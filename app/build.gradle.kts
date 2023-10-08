@@ -60,14 +60,21 @@ dependencies {
     implementation(Dependencies.composeGraphics)
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
+    implementation(platform(Dependencies.firebase))
+    implementation(Dependencies.firebaseAuth)
+    implementation(Dependencies.firebaseAnalytics)
+    implementation(Dependencies.firebaseCrashlytics)
+    implementation(Dependencies.firebaseFirestore)
+    implementation(Dependencies.firebaseStorage)
+    implementation(Dependencies.navigationCompose)
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroiTest)
+    androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
     androidTestImplementation(Dependencies.composeTestJunit)
     debugImplementation(Dependencies.composeTooling)
     debugImplementation(Dependencies.composeTestManifest)
-    //dagger-hilt
+    // dagger-hilt
     implementation(Dependencies.hilt)
     kapt(Dependencies.hiltCompiler)
 }
