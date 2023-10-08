@@ -8,5 +8,14 @@ object Versions {
     const val kotlin="1.9.0"
     const val lifecycle="2.6.2"
     const val android="8.1.2"
+    val lint by lazy {
+        val lintVersion=(android.substringBefore(".").toInt()+23).toString()
+        "$lintVersion.${android.substringAfter(".")}"
+    }
     const val jetbrainsKotlinAndroid="1.8.10"
+    const val coil="2.4.0"
+    const val navigationCompose="1.0.0"
+    const val firebaseBom="32.3.1"
+    const val googleServices="4.4.0"
+    const val crashlytics="2.9.9"
 }

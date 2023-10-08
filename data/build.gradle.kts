@@ -36,6 +36,12 @@ dependencies {
 
     implementation(Dependencies.kotlin)
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroiTest)
+    androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
+    //firebase
+    implementation(platform(Dependencies.firebaseBom))
+    implementation(Dependencies.firebaseFirestore)
+    implementation(Dependencies.firebaseStorage)
+    implementation(Dependencies.firebaseAuth)
+
 }

@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -61,15 +63,27 @@ dependencies {
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroiTest)
+    androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
     androidTestImplementation(Dependencies.composeTestJunit)
     debugImplementation(Dependencies.composeTooling)
     debugImplementation(Dependencies.composeTestManifest)
-    //dagger-hilt
+    // dagger-hilt
     implementation(Dependencies.hilt)
     kapt(Dependencies.hiltCompiler)
+    // navigation compose
+    implementation(Dependencies.navigationCompose)
+    //firebase
+    implementation(platform(Dependencies.firebaseBom))
+    implementation(Dependencies.firebaseAnalytics)
+    implementation(Dependencies.firebaseCrashlytics)
+    //coil
+    implementation(Dependencies.coil)
+    //view model
+    implementation(Dependencies.viewModelCompose)
+    implementation(Dependencies.liveDataCompose)
+    lintChecks(project(Dependencies.lintCheck))
 }
 kapt {
     correctErrorTypes = true
