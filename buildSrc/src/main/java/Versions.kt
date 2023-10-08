@@ -9,4 +9,7 @@ object Versions {
     const val lifecycle="2.6.2"
     const val android="8.1.2"
     const val jetbrainsKotlinAndroid="1.8.10"
+    const val coil="2.4.0"
+    const val navigationCompose="1.0.0"
+    const val firebaseBom="32.3.1"
 }

@@ -38,4 +38,9 @@ dependencies {
     testImplementation(Dependencies.junitTest)
     androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
+    //firebase
+    implementation(Dependencies.firebaseFirestore)
+    implementation(Dependencies.firebaseStorage)
+    implementation(Dependencies.firebaseAuth)
+
 }

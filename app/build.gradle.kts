@@ -60,13 +60,6 @@ dependencies {
     implementation(Dependencies.composeGraphics)
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
-    implementation(platform(Dependencies.firebase))
-    implementation(Dependencies.firebaseAuth)
-    implementation(Dependencies.firebaseAnalytics)
-    implementation(Dependencies.firebaseCrashlytics)
-    implementation(Dependencies.firebaseFirestore)
-    implementation(Dependencies.firebaseStorage)
-    implementation(Dependencies.navigationCompose)
     testImplementation(Dependencies.junitTest)
     androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
@@ -77,6 +70,17 @@ dependencies {
     // dagger-hilt
     implementation(Dependencies.hilt)
     kapt(Dependencies.hiltCompiler)
+    // navigation compose
+    implementation(Dependencies.navigationCompose)
+    //firebase
+    implementation(platform(Dependencies.firebaseBom))
+    implementation(Dependencies.firebaseAnalytics)
+    implementation(Dependencies.firebaseCrashlytics)
+    //coil
+    implementation(Dependencies.coil)
+    //view model
+    implementation(Dependencies.viewModelCompose)
+    implementation(Dependencies.liveDataCompose)
 }
 kapt {
     correctErrorTypes = true
