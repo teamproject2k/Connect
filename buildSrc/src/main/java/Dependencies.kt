@@ -20,10 +20,10 @@ object Dependencies {
     val junitAndroidTest by lazy { "androidx.test.ext:junit:${Versions.junitAndroidTest}" }
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
     val firebaseAuth by lazy { "com.google.firebase:firebase-auth" }
-    val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics" }
-    val firebaseCrashlytics by lazy { "com.google.firebase:firebase-crashlytics" }
-    val firebaseFirestore by lazy { "com.google.firebase:firebase-firestore" }
-    val firebaseStorage by lazy { "com.google.firebase:firebase-storage" }
+    val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
+    val firebaseCrashlytics by lazy { "com.google.firebase:firebase-crashlytics-ktx" }
+    val firebaseFirestore by lazy { "com.google.firebase:firebase-firestore-ktx" }
+    val firebaseStorage by lazy { "com.google.firebase:firebase-storage-ktx" }
     val navigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.navigationCompose}" }
     val coil by lazy { "io.coil-kt:coil-compose:${Versions.coil}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }

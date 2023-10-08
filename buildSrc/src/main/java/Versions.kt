@@ -16,4 +16,6 @@ object Versions {
     const val coil="2.4.0"
     const val navigationCompose="1.0.0"
     const val firebaseBom="32.3.1"
+    const val googleServices="4.4.0"
+    const val crashlytics="2.9.9"
 }

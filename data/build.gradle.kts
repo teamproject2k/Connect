@@ -39,7 +39,7 @@ dependencies {
     androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
     //firebase
-    implementation(Dependencies.firebaseBom)
+    implementation(platform(Dependencies.firebaseBom))
     implementation(Dependencies.firebaseFirestore)
     implementation(Dependencies.firebaseStorage)
     implementation(Dependencies.firebaseAuth)
