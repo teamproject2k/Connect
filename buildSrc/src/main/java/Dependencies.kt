@@ -28,5 +28,7 @@ object Dependencies {
     val coil by lazy { "io.coil-kt:coil-compose:${Versions.coil}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
     val liveDataCompose by lazy { "androidx.lifecycle:lifecycle-runtime-compose:${Versions.lifecycle}" }
+    val lint by lazy { "com.android.tools.lint:lint-api:${Versions.lint}" }
+    val lintCheck by lazy { ":LintRuleLibrary" }
 
 }

@@ -81,6 +81,7 @@ dependencies {
     //view model
     implementation(Dependencies.viewModelCompose)
     implementation(Dependencies.liveDataCompose)
+    lintChecks(project(Dependencies.lintCheck))
 }
 kapt {
     correctErrorTypes = true
