@@ -1,50 +1,51 @@
-package com.example.connect.ui.auth.mobile_input
+package com.example.connect.ui.auth.otp
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.ui.common.LoaderButton
 import com.example.connect.ui.common.SpacerHeight24
 import com.example.connect.ui.common.SpacerHeight48
+import com.example.connect.ui.common.SpacerWidth6
 import com.example.connect.ui.common.TopPageSection
-import com.example.connect.ui.theme.ConnectTheme
 import com.example.connect.utils.FunctionHelper
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun MobileNumberInputScreen() {
+fun OTPScreen() {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel: MobileNumberInputViewModel = hiltViewModel()
+    val viewModel: OtpViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
@@ -55,15 +56,15 @@ fun MobileNumberInputScreen() {
             TopPageSection(
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
-                stringResource(R.string.log_in)
+                stringResource(R.string.enter_otp)
             )
             Column(modifier = Modifier.padding(16.dp)) {
                 SpacerHeight24()
-                MobileInputTextField(viewModel)
+                OTPField(viewModel)
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
-                    buttonText = stringResource(id = R.string.get_otp),
+                    buttonText = stringResource(id = R.string.verify_otp),
                     onClick = {
                         keyboardController?.hide()
                         handleButtonClick(viewModel, context)
@@ -71,7 +72,6 @@ fun MobileNumberInputScreen() {
                 )
             }
         }
-
     }
     LaunchedEffect(key1 = viewModel.snackBarMessage.value) {
         if (viewModel.snackBarMessage.value.isNotBlank()) {
@@ -84,57 +84,55 @@ fun MobileNumberInputScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
-    val context = LocalContext.current
-    val keyboardController = LocalSoftwareKeyboardController.current
+fun OTPField(viewModel: OtpViewModel) {
 
-    var numberInputState by remember {
-        mutableStateOf(viewModel.userMobileNumber)
+    var otpInputState by remember {
+        mutableStateOf(viewModel.enteredOTP)
     }
-    OutlinedTextField(value = numberInputState, onValueChange = { updatedValue ->
-        if (updatedValue.length <= 10) {
-            numberInputState = updatedValue
-            viewModel.userMobileNumber = numberInputState
-        } else {
-            viewModel.snackBarMessage.value =
-                context.getString(R.string.mobile_number_can_t_be_greater_than_10_digits)
-            FunctionHelper.vibrateDevice(context)
-            keyboardController?.hide()
-        }
-    }, label = {
-        Text(text = stringResource(R.string.please_enter_mobile_number))
-    }, leadingIcon = {
-        Text(
-            text = stringResource(R.string._91),
-            color = MaterialTheme.colorScheme.scrim
-        )
-    }, shape = RoundedCornerShape(16.dp),
+
+    Row(
         modifier = Modifier
-            .fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        singleLine = true
-    )
+            .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+    ) {
+        repeat(6) { index ->
+
+            Log.e("aryan", index.toString())
+            Row(
+                modifier = Modifier
+            ) {
+                OutlinedTextField(
+                    value = getOTPCharacter(otpInputState, index),
+                    onValueChange = { updatedValue ->
+                        val s = otpInputState.toCharArray()
+                        s[index] = updatedValue[0]
+                        otpInputState = String(s)
+                        viewModel.enteredOTP = otpInputState
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    textStyle = TextStyle(textAlign = TextAlign.Center),
+                )
+            }
+            if (index + 1 != 6) {
+                SpacerWidth6()
+            }
+        }
+    }
+
 }
 
-private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
-    if (!viewModel.isValidMobileNumber()) {
+fun getOTPCharacter(otp: String, position: Int): String {
+    return if (position in otp.indices) otp[position].toString() else ""
+}
+
+private fun handleButtonClick(viewModel: OtpViewModel, context: Context) {
+    if (!viewModel.isValidOTP()) {
         viewModel.snackBarMessage.value =
-            context.getString(R.string.please_enter_a_valid_mobile_number)
+            context.getString(R.string.please_enter_valid_otp)
         FunctionHelper.vibrateDevice(context)
     } else {
-        viewModel.sendOTP()
-    }
-}
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun PreviewSignUpScreen() {
-    ConnectTheme {
-        Surface {
-            MobileNumberInputScreen()
-        }
+        viewModel.verifyOTP()
     }
 }
