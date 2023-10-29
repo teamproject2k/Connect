@@ -80,7 +80,8 @@ fun MobileNumberInputScreen() {
                 }, shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
                 )
                 SpacerHeight48()
                 LoaderButton(
