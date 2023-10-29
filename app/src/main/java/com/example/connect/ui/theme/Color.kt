@@ -13,9 +13,9 @@ val Pink40 = Color(0xFF7D5260)
 
 
 //Light
-val LightPrimaryColor = Color(0.0f, 0.4f, 0.54509807f, 1f)
+val LightPrimaryColor = Color(0xFF00668B)
 val LightOnPrimaryColor = Color(0xffffffff)
 
 //Dark
-val DarkPrimaryColor = Color(0.0f, 0.4f, 0.54509807f, 1f)
+val DarkPrimaryColor =Color(0xFF00668B)
 val DarkOnPrimaryColor = Color(0xffffffff)
