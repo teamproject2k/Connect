@@ -23,6 +23,7 @@ fun LoaderButton(
     loaderButtonState: MutableState<ButtonLoadingState>,
     buttonText: String,
     modifier: Modifier = Modifier,
+    loadingText: String = stringResource(id = R.string.please_wait),
     onClick: () -> Unit
 ) {
     val currentButtonState by remember {
@@ -49,7 +50,7 @@ fun LoaderButton(
                 )
                 SpacerWidth12()
             }
-            Text(text = if (isEnabled) buttonText else stringResource(R.string.please_wait))
+            Text(text = if (isEnabled) buttonText else loadingText)
         }
     }
 }
