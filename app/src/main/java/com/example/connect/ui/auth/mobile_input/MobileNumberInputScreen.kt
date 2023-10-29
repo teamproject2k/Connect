@@ -41,13 +41,10 @@ import com.example.connect.utils.FunctionHelper
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MobileNumberInputScreen() {
-    val viewModel: MobileNumberInputViewModel = hiltViewModel()
-    var numberInputState by remember {
-        mutableStateOf(viewModel.userMobileNumber)
-    }
     val context = LocalContext.current
-    val snackBarHostState = SnackbarHostState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val viewModel: MobileNumberInputViewModel = hiltViewModel()
+    val snackBarHostState = SnackbarHostState()
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -60,29 +57,7 @@ fun MobileNumberInputScreen() {
                 stringResource(R.string.log_in)
             )
             Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(value = numberInputState, onValueChange = { updatedValue ->
-                    if (updatedValue.length <= 10) {
-                        numberInputState = updatedValue
-                        viewModel.userMobileNumber = numberInputState
-                    } else {
-                        viewModel.snackBarMessage.value =
-                            context.getString(R.string.mobile_number_can_t_be_greater_than_10_digits)
-                        FunctionHelper.vibrateDevice(context)
-                        keyboardController?.hide()
-                    }
-                }, label = {
-                    Text(text = stringResource(R.string.please_enter_mobile_number))
-                }, leadingIcon = {
-                    Text(
-                        text = stringResource(R.string._91),
-                        color = MaterialTheme.colorScheme.scrim
-                    )
-                }, shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
+                MobileInputTextField(viewModel)
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
@@ -105,13 +80,47 @@ fun MobileNumberInputScreen() {
             viewModel.snackBarMessage.value = ""
         }
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    var numberInputState by remember {
+        mutableStateOf(viewModel.userMobileNumber)
+    }
+    OutlinedTextField(value = numberInputState, onValueChange = { updatedValue ->
+        if (updatedValue.length <= 10) {
+            numberInputState = updatedValue
+            viewModel.userMobileNumber = numberInputState
+        } else {
+            viewModel.snackBarMessage.value =
+                context.getString(R.string.mobile_number_can_t_be_greater_than_10_digits)
+            FunctionHelper.vibrateDevice(context)
+            keyboardController?.hide()
+        }
+    }, label = {
+        Text(text = stringResource(R.string.please_enter_mobile_number))
+    }, leadingIcon = {
+        Text(
+            text = stringResource(R.string._91),
+            color = MaterialTheme.colorScheme.scrim
+        )
+    }, shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true
+    )
 }
 
 private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
     if (!viewModel.isValidMobileNumber()) {
         viewModel.snackBarMessage.value =
             context.getString(R.string.please_enter_a_valid_mobile_number)
+        FunctionHelper.vibrateDevice(context)
     } else {
         viewModel.sendOTP()
     }
