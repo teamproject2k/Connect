@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.example.connect"
         minSdk = ConfigData.minSdk
-        targetSdk =  ConfigData.compileSdk
+        targetSdk = ConfigData.compileSdk
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -84,6 +84,8 @@ dependencies {
     implementation(Dependencies.viewModelCompose)
     implementation(Dependencies.liveDataCompose)
     lintChecks(project(Dependencies.lintCheck))
+    //Splash Screen Api
+    implementation(Dependencies.splashScreen)
 }
 kapt {
     correctErrorTypes = true

@@ -30,5 +30,6 @@ object Dependencies {
     val liveDataCompose by lazy { "androidx.lifecycle:lifecycle-runtime-compose:${Versions.lifecycle}" }
     val lint by lazy { "com.android.tools.lint:lint-api:${Versions.lint}" }
     val lintCheck by lazy { ":LintRuleLibrary" }
+    val splashScreen by lazy { "androidx.core:core-splashscreen:${Versions.splashScreen}" }
 
 }
