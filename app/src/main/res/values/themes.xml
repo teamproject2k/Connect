@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.Connect" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="SplashScreenTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/light_app_theme</item>
+        <item name="postSplashScreenTheme">@style/Theme.Connect</item>
+    </style>
 </resources>
