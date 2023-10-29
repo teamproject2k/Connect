@@ -44,10 +44,10 @@ class RulesDetector : Detector(), Detector.UastScanner {
                             if (superClassName.endsWith("Activity")) {
                                 handleActivityNameRule(node, context)
                                 return@forEach
-                            } else if (superClassName == "BroadcastReceiver") {
+                            } else if (superClassName.endsWith("BroadcastReceiver")) {
                                 handleBroadcastReceiverNameRule(node, context)
                                 return@forEach
-                            } else if (superClassName == "ViewModel") {
+                            } else if (superClassName.endsWith("ViewModel")) {
                                 handleViewModelNameRule(node, context)
                                 return@forEach
                             }

@@ -41,7 +41,7 @@ import com.example.connect.utils.FunctionHelper
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MobileNumberInputScreen() {
-    val viewModel: MobileNumberInputVM = hiltViewModel()
+    val viewModel: MobileNumberInputViewModel = hiltViewModel()
     var numberInputState by remember {
         mutableStateOf(viewModel.userMobileNumber)
     }
@@ -107,7 +107,7 @@ fun MobileNumberInputScreen() {
 
 }
 
-private fun handleButtonClick(viewModel: MobileNumberInputVM, context: Context) {
+private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
     if (!viewModel.isValidMobileNumber()) {
         viewModel.snackBarMessage.value =
             context.getString(R.string.please_enter_a_valid_mobile_number)

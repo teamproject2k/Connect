@@ -21,7 +21,7 @@ import java.util.Timer
 import java.util.TimerTask
 
 @Composable
-fun ThreeBallLoader(
+fun NBallLoader(
     activatedColor: Color,
     deactivatedColor: Color,
     modifier: Modifier = Modifier,
@@ -77,5 +77,5 @@ fun ThreeBallLoader(
 @Preview
 @Composable
 fun PreviewNBallLoader() {
-    ThreeBallLoader(activatedColor = Color.Black, deactivatedColor = Color.Blue)
+    NBallLoader(activatedColor = Color.Black, deactivatedColor = Color.Blue)
 }

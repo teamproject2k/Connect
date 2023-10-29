@@ -42,7 +42,7 @@ fun LoaderButton(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!isEnabled) {
-                ThreeBallLoader(
+                NBallLoader(
                     activatedColor = MaterialTheme.colorScheme.onPrimary,
                     deactivatedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
                     modifier = Modifier.size(27.dp)

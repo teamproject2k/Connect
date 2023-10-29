@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MobileNumberInputVM @Inject constructor() : BaseViewModel() {
+class MobileNumberInputViewModel @Inject constructor() : BaseViewModel() {
     var userMobileNumber = ""
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
