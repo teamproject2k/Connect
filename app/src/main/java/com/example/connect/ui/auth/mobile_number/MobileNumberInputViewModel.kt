@@ -1,4 +1,4 @@
-package com.example.connect.ui.auth.mobile_input
+package com.example.connect.ui.auth.mobile_number
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -11,13 +11,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MobileNumberInputViewModel @Inject constructor() : BaseViewModel() {
-    var userMobileNumber = ""
+    var userMobileNumberState = mutableStateOf("")
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
 
     fun isValidMobileNumber(): Boolean {
         val phoneRegex = "^[0-9]{10}$"
-        return phoneRegex.toRegex().matches(userMobileNumber)
+        return phoneRegex.toRegex().matches(userMobileNumberState.value)
     }
 
 

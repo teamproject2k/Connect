@@ -5,6 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.connect.base.BaseActivity
+import com.example.connect.ui.auth.mobile_number.MobileNumberInputScreen
 import com.example.connect.ui.auth.otp.OTPScreen
 import com.example.connect.ui.theme.ConnectTheme
 
@@ -15,8 +16,8 @@ class AuthenticationActivity : BaseActivity() {
         setContent {
             ConnectTheme {
                 Surface {
-                    // MobileNumberInputScreen()
-                    OTPScreen()
+                     MobileNumberInputScreen()
+//                    OTPScreen()
                 }
             }
         }
