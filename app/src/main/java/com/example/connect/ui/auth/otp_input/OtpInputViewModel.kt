@@ -21,7 +21,7 @@ class OtpInputViewModel @Inject constructor() : BaseViewModel() {
     val timeLeftState = mutableStateOf(ConstantsHelper.OTPTimeOutTime)
 
     fun isValidOTP(): Boolean {
-        return otpState.value.isDigitsOnly()
+        return otpState.value.isDigitsOnly() && otpState.value.length == ConstantsHelper.OTPCharCount
     }
 
 
