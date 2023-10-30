@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -29,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.ui.common.LoaderButton
-import com.example.connect.ui.common.SpacerHeight24
 import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.TopPageSection
 import com.example.connect.ui.theme.ConnectTheme
@@ -54,7 +55,6 @@ fun MobileNumberInputScreen() {
                 stringResource(R.string.log_in)
             )
             Column(modifier = Modifier.padding(16.dp)) {
-                SpacerHeight24()
                 MobileInputTextField(viewModel)
                 SpacerHeight48()
                 LoaderButton(
@@ -85,6 +85,7 @@ fun MobileNumberInputScreen() {
 fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = FocusRequester()
     OutlinedTextField(
         value = viewModel.userMobileNumberState.value,
         onValueChange = { updatedValue ->
@@ -108,10 +109,12 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
         },
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true
     )
+    focusRequester.requestFocus()
 }
 
 private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {

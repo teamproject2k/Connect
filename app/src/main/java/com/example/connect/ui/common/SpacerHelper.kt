@@ -48,10 +48,14 @@ fun SpacerWidth12() {
 }
 
 @Composable
+fun SpacerWidth8() {
+    SpacerGeneric(width = 8.dp)
+}
+
+@Composable
 fun SpacerWidth6() {
     SpacerGeneric(width = 6.dp)
 }
-
 
 
 

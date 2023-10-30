@@ -1,7 +1,8 @@
-package com.example.connect.ui.auth.otp
+package com.example.connect.ui.auth.otp_input
 
 import android.os.CountDownTimer
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import com.example.connect.base.BaseViewModel
 import com.example.connect.utils.ConstantsHelper
@@ -12,16 +13,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OtpViewModel @Inject constructor() : BaseViewModel() {
-    var enteredOTP = ""
+class OtpInputViewModel @Inject constructor() : BaseViewModel() {
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
-    val otpState = mutableStateOf(arrayOf("", "", "", "", "", ""))
+    val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTPCharCount))
     val showTimerState = mutableStateOf(true)
     val timeLeftState = mutableStateOf(ConstantsHelper.OTPTimeOutTime)
 
     fun isValidOTP(): Boolean {
-        return enteredOTP.length == 6
+        return otpState.value.isDigitsOnly()
     }
 
 
