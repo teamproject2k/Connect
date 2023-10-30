@@ -114,6 +114,7 @@ fun OTPScreen() {
 
 @Composable
 fun OTPTTimer(viewModel: OtpInputViewModel) {
+    // TODO: remove it 
     val showTimer by remember {
         viewModel.showTimerState
     }
