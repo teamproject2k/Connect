@@ -87,7 +87,7 @@ fun OTPScreen() {
                 ) {
                     Text(text = stringResource(R.string.didn_t_receive_otp), fontSize = 12.sp)
                     SpacerWidth6()
-                    OTPTTimer(viewModel)
+                    OTPTimer(viewModel)
                 }
                 SpacerHeight48()
                 LoaderButton(
@@ -113,7 +113,7 @@ fun OTPScreen() {
 }
 
 @Composable
-fun OTPTTimer(viewModel: OtpInputViewModel) {
+fun OTPTimer(viewModel: OtpInputViewModel) {
     val showTimer by remember {
         viewModel.showTimerState
     }
