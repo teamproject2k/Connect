@@ -14,9 +14,11 @@ object Versions {
     }
     const val jetbrainsKotlinAndroid = "1.8.10"
     const val coil = "2.4.0"
-    const val navigationCompose = "1.0.0"
     const val firebaseBom = "32.3.1"
     const val googleServices = "4.4.0"
     const val crashlytics = "2.9.9"
     const val splashScreen = "1.0.0"
+    val navigationCompose = "1.8.42-beta"
+    val ksp = "1.8.10-1.0.9"
+    const val navigationComposeHilt = "1.0.0"
 }

@@ -98,7 +98,7 @@ class RulesDetector : Detector(), Detector.UastScanner {
 
     private fun handleInterfaceNameRule(node: UClass, context: JavaContext) {
         val className = node.name
-        if (className != null && className.first() != 'I') {
+        if (className != null && className.first() != 'I' && !node.text.contains("annotation")) {
             context.report(
                 InterfaceNameIssue,
                 node,

@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +42,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
@@ -56,13 +54,18 @@ import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.SpacerWidth6
 import com.example.connect.ui.common.SpacerWidth8
 import com.example.connect.ui.common.TopPageSection
-import com.example.connect.ui.theme.ConnectTheme
+import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.ConstantsHelper
 import com.example.connect.utils.FunctionHelper
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@RootNavGraph(start = true)
+@Destination
 @Composable
-fun OTPScreen() {
+fun OTPScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
@@ -230,12 +233,3 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
 }
 
 
-@Preview
-@Composable
-fun PreviewOTPScreen() {
-    ConnectTheme {
-        Surface {
-            OTPScreen()
-        }
-    }
-}
