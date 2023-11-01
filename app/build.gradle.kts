@@ -89,6 +89,10 @@ dependencies {
     //navigation compose
     implementation(Dependencies.navigationCompose)
     ksp(Dependencies.ksp)
+    //Dialog Picker
+    implementation(Dependencies.dialog)
+//    implementation(Dependencies.calender)
+
 }
 kapt {
     correctErrorTypes = true

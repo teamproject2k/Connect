@@ -1,21 +1,38 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyEllipsis">
     <string name="app_name">Connect</string>
     <string name="welcome">Welcome,</string>
     <string name="let_s_connect">Let\'s Connect!</string>
     <string name="log_in">Log In</string>
     <string name="enter_otp">Enter OTP</string>
     <string name="verify_otp">Verify OTP</string>
+    <string name="create_account">Create Account</string>
     <string name="please_enter_mobile_number">Please Enter Mobile Number</string>
+    <string name="full_name">Full Name</string>
     <string name="please_wait">Please Wait...</string>
     <string name="get_otp">Get OTP</string>
     <string name="please_enter_a_valid_mobile_number">Please Enter A Valid Mobile Number</string>
     <string name="please_enter_valid_otp">Please Enter Valid OTP</string>
+    <string name="please_enter_valid_name">Please Enter Valid Name</string>
+    <string name="please_select_a_gender">Please Select A Gender</string>
+    <string name="please_select_your_dob">Please Select Your DOB</string>
     <string name="_91">+91</string>
     <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than 10 digits</string>
+    <string name="name_can_t_contain_digits_or_special_characters">Name can\'t contain digits or special characters</string>
     <string name="resend_now">Resend Now</string>
     <string name="didn_t_receive_otp">Didn\'t Receive OTP?</string>
     <string name="string_digit_string_placeholder">%1$s %2$d %3$s</string>
     <string name="secs">secs</string>
     <string name="sec">sec</string>
     <string name="resend_in">Resend in</string>
+    <string name="create_an_account">Create an Account</string>
+    <string name="date_of_birth">Date Of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_date_selected">No Date Selected</string>
+    <string-array name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
 </resources>

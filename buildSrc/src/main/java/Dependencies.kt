@@ -33,6 +33,7 @@ object Dependencies {
     val navigationCompose by lazy { "io.github.raamcosta.compose-destinations:animations-core:${Versions.navigationCompose}" }
     val ksp by lazy { "io.github.raamcosta.compose-destinations:ksp:${Versions.navigationCompose}" }
     val navigationComposeHilt by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.navigationComposeHilt}" }
-
+    val dialog by lazy { "com.maxkeppeler.sheets-compose-dialogs:core:${Versions.dialog}" }
+    val calender by lazy { "com.maxkeppeler.sheets-compose-dialogs:calender:${Versions.dialog}" }
 
 }

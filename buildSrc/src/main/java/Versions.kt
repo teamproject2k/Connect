@@ -21,4 +21,5 @@ object Versions {
     val navigationCompose = "1.8.42-beta"
     val ksp = "1.8.10-1.0.9"
     const val navigationComposeHilt = "1.0.0"
+    const val dialog = "1.2.0"
 }
