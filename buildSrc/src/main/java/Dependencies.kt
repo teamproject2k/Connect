@@ -31,5 +31,7 @@ object Dependencies {
     val lint by lazy { "com.android.tools.lint:lint-api:${Versions.lint}" }
     val lintCheck by lazy { ":LintRuleLibrary" }
     val splashScreen by lazy { "androidx.core:core-splashscreen:${Versions.splashScreen}" }
+    val dialog by lazy { "com.maxkeppeler.sheets-compose-dialogs:core:${Versions.dialog}" }
+    val calender by lazy { "com.maxkeppeler.sheets-compose-dialogs:calender:${Versions.dialog}" }
 
 }

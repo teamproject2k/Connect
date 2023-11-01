@@ -1,4 +1,4 @@
-package com.example.connect.ui.auth.mobile_input
+package com.example.connect.ui.auth.userDetails
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -10,22 +10,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MobileNumberInputViewModel @Inject constructor() : BaseViewModel() {
-    var userMobileNumber = ""
+class UserDetailsViewModel @Inject constructor() : BaseViewModel() {
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
-
-    fun isValidMobileNumber(): Boolean {
-        val phoneRegex = "^[0-9]{10}$"
-        return phoneRegex.toRegex().matches(userMobileNumber)
-    }
+    val userName = mutableStateOf("")
+    var selectedDOBState = mutableStateOf("")
+    var selectedGenderState = mutableStateOf("")
 
 
-    fun sendOTP() {
+    fun isValidName(): Boolean = userName.value.isNotBlank()
+    fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
+    fun isDobSelected(): Boolean = selectedDOBState.value.isNotBlank()
+    fun createUserProfile() {
         viewModelScope.launch {
             currentButtonLoadingState.value = ButtonLoadingState.Loading
             delay(8000)
             currentButtonLoadingState.value = ButtonLoadingState.NotLoading
         }
     }
+
 }

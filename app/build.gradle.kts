@@ -86,6 +86,10 @@ dependencies {
     lintChecks(project(Dependencies.lintCheck))
     //Splash Screen Api
     implementation(Dependencies.splashScreen)
+    //Dialog Picker
+    implementation(Dependencies.dialog)
+//    implementation(Dependencies.calender)
+
 }
 kapt {
     correctErrorTypes = true

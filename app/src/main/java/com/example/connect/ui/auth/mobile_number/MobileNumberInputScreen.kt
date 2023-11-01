@@ -1,4 +1,4 @@
-package com.example.connect.ui.auth.mobile_input
+package com.example.connect.ui.auth.mobile_number
 
 import android.content.Context
 import androidx.compose.foundation.layout.Column
@@ -18,12 +18,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -87,33 +85,36 @@ fun MobileNumberInputScreen() {
 fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    var numberInputState by remember {
-        mutableStateOf(viewModel.userMobileNumber)
-    }
-    OutlinedTextField(value = numberInputState, onValueChange = { updatedValue ->
-        if (updatedValue.length <= 10) {
-            numberInputState = updatedValue
-            viewModel.userMobileNumber = numberInputState
-        } else {
-            viewModel.snackBarMessage.value =
-                context.getString(R.string.mobile_number_can_t_be_greater_than_10_digits)
-            FunctionHelper.vibrateDevice(context)
-            keyboardController?.hide()
-        }
-    }, label = {
-        Text(text = stringResource(R.string.please_enter_mobile_number))
-    }, leadingIcon = {
-        Text(
-            text = stringResource(R.string._91),
-            color = MaterialTheme.colorScheme.scrim
-        )
-    }, shape = RoundedCornerShape(16.dp),
+    val focusRequester = FocusRequester()
+    OutlinedTextField(
+        value = viewModel.userMobileNumberState.value,
+        onValueChange = { updatedValue ->
+            if (updatedValue.length <= 10) {
+                viewModel.userMobileNumberState.value = updatedValue
+            } else {
+                viewModel.snackBarMessage.value =
+                    context.getString(R.string.mobile_number_can_t_be_greater_than_10_digits)
+                FunctionHelper.vibrateDevice(context)
+                keyboardController?.hide()
+            }
+        },
+        label = {
+            Text(text = stringResource(R.string.please_enter_mobile_number))
+        },
+        leadingIcon = {
+            Text(
+                text = stringResource(R.string._91),
+                color = MaterialTheme.colorScheme.scrim
+            )
+        },
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true
     )
+    focusRequester.requestFocus()
 }
 
 private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
