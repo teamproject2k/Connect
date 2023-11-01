@@ -14,15 +14,13 @@ class UserDetailsViewModel @Inject constructor() : BaseViewModel() {
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
     val userName = mutableStateOf("")
-    var dob = mutableStateOf("Date of Birth")
+    var selectedDOBState = mutableStateOf("")
+    var selectedGenderState = mutableStateOf("")
 
-    val expanded = mutableStateOf(false)
-    val selectedItem = mutableStateOf("Select Gender")
-    val itemList = listOf("Male", "Female", "Other")
 
     fun isValidName(): Boolean = userName.value.isNotBlank()
-    fun isGenderSelected(): Boolean = selectedItem.value != "Select Gender"
-    fun isDobSelected(): Boolean = dob.value != "Date of Birth"
+    fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
+    fun isDobSelected(): Boolean = selectedDOBState.value.isNotBlank()
     fun createUserProfile() {
         viewModelScope.launch {
             currentButtonLoadingState.value = ButtonLoadingState.Loading

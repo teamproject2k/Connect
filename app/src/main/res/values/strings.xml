@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyEllipsis">
     <string name="app_name">Connect</string>
     <string name="welcome">Welcome,</string>
     <string name="let_s_connect">Let\'s Connect!</string>
@@ -7,7 +7,7 @@
     <string name="verify_otp">Verify OTP</string>
     <string name="create_account">Create Account</string>
     <string name="please_enter_mobile_number">Please Enter Mobile Number</string>
-    <string name="please_enter_your_full_name">Please Enter Your Full Name</string>
+    <string name="full_name">Full Name</string>
     <string name="please_wait">Please Wait...</string>
     <string name="get_otp">Get OTP</string>
     <string name="please_enter_a_valid_mobile_number">Please Enter A Valid Mobile Number</string>
@@ -25,4 +25,14 @@
     <string name="sec">sec</string>
     <string name="resend_in">Resend in</string>
     <string name="create_an_account">Create an Account</string>
+    <string name="date_of_birth">Date Of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_date_selected">No Date Selected</string>
+    <string-array name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
 </resources>

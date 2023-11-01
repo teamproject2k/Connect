@@ -19,4 +19,5 @@ object Versions {
     const val googleServices = "4.4.0"
     const val crashlytics = "2.9.9"
     const val splashScreen = "1.0.0"
+    const val dialog = "1.2.0"
 }

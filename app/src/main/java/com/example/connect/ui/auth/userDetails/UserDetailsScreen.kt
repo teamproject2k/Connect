@@ -1,26 +1,32 @@
 package com.example.connect.ui.auth.userDetails
 
-import android.app.DatePickerDialog
 import android.content.Context
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.Face
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,39 +35,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.ui.common.Dropdown
+import com.example.connect.ui.common.AppOutlinedTextField
 import com.example.connect.ui.common.LoaderButton
+import com.example.connect.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.ui.common.SpacerHeight18
 import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.TopPageSection
 import com.example.connect.utils.FunctionHelper
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UserDetailsScreen() {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: UserDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
-
-    val expanded = remember { viewModel.expanded }
-    val selectedItem = remember { viewModel.selectedItem }
-    val itemList = remember { viewModel.itemList }
 
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
@@ -77,9 +76,11 @@ fun UserDetailsScreen() {
             Column(modifier = Modifier.padding(16.dp)) {
                 NameInputTextField(viewModel)
                 SpacerHeight18()
-                Dropdown(expanded, selectedItem, itemList)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    GenderPickerSection(viewModel)
+                }
                 SpacerHeight18()
-                DOBInputTextField(viewModel = viewModel)
+                DOBPickerSection(viewModel = viewModel)
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
@@ -103,19 +104,17 @@ fun UserDetailsScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NameInputTextField(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = FocusRequester()
-    OutlinedTextField(
+    AppOutlinedTextField(
         value = viewModel.userName.value,
         onValueChange = { updatedValue ->
-            val pattern = Regex("[0-9!\$@#%^&*()_+{}\\[\\]:;<>,.?~|]")
-            if (!updatedValue.contains(pattern) || updatedValue.last() == ' ') {
-                if (viewModel.userName.value.isBlank() || viewModel.userName.value.last() != ' ' || updatedValue.last() != ' ')
-                    viewModel.userName.value = updatedValue.trimStart()
+            val pattern = Regex("[0-9!$@#%^&*()_+{}\\[\\]:;<>,.?~|]")
+            if (!updatedValue.contains(pattern)) {
+                viewModel.userName.value = updatedValue
             } else {
                 viewModel.snackBarMessage.value =
                     context.getString(R.string.name_can_t_contain_digits_or_special_characters)
@@ -124,93 +123,101 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
             }
         },
         label = {
-            Text(text = stringResource(R.string.please_enter_your_full_name))
+            Text(text = stringResource(R.string.full_name))
         },
-        shape = RoundedCornerShape(16.dp),
+        leadingIcon = {
+            Image(imageVector = Icons.Rounded.Face, contentDescription = stringResource(id = R.string.full_name))
+        },
         modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester),
+            .fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         singleLine = true
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DOBInputTextField(viewModel: UserDetailsViewModel) {
-
-    var selectedDate by remember { mutableStateOf<Date?>(Date()) }
-    var dob by remember { viewModel.dob }
-
-    val focusRequester = FocusRequester()
-    var showDatePicker by remember {
+fun GenderPickerSection(viewModel: UserDetailsViewModel) {
+    val genderList = stringArrayResource(id = R.array.gender_list)
+    var isDialogVisible by remember {
         mutableStateOf(false)
     }
-
-    val onDateSelected = { date: Date ->
-        showDatePicker = false
-        selectedDate = date
-        val formattedDate = SimpleDateFormat("dd  MMM  yyyy", Locale.US).format(date)
-        dob = formattedDate
-    }
-
-    OutlinedIconButton(
-        onClick = {
-            showDatePicker = true
-            focusRequester.requestFocus()
-        },
+    OutlinedTextFieldDisabledFeelsLikeEnabled(
+        value = viewModel.selectedGenderState.value,
         modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-            Icon(
-                painter = rememberVectorPainter(image = Icons.Default.DateRange),
-                contentDescription = "Dropdown arrow",
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            Text(
-                text = dob,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.padding(start = 16.dp)
-            )
+            .fillMaxWidth(),
+        leadingIcon = { Image(imageVector = Icons.Rounded.Person, contentDescription = stringResource(id = R.string.gender)) },
+        label = { Text(text = stringResource(R.string.gender)) },
+        trailingIcon = {
+            Image(imageVector = Icons.Default.ArrowDropDown, contentDescription = stringResource(id = R.string.gender), modifier = Modifier.scale(if (isDialogVisible) -1f else 1f))
         }
+    ) {
+        isDialogVisible = true
     }
-
-    if (showDatePicker) {
-        DatePicker(onDateSelected = onDateSelected, viewModel)
+    if (isDialogVisible) {
+        DropdownMenu(
+            expanded = true, onDismissRequest = { isDialogVisible = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxWidth(.9f),
+        ) {
+            genderList.forEach { item ->
+                DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                    viewModel.selectedGenderState.value = item
+                    isDialogVisible = false
+                })
+            }
+        }
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePicker(
-    onDateSelected: (Date) -> Unit,
-    viewModel: UserDetailsViewModel
-) {
+fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
-
-    calendar.time =
-        if (viewModel.dob.value != "Date of Birth") {
-            val dateFormat = SimpleDateFormat("dd  MMM  yyyy", Locale.US)
-            val date = dateFormat.parse(viewModel.dob.value)
-            val timestamp = date!!.time
-            Date(timestamp)
-        } else Date()
-
-    val datePickerDialog = remember {
-        DatePickerDialog(
-            context,
-            { _, day, month, year ->
-                calendar.set(day, month, year)
-                onDateSelected(calendar.time)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
+    var showDatePickerState by remember {
+        mutableStateOf(false)
     }
-    datePickerDialog.show()
+    val dateSelectionState = rememberDatePickerState()
+    OutlinedTextFieldDisabledFeelsLikeEnabled(
+        value = viewModel.selectedDOBState.value,
+        modifier = Modifier
+            .fillMaxWidth(),
+        leadingIcon = { Image(imageVector = Icons.Rounded.DateRange, contentDescription = stringResource(id = R.string.date_of_birth)) },
+        label = { Text(text = stringResource(R.string.date_of_birth)) },
+    ) {
+        showDatePickerState = true
+    }
+    if (showDatePickerState) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerState = false },
+            confirmButton = {
+                Text(text = stringResource(R.string.ok), modifier = Modifier
+                    .padding(end = 16.dp, bottom = 16.dp)
+                    .clickable {
+                        if (dateSelectionState.selectedDateMillis != null) {
+                            viewModel.selectedDOBState.value = FunctionHelper.getFormattedDate(dateSelectionState.selectedDateMillis!!)
+                        }
+                        showDatePickerState = false
+                    })
+            },
+            dismissButton = {
+                Text(text = stringResource(R.string.cancel), modifier = Modifier
+                    .padding(bottom = 16.dp, end = 16.dp)
+                    .clickable {
+                        showDatePickerState = false
+                    })
+            }
+        ) {
+            DatePicker(state = dateSelectionState, showModeToggle = true, dateValidator = {
+                val calender = Calendar.getInstance()
+                val enteredDate = Date(it)
+                calender.add(Calendar.YEAR, -10)
+                enteredDate.before(calender.time)
+            })
+        }
+    }
 }
 
 private fun handleButtonClick(viewModel: UserDetailsViewModel, context: Context) {
@@ -227,7 +234,6 @@ private fun handleButtonClick(viewModel: UserDetailsViewModel, context: Context)
             context.getString(R.string.please_select_your_dob)
         FunctionHelper.vibrateDevice(context)
     } else {
-        viewModel.userName.value = viewModel.userName.value.trim()
         viewModel.createUserProfile()
     }
 }
