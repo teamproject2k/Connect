@@ -13,8 +13,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.pointerInput
@@ -36,7 +35,6 @@ object OutlinedTextFieldHelper {
     val OutlinedTextFieldBorderRadius = 16.dp
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppOutlinedTextField(
     value: String,
@@ -57,7 +55,7 @@ fun AppOutlinedTextField(
     singleLine: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     OutlinedTextField(
         value = value,
@@ -104,8 +102,7 @@ fun OutlinedTextFieldNoLabel(
     singleLine: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = TextFieldDefaults.outlinedShape,
-    colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -130,30 +127,32 @@ fun OutlinedTextFieldNoLabel(
             singleLine = singleLine,
             maxLines = maxLines,
             decorationBox = @Composable { innerTextField ->
-                TextFieldDefaults.OutlinedTextFieldDecorationBox(
+                OutlinedTextFieldDefaults.DecorationBox(
                     value = value,
-                    visualTransformation = visualTransformation,
                     innerTextField = innerTextField,
-                    placeholder = placeholder,
+                    enabled = enabled,
+                    singleLine = singleLine,
+                    visualTransformation = visualTransformation,
+                    interactionSource = interactionSource,
+                    isError = isError,
                     label = label,
+                    placeholder = placeholder,
                     leadingIcon = leadingIcon,
                     trailingIcon = trailingIcon,
                     supportingText = supportingText,
-                    singleLine = singleLine,
-                    enabled = enabled,
-                    isError = isError,
-                    interactionSource = interactionSource,
-                    contentPadding = PaddingValues(0.dp),
                     colors = colors,
+                    contentPadding = PaddingValues(0.dp),
                     container = {
-                        TextFieldDefaults.OutlinedBorderContainerBox(
-                            enabled,
-                            isError,
-                            interactionSource,
-                            colors,
-                            shape
+                        OutlinedTextFieldDefaults.ContainerBox(
+                            enabled = enabled,
+                            isError = isError,
+                            interactionSource = interactionSource,
+                            colors = colors,
+                            shape = RoundedCornerShape(OutlinedTextFieldBorderRadius),
+                            focusedBorderThickness = OutlinedTextFieldDefaults.FocusedBorderThickness,
+                            unfocusedBorderThickness = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
                         )
-                    }
+                    },
                 )
             }
         ))
@@ -183,7 +182,7 @@ fun OutlinedTextFieldDisabledFeelsLikeEnabled(
     val textColor = textStyle.color.takeOrElse {
         textColor(true).value
     }
-    val colors = TextFieldDefaults.outlinedTextFieldColors(
+    val colors = OutlinedTextFieldDefaults.colors(
         disabledTextColor = MaterialTheme.colorScheme.onSurface,
         disabledBorderColor = if (value.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
         disabledLeadingIconColor = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
@@ -213,30 +212,32 @@ fun OutlinedTextFieldDisabledFeelsLikeEnabled(
             singleLine = singleLine,
             maxLines = maxLines,
             decorationBox = @Composable { innerTextField ->
-                TextFieldDefaults.OutlinedTextFieldDecorationBox(
+                OutlinedTextFieldDefaults.DecorationBox(
                     value = value,
-                    visualTransformation = visualTransformation,
                     innerTextField = innerTextField,
-                    placeholder = placeholder,
+                    enabled = false,
+                    singleLine = singleLine,
+                    visualTransformation = visualTransformation,
+                    interactionSource = interactionSource,
+                    isError = isError,
                     label = label,
+                    placeholder = placeholder,
                     leadingIcon = leadingIcon,
                     trailingIcon = trailingIcon,
                     supportingText = supportingText,
-                    singleLine = singleLine,
-                    enabled = false,
-                    isError = isError,
-                    interactionSource = interactionSource,
                     colors = colors,
+                    contentPadding = OutlinedTextFieldDefaults.contentPadding(),
                     container = {
-                        TextFieldDefaults.OutlinedBorderContainerBox(
-                            false,
-                            isError,
-                            interactionSource,
-                            colors,
-                            RoundedCornerShape(OutlinedTextFieldBorderRadius),
-                            unfocusedBorderThickness = if (value.isBlank()) 1.dp else 2.dp
+                        OutlinedTextFieldDefaults.ContainerBox(
+                            enabled = false,
+                            isError = isError,
+                            interactionSource = interactionSource,
+                            colors = colors,
+                            shape = RoundedCornerShape(OutlinedTextFieldBorderRadius),
+                            focusedBorderThickness = OutlinedTextFieldDefaults.FocusedBorderThickness,
+                            unfocusedBorderThickness = if (value.isBlank()) 1.dp else 2.dp,
                         )
-                    }
+                    },
                 )
             }
         ))

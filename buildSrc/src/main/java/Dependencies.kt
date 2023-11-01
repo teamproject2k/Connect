@@ -24,13 +24,15 @@ object Dependencies {
     val firebaseCrashlytics by lazy { "com.google.firebase:firebase-crashlytics-ktx" }
     val firebaseFirestore by lazy { "com.google.firebase:firebase-firestore-ktx" }
     val firebaseStorage by lazy { "com.google.firebase:firebase-storage-ktx" }
-    val navigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.navigationCompose}" }
     val coil by lazy { "io.coil-kt:coil-compose:${Versions.coil}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
     val liveDataCompose by lazy { "androidx.lifecycle:lifecycle-runtime-compose:${Versions.lifecycle}" }
     val lint by lazy { "com.android.tools.lint:lint-api:${Versions.lint}" }
     val lintCheck by lazy { ":LintRuleLibrary" }
     val splashScreen by lazy { "androidx.core:core-splashscreen:${Versions.splashScreen}" }
+    val navigationCompose by lazy { "io.github.raamcosta.compose-destinations:animations-core:${Versions.navigationCompose}" }
+    val ksp by lazy { "io.github.raamcosta.compose-destinations:ksp:${Versions.navigationCompose}" }
+    val navigationComposeHilt by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.navigationComposeHilt}" }
     val dialog by lazy { "com.maxkeppeler.sheets-compose-dialogs:core:${Versions.dialog}" }
     val calender by lazy { "com.maxkeppeler.sheets-compose-dialogs:calender:${Versions.dialog}" }
 

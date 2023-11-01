@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +32,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -43,12 +40,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.ui.auth.destinations.UserDetailsScreenDestination
 import com.example.connect.ui.common.LoaderButton
 import com.example.connect.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.ui.common.SpacerHeight18
@@ -56,14 +53,17 @@ import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.SpacerWidth6
 import com.example.connect.ui.common.SpacerWidth8
 import com.example.connect.ui.common.TopPageSection
-import com.example.connect.ui.theme.ConnectTheme
+import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.ConstantsHelper
 import com.example.connect.utils.FunctionHelper
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
+@AuthenticationNavGraph
+@Destination
 @Composable
-fun OTPScreen() {
-    val context = LocalContext.current
+fun OTPScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
@@ -87,7 +87,7 @@ fun OTPScreen() {
                 ) {
                     Text(text = stringResource(R.string.didn_t_receive_otp), fontSize = 12.sp)
                     SpacerWidth6()
-                    OTPTimer(viewModel)
+                    OTPTTimer(viewModel)
                 }
                 SpacerHeight48()
                 LoaderButton(
@@ -95,7 +95,8 @@ fun OTPScreen() {
                     buttonText = stringResource(id = R.string.verify_otp),
                     onClick = {
                         keyboardController?.hide()
-                        handleButtonClick(viewModel, context)
+                        navigator.navigate(UserDetailsScreenDestination)
+//                        handleButtonClick(viewModel, context)
                     }
                 )
             }
@@ -113,16 +114,13 @@ fun OTPScreen() {
 }
 
 @Composable
-fun OTPTimer(viewModel: OtpInputViewModel) {
-    val showTimer by remember {
-        viewModel.showTimerState
-    }
-    LaunchedEffect(key1 = showTimer) {
-        if (showTimer) {
+fun OTPTTimer(viewModel: OtpInputViewModel) {
+    LaunchedEffect(key1 = viewModel.showTimerState.value) {
+        if (viewModel.showTimerState.value) {
             viewModel.startTimer()
         }
     }
-    if (showTimer) {
+    if (viewModel.showTimerState.value) {
         Text(
             text = stringResource(
                 id = R.string.string_digit_string_placeholder,
@@ -150,7 +148,7 @@ fun OTPTimer(viewModel: OtpInputViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OTPField(viewModel: OtpInputViewModel) {
     val focusRequesterList = List(ConstantsHelper.OTPCharCount) { FocusRequester() }
@@ -181,7 +179,6 @@ fun OTPField(viewModel: OtpInputViewModel) {
                         wasValueEntered = true
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
@@ -229,12 +226,3 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
 }
 
 
-@Preview
-@Composable
-fun PreviewOTPScreen() {
-    ConnectTheme {
-        Surface {
-            OTPScreen()
-        }
-    }
-}

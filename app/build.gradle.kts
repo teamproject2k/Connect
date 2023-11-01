@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("com.google.devtools.ksp") version Versions.ksp
 }
 
 android {
@@ -72,8 +73,7 @@ dependencies {
     // dagger-hilt
     implementation(Dependencies.hilt)
     kapt(Dependencies.hiltCompiler)
-    // navigation compose
-    implementation(Dependencies.navigationCompose)
+    implementation(Dependencies.navigationComposeHilt)
     //firebase
     implementation(platform(Dependencies.firebaseBom))
     implementation(Dependencies.firebaseAnalytics)
@@ -86,6 +86,9 @@ dependencies {
     lintChecks(project(Dependencies.lintCheck))
     //Splash Screen Api
     implementation(Dependencies.splashScreen)
+    //navigation compose
+    implementation(Dependencies.navigationCompose)
+    ksp(Dependencies.ksp)
     //Dialog Picker
     implementation(Dependencies.dialog)
 //    implementation(Dependencies.calender)

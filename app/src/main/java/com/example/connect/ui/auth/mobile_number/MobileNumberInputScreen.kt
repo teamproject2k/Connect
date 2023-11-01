@@ -5,41 +5,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.ui.auth.destinations.OTPScreenDestination
+import com.example.connect.ui.common.AppOutlinedTextField
 import com.example.connect.ui.common.LoaderButton
 import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.TopPageSection
-import com.example.connect.ui.theme.ConnectTheme
+import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.FunctionHelper
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
+@AuthenticationNavGraph(start = true)
+@Destination
 @Composable
-fun MobileNumberInputScreen() {
-    val context = LocalContext.current
+fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: MobileNumberInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
@@ -62,12 +60,12 @@ fun MobileNumberInputScreen() {
                     buttonText = stringResource(id = R.string.get_otp),
                     onClick = {
                         keyboardController?.hide()
-                        handleButtonClick(viewModel, context)
+//                        handleButtonClick(viewModel, context)
+                        navigator.navigate(OTPScreenDestination)
                     }
                 )
             }
         }
-
     }
     LaunchedEffect(key1 = viewModel.snackBarMessage.value) {
         if (viewModel.snackBarMessage.value.isNotBlank()) {
@@ -80,13 +78,12 @@ fun MobileNumberInputScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = FocusRequester()
-    OutlinedTextField(
+    AppOutlinedTextField(
         value = viewModel.userMobileNumberState.value,
         onValueChange = { updatedValue ->
             if (updatedValue.length <= 10) {
@@ -107,14 +104,11 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
                 color = MaterialTheme.colorScheme.scrim
             )
         },
-        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester),
+            .fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true
     )
-    focusRequester.requestFocus()
 }
 
 private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
@@ -124,16 +118,5 @@ private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Co
         FunctionHelper.vibrateDevice(context)
     } else {
         viewModel.sendOTP()
-    }
-}
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun PreviewSignUpScreen() {
-    ConnectTheme {
-        Surface {
-            MobileNumberInputScreen()
-        }
     }
 }
