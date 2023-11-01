@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,11 +51,15 @@ import com.example.connect.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.ui.common.SpacerHeight18
 import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.TopPageSection
+import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.FunctionHelper
+import com.ramcosta.composedestinations.annotation.Destination
 import java.util.Calendar
 import java.util.Date
 
 @OptIn(ExperimentalComposeUiApi::class)
+@AuthenticationNavGraph
+@Destination
 @Composable
 fun UserDetailsScreen() {
     val context = LocalContext.current
@@ -175,11 +180,10 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DOBPickerSection(viewModel: UserDetailsViewModel) {
-    val context = LocalContext.current
     var showDatePickerState by remember {
         mutableStateOf(false)
     }
-    val dateSelectionState = rememberDatePickerState()
+    val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
         value = viewModel.selectedDOBState.value,
         modifier = Modifier
@@ -213,7 +217,6 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
             DatePicker(state = dateSelectionState, showModeToggle = true, dateValidator = {
                 val calender = Calendar.getInstance()
                 val enteredDate = Date(it)
-                calender.add(Calendar.YEAR, -10)
                 enteredDate.before(calender.time)
             })
         }

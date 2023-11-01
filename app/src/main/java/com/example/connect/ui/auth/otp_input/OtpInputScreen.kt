@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -33,7 +32,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.ui.auth.destinations.UserDetailsScreenDestination
 import com.example.connect.ui.common.LoaderButton
 import com.example.connect.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.ui.common.SpacerHeight18
@@ -58,15 +57,13 @@ import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.ConstantsHelper
 import com.example.connect.utils.FunctionHelper
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-@RootNavGraph(start = true)
+@OptIn(ExperimentalComposeUiApi::class)
+@AuthenticationNavGraph
 @Destination
 @Composable
 fun OTPScreen(navigator: DestinationsNavigator) {
-    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
@@ -98,7 +95,8 @@ fun OTPScreen(navigator: DestinationsNavigator) {
                     buttonText = stringResource(id = R.string.verify_otp),
                     onClick = {
                         keyboardController?.hide()
-                        handleButtonClick(viewModel, context)
+                        navigator.navigate(UserDetailsScreenDestination)
+//                        handleButtonClick(viewModel, context)
                     }
                 )
             }
@@ -117,16 +115,12 @@ fun OTPScreen(navigator: DestinationsNavigator) {
 
 @Composable
 fun OTPTTimer(viewModel: OtpInputViewModel) {
-    // TODO: remove it 
-    val showTimer by remember {
-        viewModel.showTimerState
-    }
-    LaunchedEffect(key1 = showTimer) {
-        if (showTimer) {
+    LaunchedEffect(key1 = viewModel.showTimerState.value) {
+        if (viewModel.showTimerState.value) {
             viewModel.startTimer()
         }
     }
-    if (showTimer) {
+    if (viewModel.showTimerState.value) {
         Text(
             text = stringResource(
                 id = R.string.string_digit_string_placeholder,
@@ -154,7 +148,7 @@ fun OTPTTimer(viewModel: OtpInputViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OTPField(viewModel: OtpInputViewModel) {
     val focusRequesterList = List(ConstantsHelper.OTPCharCount) { FocusRequester() }
@@ -185,7 +179,6 @@ fun OTPField(viewModel: OtpInputViewModel) {
                         wasValueEntered = true
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next

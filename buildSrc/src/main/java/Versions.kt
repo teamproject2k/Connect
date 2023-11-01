@@ -1,7 +1,7 @@
 object Versions {
     const val daggerHilt = "2.44"
     const val activityCompose = "1.7.2"
-    const val composeBom = "2023.03.00"
+    const val composeBom = "2023.10.01"
     const val junitAndroidTest = "1.1.5"
     const val junitTest = "4.13.2"
     const val espresso = "3.5.1"
@@ -18,7 +18,7 @@ object Versions {
     const val googleServices = "4.4.0"
     const val crashlytics = "2.9.9"
     const val splashScreen = "1.0.0"
-    val navigationCompose = "1.8.42-beta"
+    val navigationCompose = "1.9.54"
     val ksp = "1.8.10-1.0.9"
     const val navigationComposeHilt = "1.0.0"
     const val dialog = "1.2.0"

@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -27,17 +24,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.ui.auth.destinations.OTPScreenDestination
+import com.example.connect.ui.common.AppOutlinedTextField
 import com.example.connect.ui.common.LoaderButton
 import com.example.connect.ui.common.SpacerHeight48
 import com.example.connect.ui.common.TopPageSection
 import com.example.connect.utils.AuthenticationNavGraph
 import com.example.connect.utils.FunctionHelper
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-@RootNavGraph(start = true)
+@OptIn(ExperimentalComposeUiApi::class)
+@AuthenticationNavGraph(start = true)
 @Destination
 @Composable
 fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
@@ -64,12 +61,11 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                     onClick = {
                         keyboardController?.hide()
 //                        handleButtonClick(viewModel, context)
-                       // navigator.navigate(OTPScreenDestination)
+                        navigator.navigate(OTPScreenDestination)
                     }
                 )
             }
         }
-
     }
     LaunchedEffect(key1 = viewModel.snackBarMessage.value) {
         if (viewModel.snackBarMessage.value.isNotBlank()) {
@@ -82,12 +78,12 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    OutlinedTextField(
+    AppOutlinedTextField(
         value = viewModel.userMobileNumberState.value,
         onValueChange = { updatedValue ->
             if (updatedValue.length <= 10) {
@@ -108,7 +104,6 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
                 color = MaterialTheme.colorScheme.scrim
             )
         },
-        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
