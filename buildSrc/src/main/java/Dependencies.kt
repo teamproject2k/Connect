@@ -19,7 +19,7 @@ object Dependencies {
     val junitTest by lazy { "junit:junit:${Versions.junitTest}" }
     val junitAndroidTest by lazy { "androidx.test.ext:junit:${Versions.junitAndroidTest}" }
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
-    val firebaseAuth by lazy { "com.google.firebase:firebase-auth" }
+    val firebaseAuth by lazy { "com.google.firebase:firebase-auth-ktx" }
     val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
     val firebaseCrashlytics by lazy { "com.google.firebase:firebase-crashlytics-ktx" }
     val firebaseFirestore by lazy { "com.google.firebase:firebase-firestore-ktx" }

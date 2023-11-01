@@ -78,6 +78,7 @@ dependencies {
     implementation(platform(Dependencies.firebaseBom))
     implementation(Dependencies.firebaseAnalytics)
     implementation(Dependencies.firebaseCrashlytics)
+    implementation(Dependencies.firebaseAuth)
     //coil
     implementation(Dependencies.coil)
     //view model
