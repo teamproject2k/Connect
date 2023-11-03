@@ -6,4 +6,7 @@ import javax.inject.Inject
 class AuthenticationUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
     suspend fun sendOtp(mobileNumber: String) = repository.sendOtp(mobileNumber)
+    suspend fun verifyOtp(verificationId: String, otp: String) = repository.verifyOtp(verificationId, otp)
+
+    suspend fun getUserDetails(userId: String) = repository.getUserDetails(userId)
 }

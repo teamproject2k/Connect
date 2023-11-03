@@ -32,6 +32,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.presentation.ui.auth.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.presentation.ui.common.SpacerHeight18
@@ -64,6 +64,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun OTPScreen(navigator: DestinationsNavigator) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
@@ -95,8 +96,7 @@ fun OTPScreen(navigator: DestinationsNavigator) {
                     buttonText = stringResource(id = R.string.verify_otp),
                     onClick = {
                         keyboardController?.hide()
-                        navigator.navigate(UserDetailsScreenDestination)
-//                        handleButtonClick(viewModel, context)
+                        handleButtonClick(viewModel, context)
                     }
                 )
             }

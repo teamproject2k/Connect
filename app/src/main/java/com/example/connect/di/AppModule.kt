@@ -1,4 +1,4 @@
-package com.example.connect.domain.di
+package com.example.connect.di
 
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class DomainModule {
+class AppModule {
 
     @Provides
     @Singleton

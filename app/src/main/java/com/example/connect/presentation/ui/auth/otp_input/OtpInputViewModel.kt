@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.enums.ButtonLoadingState
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OtpInputViewModel @Inject constructor() : BaseViewModel() {
+class OtpInputViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) : BaseViewModel() {
     val snackBarMessage = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
     val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTPCharCount))
@@ -30,7 +31,7 @@ class OtpInputViewModel @Inject constructor() : BaseViewModel() {
         showTimerState.value = true
         val countDownTimer = object : CountDownTimer(ConstantsHelper.OTPTimeOutTime * 1000, 1000) {
             override fun onTick(timeLeft: Long) {
-                timeLeftState.value = timeLeft / 1000
+                timeLeftState.longValue = timeLeft / 1000
             }
 
             override fun onFinish() {
