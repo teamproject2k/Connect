@@ -63,7 +63,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @AuthenticationNavGraph
 @Destination
 @Composable
-fun OTPScreen(navigator: DestinationsNavigator) {
+fun OTPScreen(navigator: DestinationsNavigator, mobileNumber: String) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
@@ -165,12 +165,18 @@ fun OTPField(viewModel: OtpInputViewModel) {
             OutlinedTextFieldNoLabel(
                 value = enteredValue.ifBlank { "" },
                 onValueChange = { updatedValue ->
-                    val valueToFill = if (updatedValue.isDigitsOnly() && updatedValue.isNotBlank()) updatedValue[0].toString() else " "
+                    val valueToFill =
+                        if (updatedValue.isDigitsOnly() && updatedValue.isNotBlank()) updatedValue[0].toString() else " "
                     val updatedOTP = if (index == 0) {
                         "$valueToFill${viewModel.otpState.value.substring(1)}"
                     } else {
                         val currentOtp = viewModel.otpState.value
-                        "${currentOtp.substring(0, index)}$valueToFill${currentOtp.substring(index + 1)}"
+                        "${
+                            currentOtp.substring(
+                                0,
+                                index
+                            )
+                        }$valueToFill${currentOtp.substring(index + 1)}"
                     }
                     viewModel.otpState.value = updatedOTP
                     if (valueToFill.isDigitsOnly() && index + 1 != ConstantsHelper.OTPCharCount) {

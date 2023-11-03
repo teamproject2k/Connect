@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.auth.mobile_number
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,13 +25,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.common.FirebaseConstants
+import com.example.connect.common.RequestStatusEnum
+import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.auth.destinations.OTPScreenDestination
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.utils.AuthenticationNavGraph
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.enums.ButtonLoadingState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -41,6 +48,10 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: MobileNumberInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
+    val context = LocalContext.current
+
+    HandleUIState(viewModel, navigator, context)
+
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -60,8 +71,7 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                     buttonText = stringResource(id = R.string.get_otp),
                     onClick = {
                         keyboardController?.hide()
-//                        handleButtonClick(viewModel, context)
-                        navigator.navigate(OTPScreenDestination)
+                        handleButtonClick(viewModel, context)
                     }
                 )
             }
@@ -75,6 +85,46 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
             )
             viewModel.snackBarMessage.value = ""
         }
+    }
+}
+
+@Composable
+fun HandleUIState(
+    viewModel: MobileNumberInputViewModel,
+    navigator: DestinationsNavigator,
+    context: Context
+) {
+    val uiState = viewModel.sendOtpUIState.collectAsState().value
+
+    when (uiState.status) {
+
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            if (uiState.data == FirebaseConstants.AutoLogin) {
+
+            } else {
+                navigator.navigate(OTPScreenDestination(viewModel.userMobileNumberState.value))
+            }
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessage.value =
+                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                else uiState.message.toString()
+
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+
+            Log.e(
+                ConstantsHelper.ErrorTag,
+                "MobileNumberInputScreen : ${uiState.message.toString()}"
+            )
+        }
+
+        else -> {}
     }
 }
 
@@ -100,7 +150,7 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
         },
         leadingIcon = {
             Text(
-                text = stringResource(R.string._91),
+                text = viewModel.selectedCountryCode,
                 color = MaterialTheme.colorScheme.scrim
             )
         },
@@ -111,7 +161,10 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     )
 }
 
-private fun handleButtonClick(viewModel: MobileNumberInputViewModel, context: Context) {
+private fun handleButtonClick(
+    viewModel: MobileNumberInputViewModel,
+    context: Context
+) {
     if (!viewModel.isValidMobileNumber()) {
         viewModel.snackBarMessage.value =
             context.getString(R.string.please_enter_a_valid_mobile_number)

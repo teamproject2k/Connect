@@ -13,5 +13,9 @@ data class ResponseState<out T>(val status: RequestStatusEnum, val data: T?, val
         fun <T> error(msg: String, data: T? = null): ResponseState<T> {
             return ResponseState(RequestStatusEnum.EXCEPTION, data, msg)
         }
+
+        fun <T> none(): ResponseState<T> {
+            return ResponseState(RequestStatusEnum.NONE, null, null)
+        }
     }
 }
