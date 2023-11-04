@@ -1,13 +1,11 @@
 package com.example.connect.data.repository
 
-import android.app.Activity
-import android.content.Context
-import androidx.compose.ui.platform.LocalContext
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -46,11 +44,12 @@ class IAuthenticationRepositoryImpl @Inject constructor(private val firebaseAuth
 
         val options = PhoneAuthOptions.newBuilder(firebaseAuth)
             .setPhoneNumber(countryCode + mobileNumber)
-            .setTimeout(60L, TimeUnit.SECONDS)
+            .setTimeout(ConstantsHelper.OTPTimeOutTime, TimeUnit.SECONDS)
             .setCallbacks(callbacks)
-            .build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
-
+        if (AuthenticationActivity.Instance != null) {
+            options.setActivity(AuthenticationActivity.Instance!!)
+        }
+        PhoneAuthProvider.verifyPhoneNumber(options.build())
     }
 
     override suspend fun verifyOtp(

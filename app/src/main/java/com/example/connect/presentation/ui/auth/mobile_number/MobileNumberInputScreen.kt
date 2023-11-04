@@ -27,7 +27,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.RequestStatusEnum
-import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.auth.destinations.OTPScreenDestination
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
@@ -95,9 +94,7 @@ fun HandleUIState(
     context: Context
 ) {
     val uiState = viewModel.sendOtpUIState.collectAsState().value
-
     when (uiState.status) {
-
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
         }

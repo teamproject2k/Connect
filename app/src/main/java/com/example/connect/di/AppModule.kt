@@ -20,7 +20,6 @@ class AppModule {
     fun getFirebaseAuth(): FirebaseAuth {
         val firebaseAuth = Firebase.auth
         firebaseAuth.useAppLanguage()
-        firebaseAuth.firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
         return firebaseAuth
     }
 

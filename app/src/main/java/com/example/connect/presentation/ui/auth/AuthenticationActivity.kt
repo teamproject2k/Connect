@@ -17,10 +17,15 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AuthenticationActivity : BaseActivity() {
+    companion object {
+        var Instance: AuthenticationActivity? = null
+    }
+
     @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        Instance = this
         setContent {
             ConnectTheme {
                 val navHostEngine = rememberAnimatedNavHostEngine(
@@ -34,5 +39,10 @@ class AuthenticationActivity : BaseActivity() {
                 DestinationsNavHost(navGraph = NavGraphs.authentication, engine = navHostEngine)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Instance = null
     }
 }
