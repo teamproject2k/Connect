@@ -2,7 +2,6 @@ package com.example.connect.presentation.ui.auth.mobile_number
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -108,7 +107,6 @@ private fun HandleGetUserDetailsState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ", "mobile: get user")
             if (userDetailsState.data == null) {
                 navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack()
@@ -157,7 +155,6 @@ private fun HandleSendOTPState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ", "mobile send otp: ")
             if (sendOtpState.data?.first == FirebaseConstants.AutoLogin) {
                 viewModel.getUserDetails(sendOtpState.data.second)
             } else {

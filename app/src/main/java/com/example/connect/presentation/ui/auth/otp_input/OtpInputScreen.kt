@@ -2,7 +2,6 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -266,7 +265,6 @@ fun HandleUserDetailsState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ", " user otp: ")
             if (userDetailsState.data == null) {
                 navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
@@ -315,7 +313,6 @@ fun HandleVerifyOTPState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ", "verify otp: ")
             if (verifyOtpState.data != null) {
                 viewModel.getUserDetails(verifyOtpState.data.uid)
             } else {
