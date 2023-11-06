@@ -8,7 +8,7 @@ import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.utils.FunctionHelper.getUserId
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class UserDetailsViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
+    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val userNameState = mutableStateOf("")
     val selectedDOBState = mutableStateOf("")
     val selectedGenderState = mutableStateOf("")

@@ -62,7 +62,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.LocalActivity
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.Calendar
@@ -99,7 +99,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                 DOBPickerSection(viewModel = viewModel)
                 SpacerHeight48()
                 LoaderButton(
-                    loaderButtonState = viewModel.currentButtonLoadingState,
+                    loaderButtonState = viewModel.currentButtonLoadingEnum,
                     loadingText = stringResource(R.string.creating_account),
                     buttonText = stringResource(id = R.string.create_account),
                     onClick = {
@@ -261,7 +261,7 @@ private fun HandleAddUserState(
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -269,14 +269,14 @@ private fun HandleAddUserState(
             val intent = Intent(context, HomeActivity::class.java)
             context.startActivity(intent)
             LocalActivity.current.finish()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
             viewModel.snackBarMessageState.value =
                 if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
                 else uiState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,

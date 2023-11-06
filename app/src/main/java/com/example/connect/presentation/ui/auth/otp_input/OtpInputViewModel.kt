@@ -11,7 +11,7 @@ import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class OtpInputViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
+    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTPCharCount))
     val showTimerState = mutableStateOf(true)
     val timeLeftState = mutableLongStateOf(ConstantsHelper.OTPTimeOutTime)

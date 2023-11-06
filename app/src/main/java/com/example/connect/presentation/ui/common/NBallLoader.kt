@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,7 +29,7 @@ fun NBallLoader(
     animationTotalDurationInMillis: Long = 1000
 ) {
     var currentSelectedBallIndex by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
 
     Row(

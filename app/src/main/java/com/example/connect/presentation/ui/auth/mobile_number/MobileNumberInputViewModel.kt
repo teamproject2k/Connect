@@ -7,7 +7,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,7 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
     BaseViewModel() {
     val userMobileNumberState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
+    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val selectedCountryCode = "+91"
 
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =

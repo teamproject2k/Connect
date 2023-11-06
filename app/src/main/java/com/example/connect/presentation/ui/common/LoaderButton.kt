@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.connect.R
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 
 @Composable
 fun LoaderButton(
-    loaderButtonState: MutableState<ButtonLoadingState>,
+    loaderButtonState: MutableState<ButtonLoadingEnum>,
     buttonText: String,
     modifier: Modifier = Modifier,
     loadingText: String = stringResource(id = R.string.please_wait),
@@ -30,7 +30,7 @@ fun LoaderButton(
         loaderButtonState
     }
 
-    val isEnabled = currentButtonState == ButtonLoadingState.NotLoading
+    val isEnabled = currentButtonState == ButtonLoadingEnum.NotLoading
 
     Button(
         onClick = { onClick() },

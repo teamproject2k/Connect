@@ -69,7 +69,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.LocalActivity
-import com.example.connect.presentation.utils.enums.ButtonLoadingState
+import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -92,7 +92,7 @@ fun OTPScreen(
     viewModel.countryCode = countryCode
     HandleVerifyOTPState(viewModel, navigator, context)
     HandleUserDetailsState(viewModel, navigator, context)
-    HandleResendOTPState(viewModel, navigator, context)
+    HandleResendOTPState(viewModel, context)
 
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
@@ -118,7 +118,7 @@ fun OTPScreen(
                 }
                 SpacerHeight48()
                 LoaderButton(
-                    loaderButtonState = viewModel.currentButtonLoadingState,
+                    loaderButtonState = viewModel.currentButtonLoadingEnum,
                     buttonText = stringResource(id = R.string.verify_otp),
                     loadingText = stringResource(R.string.verifying_otp),
                     onClick = {
@@ -262,11 +262,11 @@ fun HandleUserDetailsState(
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ",  " user otp: ", )
+            Log.e("check recompose ", " user otp: ")
             if (userDetailsState.data == null) {
                 navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
@@ -276,7 +276,7 @@ fun HandleUserDetailsState(
                 context.startActivity(intent)
                 LocalActivity.current.finish()
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -286,7 +286,7 @@ fun HandleUserDetailsState(
                 )
                 else userDetailsState.message.toString()
 
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -311,11 +311,11 @@ fun HandleVerifyOTPState(
 
     when (verifyOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
-            Log.e("check recompose ", "verify otp: ", )
+            Log.e("check recompose ", "verify otp: ")
             if (verifyOtpState.data != null) {
                 viewModel.getUserDetails(verifyOtpState.data.uid)
             } else {
@@ -330,7 +330,7 @@ fun HandleVerifyOTPState(
                     R.string.something_went_wrong
                 )
                 else verifyOtpState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -350,13 +350,12 @@ fun HandleVerifyOTPState(
 @Composable
 fun HandleResendOTPState(
     viewModel: OtpInputViewModel,
-    navigator: DestinationsNavigator,
     context: Context
 ) {
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -366,7 +365,7 @@ fun HandleResendOTPState(
                 viewModel.snackBarMessageState.value =
                     stringResource(R.string.otp_sent_successfully)
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -376,7 +375,7 @@ fun HandleResendOTPState(
                 )
                 else resendOtpState.message.toString()
 
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
