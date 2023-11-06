@@ -2,6 +2,7 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -89,7 +90,9 @@ fun OTPScreen(
     viewModel.mobileNumber = mobileNumber
     viewModel.verificationId = verificationId
     viewModel.countryCode = countryCode
-    HandleUIState(viewModel, navigator, context)
+    HandleVerifyOTPState(viewModel, navigator, context)
+    HandleUserDetailsState(viewModel, navigator, context)
+    HandleResendOTPState(viewModel, navigator, context)
 
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
@@ -136,6 +139,7 @@ fun OTPScreen(
         }
     }
 }
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -248,55 +252,21 @@ fun OTPField(viewModel: OtpInputViewModel) {
     }
 }
 
+
 @Composable
-fun HandleUIState(
+fun HandleUserDetailsState(
     viewModel: OtpInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
 ) {
-    val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
-    val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
-
-    when (verifyOtpState.status) {
-        RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
-        }
-
-        RequestStatusEnum.SUCCESS -> {
-            if (verifyOtpState.data != null) {
-                viewModel.getUserDetails(verifyOtpState.data.uid)
-            } else {
-                context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-                navigator.popBackStack()
-            }
-        }
-
-        RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
-                )
-                else verifyOtpState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "OTPInputScreen",
-                verifyOtpState.message.toString()
-            )
-        }
-
-        RequestStatusEnum.NONE -> {
-
-        }
-    }
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
+            Log.e("check recompose ",  " user otp: ", )
             if (userDetailsState.data == null) {
                 navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
@@ -329,6 +299,61 @@ fun HandleUIState(
 
         }
     }
+}
+
+@Composable
+fun HandleVerifyOTPState(
+    viewModel: OtpInputViewModel,
+    navigator: DestinationsNavigator,
+    context: Context
+) {
+    val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
+
+    when (verifyOtpState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            Log.e("check recompose ", "verify otp: ", )
+            if (verifyOtpState.data != null) {
+                viewModel.getUserDetails(verifyOtpState.data.uid)
+            } else {
+                context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+                navigator.popBackStack()
+            }
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                    R.string.something_went_wrong
+                )
+                else verifyOtpState.message.toString()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "OTPInputScreen",
+                verifyOtpState.message.toString()
+            )
+        }
+
+        RequestStatusEnum.NONE -> {
+
+        }
+    }
+
+
+}
+
+@Composable
+fun HandleResendOTPState(
+    viewModel: OtpInputViewModel,
+    navigator: DestinationsNavigator,
+    context: Context
+) {
+    val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
@@ -346,17 +371,17 @@ fun HandleUIState(
 
         RequestStatusEnum.EXCEPTION -> {
             viewModel.snackBarMessageState.value =
-                if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == ErrorCodes.NoUserFound) context.getString(
                     R.string.something_went_wrong
                 )
-                else verifyOtpState.message.toString()
+                else resendOtpState.message.toString()
 
             viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
                 "OTPInputScreen",
-                verifyOtpState.message.toString()
+                resendOtpState.message.toString()
             )
         }
 
@@ -364,7 +389,6 @@ fun HandleUIState(
 
         }
     }
-
 
 }
 

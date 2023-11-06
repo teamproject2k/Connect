@@ -77,7 +77,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: UserDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
-    HandleUIState(viewModel = viewModel, context = context)
+    HandleAddUserState(viewModel = viewModel, context = context)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -254,7 +254,7 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
 }
 
 @Composable
-private fun HandleUIState(
+private fun HandleAddUserState(
     viewModel: UserDetailsViewModel,
     context: Context
 ) {

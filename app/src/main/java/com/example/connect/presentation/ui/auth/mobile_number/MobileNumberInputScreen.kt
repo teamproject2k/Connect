@@ -2,6 +2,7 @@ package com.example.connect.presentation.ui.auth.mobile_number
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +56,8 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val viewModel: MobileNumberInputViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val context = LocalContext.current
-    HandleUIState(viewModel, navigator, context)
+    HandleSendOTPState(viewModel, navigator, context)
+    HandleGetUserDetailsState(viewModel, navigator, context)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -94,19 +96,68 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-private fun HandleUIState(
+private fun HandleGetUserDetailsState(
+    viewModel: MobileNumberInputViewModel,
+    navigator: DestinationsNavigator,
+    context: Context
+) {
+    val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
+    when (userDetailsState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            Log.e("check recompose ", "mobile: get user")
+            if (userDetailsState.data == null) {
+                navigator.navigate(UserDetailsScreenDestination())
+                navigator.popBackStack()
+            } else {
+                viewModel.sharedPreference.isUserDetailsEntered = true
+                val intent = Intent(context, HomeActivity::class.java)
+                intent.putExtra(IntentConstants.UserDetails, userDetailsState.data)
+                context.startActivity(intent)
+                LocalActivity.current.finish()
+            }
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
+                    R.string.something_went_wrong
+                )
+                else userDetailsState.message.toString()
+
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "MobileNumberInputScreen",
+                userDetailsState.message.toString()
+            )
+        }
+
+        RequestStatusEnum.NONE -> {
+
+        }
+    }
+}
+
+@Composable
+private fun HandleSendOTPState(
     viewModel: MobileNumberInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
 ) {
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
-    val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (sendOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
+            Log.e("check recompose ", "mobile send otp: ")
             if (sendOtpState.data?.first == FirebaseConstants.AutoLogin) {
                 viewModel.getUserDetails(sendOtpState.data.second)
             } else {
@@ -135,45 +186,6 @@ private fun HandleUIState(
                 ConstantsHelper.ErrorTag,
                 "MobileNumberInputScreen",
                 sendOtpState.message.toString()
-            )
-        }
-
-        RequestStatusEnum.NONE -> {
-
-        }
-    }
-    when (userDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
-        }
-
-        RequestStatusEnum.SUCCESS -> {
-            if (userDetailsState.data == null) {
-                navigator.navigate(UserDetailsScreenDestination())
-                navigator.popBackStack()
-            } else {
-                viewModel.sharedPreference.isUserDetailsEntered = true
-                val intent = Intent(context, HomeActivity::class.java)
-                intent.putExtra(IntentConstants.UserDetails, userDetailsState.data)
-                context.startActivity(intent)
-                LocalActivity.current.finish()
-            }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
-        }
-
-        RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
-                )
-                else userDetailsState.message.toString()
-
-            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "MobileNumberInputScreen",
-                userDetailsState.message.toString()
             )
         }
 
