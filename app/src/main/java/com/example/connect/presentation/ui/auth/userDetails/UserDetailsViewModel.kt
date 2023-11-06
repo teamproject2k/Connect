@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,7 +43,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
                     authenticationUseCase.getUsersFromName(userNameState.value)
-                if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION) {
+                if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
                     val formattedUserName = getFormattedUserName()
                     val createdDate = Date().time
                     val user = UserDetails(
@@ -55,7 +54,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                         selectedDOBState.longValue,
                         createdDate,
                         createdDate,
-                        UUID.randomUUID().toString()
+                        sharedPreference.deviceId!!
                     )
                     val userDetailsResponseState = authenticationUseCase.addUserToRemote(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
@@ -63,7 +62,8 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                     }
                     _addUserStateFlow.value = authenticationUseCase.addUserToRemote(user)
                 } else {
-                    _addUserStateFlow.value = currentUserByNameResponseState
+                    _addUserStateFlow.value =
+                        ResponseState.error(currentUserByNameResponseState.message ?: "")
                 }
             }
         }

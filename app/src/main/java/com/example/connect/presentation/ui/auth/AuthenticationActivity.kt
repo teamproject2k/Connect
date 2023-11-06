@@ -18,6 +18,7 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import java.util.UUID
 
 class AuthenticationActivity : BaseActivity() {
     companion object {
@@ -28,6 +29,7 @@ class AuthenticationActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        setDeviceInfo()
         if (firebaseAuth.currentUser != null && sharedPreferences.isUserDetailsEntered) {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
@@ -85,6 +87,12 @@ class AuthenticationActivity : BaseActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun setDeviceInfo() {
+        if (sharedPreferences.deviceId.isNullOrBlank()) {
+            sharedPreferences.deviceId = UUID.randomUUID().toString()
         }
     }
 

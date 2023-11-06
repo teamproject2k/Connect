@@ -32,6 +32,7 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow: StateFlow<ResponseState<UserDetails?>> get() = _getUserDetailsStateFlow
 
+
     fun isValidMobileNumber(): Boolean {
         val phoneRegex = "^[0-9]{10}$"
         return phoneRegex.toRegex().matches(userMobileNumberState.value)
@@ -58,6 +59,14 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
                 val userDetailsResponseState = authenticationUseCase.getUserDetails(userId)
                 if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS && userDetailsResponseState.data != null) {
                     authenticationUseCase.addUserToLocalDb(userDetailsResponseState.data)
+                    if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
+                        && sharedPreference.deviceId != null
+                    ) {
+                        authenticationUseCase.updateDeviceId(
+                            userDetailsResponseState.data.firebaseUserId,
+                            sharedPreference.deviceId!!
+                        )
+                    }
                 }
                 _getUserDetailsStateFlow.value = userDetailsResponseState
             }
@@ -67,5 +76,10 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
     fun resetStateFlow() {
         _sendOtpUIStateFlow.value = ResponseState.none()
         _getUserDetailsStateFlow.value = ResponseState.none()
+    }
+
+
+    fun updateDeviceId(deviceId: String) {
+
     }
 }

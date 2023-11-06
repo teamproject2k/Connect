@@ -120,7 +120,20 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToLocalDb(userDetails: UserDetails):Long {
+    override suspend fun addUserToLocalDb(userDetails: UserDetails): Long {
         return appDatabase.getUsersDao().insertUser(userDetails)
+    }
+
+    override suspend fun updateDeviceId(
+        fireBaseId: String,
+        updatedDeviceId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId)
+                .update(UserDetails::currentLoggedInDeviceId.name, updatedDeviceId).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
     }
 }

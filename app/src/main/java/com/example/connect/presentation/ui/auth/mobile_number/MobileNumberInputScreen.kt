@@ -116,6 +116,7 @@ private fun HandleGetUserDetailsState(
                 intent.putExtra(IntentConstants.UserDetails, userDetailsState.data)
                 context.startActivity(intent)
                 LocalActivity.current.finish()
+
             }
             viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
