@@ -21,7 +21,7 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
     BaseViewModel() {
     val userMobileNumberState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
+    val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val selectedCountryCode = "+91"
 
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =

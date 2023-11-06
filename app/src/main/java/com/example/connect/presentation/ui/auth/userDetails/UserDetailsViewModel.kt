@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.auth.userDetails
 
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
@@ -23,9 +24,9 @@ import javax.inject.Inject
 class UserDetailsViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
+    val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val userNameState = mutableStateOf("")
-    val selectedDOBState = mutableStateOf("")
+    val selectedDOBState = mutableLongStateOf(-1)
     val selectedGenderState = mutableStateOf("")
     private val _addUserStateFlow: MutableStateFlow<ResponseState<Int>> =
         MutableStateFlow(ResponseState.none())
@@ -34,7 +35,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
 
     fun isValidName(): Boolean = userNameState.value.isNotBlank()
     fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
-    fun isDobSelected(): Boolean = selectedDOBState.value.isNotBlank()
+    fun isDobSelected(): Boolean = selectedDOBState.longValue != -1L
     fun createUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -49,9 +50,9 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                     val user = UserDetails(
                         fireBaseAuth.currentUser!!.uid,
                         getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
-                        userNameState.value,
+                        formattedUserName,
                         selectedGenderState.value,
-                        selectedDOBState.value,
+                        selectedDOBState.longValue,
                         createdDate,
                         createdDate,
                         UUID.randomUUID().toString()

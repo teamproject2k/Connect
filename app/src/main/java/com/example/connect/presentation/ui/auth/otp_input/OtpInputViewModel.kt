@@ -25,7 +25,7 @@ import javax.inject.Inject
 class OtpInputViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingEnum = mutableStateOf(ButtonLoadingEnum.NotLoading)
+    val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
     val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTPCharCount))
     val showTimerState = mutableStateOf(true)
     val timeLeftState = mutableLongStateOf(ConstantsHelper.OTPTimeOutTime)

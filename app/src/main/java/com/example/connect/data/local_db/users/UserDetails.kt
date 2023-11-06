@@ -11,12 +11,12 @@ data class UserDetails(
     val connectUserId: String,
     val name: String,
     val gender: String,
-    val dateOfBirth: String,
+    val dateOfBirth: Long,
     val createdAt: Long,
     val modifiedAt: Long,
     val currentLoggedInDeviceId: String,
     val bio: String = "Connect User",
     val profilePhoto: String? = null,
 ) : Serializable {
-    constructor() : this("1", "", "", "", "", 0, 0, "")
+    constructor() : this("1", "", "", "", -1, 0, 0, "")
 }

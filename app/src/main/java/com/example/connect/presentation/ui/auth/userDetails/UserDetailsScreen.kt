@@ -99,7 +99,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                 DOBPickerSection(viewModel = viewModel)
                 SpacerHeight48()
                 LoaderButton(
-                    loaderButtonState = viewModel.currentButtonLoadingEnum,
+                    loaderButtonState = viewModel.currentButtonLoadingState,
                     loadingText = stringResource(R.string.creating_account),
                     buttonText = stringResource(id = R.string.create_account),
                     onClick = {
@@ -209,7 +209,9 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     }
     val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
-        value = viewModel.selectedDOBState.value,
+        value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
+            viewModel.selectedDOBState.longValue
+        ) else "",
         modifier = Modifier
             .fillMaxWidth(),
         leadingIcon = {
@@ -231,7 +233,7 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
                     .clickable {
                         if (dateSelectionState.selectedDateMillis != null) {
                             viewModel.selectedDOBState.value =
-                                FunctionHelper.getFormattedDate(dateSelectionState.selectedDateMillis!!)
+                                dateSelectionState.selectedDateMillis!!
                         }
                         showDatePickerState = false
                     })
@@ -261,7 +263,7 @@ private fun HandleAddUserState(
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -269,14 +271,14 @@ private fun HandleAddUserState(
             val intent = Intent(context, HomeActivity::class.java)
             context.startActivity(intent)
             LocalActivity.current.finish()
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
             viewModel.snackBarMessageState.value =
                 if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
                 else uiState.message.toString()
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,

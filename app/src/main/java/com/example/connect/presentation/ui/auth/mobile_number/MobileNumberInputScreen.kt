@@ -72,7 +72,7 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                 MobileInputTextField(viewModel)
                 SpacerHeight48()
                 LoaderButton(
-                    loaderButtonState = viewModel.currentButtonLoadingEnum,
+                    loaderButtonState = viewModel.currentButtonLoadingState,
                     loadingText = stringResource(R.string.sending_otp),
                     buttonText = stringResource(id = R.string.get_otp),
                     onClick = {
@@ -103,7 +103,7 @@ private fun HandleGetUserDetailsState(
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -117,7 +117,7 @@ private fun HandleGetUserDetailsState(
                 context.startActivity(intent)
                 LocalActivity.current.finish()
             }
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -127,7 +127,7 @@ private fun HandleGetUserDetailsState(
                 )
                 else userDetailsState.message.toString()
 
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -151,7 +151,7 @@ private fun HandleSendOTPState(
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
     when (sendOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -167,7 +167,7 @@ private fun HandleSendOTPState(
                 )
                 viewModel.resetStateFlow()
             }
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -177,7 +177,7 @@ private fun HandleSendOTPState(
                 )
                 else sendOtpState.message.toString()
 
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,

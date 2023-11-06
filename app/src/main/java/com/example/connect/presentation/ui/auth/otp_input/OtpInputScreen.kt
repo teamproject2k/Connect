@@ -117,7 +117,7 @@ fun OTPScreen(
                 }
                 SpacerHeight48()
                 LoaderButton(
-                    loaderButtonState = viewModel.currentButtonLoadingEnum,
+                    loaderButtonState = viewModel.currentButtonLoadingState,
                     buttonText = stringResource(id = R.string.verify_otp),
                     loadingText = stringResource(R.string.verifying_otp),
                     onClick = {
@@ -261,20 +261,20 @@ fun HandleUserDetailsState(
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
             if (userDetailsState.data == null) {
-                navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
+                navigator.navigate(UserDetailsScreenDestination())
             } else {
                 viewModel.sharedPreference.isUserDetailsEntered = true
                 val intent = Intent(context, HomeActivity::class.java)
                 context.startActivity(intent)
                 LocalActivity.current.finish()
             }
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -284,7 +284,7 @@ fun HandleUserDetailsState(
                 )
                 else userDetailsState.message.toString()
 
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -309,7 +309,7 @@ fun HandleVerifyOTPState(
 
     when (verifyOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -327,7 +327,7 @@ fun HandleVerifyOTPState(
                     R.string.something_went_wrong
                 )
                 else verifyOtpState.message.toString()
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -352,7 +352,7 @@ fun HandleResendOTPState(
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -362,7 +362,7 @@ fun HandleResendOTPState(
                 viewModel.snackBarMessageState.value =
                     stringResource(R.string.otp_sent_successfully)
             }
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -372,7 +372,7 @@ fun HandleResendOTPState(
                 )
                 else resendOtpState.message.toString()
 
-            viewModel.currentButtonLoadingEnum.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
