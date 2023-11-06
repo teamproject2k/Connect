@@ -14,6 +14,10 @@ import com.example.lintrulelibrary.utils.IssuesUtils.EnumNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.EnumNameIssueText
 import com.example.lintrulelibrary.utils.IssuesUtils.InterfaceNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.InterfaceNameIssueText
+import com.example.lintrulelibrary.utils.IssuesUtils.StateFlowNameIssue
+import com.example.lintrulelibrary.utils.IssuesUtils.StateFlowNameIssueText
+import com.example.lintrulelibrary.utils.IssuesUtils.StateNameIssue
+import com.example.lintrulelibrary.utils.IssuesUtils.StateNameIssueText
 import com.example.lintrulelibrary.utils.IssuesUtils.StaticVariableNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.StaticVariableNameIssueText
 import com.example.lintrulelibrary.utils.IssuesUtils.ViewModelNameIssue
@@ -69,6 +73,7 @@ class RulesDetector : Detector(), Detector.UastScanner {
 
             override fun visitVariable(node: UVariable) {
                 val variableName = node.name
+                val variableType = node.type
                 if (node.isStatic && variableName != null) {
                     if (!BaseUtils.isTitleCase(variableName)) {
                         context.report(
@@ -77,6 +82,27 @@ class RulesDetector : Detector(), Detector.UastScanner {
                             context.getLocation(node as UElement),
                             StaticVariableNameIssueText
                         )
+                    }
+                }
+                if (!node.text.contains("fun")) {
+                    if (variableType.canonicalText.contains("StateFlow")) {
+                        if (variableName?.endsWith("StateFlow") == false) {
+                            context.report(
+                                StateFlowNameIssue,
+                                node as UElement,
+                                context.getLocation(node as UElement),
+                                StateFlowNameIssueText
+                            )
+                        }
+                    } else if (variableType.canonicalText.contains("State")) {
+                        if (variableName?.endsWith("State") == false) {
+                            context.report(
+                                StateNameIssue,
+                                node as UElement,
+                                context.getLocation(node as UElement),
+                                StateNameIssueText
+                            )
+                        }
                     }
                 }
             }
