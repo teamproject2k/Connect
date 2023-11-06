@@ -7,6 +7,8 @@ import com.example.lintrulelibrary.utils.IssuesUtils.BroadcastReceiverNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.EnumConstantNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.EnumNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.InterfaceNameIssue
+import com.example.lintrulelibrary.utils.IssuesUtils.StateFlowNameIssue
+import com.example.lintrulelibrary.utils.IssuesUtils.StateNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.StaticVariableNameIssue
 import com.example.lintrulelibrary.utils.IssuesUtils.ViewModelNameIssue
 
@@ -19,6 +21,8 @@ class RulesIssueRegistry : IssueRegistry() {
             InterfaceNameIssue,
             ActivityNameIssue,
             ViewModelNameIssue,
-            StaticVariableNameIssue
+            StaticVariableNameIssue,
+            StateFlowNameIssue,
+            StateNameIssue
         )
 }

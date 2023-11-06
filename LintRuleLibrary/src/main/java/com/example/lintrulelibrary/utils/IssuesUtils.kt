@@ -8,7 +8,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.example.lintrulelibrary.detectors.RulesDetector
 
 object IssuesUtils {
-    val ActivityNameIssueText = "Activity name must end with activity"
+    const val ActivityNameIssueText = "Activity name must end with activity"
     val ActivityNameIssue = Issue.create(
         "ActivityNameRule",
         ActivityNameIssueText,
@@ -19,7 +19,7 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val BroadcastReceiverNameIssueText = "Broadcast Receiver name must end with Receiver"
+    const val BroadcastReceiverNameIssueText = "Broadcast Receiver name must end with Receiver"
     val BroadcastReceiverNameIssue = Issue.create(
         "BroadcastReceiverNameRule",
         BroadcastReceiverNameIssueText,
@@ -30,7 +30,7 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val EnumNameIssueText = "Enum class must end with Enum"
+    const val EnumNameIssueText = "Enum class must end with Enum"
     val EnumNameIssue = Issue.create(
         "EnumNameRule",
         EnumNameIssueText,
@@ -41,7 +41,7 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val ViewModelNameIssueText = "ViewModel name must end with ViewModel"
+    const val ViewModelNameIssueText = "ViewModel name must end with ViewModel"
     val ViewModelNameIssue = Issue.create(
         "ViewModelNameRule",
         ViewModelNameIssueText,
@@ -52,7 +52,7 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val InterfaceNameIssueText = "Interface name must start with I"
+    const val InterfaceNameIssueText = "Interface name must start with I"
     val InterfaceNameIssue = Issue.create(
         "InterfaceNameRule",
         InterfaceNameIssueText,
@@ -63,7 +63,7 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val EnumConstantNameIssueText = "Enum constants must be title case"
+    const val EnumConstantNameIssueText = "Enum constants must be title case"
     val EnumConstantNameIssue = Issue.create(
         "EnumConstantsNameRule",
         EnumConstantNameIssueText,
@@ -74,11 +74,32 @@ object IssuesUtils {
         Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
     )
 
-    val StaticVariableNameIssueText = "Static variables must be title case"
+    const val StaticVariableNameIssueText = "Static variables must be title case"
     val StaticVariableNameIssue = Issue.create(
         "StaticVariableNameRule",
         StaticVariableNameIssueText,
         StaticVariableNameIssueText,
+        Category.CORRECTNESS,
+        6,
+        Severity.WARNING,
+        Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
+    )
+
+    const val StateFlowNameIssueText = "variables of type StateFlow must end with StateFlow"
+    val StateFlowNameIssue = Issue.create(
+        "StateFlowNameRule",
+        StateFlowNameIssueText,
+        StateFlowNameIssueText,
+        Category.CORRECTNESS,
+        6,
+        Severity.WARNING,
+        Implementation(RulesDetector::class.java, Scope.JAVA_FILE_SCOPE)
+    )
+    const val StateNameIssueText = "variables of type State must end with State"
+    val StateNameIssue = Issue.create(
+        "StateNameRule",
+        StateNameIssueText,
+        StateNameIssueText,
         Category.CORRECTNESS,
         6,
         Severity.WARNING,

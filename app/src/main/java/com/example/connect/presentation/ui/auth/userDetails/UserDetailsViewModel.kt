@@ -2,31 +2,82 @@ package com.example.connect.presentation.ui.auth.userDetails
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.common.RequestStatusEnum
+import com.example.connect.common.ResponseState
+import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.utils.FunctionHelper.getUserId
 import com.example.connect.presentation.utils.enums.ButtonLoadingState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Date
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class UserDetailsViewModel @Inject constructor() : BaseViewModel() {
-    val snackBarMessage = mutableStateOf("")
+class UserDetailsViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
+    BaseViewModel() {
+    val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingState.NotLoading)
-    val userName = mutableStateOf("")
-    var selectedDOBState = mutableStateOf("")
-    var selectedGenderState = mutableStateOf("")
+    val userNameState = mutableStateOf("")
+    val selectedDOBState = mutableStateOf("")
+    val selectedGenderState = mutableStateOf("")
+    private val _addUserStateFlow: MutableStateFlow<ResponseState<Int>> =
+        MutableStateFlow(ResponseState.none())
+    val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
 
 
-    fun isValidName(): Boolean = userName.value.isNotBlank()
+    fun isValidName(): Boolean = userNameState.value.isNotBlank()
     fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
     fun isDobSelected(): Boolean = selectedDOBState.value.isNotBlank()
     fun createUserProfile() {
         viewModelScope.launch {
-            currentButtonLoadingState.value = ButtonLoadingState.Loading
-            delay(8000)
-            currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            withContext(Dispatchers.IO) {
+
+                _addUserStateFlow.value = ResponseState.loading()
+                //get no of users with name to set user id
+                val currentUserByNameResponseState =
+                    authenticationUseCase.getUsersFromName(userNameState.value)
+                if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION) {
+                    val formattedUserName = getFormattedUserName()
+                    val createdDate = Date().time
+                    val user = UserDetails(
+                        fireBaseAuth.currentUser!!.uid,
+                        getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
+                        userNameState.value,
+                        selectedGenderState.value,
+                        selectedDOBState.value,
+                        createdDate,
+                        createdDate,
+                        UUID.randomUUID().toString()
+                    )
+                    val userDetailsResponseState = authenticationUseCase.addUserToRemote(user)
+                    if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
+                        authenticationUseCase.addUserToLocalDb(user)
+                    }
+                    _addUserStateFlow.value = authenticationUseCase.addUserToRemote(user)
+                } else {
+                    _addUserStateFlow.value = currentUserByNameResponseState
+                }
+            }
         }
     }
+
+    private fun getFormattedUserName(): String {
+        var formattedUserName = ""
+        val formattedUserNameList = userNameState.value.trim().split(" ")
+        formattedUserNameList.forEach {
+            if (it.isNotBlank()) {
+                formattedUserName += "$it "
+            }
+        }
+        return formattedUserName.trimEnd()
+    }
+
 
 }

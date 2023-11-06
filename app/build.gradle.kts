@@ -79,6 +79,7 @@ dependencies {
     implementation(Dependencies.firebaseAnalytics)
     implementation(Dependencies.firebaseCrashlytics)
     implementation(Dependencies.firebaseAuth)
+    implementation(Dependencies.firebaseFirestore)
     //coil
     implementation(Dependencies.coil)
     //view model
@@ -92,7 +93,10 @@ dependencies {
     ksp(Dependencies.ksp)
     //Dialog Picker
     implementation(Dependencies.dialog)
-//    implementation(Dependencies.calender)
+    //Room
+    implementation(Dependencies.roomRuntime)
+    annotationProcessor(Dependencies.roomCompiler)
+    kapt(Dependencies.roomKapt)
 
 }
 kapt {

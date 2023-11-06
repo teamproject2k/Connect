@@ -31,6 +31,11 @@
     <string name="cancel">Cancel</string>
     <string name="no_date_selected">No Date Selected</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="otp_sent_successfully">OTP Sent Successfully</string>
+    <string name="sending_otp">Sending OTP...</string>
+    <string name="verifying_otp">Verifying OTP...</string>
+    <string name="some_error_occurred_please_login_again">Some Error Occurred , Please Login Again</string>
+    <string name="creating_account">Creating Account...</string>
     <string-array name="gender_list">
         <item>Male</item>
         <item>Female</item>

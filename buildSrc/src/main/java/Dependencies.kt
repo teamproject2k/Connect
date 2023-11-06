@@ -35,5 +35,8 @@ object Dependencies {
     val navigationComposeHilt by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.navigationComposeHilt}" }
     val dialog by lazy { "com.maxkeppeler.sheets-compose-dialogs:core:${Versions.dialog}" }
     val calender by lazy { "com.maxkeppeler.sheets-compose-dialogs:calender:${Versions.dialog}" }
+    val roomRuntime by lazy { "androidx.room:room-runtime:${Versions.room}" }
+    val roomCompiler by lazy { "androidx.room:room-compiler:${Versions.room}" }
+    val roomKapt by lazy { "androidx.room:room-compiler:${Versions.room}" }
 
 }

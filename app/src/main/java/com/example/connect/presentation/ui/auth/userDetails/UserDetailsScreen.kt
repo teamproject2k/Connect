@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.auth.userDetails
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,15 +47,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
+import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.presentation.ui.common.SpacerHeight18
 import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
+import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.showToast
+import com.example.connect.presentation.utils.LocalActivity
+import com.example.connect.presentation.utils.enums.ButtonLoadingState
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.Calendar
 import java.util.Date
 
@@ -61,12 +72,12 @@ import java.util.Date
 @AuthenticationNavGraph
 @Destination
 @Composable
-fun UserDetailsScreen() {
+fun UserDetailsScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: UserDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
-
+    HandleUIState(viewModel = viewModel, context = context)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -89,22 +100,23 @@ fun UserDetailsScreen() {
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
+                    loadingText = stringResource(R.string.creating_account),
                     buttonText = stringResource(id = R.string.create_account),
                     onClick = {
                         keyboardController?.hide()
-                        handleButtonClick(viewModel, context)
+                        handleButtonClick(viewModel, context, navigator)
                     }
                 )
             }
         }
     }
-    LaunchedEffect(key1 = viewModel.snackBarMessage.value) {
-        if (viewModel.snackBarMessage.value.isNotBlank()) {
+    LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
+        if (viewModel.snackBarMessageState.value.isNotBlank()) {
             snackBarHostState.showSnackbar(
-                viewModel.snackBarMessage.value,
+                viewModel.snackBarMessageState.value,
                 duration = SnackbarDuration.Short
             )
-            viewModel.snackBarMessage.value = ""
+            viewModel.snackBarMessageState.value = ""
         }
     }
 }
@@ -115,13 +127,13 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
-        value = viewModel.userName.value,
+        value = viewModel.userNameState.value,
         onValueChange = { updatedValue ->
             val pattern = Regex("[0-9!$@#%^&*()_+{}\\[\\]:;<>,.?~|]")
             if (!updatedValue.contains(pattern)) {
-                viewModel.userName.value = updatedValue
+                viewModel.userNameState.value = updatedValue
             } else {
-                viewModel.snackBarMessage.value =
+                viewModel.snackBarMessageState.value =
                     context.getString(R.string.name_can_t_contain_digits_or_special_characters)
                 FunctionHelper.vibrateDevice(context)
                 keyboardController?.hide()
@@ -131,7 +143,10 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
             Text(text = stringResource(R.string.full_name))
         },
         leadingIcon = {
-            Image(imageVector = Icons.Rounded.Face, contentDescription = stringResource(id = R.string.full_name))
+            Image(
+                imageVector = Icons.Rounded.Face,
+                contentDescription = stringResource(id = R.string.full_name)
+            )
         },
         modifier = Modifier
             .fillMaxWidth(),
@@ -151,10 +166,19 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
         value = viewModel.selectedGenderState.value,
         modifier = Modifier
             .fillMaxWidth(),
-        leadingIcon = { Image(imageVector = Icons.Rounded.Person, contentDescription = stringResource(id = R.string.gender)) },
+        leadingIcon = {
+            Image(
+                imageVector = Icons.Rounded.Person,
+                contentDescription = stringResource(id = R.string.gender)
+            )
+        },
         label = { Text(text = stringResource(R.string.gender)) },
         trailingIcon = {
-            Image(imageVector = Icons.Default.ArrowDropDown, contentDescription = stringResource(id = R.string.gender), modifier = Modifier.scale(if (isDialogVisible) -1f else 1f))
+            Image(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = stringResource(id = R.string.gender),
+                modifier = Modifier.scale(if (isDialogVisible) -1f else 1f)
+            )
         }
     ) {
         isDialogVisible = true
@@ -188,7 +212,12 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
         value = viewModel.selectedDOBState.value,
         modifier = Modifier
             .fillMaxWidth(),
-        leadingIcon = { Image(imageVector = Icons.Rounded.DateRange, contentDescription = stringResource(id = R.string.date_of_birth)) },
+        leadingIcon = {
+            Image(
+                imageVector = Icons.Rounded.DateRange,
+                contentDescription = stringResource(id = R.string.date_of_birth)
+            )
+        },
         label = { Text(text = stringResource(R.string.date_of_birth)) },
     ) {
         showDatePickerState = true
@@ -201,7 +230,8 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
                     .padding(end = 16.dp, bottom = 16.dp)
                     .clickable {
                         if (dateSelectionState.selectedDateMillis != null) {
-                            viewModel.selectedDOBState.value = FunctionHelper.getFormattedDate(dateSelectionState.selectedDateMillis!!)
+                            viewModel.selectedDOBState.value =
+                                FunctionHelper.getFormattedDate(dateSelectionState.selectedDateMillis!!)
                         }
                         showDatePickerState = false
                     })
@@ -223,20 +253,65 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     }
 }
 
-private fun handleButtonClick(viewModel: UserDetailsViewModel, context: Context) {
+@Composable
+private fun HandleUIState(
+    viewModel: UserDetailsViewModel,
+    context: Context
+) {
+    val uiState = viewModel.addUserStateFlow.collectAsState().value
+    when (uiState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.sharedPreference.isUserDetailsEntered = true
+            val intent = Intent(context, HomeActivity::class.java)
+            context.startActivity(intent)
+            LocalActivity.current.finish()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                else uiState.message.toString()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingState.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserDetailsScreen",
+                uiState.message.toString()
+            )
+        }
+
+        else -> {}
+    }
+}
+
+private fun handleButtonClick(
+    viewModel: UserDetailsViewModel,
+    context: Context,
+    navigator: DestinationsNavigator
+) {
     if (!viewModel.isValidName()) {
-        viewModel.snackBarMessage.value =
+        viewModel.snackBarMessageState.value =
             context.getString(R.string.please_enter_valid_name)
         FunctionHelper.vibrateDevice(context)
     } else if (!viewModel.isGenderSelected()) {
-        viewModel.snackBarMessage.value =
+        viewModel.snackBarMessageState.value =
             context.getString(R.string.please_select_a_gender)
         FunctionHelper.vibrateDevice(context)
     } else if (!viewModel.isDobSelected()) {
-        viewModel.snackBarMessage.value =
+        viewModel.snackBarMessageState.value =
             context.getString(R.string.please_select_your_dob)
         FunctionHelper.vibrateDevice(context)
     } else {
-        viewModel.createUserProfile()
+        if (viewModel.fireBaseAuth.currentUser != null) {
+            viewModel.createUserProfile()
+        } else {
+            context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+            navigator.popBackStack()
+        }
     }
 }
