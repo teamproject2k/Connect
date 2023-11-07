@@ -124,7 +124,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().insertUser(userDetails)
     }
 
-    override suspend fun updateDeviceId(
+    override suspend fun updateDeviceIdOnRemote(
         fireBaseId: String,
         updatedDeviceId: String
     ): ResponseState<Nothing> {
@@ -135,5 +135,9 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
+    }
+
+    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) :Int{
+      return  appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
     }
 }

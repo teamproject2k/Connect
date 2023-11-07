@@ -41,6 +41,7 @@ import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.LocalActivity
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
@@ -157,7 +158,12 @@ private fun HandleSendOTPState(
 
         RequestStatusEnum.SUCCESS -> {
             if (sendOtpState.data?.first == FirebaseConstants.AutoLogin) {
-                viewModel.getUserDetails(sendOtpState.data.second)
+                if (context.isNetworkAvailable()) {
+                    viewModel.getUserDetails(sendOtpState.data.second)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.no_internet_connection)
+                }
             } else {
                 navigator.navigate(
                     OTPScreenDestination(
@@ -234,7 +240,9 @@ private fun handleButtonClick(
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_enter_a_valid_mobile_number)
         FunctionHelper.vibrateDevice(context)
-    } else {
+    } else if (context.isNetworkAvailable()) {
         viewModel.sendOTP()
+    } else {
+        viewModel.snackBarMessageState.value = context.getString(R.string.no_internet_connection)
     }
 }

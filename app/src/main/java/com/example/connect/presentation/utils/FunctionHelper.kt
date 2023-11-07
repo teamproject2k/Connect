@@ -1,6 +1,8 @@
 package com.example.connect.presentation.utils
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
@@ -8,6 +10,7 @@ import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 object FunctionHelper {
     fun vibrateDevice(context: Context, vibrationDuration: Long = 200) {
@@ -37,5 +40,22 @@ object FunctionHelper {
 
     fun Context.showToast(message: String, toastLength: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this, message, toastLength).show()
+    }
+
+
+    fun Context.isNetworkAvailable(): Boolean {
+        var isNetworkAvailable = false
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetwork
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        if (networkCapabilities != null) {
+            isNetworkAvailable = with(networkCapabilities) {
+                hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        || hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+            }
+        }
+        return isNetworkAvailable
     }
 }

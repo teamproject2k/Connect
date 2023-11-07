@@ -87,10 +87,17 @@ class OtpInputViewModel @Inject constructor(private val authenticationUseCase: A
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
                     ) {
-                        authenticationUseCase.updateDeviceId(
-                            userDetailsResponseState.data.firebaseUserId,
-                            sharedPreference.deviceId!!
-                        )
+                        val updateDeviceIdOnRemoteResponseState =
+                            authenticationUseCase.updateDeviceIdOnRemote(
+                                userDetailsResponseState.data.firebaseUserId,
+                                sharedPreference.deviceId!!
+                            )
+                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.SUCCESS) {
+                            authenticationUseCase.updateDeviceIdOnLocal(
+                                userDetailsResponseState.data.firebaseUserId,
+                                sharedPreference.deviceId!!
+                            )
+                        }
                     }
                 }
                 _getUserDetailsStateFlow.value = userDetailsResponseState
