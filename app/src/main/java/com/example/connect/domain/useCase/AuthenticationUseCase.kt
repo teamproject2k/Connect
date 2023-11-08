@@ -29,6 +29,10 @@ class AuthenticationUseCase @Inject constructor(private val repository: IAuthent
         repository.addUserToLocalDb(userDetails)
 
 
-    suspend fun updateDeviceId(fireBaseId: String, updatedDeviceId: String) =
-        repository.updateDeviceId(fireBaseId, updatedDeviceId)
+    suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String) =
+        repository.updateDeviceIdOnRemote(fireBaseId, updatedDeviceId)
+
+
+    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) =
+        repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
 }

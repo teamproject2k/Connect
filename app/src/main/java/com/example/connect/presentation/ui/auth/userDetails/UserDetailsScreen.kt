@@ -60,6 +60,7 @@ import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.LocalActivity
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
@@ -310,7 +311,12 @@ private fun handleButtonClick(
         FunctionHelper.vibrateDevice(context)
     } else {
         if (viewModel.fireBaseAuth.currentUser != null) {
-            viewModel.createUserProfile()
+            if (context.isNetworkAvailable()) {
+                viewModel.createUserProfile()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+            }
         } else {
             context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
             navigator.popBackStack()

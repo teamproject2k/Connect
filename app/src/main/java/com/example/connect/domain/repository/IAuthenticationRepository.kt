@@ -23,7 +23,10 @@ interface IAuthenticationRepository {
 
     suspend fun addUserToLocalDb(userDetails: UserDetails): Long
 
-    suspend fun updateDeviceId(fireBaseId: String, updatedDeviceId: String): ResponseState<Nothing>
+    suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String): ResponseState<Nothing>
+
+
+    suspend fun updateDeviceIdOnLocal(fireBaseId: String,updatedDeviceId: String): Int
 
 
 }

@@ -66,6 +66,7 @@ import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.LocalActivity
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
@@ -314,7 +315,12 @@ fun HandleVerifyOTPState(
 
         RequestStatusEnum.SUCCESS -> {
             if (verifyOtpState.data != null) {
-                viewModel.getUserDetails(verifyOtpState.data.uid)
+                if (context.isNetworkAvailable()) {
+                    viewModel.getUserDetails(verifyOtpState.data.uid)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.no_internet_connection)
+                }
             } else {
                 context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
                 navigator.popBackStack()
@@ -357,7 +363,12 @@ fun HandleResendOTPState(
 
         RequestStatusEnum.SUCCESS -> {
             if (resendOtpState.data?.first == FirebaseConstants.AutoLogin) {
-                viewModel.getUserDetails(resendOtpState.data.second)
+                if (context.isNetworkAvailable()) {
+                    viewModel.getUserDetails(resendOtpState.data.second)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.no_internet_connection)
+                }
             } else {
                 viewModel.snackBarMessageState.value =
                     stringResource(R.string.otp_sent_successfully)
@@ -393,8 +404,10 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_enter_valid_otp)
         FunctionHelper.vibrateDevice(context)
-    } else {
+    } else if (context.isNetworkAvailable()) {
         viewModel.verifyOTP(viewModel.verificationId)
+    } else {
+        viewModel.snackBarMessageState.value = context.getString(R.string.no_internet_connection)
     }
 }
 

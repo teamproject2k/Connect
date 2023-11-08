@@ -40,11 +40,11 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
             withContext(Dispatchers.IO) {
 
                 _addUserStateFlow.value = ResponseState.loading()
+                val formattedUserName = getFormattedUserName()
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
-                    authenticationUseCase.getUsersFromName(userNameState.value)
+                    authenticationUseCase.getUsersFromName(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
-                    val formattedUserName = getFormattedUserName()
                     val createdDate = Date().time
                     val user = UserDetails(
                         fireBaseAuth.currentUser!!.uid,
@@ -77,7 +77,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                 formattedUserName += "$it "
             }
         }
-        return formattedUserName.trimEnd()
+        return formattedUserName.trimEnd().lowercase()
     }
 
 
