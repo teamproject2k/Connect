@@ -118,7 +118,7 @@ fun UserProfileScreen() {
     val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
     BottomSheetScaffold(sheetContent = {
         BottomSheetSection(viewModel, bottomSheetState)
-    }, scaffoldState = scaffoldState) {
+    }, scaffoldState = scaffoldState, sheetShape = RoundedCornerShape(32.dp)) {
         Column(
             modifier = Modifier
                 .padding(it)
