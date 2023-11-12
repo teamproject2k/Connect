@@ -14,8 +14,11 @@ import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.ui.theme.ConnectTheme
 import com.example.connect.presentation.utils.LocalActivity
 import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 
+
+@AndroidEntryPoint
 class AuthenticationActivity : BaseActivity() {
     companion object {
         var Instance: AuthenticationActivity? = null

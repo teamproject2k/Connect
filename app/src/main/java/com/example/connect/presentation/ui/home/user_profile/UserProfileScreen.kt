@@ -95,7 +95,6 @@ import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
-import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.example.connect.presentation.utils.LocalActivity
@@ -147,13 +146,8 @@ fun UserProfileScreen() {
         }
     }
     LaunchedEffect(key1 = true) {
-        if (context.isNetworkAvailable()) {
-            viewModel.getUserDetails()
-            viewModel.getPostDetails()
-        } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
-        }
+        viewModel.getUserDetails()
+        viewModel.getPostDetails()
     }
 
 }

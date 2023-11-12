@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.auth.userDetails
+package com.example.connect.presentation.ui.auth.user_details
 
 import android.content.Context
 import android.content.Intent

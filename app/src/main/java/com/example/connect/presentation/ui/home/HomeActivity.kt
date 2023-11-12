@@ -9,7 +9,10 @@ import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
 import com.example.connect.presentation.ui.theme.ConnectTheme
 import com.example.connect.presentation.utils.LocalActivity
 import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class HomeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
