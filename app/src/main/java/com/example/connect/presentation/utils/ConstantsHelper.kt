@@ -5,4 +5,5 @@ object ConstantsHelper {
     const val OTPCharCount = 6
     const val NavigationAnimationDuration = 300
     const val ErrorTag = "Error"
+    const val UserProfileFriendColumns = 4
 }

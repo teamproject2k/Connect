@@ -17,6 +17,8 @@ data class UserDetails(
     val currentLoggedInDeviceId: String,
     val bio: String = "Connect User",
     val profilePhoto: String? = null,
+    val coverPhoto: String? = null,
+    val friendList: List<String> = listOf()
 ) : Serializable {
     constructor() : this("1", "", "", "", -1, 0, 0, "")
 }

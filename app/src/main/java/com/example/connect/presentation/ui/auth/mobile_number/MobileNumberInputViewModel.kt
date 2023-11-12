@@ -85,8 +85,4 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         _getUserDetailsStateFlow.value = ResponseState.none()
     }
 
-
-    fun updateDeviceId(deviceId: String) {
-
-    }
 }

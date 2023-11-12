@@ -3,29 +3,27 @@ package com.example.connect.presentation.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.connect.presentation.base.BaseActivity
-import com.example.connect.presentation.ui.auth.destinations.UserDetailsScreenDestination
+import com.example.connect.presentation.ui.NavGraphs
+import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
+import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
+import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.ui.theme.ConnectTheme
-import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.LocalActivity
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
-import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 
+
+@AndroidEntryPoint
 class AuthenticationActivity : BaseActivity() {
     companion object {
         var Instance: AuthenticationActivity? = null
     }
 
-    @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -39,51 +37,11 @@ class AuthenticationActivity : BaseActivity() {
             setContent {
                 CompositionLocalProvider(LocalActivity provides this) {
                     ConnectTheme {
-                        val navHostEngine = rememberAnimatedNavHostEngine(
-                            rootDefaultAnimations = RootNavGraphDefaultAnimations(
-                                enterTransition = {
-                                    slideIntoContainer(
-                                        AnimatedContentTransitionScope.SlideDirection.Left,
-                                        animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
-                                    )
-                                },
-                                exitTransition = {
-                                    slideOutOfContainer(
-                                        AnimatedContentTransitionScope.SlideDirection.Left,
-                                        animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
-                                    )
-                                },
-                                popEnterTransition = {
-                                    slideIntoContainer(
-                                        AnimatedContentTransitionScope.SlideDirection.Right,
-                                        animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
-                                    )
-                                },
-                                popExitTransition = {
-                                    slideOutOfContainer(
-                                        AnimatedContentTransitionScope.SlideDirection.Right,
-                                        animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
-                                    )
-                                }
-                            ),
-                        )
                         DestinationsNavHost(
                             navGraph = NavGraphs.authentication,
-                            engine = navHostEngine
+                            engine = getAnimatedNavHostEngine(),
+                            startRoute = if (firebaseAuth.currentUser != null) UserDetailsScreenDestination else MobileNumberInputScreenDestination
                         )
-
-                        if (firebaseAuth.currentUser != null) {
-                            DestinationsNavHost(
-                                navGraph = NavGraphs.authentication,
-                                engine = navHostEngine,
-                                startRoute = UserDetailsScreenDestination
-                            )
-                        } else {
-                            DestinationsNavHost(
-                                navGraph = NavGraphs.authentication,
-                                engine = navHostEngine
-                            )
-                        }
                     }
                 }
             }

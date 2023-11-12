@@ -14,4 +14,6 @@ interface IUsersDao {
     @Query("UPDATE UserDetails SET currentLoggedInDeviceId = :updatedDeviceId WHERE firebaseUserId = :fireBaseId")
     fun updateDeviceId(fireBaseId: String, updatedDeviceId: String): Int
 
+    @Query("SELECT * FROM UserDetails WHERE firebaseUserId = :fireBaseId")
+    fun getUserDetails(fireBaseId: String): UserDetails?
 }

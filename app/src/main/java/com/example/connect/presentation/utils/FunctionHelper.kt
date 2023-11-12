@@ -58,4 +58,16 @@ object FunctionHelper {
         }
         return isNetworkAvailable
     }
+
+
+    fun getFormattedDisplayName(name: String): String {
+        return name.split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(
+                    Locale.getDefault()
+                ) else it.toString()
+            }
+        }
+    }
+
 }

@@ -1,9 +1,14 @@
 package com.example.connect.presentation.utils
 
 import com.ramcosta.composedestinations.annotation.NavGraph
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 
 @NavGraph
 annotation class AuthenticationNavGraph(
+    val start: Boolean = false
+)
+
+
+@NavGraph
+annotation class HomeNavGraph(
     val start: Boolean = false
 )

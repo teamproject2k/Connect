@@ -37,9 +37,22 @@
     <string name="some_error_occurred_please_login_again">Some Error Occurred , Please Login Again</string>
     <string name="creating_account">Creating Account...</string>
     <string name="no_internet_connection">No Internet Connection</string>
-    <string-array name="gender_list">
-        <item>Male</item>
-        <item>Female</item>
-        <item>Other</item>
-    </string-array>
+    <string name="unable_to_load_post">Unable to load post</string>
+    <string name="play_video">Play Video</string>
+    <string name="posts">Posts</string>
+    <string name="friends">Friends</string>
+    <string name="see_all">See All</string>
+    <string name="getting_details">Getting Details...</string>
+    <string name="no_user_found_please_reenter_details">No User Found. Please reenter details</string>
+    <string name="add_post">Add Post</string>
+    <string name="profile_image">Profile Image</string>
+    <string name="cover_photo">Cover Photo</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="no_posts_added">No posts added.</string>
+    <string name="no_friends_added">No friends added.</string>
+    <string name="add_friends">Add Friends</string>
+    <string name="more_options">More Options</string>
+    <string name="logout">Logout</string>
+    <string name="do_you_really_want_to_logout_from_the_app">Do you really want to logout from the app ?</string>
+    <string name="warning">Warning</string>
 </resources>

@@ -107,9 +107,11 @@ class OtpInputViewModel @Inject constructor(private val authenticationUseCase: A
 
     fun verifyOTP(verificationId: String) {
         viewModelScope.launch {
-            _verifyOtpStateFlow.value = ResponseState.loading()
-            _verifyOtpStateFlow.value =
-                authenticationUseCase.verifyOtp(verificationId, otpState.value)
+            withContext(Dispatchers.IO) {
+                _verifyOtpStateFlow.value = ResponseState.loading()
+                _verifyOtpStateFlow.value =
+                    authenticationUseCase.verifyOtp(verificationId, otpState.value)
+            }
         }
     }
 }

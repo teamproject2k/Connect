@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.auth.userDetails
+package com.example.connect.presentation.ui.auth.user_details
 
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +38,6 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
     fun createUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-
                 _addUserStateFlow.value = ResponseState.loading()
                 val formattedUserName = getFormattedUserName()
                 //get no of users with name to set user id
