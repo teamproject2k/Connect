@@ -857,7 +857,7 @@ fun TextCountSeeAll(
     count: Int,
     areBracketsVisible: Boolean = true,
     showSeeAll: Boolean = true,
-    onSeeAllClick: () -> Unit = {},
+    onSeeAllClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier

@@ -12,7 +12,7 @@ fun getHeightToMaintainAspectRatio(
     itemsRequiredPerRow: Int,
     itemsHorizontalPadding: Dp,
     noOfRows: Int,
-    itemsVerticalPadding: Dp,
+    itemsVerticalPadding: Dp
 ): Dp {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val availableScreenWidth =
@@ -26,7 +26,7 @@ fun getHeightToMaintainAspectRatio(
 fun getWidthToMaintainAspectRatio(
     horizontalPadding: Dp,
     itemsRequiredPerRow: Int,
-    itemsHorizontalPadding: Dp,
+    itemsHorizontalPadding: Dp
 ): Dp {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val availableWidth =
