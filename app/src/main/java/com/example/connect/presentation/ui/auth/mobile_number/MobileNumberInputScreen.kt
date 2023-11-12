@@ -31,12 +31,12 @@ import com.example.connect.common.IntentConstants
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
-import com.example.connect.presentation.ui.auth.destinations.OTPScreenDestination
-import com.example.connect.presentation.ui.auth.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
+import com.example.connect.presentation.ui.destinations.OTPScreenDestination
+import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper

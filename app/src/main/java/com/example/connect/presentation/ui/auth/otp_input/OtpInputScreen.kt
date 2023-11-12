@@ -53,8 +53,6 @@ import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
-import com.example.connect.presentation.ui.auth.destinations.MobileNumberInputScreenDestination
-import com.example.connect.presentation.ui.auth.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.presentation.ui.common.SpacerHeight18
@@ -62,6 +60,8 @@ import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TopPageSection
+import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
+import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper

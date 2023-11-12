@@ -101,13 +101,19 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         }
     }
 
-    fun getFriendListFromIds(friendIdList: List<String>) {
+    private fun getFriendListFromIds(friendIdList: List<String>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _friendsDetailsStateFlow.value = ResponseState.loading()
                 _friendsDetailsStateFlow.value = homeUseCase.getUserDetailsFromIds(friendIdList)
             }
         }
+    }
+
+
+    fun logout() {
+        sharedPreference.isUserDetailsEntered = false
+        fireBaseAuth.signOut()
     }
 
 }

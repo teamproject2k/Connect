@@ -25,15 +25,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,33 +90,51 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.theme.OnBlack
+import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.utils.FunctionHelper.shimmer
 import com.example.connect.presentation.utils.FunctionHelper.showToast
+import com.example.connect.presentation.utils.HomeNavGraph
 import com.example.connect.presentation.utils.LocalActivity
 import com.example.connect.presentation.utils.enums.PostTypeEnum
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterial3Api::class)
+@HomeNavGraph(start = true)
+@Destination
 @Composable
 fun UserProfileScreen() {
     val viewModel: UserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val bottomSheetState =
+        SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
+    val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
     BottomSheetScaffold(sheetContent = {
-
-    }, snackbarHost = { SnackbarHost(snackBarHostState) }) {
+        BottomSheetSection(viewModel)
+    }, scaffoldState = scaffoldState) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleUserDetails(viewModel = viewModel)
+            HandleUserDetails(viewModel = viewModel) {
+                if (bottomSheetState.isVisible) {
+                    coroutineScope.launch {
+                        bottomSheetState.hide()
+                    }
+                } else {
+                    coroutineScope.launch {
+                        bottomSheetState.show()
+                    }
+                }
+            }
         }
     }
 
@@ -136,7 +160,98 @@ fun UserProfileScreen() {
 
 
 @Composable
-fun HandleUserDetails(viewModel: UserProfileViewModel) {
+fun BottomSheetSection(viewModel: UserProfileViewModel) {
+    val context = LocalContext.current
+    val currentActivity = LocalActivity.current
+    var showLogoutDialog by remember {
+        mutableStateOf(false)
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        BottomSheetItem(imageVector = Icons.Default.Settings, text = "Settings") {
+            // TODO: navigate to settings screen
+        }
+        BottomSheetItem(
+            imageVector = Icons.Default.ExitToApp,
+            text = stringResource(id = R.string.logout)
+        ) {
+            showLogoutDialog = true
+        }
+    }
+    if (showLogoutDialog) {
+        LogoutAlertDialog(onDismiss = { showLogoutDialog = false }) {
+            viewModel.logout()
+            val intent = Intent(context, AuthenticationActivity::class.java)
+            context.startActivity(intent)
+            currentActivity.finish()
+            showLogoutDialog = false
+        }
+    }
+}
+
+
+@Composable
+fun LogoutAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            Text(text = stringResource(id = R.string.ok), modifier = Modifier.clickable {
+                onOk()
+            })
+        },
+        dismissButton = {
+            Text(
+                text = stringResource(id = R.string.cancel),
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .clickable {
+                        onDismiss()
+                    }
+            )
+        },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = stringResource(R.string.warning),
+                    colorFilter = ColorFilter.tint(WarningColor)
+                )
+                SpacerWidth12()
+                TextBold18(text = stringResource(R.string.logout))
+            }
+        },
+        text = {
+            Text(text = stringResource(R.string.do_you_really_want_to_logout_from_the_app))
+        }
+    )
+}
+
+@Composable
+fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick()
+                }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(imageVector = imageVector, contentDescription = text)
+            SpacerWidth12()
+            Text(text = text)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(Color(0x33CCCCCC))
+        )
+    }
+}
+
+@Composable
+fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () -> Unit) {
     val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -151,7 +266,7 @@ fun HandleUserDetails(viewModel: UserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            ProfileScreen(userDetailsState.data!!, viewModel)
+            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -179,27 +294,30 @@ fun HandleUserDetails(viewModel: UserProfileViewModel) {
 
 
 @Composable
-fun ProfileScreen(userDetails: UserDetails, viewModel: UserProfileViewModel) {
+fun ProfileScreen(
+    userDetails: UserDetails,
+    viewModel: UserProfileViewModel,
+    onOptionsMenuClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails)
+        ImageSection(userDetails, onOptionsMenuClick)
         SpacerHeight12()
         UserDetailsSection(userDetails)
         SpacerHeight24()
         HandleFriendListSection(viewModel = viewModel)
         SpacerHeight24()
         HandlePostSection(viewModel)
-        SpacerHeight24()
     }
 }
 
 
 @Composable
-fun ImageSection(userDetails: UserDetails) {
+fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -235,7 +353,9 @@ fun ImageSection(userDetails: UserDetails) {
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
 
-        IconButton(onClick = { },
+        IconButton(onClick = {
+            onOptionsMenuClick()
+        },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(moreOptionsRef) {
                 top.linkTo(coverImageRef.top, 16.dp)
@@ -786,36 +906,6 @@ fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean 
         }
     }, textAlign = TextAlign.Center)
 }
-
-
-@Composable
-fun ProfileOptions(icon: ImageVector, text: String, onClick: (String) -> Unit) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                imageVector = icon,
-                contentDescription = text,
-                modifier = Modifier.size(20.dp),
-                colorFilter = ColorFilter.tint(Color(0xCC444444))
-            )
-            SpacerWidth12()
-            Text(text = text)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(Color(0x33CCCCCC))
-        ) {
-        }
-    }
-}
-
 
 @Preview
 @Composable

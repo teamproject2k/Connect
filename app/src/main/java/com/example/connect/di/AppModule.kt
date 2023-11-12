@@ -58,7 +58,7 @@ class AppModule {
     @Provides
     @Singleton
     fun getRoomDatabase(@ApplicationContext context: Context): AppDatabase {
-        val database = Room.databaseBuilder(context, AppDatabase::class.java, "ConnectRoomDb")
+        val database = Room.databaseBuilder(context, AppDatabase::class.java, "com.example.connect.app_database")
         return database.build()
     }
 
