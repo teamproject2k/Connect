@@ -11,7 +11,7 @@ import com.example.connect.data.local_db.users.UserDetails
 
 @Database(entities = [UserDetails::class, PostDetails::class], version = 1)
 @TypeConverters(AppTypeConverters::class)
-abstract class AppDatabase() : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUsersDao(): IUsersDao
 

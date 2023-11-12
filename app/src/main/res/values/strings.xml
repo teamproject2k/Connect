@@ -48,8 +48,8 @@
     <string name="profile_image">Profile Image</string>
     <string name="cover_photo">Cover Photo</string>
     <string name="edit_profile">Edit Profile</string>
-    <string name="no_posts_found">No posts found.</string>
-    <string name="no_friends_found">No friends found.</string>
+    <string name="no_posts_added">No posts added.</string>
+    <string name="no_friends_added">No friends added.</string>
     <string name="add_friends">Add Friends</string>
     <string name="more_options">More Options</string>
     <string name="logout">Logout</string>

@@ -1,4 +1,4 @@
-package com.example.connect.presentation.utils
+package com.example.connect.presentation.ui.common
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.staticCompositionLocalOf

@@ -77,11 +77,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.common.ErrorCodes
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.LoaderFullScreen
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
 import com.example.connect.presentation.ui.common.SpacerHeight6
@@ -97,7 +100,6 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
-import com.example.connect.presentation.utils.LocalActivity
 import com.example.connect.presentation.utils.enums.PostTypeEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
@@ -111,7 +113,6 @@ fun UserProfileScreen() {
     val viewModel: UserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
     val bottomSheetState =
         SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
     val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
@@ -278,6 +279,12 @@ fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () ->
                 }
                 isExceptionHandled = true
             }
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserProfileScreen",
+                userDetailsState.message.toString()
+            )
         }
 
         RequestStatusEnum.NONE -> {
@@ -447,6 +454,12 @@ fun HandleFriendListSection(viewModel: UserProfileViewModel) {
                         ?: stringResource(id = R.string.something_went_wrong)
                 isExceptionHandled = true
             }
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserProfileScreen",
+                friendsDetailsState.message.toString()
+            )
         }
 
         RequestStatusEnum.NONE -> {
@@ -514,7 +527,7 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.no_friends_found),
+                    text = stringResource(R.string.no_friends_added),
                     fontSize = 14.sp,
                 )
                 SpacerWidth8()
@@ -611,6 +624,12 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
                 }
                 isExceptionHandled = true
             }
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserProfileScreen",
+                postDetailState.message.toString()
+            )
         }
 
         RequestStatusEnum.NONE -> {
@@ -698,7 +717,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.no_posts_found),
+                    text = stringResource(R.string.no_posts_added),
                     fontSize = 14.sp,
                 )
                 SpacerWidth8()
