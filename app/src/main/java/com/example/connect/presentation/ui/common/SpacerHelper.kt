@@ -25,6 +25,15 @@ fun SpacerHeight6() {
     SpacerGeneric(height = 6.dp)
 }
 
+@Composable
+fun SpacerHeight12() {
+    SpacerGeneric(height = 12.dp)
+}
+
+@Composable
+fun SpacerHeight16() {
+    SpacerGeneric(height = 16.dp)
+}
 
 @Composable
 fun SpacerHeight18() {
