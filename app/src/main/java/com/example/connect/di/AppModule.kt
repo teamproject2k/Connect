@@ -6,7 +6,9 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
+import com.example.connect.data.repository.IHomeRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
+import com.example.connect.domain.repository.IHomeRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,4 +61,13 @@ class AppModule {
         val database = Room.databaseBuilder(context, AppDatabase::class.java, "ConnectRoomDb")
         return database.build()
     }
+
+
+    @Provides
+    @Singleton
+    fun getHomeRepository(
+        appDatabase: AppDatabase,
+        fireStore: FirebaseFirestore
+    ): IHomeRepository =
+        IHomeRepositoryImpl(appDatabase, fireStore)
 }
