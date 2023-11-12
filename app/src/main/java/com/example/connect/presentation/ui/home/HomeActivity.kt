@@ -21,7 +21,7 @@ class HomeActivity : BaseActivity() {
                 ConnectTheme {
                     DestinationsNavHost(
                         navGraph = NavGraphs.home,
-                        engine = getAnimatedNavHostEngine(),
+                        engine = getAnimatedNavHostEngine()
                     )
                 }
             }

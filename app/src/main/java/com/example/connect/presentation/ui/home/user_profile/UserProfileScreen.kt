@@ -57,7 +57,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -69,7 +68,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -93,6 +91,8 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
+import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
@@ -519,7 +519,7 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(
-                        GetHeightToMaintainAspectRatio(
+                        getHeightToMaintainAspectRatio(
                             horizontalPadding = 16.dp,
                             verticalPadding = 0.dp,
                             itemsRequiredPerRow = 4,
@@ -660,7 +660,7 @@ fun PostLoadingSection() {
         Row(modifier = Modifier.fillMaxWidth()) {
             PostItem(
                 postDetails = null, showShimmer = true, modifier = Modifier.size(
-                    PostItemSize(
+                    getWidthToMaintainAspectRatio(
                         horizontalPadding = 16.dp,
                         itemsRequiredPerRow = 3,
                         itemsHorizontalPadding = 8.dp
@@ -670,7 +670,7 @@ fun PostLoadingSection() {
             SpacerWidth8()
             PostItem(
                 postDetails = null, showShimmer = true, modifier = Modifier.size(
-                    PostItemSize(
+                    getWidthToMaintainAspectRatio(
                         horizontalPadding = 16.dp,
                         itemsRequiredPerRow = 3,
                         itemsHorizontalPadding = 8.dp
@@ -680,7 +680,7 @@ fun PostLoadingSection() {
             SpacerWidth8()
             PostItem(
                 postDetails = null, showShimmer = true, modifier = Modifier.size(
-                    PostItemSize(
+                    getWidthToMaintainAspectRatio(
                         horizontalPadding = 16.dp,
                         itemsRequiredPerRow = 3,
                         itemsHorizontalPadding = 8.dp
@@ -709,7 +709,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(
-                        GetHeightToMaintainAspectRatio(
+                        getHeightToMaintainAspectRatio(
                             horizontalPadding = 16.dp,
                             verticalPadding = 0.dp,
                             itemsRequiredPerRow = 4,
@@ -739,7 +739,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .height(
-                        GetHeightToMaintainAspectRatio(
+                        getHeightToMaintainAspectRatio(
                             horizontalPadding = 16.dp,
                             verticalPadding = 0.dp,
                             itemsRequiredPerRow = 3,
@@ -756,7 +756,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
                     PostItem(
                         postDetails = details,
                         modifier = Modifier.size(
-                            PostItemSize(
+                            getWidthToMaintainAspectRatio(
                                 horizontalPadding = 16.dp,
                                 itemsRequiredPerRow = 3,
                                 itemsHorizontalPadding = 8.dp
@@ -768,35 +768,6 @@ fun PostSection(postDetailsList: List<PostDetails>) {
             }
         }
     }
-}
-
-@Composable
-fun PostItemSize(
-    horizontalPadding: Dp,
-    itemsRequiredPerRow: Int,
-    itemsHorizontalPadding: Dp,
-): Dp {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val availableWidth =
-        screenWidth - horizontalPadding * 2 - itemsHorizontalPadding * (itemsRequiredPerRow - 1)
-    return availableWidth / itemsRequiredPerRow
-}
-
-
-@Composable
-fun GetHeightToMaintainAspectRatio(
-    horizontalPadding: Dp,
-    verticalPadding: Dp,
-    itemsRequiredPerRow: Int,
-    itemsHorizontalPadding: Dp,
-    noOfRows: Int,
-    itemsVerticalPadding: Dp,
-): Dp {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val availableScreenWidth =
-        screenWidth - horizontalPadding * 2 - itemsHorizontalPadding * (itemsRequiredPerRow - 1)
-    val singleItemHeight = availableScreenWidth / itemsRequiredPerRow
-    return singleItemHeight * noOfRows + itemsVerticalPadding * (noOfRows - 1) + verticalPadding * 2
 }
 
 

@@ -51,7 +51,7 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun getPostDetailsFromLocale(fireBaseId: String): List<PostDetails>? {
+    override suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostDetails>? {
         return appDatabase.getPostDao().getPostList(fireBaseId)
     }
 

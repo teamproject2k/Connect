@@ -17,8 +17,8 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
         repository.addUserToLocalDb(userDetails)
 
 
-    suspend fun getPostDetailsFromLocale(fireBaseId: String) =
-        repository.getPostDetailsFromLocale(fireBaseId)
+    suspend fun getPostDetailsFromLocal(fireBaseId: String) =
+        repository.getPostDetailsFromLocal(fireBaseId)
 
     suspend fun getPostDetailsFromServer(fireBaseId: String) =
         repository.getPostDetailsFromServer(fireBaseId)

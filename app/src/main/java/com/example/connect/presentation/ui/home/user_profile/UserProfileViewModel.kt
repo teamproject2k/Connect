@@ -80,7 +80,7 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                 _postDetailsStateFlow.value = ResponseState.loading()
                 val fireBaseId = fireBaseAuth.currentUser?.uid
                 if (fireBaseId != null) {
-                    val postDetails = homeUseCase.getPostDetailsFromLocale(fireBaseId)
+                    val postDetails = homeUseCase.getPostDetailsFromLocal(fireBaseId)
                     if (!postDetails.isNullOrEmpty()) {
                         _postDetailsStateFlow.value = ResponseState.success(postDetails)
                     } else {

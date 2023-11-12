@@ -16,7 +16,7 @@ interface IHomeRepository {
 
     suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UserDetails>>
 
-    suspend fun getPostDetailsFromLocale(fireBaseId: String): List<PostDetails>?
+    suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostDetails>?
 
     suspend fun getPostDetailsFromServer(fireBaseId: String): ResponseState<List<PostDetails>>
 
