@@ -117,7 +117,7 @@ fun UserProfileScreen() {
         SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
     val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
     BottomSheetScaffold(sheetContent = {
-        BottomSheetSection(viewModel)
+        BottomSheetSection(viewModel, bottomSheetState)
     }, scaffoldState = scaffoldState) {
         Column(
             modifier = Modifier
@@ -154,10 +154,12 @@ fun UserProfileScreen() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetSection(viewModel: UserProfileViewModel) {
+fun BottomSheetSection(viewModel: UserProfileViewModel, bottomSheetState: SheetState) {
     val context = LocalContext.current
     val currentActivity = LocalActivity.current
+    val coroutineScope = rememberCoroutineScope()
     var showLogoutDialog by remember {
         mutableStateOf(false)
     }
@@ -169,6 +171,9 @@ fun BottomSheetSection(viewModel: UserProfileViewModel) {
             imageVector = Icons.Default.ExitToApp,
             text = stringResource(id = R.string.logout)
         ) {
+            coroutineScope.launch {
+                bottomSheetState.hide()
+            }
             showLogoutDialog = true
         }
     }

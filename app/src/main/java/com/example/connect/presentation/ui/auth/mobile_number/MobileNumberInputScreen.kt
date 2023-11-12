@@ -27,12 +27,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.IntentConstants
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.OTPScreenDestination
@@ -42,7 +42,6 @@ import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -114,7 +113,6 @@ private fun HandleGetUserDetailsState(
             } else {
                 viewModel.sharedPreference.isUserDetailsEntered = true
                 val intent = Intent(context, HomeActivity::class.java)
-                intent.putExtra(IntentConstants.UserDetails, userDetailsState.data)
                 context.startActivity(intent)
                 LocalActivity.current.finish()
 

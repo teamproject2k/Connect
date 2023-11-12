@@ -55,9 +55,4 @@
     <string name="logout">Logout</string>
     <string name="do_you_really_want_to_logout_from_the_app">Do you really want to logout from the app ?</string>
     <string name="warning">Warning</string>
-    <string-array name="gender_list">
-        <item>Male</item>
-        <item>Female</item>
-        <item>Other</item>
-    </string-array>
 </resources>
