@@ -16,8 +16,6 @@ object Dependencies {
     val composeTestManifest by lazy { "$composeTest-manifest" }
     val kotlin by lazy { "androidx.core:core-ktx:${Versions.kotlin}" }
     val lifecycle by lazy { "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.lifecycle}" }
-    val junitTest by lazy { "junit:junit:${Versions.junitTest}" }
-    val junitAndroidTest by lazy { "androidx.test.ext:junit:${Versions.junitAndroidTest}" }
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
     val firebaseAuth by lazy { "com.google.firebase:firebase-auth-ktx" }
     val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
@@ -38,5 +36,8 @@ object Dependencies {
     val roomRuntime by lazy { "androidx.room:room-runtime:${Versions.room}" }
     val roomCompiler by lazy { "androidx.room:room-compiler:${Versions.room}" }
     val roomKapt by lazy { "androidx.room:room-compiler:${Versions.room}" }
-
+    val constraintLayout by lazy { "androidx.constraintlayout:constraintlayout-compose:${Versions.constraintLayoutCompose}" }
+    val gson by lazy { "com.google.code.gson:gson:${Versions.gson}" }
+    val junitTest by lazy { "org.junit.jupiter:junit-jupiter-api:${Versions.junitTest}" }
+    val junitTestRuntime by lazy {  "org.junit.jupiter:junit-jupiter-engine:${Versions.junitTest}"}
 }

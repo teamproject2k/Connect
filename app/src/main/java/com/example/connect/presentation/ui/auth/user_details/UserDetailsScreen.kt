@@ -63,6 +63,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
+import com.example.connect.presentation.utils.Validator
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -94,10 +95,10 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                 NameInputTextField(viewModel)
                 SpacerHeight18()
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    GenderPickerSection(viewModel)
+                    GenderPicker(viewModel)
                 }
                 SpacerHeight18()
-                DOBPickerSection(viewModel = viewModel)
+                DOBPicker(viewModel = viewModel)
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
@@ -122,16 +123,83 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     }
 }
 
+@Composable
+private fun HandleAddUserState(
+    viewModel: UserDetailsViewModel,
+    context: Context
+) {
+    val uiState = viewModel.addUserStateFlow.collectAsState().value
+    when (uiState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.sharedPreference.isUserDetailsEntered = true
+            val intent = Intent(context, HomeActivity::class.java)
+            context.startActivity(intent)
+            LocalActivity.current.finish()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                else uiState.message.toString()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserDetailsScreen",
+                uiState.message.toString()
+            )
+        }
+
+        else -> {}
+    }
+}
+
+private fun handleButtonClick(
+    viewModel: UserDetailsViewModel,
+    context: Context,
+    navigator: DestinationsNavigator
+) {
+    if (!Validator.isValidName(viewModel.userNameState.value)) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.please_enter_valid_name)
+        FunctionHelper.vibrateDevice(context)
+    } else if (!Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.please_select_a_gender)
+        FunctionHelper.vibrateDevice(context)
+    } else if (!Validator.isValidDob(viewModel.selectedDOBState.value)) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.please_select_your_dob)
+        FunctionHelper.vibrateDevice(context)
+    } else {
+        if (viewModel.fireBaseAuth.currentUser != null) {
+            if (context.isNetworkAvailable()) {
+                viewModel.createUserProfile()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+            }
+        } else {
+            context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+            navigator.popBackStack()
+        }
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NameInputTextField(viewModel: UserDetailsViewModel) {
+fun NameInputTextField(viewModel: UserDetailsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
         value = viewModel.userNameState.value,
         onValueChange = { updatedValue ->
-            val pattern = Regex("[0-9!$@#%^&*()_+{}\\[\\]:;<>,.?~|]")
-            if (!updatedValue.contains(pattern)) {
+            if (Validator.isValidName(updatedValue)) {
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
@@ -158,7 +226,7 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenderPickerSection(viewModel: UserDetailsViewModel) {
+fun GenderPicker(viewModel: UserDetailsViewModel = hiltViewModel()) {
     val genderList = stringArrayResource(id = R.array.gender_list)
     var isDialogVisible by remember {
         mutableStateOf(false)
@@ -189,7 +257,7 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
             expanded = true, onDismissRequest = { isDialogVisible = false },
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
-                .fillMaxWidth(.9f),
+                .fillMaxWidth(.9f)
         ) {
             genderList.forEach { item ->
                 DropdownMenuItem(text = { Text(text = item) }, onClick = {
@@ -201,10 +269,9 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DOBPickerSection(viewModel: UserDetailsViewModel) {
+fun DOBPicker(viewModel: UserDetailsViewModel = hiltViewModel()) {
     var showDatePickerState by remember {
         mutableStateOf(false)
     }
@@ -252,74 +319,6 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
                 val enteredDate = Date(it)
                 enteredDate.before(calender.time)
             })
-        }
-    }
-}
-
-@Composable
-private fun HandleAddUserState(
-    viewModel: UserDetailsViewModel,
-    context: Context
-) {
-    val uiState = viewModel.addUserStateFlow.collectAsState().value
-    when (uiState.status) {
-        RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
-        }
-
-        RequestStatusEnum.SUCCESS -> {
-            viewModel.sharedPreference.isUserDetailsEntered = true
-            val intent = Intent(context, HomeActivity::class.java)
-            context.startActivity(intent)
-            LocalActivity.current.finish()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
-        }
-
-        RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
-                else uiState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserDetailsScreen",
-                uiState.message.toString()
-            )
-        }
-
-        else -> {}
-    }
-}
-
-private fun handleButtonClick(
-    viewModel: UserDetailsViewModel,
-    context: Context,
-    navigator: DestinationsNavigator
-) {
-    if (!viewModel.isValidName()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_valid_name)
-        FunctionHelper.vibrateDevice(context)
-    } else if (!viewModel.isGenderSelected()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_a_gender)
-        FunctionHelper.vibrateDevice(context)
-    } else if (!viewModel.isDobSelected()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_your_dob)
-        FunctionHelper.vibrateDevice(context)
-    } else {
-        if (viewModel.fireBaseAuth.currentUser != null) {
-            if (context.isNetworkAvailable()) {
-                viewModel.createUserProfile()
-            } else {
-                viewModel.snackBarMessageState.value =
-                    context.getString(R.string.no_internet_connection)
-            }
-        } else {
-            context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-            navigator.popBackStack()
         }
     }
 }

@@ -42,6 +42,7 @@ import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.Validator
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -115,7 +116,6 @@ private fun HandleGetUserDetailsState(
                 val intent = Intent(context, HomeActivity::class.java)
                 context.startActivity(intent)
                 LocalActivity.current.finish()
-
             }
             viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
@@ -234,7 +234,7 @@ private fun handleButtonClick(
     viewModel: MobileNumberInputViewModel,
     context: Context
 ) {
-    if (!viewModel.isValidMobileNumber()) {
+    if (!Validator.isValidMobileNumber(viewModel.userMobileNumberState.value)) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_enter_a_valid_mobile_number)
         FunctionHelper.vibrateDevice(context)

@@ -26,7 +26,6 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
 
     val userDetailsStateFlow: StateFlow<ResponseState<UserDetails>> get() = _userDetailsStateFlow
 
-
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UserDetails>>> =
         MutableStateFlow(ResponseState.none())
 
@@ -73,7 +72,6 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         }
     }
 
-
     fun getPostDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -110,10 +108,8 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         }
     }
 
-
     fun logout() {
         sharedPreference.isUserDetailsEntered = false
         fireBaseAuth.signOut()
     }
-
 }

@@ -67,7 +67,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -94,6 +93,7 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
+import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -102,6 +102,7 @@ import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.example.connect.presentation.utils.enums.PostTypeEnum
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -109,7 +110,7 @@ import kotlin.math.ceil
 @HomeNavGraph(start = true)
 @Destination
 @Composable
-fun UserProfileScreen() {
+fun UserProfileScreen(navigator: DestinationsNavigator) {
     val viewModel: UserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
@@ -124,7 +125,7 @@ fun UserProfileScreen() {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleUserDetails(viewModel = viewModel) {
+            HandleUserDetails(viewModel = viewModel, navigator) {
                 if (bottomSheetState.isVisible) {
                     coroutineScope.launch {
                         bottomSheetState.hide()
@@ -150,9 +151,7 @@ fun UserProfileScreen() {
         viewModel.getUserDetails()
         viewModel.getPostDetails()
     }
-
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,7 +186,6 @@ fun BottomSheetSection(viewModel: UserProfileViewModel, bottomSheetState: SheetS
         }
     }
 }
-
 
 @Composable
 fun LogoutAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
@@ -251,7 +249,11 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
 }
 
 @Composable
-fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () -> Unit) {
+fun HandleUserDetails(
+    viewModel: UserProfileViewModel,
+    navigator: DestinationsNavigator,
+    onOptionsMenuClick: () -> Unit
+) {
     val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -266,7 +268,7 @@ fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () ->
         }
 
         RequestStatusEnum.SUCCESS -> {
-            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
+            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick, navigator)
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -298,12 +300,12 @@ fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () ->
     }
 }
 
-
 @Composable
 fun ProfileScreen(
     userDetails: UserDetails,
     viewModel: UserProfileViewModel,
-    onOptionsMenuClick: () -> Unit
+    onOptionsMenuClick: () -> Unit,
+    navigator: DestinationsNavigator
 ) {
     Column(
         modifier = Modifier
@@ -311,7 +313,7 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails, onOptionsMenuClick)
+        ImageSection(userDetails, onOptionsMenuClick, navigator)
         SpacerHeight12()
         UserDetailsSection(userDetails)
         SpacerHeight24()
@@ -321,9 +323,12 @@ fun ProfileScreen(
     }
 }
 
-
 @Composable
-fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
+fun ImageSection(
+    userDetails: UserDetails,
+    onOptionsMenuClick: () -> Unit,
+    navigator: DestinationsNavigator
+) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -333,20 +338,20 @@ fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(ConstantsHelper.CoverImageHeight)
                 .background(Color.LightGray)
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop
         )
         AsyncImage(
             model = userDetails.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
-                .size(150.dp)
+                .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
                 .border(4.dp, Color.White, CircleShape)
@@ -376,7 +381,11 @@ fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
 
         IconButton(
             onClick = {
-                // TODO: navigate user to user profile edit screen
+                navigator.navigate(
+                    EditProfileScreenDestination(
+                        userDetails
+                    )
+                )
             },
             modifier = Modifier.constrainAs(editImageRef) {
                 top.linkTo(coverImageRef.bottom, 16.dp)
@@ -390,7 +399,6 @@ fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun UserDetailsSection(userDetails: UserDetails) {
@@ -419,7 +427,6 @@ fun UserDetailsSection(userDetails: UserDetails) {
 
 }
 
-
 @Composable
 fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight? = null) {
     Row(horizontalArrangement = Arrangement.Center) {
@@ -430,7 +437,6 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
         )
         SpacerWidth6()
         Text(text = text, fontSize = 12.sp, fontWeight = fontWeight)
-
     }
 }
 
@@ -498,7 +504,6 @@ fun FriendsListLoading() {
     }
 }
 
-
 @Composable
 fun FriendsListSection(friendsList: List<UserDetails>) {
     Column(
@@ -564,7 +569,6 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
     }
 }
 
-
 @Composable
 fun FriendItem(
     friendDetails: UserDetails?,
@@ -591,9 +595,7 @@ fun FriendItem(
             error = painterResource(id = R.drawable.ic_default_user)
         )
     }
-
 }
-
 
 @Composable
 fun HandlePostSection(viewModel: UserProfileViewModel) {
@@ -642,7 +644,6 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
         }
     }
 }
-
 
 @Composable
 fun PostLoadingSection() {
@@ -770,7 +771,6 @@ fun PostSection(postDetailsList: List<PostDetails>) {
     }
 }
 
-
 @Composable
 fun PostItem(
     postDetails: PostDetails?,
@@ -832,7 +832,6 @@ fun PostItem(
     }
 }
 
-
 @Composable
 fun PostTextOnlyItem(caption: String) {
     Box(
@@ -881,7 +880,6 @@ fun TextCountSeeAll(
     }
 }
 
-
 @Composable
 fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean = true) {
     Text(text = buildAnnotatedString {
@@ -894,10 +892,4 @@ fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean 
             append(countText)
         }
     }, textAlign = TextAlign.Center)
-}
-
-@Preview
-@Composable
-fun PreviewUserDetailsScreen() {
-    UserProfileScreen()
 }

@@ -3,7 +3,6 @@ package com.example.connect.presentation.ui.auth.otp_input
 import android.os.CountDownTimer
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
@@ -43,11 +42,6 @@ class OtpInputViewModel @Inject constructor(private val authenticationUseCase: A
         MutableStateFlow(ResponseState.none())
     val resendOtpStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _resendOtpStateFlow
 
-    fun isValidOTP(): Boolean {
-        return otpState.value.isDigitsOnly() && otpState.value.length == ConstantsHelper.OTPCharCount
-    }
-
-
     fun startTimer() {
         showTimerState.value = true
         val countDownTimer = object : CountDownTimer(ConstantsHelper.OTPTimeOutTime * 1000, 1000) {
@@ -61,7 +55,6 @@ class OtpInputViewModel @Inject constructor(private val authenticationUseCase: A
         }
         countDownTimer.start()
     }
-
 
     fun resendOtp() {
         viewModelScope.launch {

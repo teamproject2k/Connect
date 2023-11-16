@@ -21,9 +21,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-    }
+        }       // testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
 
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -63,8 +63,9 @@ dependencies {
     implementation(Dependencies.composeGraphics)
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
+    implementation("androidx.test:monitor:1.6.1")
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroidTest)
+    testImplementation(Dependencies.junitTestRuntime)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
     androidTestImplementation(Dependencies.composeTestJunit)
@@ -95,16 +96,21 @@ dependencies {
     implementation(Dependencies.dialog)
     //Room
     implementation(Dependencies.roomRuntime)
+    implementation(Dependencies.gson)
     annotationProcessor(Dependencies.roomCompiler)
     kapt(Dependencies.roomKapt)
     //constraint layout
-    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation ("com.google.code.gson:gson:2.10.1")
-
-
+    implementation(Dependencies.constraintLayout)
+}
+tasks {
+    // Configure the test task to use JUnit Platform
+    withType<Test> {
+        useJUnitPlatform()
+    }
 }
 kapt {
     correctErrorTypes = true
 }
+
 
 

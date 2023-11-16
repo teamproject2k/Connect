@@ -30,11 +30,6 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
     private val _addUserStateFlow: MutableStateFlow<ResponseState<Int>> =
         MutableStateFlow(ResponseState.none())
     val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
-
-
-    fun isValidName(): Boolean = userNameState.value.isNotBlank()
-    fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
-    fun isDobSelected(): Boolean = selectedDOBState.longValue != -1L
     fun createUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -78,6 +73,5 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
         }
         return formattedUserName.trimEnd().lowercase()
     }
-
 
 }

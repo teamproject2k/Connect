@@ -69,6 +69,7 @@ import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.utils.Validator
 import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -400,7 +401,7 @@ fun HandleResendOTPState(
 }
 
 private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
-    if (!viewModel.isValidOTP()) {
+    if (!Validator.isValidOTP(viewModel.otpState.value)) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_enter_valid_otp)
         FunctionHelper.vibrateDevice(context)

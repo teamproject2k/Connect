@@ -32,12 +32,6 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow: StateFlow<ResponseState<UserDetails?>> get() = _getUserDetailsStateFlow
 
-
-    fun isValidMobileNumber(): Boolean {
-        val phoneRegex = "^[0-9]{10}$"
-        return phoneRegex.toRegex().matches(userMobileNumberState.value)
-    }
-
     fun sendOTP() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
