@@ -7,6 +7,8 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.example.connect.R
+import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,6 +70,28 @@ object FunctionHelper {
                 ) else it.toString()
             }
         }
+    }
+
+
+    fun getPostVisibilityList(context: Context): List<PostVisibilityScope> {
+        val postVisibilityScopeList = arrayListOf<PostVisibilityScope>()
+        postVisibilityScopeList.add(
+            PostVisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                context.getString(R.string.this_post_will_be_visible_to_every_connect_user),
+                R.drawable.ic_lock_open
+            )
+        )
+        postVisibilityScopeList.add(
+            PostVisibilityScope(
+                1,
+                context.getString(R.string.private_visibility),
+                context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_close
+            )
+        )
+        return postVisibilityScopeList
     }
 
 }

@@ -55,4 +55,15 @@
     <string name="logout">Logout</string>
     <string name="do_you_really_want_to_logout_from_the_app">Do you really want to logout from the app ?</string>
     <string name="warning">Warning</string>
+    <string name="add_description">Add description...</string>
+    <string name="post">Post</string>
+    <string name="create_post">Create Post</string>
+    <string name="public_visibility">Public</string>
+    <string name="private_visibility">Private</string>
+    <string name="this_post_will_be_visible_to_every_connect_user">This post will be visible to every Connect user</string>
+    <string name="this_post_will_only_be_visible_to_your_friends">This post will only be visible to your friends</string>
+    <string name="post_image">Post Image</string>
+    <string name="some_error_occurred">Some error occurred</string>
+    <string name="add_image">Add Image</string>
+    <string name="add_video">Add Video</string>
 </resources>

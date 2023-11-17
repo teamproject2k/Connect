@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.connect.R
-import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
+import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
 
 @Composable
 fun LoaderButton(
