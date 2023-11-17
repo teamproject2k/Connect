@@ -18,6 +18,8 @@ class EditProfileViewModel @Inject constructor() : BaseViewModel() {
     lateinit var userBioState: MutableState<String>
     lateinit var selectedDOBState: MutableLongState
     lateinit var selectedGenderState: MutableState<String>
+    lateinit var profilePhotoState: MutableState<String?>
+    lateinit var coverPhotoState: MutableState<String?>
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
     var isDataInitialized = false
@@ -26,10 +28,12 @@ class EditProfileViewModel @Inject constructor() : BaseViewModel() {
         userBioState = mutableStateOf(userDetails.bio)
         selectedGenderState = mutableStateOf(userDetails.gender)
         selectedDOBState = mutableLongStateOf(userDetails.dateOfBirth)
+        profilePhotoState = mutableStateOf(userDetails.profilePhoto)
+        coverPhotoState = mutableStateOf(userDetails.coverPhoto)
         isDataInitialized = true
     }
 
     fun updateUserProfile() {
-       currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+        currentButtonLoadingState.value = ButtonLoadingEnum.Loading
     }
 }

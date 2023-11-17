@@ -1,6 +1,10 @@
 package com.example.connect.presentation.ui.home.editProfile
 
 import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -92,10 +96,9 @@ fun EditProfileScreen(
     val context = LocalContext.current
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
-            modifier = Modifier
-                .padding(it)
+            modifier = Modifier.padding(it)
         ) {
-            EditProfileImageSection(userDetails)
+            EditProfileImageSection(userDetails, viewModel)
             SpacerHeight24()
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 EditProfileNameInputTextField(viewModel)
@@ -135,7 +138,8 @@ fun EditProfileScreen(
 }
 
 @Composable
-fun EditProfileImageSection(userDetails: UserDetails) {
+fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileViewModel) {
+
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editCoverRef, editProfileRef, connectIdRef
@@ -172,9 +176,13 @@ fun EditProfileImageSection(userDetails: UserDetails) {
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
 
+        val profileImageLauncher = getGalleryImageLauncher { imageId: String? ->
+            if (imageId != null) viewModel.profilePhotoState.value = imageId
+        }
+
         // Update Cover Image
         IconButton(onClick = {
-
+            profileImageLauncher.launch("image/*")
         },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(editCoverRef) {
@@ -188,9 +196,13 @@ fun EditProfileImageSection(userDetails: UserDetails) {
             )
         }
 
+        val coverImageLauncher = getGalleryImageLauncher { imageId: String? ->
+            if (imageId != null) viewModel.coverPhotoState.value = imageId
+        }
+
         // Update Profile Image
         IconButton(onClick = {
-
+            coverImageLauncher.launch("image/*")
         },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(editProfileRef) {
@@ -418,4 +430,16 @@ private fun handleButtonClick(
             navigator.popBackStack()
         }
     }
+}
+
+@Composable
+private fun getGalleryImageLauncher(onImageSelect: (String) -> Unit): ManagedActivityResultLauncher<String, Uri?> {
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        onImageSelect(uri.toString())
+    }
+
+    return imageLauncher
 }
