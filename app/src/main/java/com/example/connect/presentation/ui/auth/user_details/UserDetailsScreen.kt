@@ -63,7 +63,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
-import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
+import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.Calendar

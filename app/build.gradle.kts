@@ -101,6 +101,9 @@ dependencies {
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation ("com.google.code.gson:gson:2.10.1")
 
+    implementation ("androidx.media3:media3-exoplayer:1.2.0")
+//    implementation "androidx.media3:media3-exoplayer-dash:1.2.0"
+//    implementation "androidx.media3:media3-ui:1.2.0"
 
 }
 kapt {

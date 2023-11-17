@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -94,19 +95,19 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
+import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
-import com.example.connect.presentation.utils.enums.PostTypeEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterial3Api::class)
-@HomeNavGraph(start = true)
+@HomeNavGraph
 @Destination
 @Composable
 fun UserProfileScreen() {
@@ -116,9 +117,16 @@ fun UserProfileScreen() {
     val bottomSheetState =
         SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
     val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
-    BottomSheetScaffold(sheetContent = {
-        BottomSheetSection(viewModel, bottomSheetState)
-    }, scaffoldState = scaffoldState, sheetShape = RoundedCornerShape(32.dp)) {
+    BottomSheetScaffold(
+        sheetContent = {
+            BottomSheetSection(viewModel, bottomSheetState)
+        },
+        scaffoldState = scaffoldState,
+        sheetShape = RoundedCornerShape(
+            topEnd = ConstantsHelper.BottomSheetRoundness,
+            topStart = ConstantsHelper.BottomSheetRoundness
+        )
+    ) {
         Column(
             modifier = Modifier
                 .padding(it)
@@ -241,12 +249,7 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
             SpacerWidth12()
             Text(text = text)
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(Color(0x33CCCCCC))
-        )
+        Divider()
     }
 }
 
