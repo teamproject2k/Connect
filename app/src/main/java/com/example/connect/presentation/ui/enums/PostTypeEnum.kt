@@ -1,4 +1,4 @@
-package com.example.connect.presentation.utils.enums
+package com.example.connect.presentation.ui.enums
 
 enum class PostTypeEnum {
     Text,

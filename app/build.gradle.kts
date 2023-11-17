@@ -21,8 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }       // testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
-
+        }
     }
     buildTypes {
         release {
@@ -99,8 +98,11 @@ dependencies {
     implementation(Dependencies.gson)
     annotationProcessor(Dependencies.roomCompiler)
     kapt(Dependencies.roomKapt)
-    //constraint layout
+    //Constraint layout
     implementation(Dependencies.constraintLayout)
+    //Exoplayer
+    implementation ("androidx.media3:media3-exoplayer:1.2.0")
+
 }
 tasks {
     // Configure the test task to use JUnit Platform
@@ -111,6 +113,5 @@ tasks {
 kapt {
     correctErrorTypes = true
 }
-
 
 

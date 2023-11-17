@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -67,6 +68,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -93,39 +95,44 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
-import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
+import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
-import com.example.connect.presentation.utils.enums.PostTypeEnum
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 @OptIn(ExperimentalMaterial3Api::class)
-@HomeNavGraph(start = true)
+@HomeNavGraph
 @Destination
 @Composable
-fun UserProfileScreen(navigator: DestinationsNavigator) {
+fun UserProfileScreen() {
     val viewModel: UserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetState =
         SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
     val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
-    BottomSheetScaffold(sheetContent = {
-        BottomSheetSection(viewModel, bottomSheetState)
-    }, scaffoldState = scaffoldState, sheetShape = RoundedCornerShape(32.dp)) {
+    BottomSheetScaffold(
+        sheetContent = {
+            BottomSheetSection(viewModel, bottomSheetState)
+        },
+        scaffoldState = scaffoldState,
+        sheetShape = RoundedCornerShape(
+            topEnd = ConstantsHelper.BottomSheetRoundness,
+            topStart = ConstantsHelper.BottomSheetRoundness
+        )
+    ) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleUserDetails(viewModel = viewModel, navigator) {
+            HandleUserDetails(viewModel = viewModel) {
                 if (bottomSheetState.isVisible) {
                     coroutineScope.launch {
                         bottomSheetState.hide()
@@ -151,7 +158,9 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
         viewModel.getUserDetails()
         viewModel.getPostDetails()
     }
+
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,6 +195,7 @@ fun BottomSheetSection(viewModel: UserProfileViewModel, bottomSheetState: SheetS
         }
     }
 }
+
 
 @Composable
 fun LogoutAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
@@ -239,21 +249,12 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
             SpacerWidth12()
             Text(text = text)
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(Color(0x33CCCCCC))
-        )
+        Divider()
     }
 }
 
 @Composable
-fun HandleUserDetails(
-    viewModel: UserProfileViewModel,
-    navigator: DestinationsNavigator,
-    onOptionsMenuClick: () -> Unit
-) {
+fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () -> Unit) {
     val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -268,7 +269,7 @@ fun HandleUserDetails(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick, navigator)
+            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -300,12 +301,12 @@ fun HandleUserDetails(
     }
 }
 
+
 @Composable
 fun ProfileScreen(
     userDetails: UserDetails,
     viewModel: UserProfileViewModel,
-    onOptionsMenuClick: () -> Unit,
-    navigator: DestinationsNavigator
+    onOptionsMenuClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -313,7 +314,7 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails, onOptionsMenuClick, navigator)
+        ImageSection(userDetails, onOptionsMenuClick)
         SpacerHeight12()
         UserDetailsSection(userDetails)
         SpacerHeight24()
@@ -323,12 +324,9 @@ fun ProfileScreen(
     }
 }
 
+
 @Composable
-fun ImageSection(
-    userDetails: UserDetails,
-    onOptionsMenuClick: () -> Unit,
-    navigator: DestinationsNavigator
-) {
+fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -338,20 +336,20 @@ fun ImageSection(
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ConstantsHelper.CoverImageHeight)
+                .height(200.dp)
                 .background(Color.LightGray)
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
         AsyncImage(
             model = userDetails.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
-                .size(ConstantsHelper.ProfileImageHeight)
+                .size(150.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
                 .border(4.dp, Color.White, CircleShape)
@@ -381,11 +379,7 @@ fun ImageSection(
 
         IconButton(
             onClick = {
-                navigator.navigate(
-                    EditProfileScreenDestination(
-                        userDetails
-                    )
-                )
+                // TODO: navigate user to user profile edit screen
             },
             modifier = Modifier.constrainAs(editImageRef) {
                 top.linkTo(coverImageRef.bottom, 16.dp)
@@ -399,6 +393,7 @@ fun ImageSection(
         }
     }
 }
+
 
 @Composable
 fun UserDetailsSection(userDetails: UserDetails) {
@@ -427,6 +422,7 @@ fun UserDetailsSection(userDetails: UserDetails) {
 
 }
 
+
 @Composable
 fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight? = null) {
     Row(horizontalArrangement = Arrangement.Center) {
@@ -437,6 +433,7 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
         )
         SpacerWidth6()
         Text(text = text, fontSize = 12.sp, fontWeight = fontWeight)
+
     }
 }
 
@@ -504,6 +501,7 @@ fun FriendsListLoading() {
     }
 }
 
+
 @Composable
 fun FriendsListSection(friendsList: List<UserDetails>) {
     Column(
@@ -569,6 +567,7 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
     }
 }
 
+
 @Composable
 fun FriendItem(
     friendDetails: UserDetails?,
@@ -595,7 +594,9 @@ fun FriendItem(
             error = painterResource(id = R.drawable.ic_default_user)
         )
     }
+
 }
+
 
 @Composable
 fun HandlePostSection(viewModel: UserProfileViewModel) {
@@ -644,6 +645,7 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
         }
     }
 }
+
 
 @Composable
 fun PostLoadingSection() {
@@ -771,6 +773,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
     }
 }
 
+
 @Composable
 fun PostItem(
     postDetails: PostDetails?,
@@ -832,6 +835,7 @@ fun PostItem(
     }
 }
 
+
 @Composable
 fun PostTextOnlyItem(caption: String) {
     Box(
@@ -880,6 +884,7 @@ fun TextCountSeeAll(
     }
 }
 
+
 @Composable
 fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean = true) {
     Text(text = buildAnnotatedString {
@@ -892,4 +897,10 @@ fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean 
             append(countText)
         }
     }, textAlign = TextAlign.Center)
+}
+
+@Preview
+@Composable
+fun PreviewUserDetailsScreen() {
+    UserProfileScreen()
 }
