@@ -64,7 +64,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
-@HomeNavGraph(start = true)
+@HomeNavGraph
 @Destination
 @Composable
 fun AddPost() {

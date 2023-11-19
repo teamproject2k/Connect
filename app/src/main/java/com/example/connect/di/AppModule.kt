@@ -14,6 +14,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,17 +36,19 @@ class AppModule {
         return firebaseAuth
     }
 
-
     @Provides
     @Singleton
     fun getSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences("com.example.connect_shared_pref", MODE_PRIVATE)
     }
 
-
     @Provides
     @Singleton
     fun getFireStore(): FirebaseFirestore = Firebase.firestore
+
+    @Provides
+    @Singleton
+    fun getFireStorage(): FirebaseStorage = Firebase.storage
 
     @Provides
     @Singleton
@@ -58,16 +62,20 @@ class AppModule {
     @Provides
     @Singleton
     fun getRoomDatabase(@ApplicationContext context: Context): AppDatabase {
-        val database = Room.databaseBuilder(context, AppDatabase::class.java, "com.example.connect.app_database")
+        val database = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "com.example.connect.app_database"
+        )
         return database.build()
     }
-
 
     @Provides
     @Singleton
     fun getHomeRepository(
         appDatabase: AppDatabase,
-        fireStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
+        firebaseStorage: FirebaseStorage
     ): IHomeRepository =
-        IHomeRepositoryImpl(appDatabase, fireStore)
+        IHomeRepositoryImpl(appDatabase, fireStore, firebaseStorage)
 }

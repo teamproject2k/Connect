@@ -7,6 +7,7 @@ import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -101,13 +102,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUsersFromName(name: String): ResponseState<Int> {
-        return try {
-            val result = fireStore.collection(FirebaseConstants.UsersKey)
-                .whereEqualTo(UserDetails::name.name, name).get().await()
-            ResponseState.success(result.size())
-        } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
-        }
+        return FunctionHelper.getUsersFromName(fireStore, name)
     }
 
     override suspend fun addUserToRemote(userDetails: UserDetails): ResponseState<Nothing> {
@@ -137,7 +132,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) :Int{
-      return  appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
+    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int {
+        return appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
     }
 }

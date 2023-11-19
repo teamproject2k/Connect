@@ -1,5 +1,7 @@
 package com.example.connect.domain.useCase
 
+import android.net.Uri
+import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.repository.IHomeRepository
@@ -16,7 +18,6 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
     suspend fun addUserToLocalDb(userDetails: UserDetails) =
         repository.addUserToLocalDb(userDetails)
 
-
     suspend fun getPostDetailsFromLocal(fireBaseId: String) =
         repository.getPostDetailsFromLocal(fireBaseId)
 
@@ -31,5 +32,17 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
 
     suspend fun getUserDetailsFromIds(idList: List<String>) =
         repository.getUserDetailsFromIds(idList)
+
+    suspend fun updateUserDetails(fieldsToUpdate: MutableMap<String, String>): ResponseState<String> {
+        return repository.updateUserDetails(fieldsToUpdate)
+    }
+
+    suspend fun getUsersFromName(name: String) = repository.getUsersFromName(name)
+
+    suspend fun updateProfileImageOnRemoteStorage(profileImage: Uri?, firebaseUserId: String) =
+        repository.updateProfileImageOnRemoteStorage(profileImage, firebaseUserId)
+
+    suspend fun updateCoverImageOnRemoteStorage(coverImage: Uri?, firebaseUserId: String) =
+        repository.updateCoverImageOnRemoteStorage(coverImage, firebaseUserId)
 
 }

@@ -1,9 +1,10 @@
-package com.example.connect.presentation.ui.home.editProfile
+package com.example.connect.presentation.ui.home.edit_profile
 
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.rounded.DateRange
@@ -38,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,11 +65,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
+import com.example.connect.common.RequestStatusEnum
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.presentation.ui.common.SpacerHeight24
+import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
@@ -83,22 +92,40 @@ import java.util.Date
 @Composable
 fun EditProfileScreen(
     userDetails: UserDetails,
-    viewModel: EditProfileViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
 
+    val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
         viewModel.initializeStates(userDetails)
     }
 
+    val context = LocalContext.current
+    HandleUpdateUserState(viewModel, context)
+
+    val imageResultLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            //uri will be null in case user doesn't select any image
+            if (uri != null) {
+                if (viewModel.isProfileUri) {
+                    viewModel.profilePhotoState.value =
+                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
+                } else {
+                    viewModel.coverPhotoState.value =
+                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
+                }
+            }
+        }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackBarHostState = SnackbarHostState()
-    val context = LocalContext.current
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier
+                .padding(it)
+                .verticalScroll(rememberScrollState())
         ) {
-            EditProfileImageSection(userDetails, viewModel)
+            EditProfileImageSection(viewModel, imageResultLauncher)
             SpacerHeight24()
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 EditProfileNameInputTextField(viewModel)
@@ -119,7 +146,8 @@ fun EditProfileScreen(
                         handleButtonClick(
                             viewModel,
                             context,
-                            navigator
+                            navigator,
+                            userDetails
                         )
                     }
                 )
@@ -138,14 +166,17 @@ fun EditProfileScreen(
 }
 
 @Composable
-fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileViewModel) {
+fun EditProfileImageSection(
+    viewModel: EditProfileViewModel,
+    imageResultLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
+) {
 
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editCoverRef, editProfileRef, connectIdRef
         ) = createRefs()
         AsyncImage(
-            model = userDetails.coverPhoto,
+            model = viewModel.coverPhotoState.value?.uri,
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,8 +190,9 @@ fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileView
             contentScale = ContentScale.Crop
         )
         AsyncImage(
-            model = userDetails.profilePhoto,
+            model = viewModel.profilePhotoState.value?.uri,
             contentDescription = stringResource(R.string.profile_image),
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
@@ -176,13 +208,10 @@ fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileView
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
 
-        val profileImageLauncher = getGalleryImageLauncher { imageId: String? ->
-            if (imageId != null) viewModel.profilePhotoState.value = imageId
-        }
-
         // Update Cover Image
         IconButton(onClick = {
-            profileImageLauncher.launch("image/*")
+            viewModel.isProfileUri = false
+            imageResultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(editCoverRef) {
@@ -191,18 +220,15 @@ fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileView
             }
         ) {
             Image(
-                painterResource(id = R.drawable.ic_camera),
+                painter = painterResource(id = R.drawable.ic_camera),
                 contentDescription = stringResource(R.string.capture_image)
             )
         }
 
-        val coverImageLauncher = getGalleryImageLauncher { imageId: String? ->
-            if (imageId != null) viewModel.coverPhotoState.value = imageId
-        }
-
         // Update Profile Image
         IconButton(onClick = {
-            coverImageLauncher.launch("image/*")
+            viewModel.isProfileUri = true
+            imageResultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(editProfileRef) {
@@ -217,11 +243,13 @@ fun EditProfileImageSection(userDetails: UserDetails, viewModel: EditProfileView
         }
 
         Text(
-            text = userDetails.connectUserId, modifier = Modifier.constrainAs(connectIdRef) {
+            text = viewModel.connectUserIdState.value,
+            modifier = Modifier.constrainAs(connectIdRef) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 top.linkTo(profileImageRef.bottom, 2.dp)
-            }, fontSize = 15.sp,
+            },
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         )
     }
@@ -236,7 +264,6 @@ fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
         value = FunctionHelper.getFormattedDisplayName(viewModel.userNameState.value),
         onValueChange = { updatedValue ->
             if (Validator.isValidName(updatedValue)) {
-
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
@@ -399,28 +426,28 @@ fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
 private fun handleButtonClick(
     viewModel: EditProfileViewModel,
     context: Context,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    userDetails: UserDetails
 ) {
     if (!Validator.isValidName(viewModel.userNameState.value)) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_valid_name)
+        viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_valid_name)
         FunctionHelper.vibrateDevice(context)
     } else if (!Validator.isValidBio(viewModel.userBioState.value)) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_valid_bio)
+        viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_valid_bio)
         FunctionHelper.vibrateDevice(context)
     } else if (!Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_a_gender)
+        viewModel.snackBarMessageState.value = context.getString(R.string.please_select_a_gender)
         FunctionHelper.vibrateDevice(context)
     } else if (!Validator.isValidDob(viewModel.selectedDOBState.value)) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_your_dob)
+        viewModel.snackBarMessageState.value = context.getString(R.string.please_select_your_dob)
         FunctionHelper.vibrateDevice(context)
     } else {
         if (viewModel.fireBaseAuth.currentUser != null) {
             if (context.isNetworkAvailable()) {
-                viewModel.updateUserProfile()
+                val fieldsToUpdate = viewModel.getFieldsToUpdate(userDetails)
+                if (fieldsToUpdate.isNotEmpty()) {
+                    viewModel.updateUserProfile(fieldsToUpdate, userDetails.firebaseUserId)
+                }
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -433,13 +460,35 @@ private fun handleButtonClick(
 }
 
 @Composable
-private fun getGalleryImageLauncher(onImageSelect: (String) -> Unit): ManagedActivityResultLauncher<String, Uri?> {
+fun HandleUpdateUserState(viewModel: EditProfileViewModel, context: Context) {
 
-    val imageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        onImageSelect(uri.toString())
+    val uiState = viewModel.updateUserStateFlow.collectAsState().value
+
+    when (uiState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.snackBarMessageState.value =
+                stringResource(R.string.user_details_updated_successfully)
+            viewModel.connectUserIdState.value = uiState.data.toString()
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                else uiState.message.toString()
+            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserDetailsScreen",
+                uiState.message.toString()
+            )
+        }
+
+        else -> {}
     }
-
-    return imageLauncher
 }

@@ -21,17 +21,13 @@ class AuthenticationUseCase @Inject constructor(private val repository: IAuthent
 
     suspend fun getUsersFromName(name: String) = repository.getUsersFromName(name)
 
-
     suspend fun addUserToRemote(userDetails: UserDetails) = repository.addUserToRemote(userDetails)
-
 
     suspend fun addUserToLocalDb(userDetails: UserDetails) =
         repository.addUserToLocalDb(userDetails)
 
-
     suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String) =
         repository.updateDeviceIdOnRemote(fireBaseId, updatedDeviceId)
-
 
     suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) =
         repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)

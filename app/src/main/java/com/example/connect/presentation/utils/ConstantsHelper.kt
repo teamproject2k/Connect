@@ -10,6 +10,7 @@ object ConstantsHelper {
     const val UserProfileFriendColumns = 4
     const val NameMaxCharacterLimit = 50
     const val BioMaxCharacterLimit = 100
+    const val MediaTypeImage = "image"
     val CoverImageHeight = 200.dp
     val ProfileImageHeight = 150.dp
     val BottomSheetRoundness = 32.dp

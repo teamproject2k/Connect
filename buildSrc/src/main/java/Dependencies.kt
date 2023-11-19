@@ -38,6 +38,7 @@ object Dependencies {
     val roomKapt by lazy { "androidx.room:room-compiler:${Versions.room}" }
     val constraintLayout by lazy { "androidx.constraintlayout:constraintlayout-compose:${Versions.constraintLayoutCompose}" }
     val gson by lazy { "com.google.code.gson:gson:${Versions.gson}" }
+    val exoplayer by lazy { "androidx.media3:media3-exoplayer:1.2.0" }
     val junitTest by lazy { "org.junit.jupiter:junit-jupiter-api:${Versions.junitTest}" }
-    val junitTestRuntime by lazy {  "org.junit.jupiter:junit-jupiter-engine:${Versions.junitTest}"}
+    val junitTestRuntime by lazy { "org.junit.jupiter:junit-jupiter-engine:${Versions.junitTest}" }
 }

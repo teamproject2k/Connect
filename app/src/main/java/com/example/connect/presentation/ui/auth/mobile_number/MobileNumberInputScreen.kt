@@ -37,13 +37,13 @@ import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.OTPScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
+import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.Validator
-import com.example.connect.presentation.utils.enums.ButtonLoadingEnum
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 

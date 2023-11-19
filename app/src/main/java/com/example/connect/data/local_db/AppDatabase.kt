@@ -15,6 +15,5 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUsersDao(): IUsersDao
 
-
     abstract fun getPostDao(): IPostDao
 }

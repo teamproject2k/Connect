@@ -80,6 +80,7 @@ dependencies {
     implementation(Dependencies.firebaseCrashlytics)
     implementation(Dependencies.firebaseAuth)
     implementation(Dependencies.firebaseFirestore)
+    implementation(Dependencies.firebaseStorage)
     //coil
     implementation(Dependencies.coil)
     //view model
@@ -101,8 +102,7 @@ dependencies {
     //Constraint layout
     implementation(Dependencies.constraintLayout)
     //Exoplayer
-    implementation ("androidx.media3:media3-exoplayer:1.2.0")
-
+    implementation(Dependencies.exoplayer)
 }
 tasks {
     // Configure the test task to use JUnit Platform

@@ -8,8 +8,9 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
-import com.example.connect.presentation.utils.FunctionHelper.getUserId
 import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseUserName
+import com.example.connect.presentation.utils.FunctionHelper.getUserId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +35,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addUserStateFlow.value = ResponseState.loading()
-                val formattedUserName = getFormattedUserName()
+                val formattedUserName = getLowerCaseUserName(userNameState.value)
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
                     authenticationUseCase.getUsersFromName(formattedUserName)
@@ -62,16 +63,4 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
             }
         }
     }
-
-    private fun getFormattedUserName(): String {
-        var formattedUserName = ""
-        val formattedUserNameList = userNameState.value.trim().split(" ")
-        formattedUserNameList.forEach {
-            if (it.isNotBlank()) {
-                formattedUserName += "$it "
-            }
-        }
-        return formattedUserName.trimEnd().lowercase()
-    }
-
 }

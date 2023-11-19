@@ -16,4 +16,7 @@ interface IUsersDao {
 
     @Query("SELECT * FROM UserDetails WHERE firebaseUserId = :fireBaseId")
     fun getUserDetails(fireBaseId: String): UserDetails?
+
+    @Query("SELECT * FROM UserDetails WHERE firebaseUserId = :fireBaseId")
+    fun updateUserDetails(fireBaseId: String): UserDetails?
 }
