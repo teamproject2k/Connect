@@ -365,6 +365,7 @@ fun ImageSection(
                     top.linkTo(coverImageRef.bottom)
                     bottom.linkTo(coverImageRef.bottom)
                 },
+            contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
@@ -576,9 +577,9 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
 
 @Composable
 fun FriendItem(
+    modifier: Modifier = Modifier,
     friendDetails: UserDetails?,
     showShimmer: Boolean = false,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     val updatedModifier = if (friendDetails != null) {

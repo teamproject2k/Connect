@@ -33,19 +33,25 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
     suspend fun getUserDetailsFromIds(idList: List<String>) =
         repository.getUserDetailsFromIds(idList)
 
-    suspend fun updateUserDetails(
-        fieldsToUpdate: MutableMap<String, String>,
+    suspend fun updateUserDetailsOnServer(
+        fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
-    ): ResponseState<String> {
-        return repository.updateUserDetails(fieldsToUpdate, firebaseUserId)
+    ): ResponseState<Nothing?> {
+        return repository.updateUserDetailsOnServer(fieldsToUpdate, firebaseUserId)
     }
 
-    suspend fun getUsersFromName(name: String) = repository.getUsersFromName(name)
+    suspend fun getUsersFromName(name: Any) = repository.getUsersFromName(name)
 
-    suspend fun updateProfileImageOnRemoteStorage(profileImage: Uri?, firebaseUserId: String) =
-        repository.updateProfileImageOnRemoteStorage(profileImage, firebaseUserId)
+    suspend fun updateImageOnRemoteStorage(
+        imageUri: Uri?,
+        firebaseUserId: String,
+        parameterToUpdate: String
+    ) = repository.updateImageOnRemoteStorage(imageUri, firebaseUserId, parameterToUpdate)
 
-    suspend fun updateCoverImageOnRemoteStorage(coverImage: Uri?, firebaseUserId: String) =
-        repository.updateCoverImageOnRemoteStorage(coverImage, firebaseUserId)
+    suspend fun updateUserDetailsOnLocal(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ) = repository.updateUserDetailsOnLocal(fieldsToUpdate, firebaseUserId)
+
 
 }

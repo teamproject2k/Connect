@@ -81,9 +81,10 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
 
                     if (fieldsToUpdate.containsKey(UserDetails::profilePhoto.name)) {
                         val updateProfilePhotoResponseState =
-                            homeUseCase.updateProfileImageOnRemoteStorage(
+                            homeUseCase.updateImageOnRemoteStorage(
                                 profilePhotoState.value?.uri,
-                                userDetails.firebaseUserId
+                                userDetails.firebaseUserId,
+                                UserDetails::profilePhoto.name
                             )
                         if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = updateProfilePhotoResponseState
@@ -94,9 +95,10 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                     }
                     if (fieldsToUpdate.containsKey(UserDetails::coverPhoto.name)) {
                         val updateCoverPhotoResponseState =
-                            homeUseCase.updateCoverImageOnRemoteStorage(
+                            homeUseCase.updateImageOnRemoteStorage(
                                 coverPhotoState.value?.uri,
-                                userDetails.firebaseUserId
+                                userDetails.firebaseUserId,
+                                UserDetails::coverPhoto.name
                             )
                         if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = updateCoverPhotoResponseState
@@ -123,26 +125,38 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                         } else {
                             fieldsToUpdate[UserDetails::connectUserId.name] =
                                 FunctionHelper.getUserId(
-                                    userName,
+                                    userName.toString(),
                                     currentUserByNameResponseState?.data ?: 0
                                 )
                         }
                     }
-                    _updateUserStateFlow.value = homeUseCase.updateUserDetails(fieldsToUpdate, userDetails.firebaseUserId)
+                    val updatedUserResponseState =
+                        homeUseCase.updateUserDetailsOnServer(
+                            fieldsToUpdate,
+                            userDetails.firebaseUserId
+                        )
+
+                    if (updatedUserResponseState.status != RequestStatusEnum.EXCEPTION) {
+                        homeUseCase.updateUserDetailsOnLocal(
+                            fieldsToUpdate,
+                            userDetails.firebaseUserId
+                        )
+                    }
+                    _updateUserStateFlow.value = updatedUserResponseState
                 }
             }
         }
     }
 
-    private fun getFieldsToUpdate(): MutableMap<String, String> {
+    private fun getFieldsToUpdate(): MutableMap<String, Any> {
 
-        val fieldsToUpdate: MutableMap<String, String> = mutableMapOf()
+        val fieldsToUpdate: MutableMap<String, Any> = mutableMapOf()
 
         val isCoverImageUpdated =
-            coverPhotoState.value?.uri.toString() != userDetails.coverPhoto
+            coverPhotoState.value?.uri.toString() != userDetails.coverPhoto.toString()
 
         val isProfileImageUpdated =
-            profilePhotoState.value?.uri.toString() != userDetails.profilePhoto
+            profilePhotoState.value?.uri.toString() != userDetails.profilePhoto.toString()
 
         val lowerCaseUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
         val isUserNameUpdated = userDetails.name != lowerCaseUserName
@@ -167,7 +181,7 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         }
         if (isDobUpdated) {
             fieldsToUpdate[UserDetails::dateOfBirth.name] =
-                selectedDOBState.longValue.toString()
+                selectedDOBState.longValue
         }
 
         return fieldsToUpdate

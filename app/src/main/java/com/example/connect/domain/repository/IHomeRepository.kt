@@ -22,15 +22,21 @@ interface IHomeRepository {
 
     suspend fun addPostListToLocal(postDetailList: List<PostDetails>): LongArray
 
-    suspend fun updateUserDetails(
-        fieldsToUpdate: MutableMap<String, String>,
+    suspend fun updateUserDetailsOnServer(
+        fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
+    ): ResponseState<Nothing?>
+
+    suspend fun getUsersFromName(name: Any): ResponseState<Int>
+
+    suspend fun updateImageOnRemoteStorage(
+        imageUri: Uri?,
+        firebaseUserId: String,
+        parameterToUpdate: String
     ): ResponseState<String>
 
-    suspend fun getUsersFromName(name: String): ResponseState<Int>
-
-    suspend fun updateProfileImageOnRemoteStorage(profileImage: Uri?, firebaseUserId: String): ResponseState<String>
-
-    suspend fun updateCoverImageOnRemoteStorage(coverImage: Uri?, firebaseUserId: String): ResponseState<String>
-
+    suspend fun updateUserDetailsOnLocal(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ): Long
 }

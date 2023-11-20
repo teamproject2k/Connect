@@ -1,6 +1,7 @@
 package com.example.connect.data.repository
 
 import android.net.Uri
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
@@ -84,51 +85,54 @@ class IHomeRepositoryImpl(
         return appDatabase.getPostDao().insertPostList(postDetailList)
     }
 
-    override suspend fun updateUserDetails(
-        fieldsToUpdate: MutableMap<String, String>,
+    override suspend fun updateUserDetailsOnServer(
+        fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
-    ): ResponseState<String> {
+    ): ResponseState<Nothing?> {
         return try {
             fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId)
-                .update(fieldsToUpdate as Map<String, Any>).await()
-            ResponseState.success(fieldsToUpdate[UserDetails::connectUserId.name])
+                .update(fieldsToUpdate).await()
+            ResponseState.success(null)
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
-    override suspend fun getUsersFromName(name: String): ResponseState<Int> {
-        return FunctionHelper.getUsersFromName(fireStore, name)
+    override suspend fun getUsersFromName(name: Any): ResponseState<Int> {
+        return FunctionHelper.getUsersFromName(fireStore, name.toString())
     }
 
-    override suspend fun updateProfileImageOnRemoteStorage(
-        profileImage: Uri?,
-        firebaseUserId: String
+    override suspend fun updateImageOnRemoteStorage(
+        imageUri: Uri?,
+        firebaseUserId: String,
+        parameterToUpdate: String
     ): ResponseState<String> {
         return try {
-            val remoteUrl =
+            val downloadUrl =
                 firebaseStorage.reference.child(FirebaseConstants.UsersKey).child(firebaseUserId)
-                    .child(UserDetails::profilePhoto.name).putFile(profileImage!!)
-                    .await().storage.downloadUrl.toString()
-            ResponseState.success(remoteUrl)
+                    .child(parameterToUpdate).putFile(imageUri!!)
+                    .await().storage.downloadUrl.await()
+
+            ResponseState.success(downloadUrl.toString())
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
-    override suspend fun updateCoverImageOnRemoteStorage(
-        coverImage: Uri?,
+    override suspend fun updateUserDetailsOnLocal(
+        fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
-    ): ResponseState<String> {
-        return try {
-            val remoteUrl =
-                firebaseStorage.reference.child(FirebaseConstants.UsersKey).child(firebaseUserId)
-                    .child(UserDetails::coverPhoto.name).putFile(coverImage!!)
-                    .await().storage.downloadUrl.toString()
-            ResponseState.success(remoteUrl)
-        } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
-        }
+    ): Long {
+
+        val setClause = fieldsToUpdate.entries.joinToString(", ") { "${it.key} = ?" }
+        val sql =
+            "UPDATE ${UserDetails::class.simpleName} SET $setClause WHERE ${UserDetails::firebaseUserId.name} = ?"
+        val bindArgs = fieldsToUpdate.values.toMutableList()
+        bindArgs.add(firebaseUserId)
+
+        val queryToExecute = SimpleSQLiteQuery(sql, bindArgs.toTypedArray())
+
+        return appDatabase.getUsersDao().updateUserDetails(queryToExecute)
     }
 
 }

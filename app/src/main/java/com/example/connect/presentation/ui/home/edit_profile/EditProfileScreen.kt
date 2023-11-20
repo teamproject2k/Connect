@@ -101,7 +101,7 @@ fun EditProfileScreen(
     }
 
     val context = LocalContext.current
-    HandleUpdateUserState(viewModel, context)
+    HandleUpdateUserState(viewModel, context, navigator)
 
     val imageResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -398,7 +398,7 @@ fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
                     .padding(end = 16.dp, bottom = 16.dp)
                     .clickable {
                         if (dateSelectionState.selectedDateMillis != null) {
-                            viewModel.selectedDOBState.value =
+                            viewModel.selectedDOBState.longValue =
                                 dateSelectionState.selectedDateMillis!!
                         }
                         showDatePickerState = false
@@ -435,7 +435,7 @@ private fun handleButtonClick(
     } else if (!Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
         viewModel.snackBarMessageState.value = context.getString(R.string.please_select_a_gender)
         FunctionHelper.vibrateDevice(context)
-    } else if (!Validator.isValidDob(viewModel.selectedDOBState.value)) {
+    } else if (!Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
         viewModel.snackBarMessageState.value = context.getString(R.string.please_select_your_dob)
         FunctionHelper.vibrateDevice(context)
     } else {
@@ -454,7 +454,11 @@ private fun handleButtonClick(
 }
 
 @Composable
-fun HandleUpdateUserState(viewModel: EditProfileViewModel, context: Context) {
+fun HandleUpdateUserState(
+    viewModel: EditProfileViewModel,
+    context: Context,
+    navigator: DestinationsNavigator
+) {
 
     val uiState = viewModel.updateUserStateFlow.collectAsState().value
 
@@ -465,10 +469,8 @@ fun HandleUpdateUserState(viewModel: EditProfileViewModel, context: Context) {
 
         RequestStatusEnum.SUCCESS -> {
             viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
-            viewModel.snackBarMessageState.value =
-                stringResource(R.string.user_details_updated_successfully)
-            // TODO: Remove this
-            viewModel.connectUserIdState.value = uiState.data.toString()
+            context.showToast(stringResource(R.string.user_details_updated_successfully))
+            navigator.popBackStack()
         }
 
         RequestStatusEnum.EXCEPTION -> {
