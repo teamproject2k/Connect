@@ -84,12 +84,13 @@ class IHomeRepositoryImpl(
         return appDatabase.getPostDao().insertPostList(postDetailList)
     }
 
-    override suspend fun updateUserDetails(fieldsToUpdate: MutableMap<String, String>): ResponseState<String> {
+    override suspend fun updateUserDetails(
+        fieldsToUpdate: MutableMap<String, String>,
+        firebaseUserId: String
+    ): ResponseState<String> {
         return try {
-            fieldsToUpdate[UserDetails::firebaseUserId.name]?.let {
-                fireStore.collection(FirebaseConstants.UsersKey).document(it)
-                    .update(fieldsToUpdate as Map<String, Any>).await()
-            }
+            fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId)
+                .update(fieldsToUpdate as Map<String, Any>).await()
             ResponseState.success(fieldsToUpdate[UserDetails::connectUserId.name])
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")

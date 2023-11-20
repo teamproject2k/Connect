@@ -33,8 +33,11 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
     suspend fun getUserDetailsFromIds(idList: List<String>) =
         repository.getUserDetailsFromIds(idList)
 
-    suspend fun updateUserDetails(fieldsToUpdate: MutableMap<String, String>): ResponseState<String> {
-        return repository.updateUserDetails(fieldsToUpdate)
+    suspend fun updateUserDetails(
+        fieldsToUpdate: MutableMap<String, String>,
+        firebaseUserId: String
+    ): ResponseState<String> {
+        return repository.updateUserDetails(fieldsToUpdate, firebaseUserId)
     }
 
     suspend fun getUsersFromName(name: String) = repository.getUsersFromName(name)

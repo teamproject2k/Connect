@@ -33,12 +33,6 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         MutableStateFlow(ResponseState.none())
     val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
 
-    private val _updateProfileImageStateFlow: MutableStateFlow<ResponseState<String?>> =
-        MutableStateFlow(ResponseState.none())
-
-    private val _updateCoverImageStateFlow: MutableStateFlow<ResponseState<String?>> =
-        MutableStateFlow(ResponseState.none())
-
     lateinit var userNameState: MutableState<String>
     lateinit var connectUserIdState: MutableState<String>
     lateinit var userBioState: MutableState<String>
@@ -46,15 +40,14 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
     lateinit var selectedGenderState: MutableState<String>
     lateinit var profilePhotoState: MutableState<PostMediaData?>
     lateinit var coverPhotoState: MutableState<PostMediaData?>
+    lateinit var userDetails: UserDetails
     var isProfileUri = true
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
     var isDataInitialized = false
-    private var isUserNameUpdated = false
-    private var isProfileImageUpdated = false
-    private var isCoverImageUpdated = false
 
     fun initializeStates(userDetails: UserDetails) {
+        this.userDetails = userDetails
         userNameState = mutableStateOf(userDetails.name)
         userBioState = mutableStateOf(userDetails.bio)
         selectedGenderState = mutableStateOf(userDetails.gender)
@@ -69,24 +62,100 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         coverPhotoState = mutableStateOf(
             PostMediaData(userDetails.coverPhoto?.toUri(), ConstantsHelper.MediaTypeImage)
         )
-        isDataInitialized = true
         connectUserIdState = mutableStateOf(userDetails.connectUserId)
+        isDataInitialized = true
     }
 
-    fun getFieldsToUpdate(userDetails: UserDetails): MutableMap<String, String> {
+    fun updateUserProfile() {
+
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _updateUserStateFlow.value = ResponseState.loading()
+
+                val fieldsToUpdate = getFieldsToUpdate()
+                if (fieldsToUpdate.isEmpty()) {
+                    _updateUserStateFlow.value = ResponseState.success(null)
+                } else {
+                    var remoteProfilePhotoUrl: String? = null
+                    var remoteCoverPhotoUrl: String? = null
+
+                    if (fieldsToUpdate.containsKey(UserDetails::profilePhoto.name)) {
+                        val updateProfilePhotoResponseState =
+                            homeUseCase.updateProfileImageOnRemoteStorage(
+                                profilePhotoState.value?.uri,
+                                userDetails.firebaseUserId
+                            )
+                        if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
+                            _updateUserStateFlow.value = updateProfilePhotoResponseState
+                            return@withContext
+                        } else {
+                            remoteProfilePhotoUrl = updateProfilePhotoResponseState.data
+                        }
+                    }
+                    if (fieldsToUpdate.containsKey(UserDetails::coverPhoto.name)) {
+                        val updateCoverPhotoResponseState =
+                            homeUseCase.updateCoverImageOnRemoteStorage(
+                                coverPhotoState.value?.uri,
+                                userDetails.firebaseUserId
+                            )
+                        if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
+                            _updateUserStateFlow.value = updateCoverPhotoResponseState
+                            return@withContext
+                        } else {
+                            remoteCoverPhotoUrl = updateCoverPhotoResponseState.data
+                        }
+                    }
+                    if (!remoteProfilePhotoUrl.isNullOrEmpty()) {
+                        fieldsToUpdate[UserDetails::profilePhoto.name] = remoteProfilePhotoUrl
+                    }
+                    if (!remoteCoverPhotoUrl.isNullOrEmpty()) {
+                        fieldsToUpdate[UserDetails::coverPhoto.name] = remoteCoverPhotoUrl
+                    }
+                    if (fieldsToUpdate.containsKey(UserDetails::name.name)) {
+                        val userName = fieldsToUpdate[UserDetails::name.name]
+                        val currentUserByNameResponseState = userName?.let {
+                            homeUseCase.getUsersFromName(it)
+                        }
+                        if (userName == null || currentUserByNameResponseState?.status == RequestStatusEnum.EXCEPTION) {
+                            _updateUserStateFlow.value =
+                                ResponseState.error(currentUserByNameResponseState?.message ?: "")
+                            return@withContext
+                        } else {
+                            fieldsToUpdate[UserDetails::connectUserId.name] =
+                                FunctionHelper.getUserId(
+                                    userName,
+                                    currentUserByNameResponseState?.data ?: 0
+                                )
+                        }
+                    }
+                    _updateUserStateFlow.value = homeUseCase.updateUserDetails(fieldsToUpdate, userDetails.firebaseUserId)
+                }
+            }
+        }
+    }
+
+    private fun getFieldsToUpdate(): MutableMap<String, String> {
 
         val fieldsToUpdate: MutableMap<String, String> = mutableMapOf()
 
-        isCoverImageUpdated =
+        val isCoverImageUpdated =
             coverPhotoState.value?.uri.toString() != userDetails.coverPhoto
-        isProfileImageUpdated = profilePhotoState.value?.uri.toString() != userDetails.profilePhoto
+
+        val isProfileImageUpdated =
+            profilePhotoState.value?.uri.toString() != userDetails.profilePhoto
 
         val lowerCaseUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
-        isUserNameUpdated = userDetails.name != lowerCaseUserName
+        val isUserNameUpdated = userDetails.name != lowerCaseUserName
         val isBioUpdated = userDetails.bio != userBioState.value
         val isGenderUpdated = userDetails.gender != selectedGenderState.value
         val isDobUpdated = userDetails.dateOfBirth != selectedDOBState.longValue
 
+        if (isProfileImageUpdated) {
+            fieldsToUpdate[UserDetails::profilePhoto.name] = profilePhotoState.value?.uri.toString()
+        }
+        if (isCoverImageUpdated) {
+            fieldsToUpdate[UserDetails::coverPhoto.name] = coverPhotoState.value?.uri.toString()
+        }
         if (isUserNameUpdated) {
             fieldsToUpdate[UserDetails::name.name] = lowerCaseUserName
         }
@@ -103,102 +172,4 @@ class EditProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
 
         return fieldsToUpdate
     }
-
-    fun updateUserProfile(fieldsToUpdate: MutableMap<String, String>, firebaseUserId: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                _updateUserStateFlow.value = ResponseState.loading()
-
-                if (isUserNameUpdated) {
-                    val userName = fieldsToUpdate[UserDetails::name.name]
-                    val currentUserByNameResponseState = userName?.let {
-                        homeUseCase.getUsersFromName(it)
-                    }
-                    if (userName != null && currentUserByNameResponseState?.status != RequestStatusEnum.EXCEPTION) {
-                        updateProfile(
-                            fieldsToUpdate,
-                            firebaseUserId,
-                            userName,
-                            currentUserByNameResponseState
-                        )
-                    }
-                } else {
-                    updateProfile(
-                        fieldsToUpdate,
-                        firebaseUserId
-                    )
-                }
-            }
-        }
-    }
-
-    private fun updateProfile(
-        fieldsToUpdate: MutableMap<String, String>,
-        firebaseUserId: String,
-        userName: String = "",
-        currentUserByNameResponseState: ResponseState<Int>? = ResponseState.none()
-    ) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-
-                if (isProfileImageUpdated) {
-                    updateProfileImageOnRemoteStorage(firebaseUserId)
-                }
-
-                if (isCoverImageUpdated) {
-                    updateCoverImageOnRemoteStorage(firebaseUserId)
-                }
-
-                if ((!isProfileImageUpdated || _updateProfileImageStateFlow.value.status != RequestStatusEnum.EXCEPTION) &&
-                    (!isCoverImageUpdated || _updateCoverImageStateFlow.value.status != RequestStatusEnum.EXCEPTION)
-                ) {
-
-                    if (isCoverImageUpdated) {
-                        fieldsToUpdate[UserDetails::coverPhoto.name] =
-                            _updateCoverImageStateFlow.value.data.toString()
-                    }
-
-                    if (isProfileImageUpdated) {
-                        fieldsToUpdate[UserDetails::profilePhoto.name] =
-                            _updateProfileImageStateFlow.value.data.toString()
-                    }
-
-                    if (isUserNameUpdated) {
-                        fieldsToUpdate[UserDetails::connectUserId.name] =
-                            FunctionHelper.getUserId(
-                                userName,
-                                currentUserByNameResponseState?.data ?: 0
-                            )
-                    }
-                    _updateUserStateFlow.value =
-                        homeUseCase.updateUserDetails(fieldsToUpdate)
-                }
-            }
-        }
-    }
-
-    private fun updateProfileImageOnRemoteStorage(firebaseUserId: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                _updateProfileImageStateFlow.value = ResponseState.loading()
-                _updateProfileImageStateFlow.value = homeUseCase.updateProfileImageOnRemoteStorage(
-                    profilePhotoState.value?.uri,
-                    firebaseUserId
-                )
-            }
-        }
-    }
-
-    private fun updateCoverImageOnRemoteStorage(firebaseUserId: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                _updateCoverImageStateFlow.value = ResponseState.loading()
-                _updateCoverImageStateFlow.value = homeUseCase.updateCoverImageOnRemoteStorage(
-                    coverPhotoState.value?.uri,
-                    firebaseUserId
-                )
-            }
-        }
-    }
-
 }

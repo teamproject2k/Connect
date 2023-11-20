@@ -146,8 +146,7 @@ fun EditProfileScreen(
                         handleButtonClick(
                             viewModel,
                             context,
-                            navigator,
-                            userDetails
+                            navigator
                         )
                     }
                 )
@@ -263,7 +262,7 @@ fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
     AppOutlinedTextField(
         value = FunctionHelper.getFormattedDisplayName(viewModel.userNameState.value),
         onValueChange = { updatedValue ->
-            if (Validator.isValidName(updatedValue)) {
+            if (updatedValue.length <= ConstantsHelper.NameMaxCharacterLimit) {
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
@@ -358,9 +357,9 @@ fun EditProfileGenderPicker(viewModel: EditProfileViewModel) {
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth(.9f)
         ) {
-            genderList.forEach { item ->
-                DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                    viewModel.selectedGenderState.value = item
+            genderList.forEach { gender ->
+                DropdownMenuItem(text = { Text(text = gender) }, onClick = {
+                    viewModel.selectedGenderState.value = gender
                     isDialogVisible = false
                 })
             }
@@ -379,8 +378,7 @@ fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
         value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
             viewModel.selectedDOBState.longValue
         ) else "",
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         leadingIcon = {
             Image(
                 imageVector = Icons.Rounded.DateRange,
@@ -426,8 +424,7 @@ fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
 private fun handleButtonClick(
     viewModel: EditProfileViewModel,
     context: Context,
-    navigator: DestinationsNavigator,
-    userDetails: UserDetails
+    navigator: DestinationsNavigator
 ) {
     if (!Validator.isValidName(viewModel.userNameState.value)) {
         viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_valid_name)
@@ -444,10 +441,7 @@ private fun handleButtonClick(
     } else {
         if (viewModel.fireBaseAuth.currentUser != null) {
             if (context.isNetworkAvailable()) {
-                val fieldsToUpdate = viewModel.getFieldsToUpdate(userDetails)
-                if (fieldsToUpdate.isNotEmpty()) {
-                    viewModel.updateUserProfile(fieldsToUpdate, userDetails.firebaseUserId)
-                }
+                viewModel.updateUserProfile()
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -473,6 +467,7 @@ fun HandleUpdateUserState(viewModel: EditProfileViewModel, context: Context) {
             viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             viewModel.snackBarMessageState.value =
                 stringResource(R.string.user_details_updated_successfully)
+            // TODO: Remove this
             viewModel.connectUserIdState.value = uiState.data.toString()
         }
 
@@ -484,7 +479,7 @@ fun HandleUpdateUserState(viewModel: EditProfileViewModel, context: Context) {
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
-                "UserDetailsScreen",
+                "EditProfileScreen",
                 uiState.message.toString()
             )
         }

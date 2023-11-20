@@ -22,7 +22,10 @@ interface IHomeRepository {
 
     suspend fun addPostListToLocal(postDetailList: List<PostDetails>): LongArray
 
-    suspend fun updateUserDetails(fieldsToUpdate: MutableMap<String, String>): ResponseState<String>
+    suspend fun updateUserDetails(
+        fieldsToUpdate: MutableMap<String, String>,
+        firebaseUserId: String
+    ): ResponseState<String>
 
     suspend fun getUsersFromName(name: String): ResponseState<Int>
 
