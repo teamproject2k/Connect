@@ -38,6 +38,9 @@ class UserDetailsViewModel @Inject constructor(
     val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
 
 
+    /**
+     * Creates a user profile in the database.
+     */
     fun createUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -71,6 +74,9 @@ class UserDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Formats the user name to be used in the database.
+     */
     private fun getFormattedUserName(): String {
         var formattedUserName = ""
         val formattedUserNameList = userNameState.value.trim().split(" ")

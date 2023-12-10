@@ -54,6 +54,9 @@ class OtpInputViewModel @Inject constructor(
     val resendOtpStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _resendOtpStateFlow
 
 
+    /**
+     * A flow that emits the remaining time in seconds until the OTP expires.
+     */
     val timeLeftFlow = flow {
         var countDownTime = ConstantsHelper.OTPTimeOutTime
         while (countDownTime >= 0) {
@@ -65,6 +68,9 @@ class OtpInputViewModel @Inject constructor(
     }
 
 
+    /**
+     * Resends the OTP to the user.
+     */
     fun resendOtp() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -79,6 +85,11 @@ class OtpInputViewModel @Inject constructor(
     }
 
 
+    /**
+     * Gets the user details from the remote server.
+     *
+     * @param userId The user's ID.
+     */
     fun getUserDetails(userId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -107,6 +118,11 @@ class OtpInputViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Verifies the OTP entered by the user.
+     *
+     * @param verificationId The verification ID.
+     */
     fun verifyOTP(verificationId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
