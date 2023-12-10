@@ -25,4 +25,9 @@ interface IHomeRepository {
 
     suspend fun addPostListToLocal(postDetailList: List<PostDetails>): LongArray
 
+    suspend fun uploadPostToServer(
+        postDetails: PostDetails,
+        fireBaseId: String
+    ): ResponseState<String>
+
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -21,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,12 +38,13 @@ import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.OTPScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.validation.Validator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -57,7 +59,9 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     HandleSendOTPState(viewModel, navigator, context)
     HandleGetUserDetailsState(viewModel, navigator, context)
-    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackBarHostState) },
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -66,9 +70,17 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
             TopPageSection(
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
-                stringResource(R.string.log_in)
+                stringResource(R.string.log_in),
+                buildAnnotatedString {
+                    append(
+                        stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
+                    )
+                }
             )
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            ) {
                 MobileInputTextField(viewModel)
                 SpacerHeight48()
                 LoaderButton(
@@ -103,7 +115,7 @@ private fun HandleGetUserDetailsState(
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -117,7 +129,8 @@ private fun HandleGetUserDetailsState(
                 LocalActivity.current.finish()
 
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -126,8 +139,7 @@ private fun HandleGetUserDetailsState(
                     R.string.something_went_wrong
                 )
                 else userDetailsState.message.toString()
-
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -151,10 +163,11 @@ private fun HandleSendOTPState(
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
     when (sendOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             if (sendOtpState.data?.first == FirebaseConstants.AutoLogin) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(sendOtpState.data.second)
@@ -167,22 +180,20 @@ private fun HandleSendOTPState(
                     OTPScreenDestination(
                         viewModel.userMobileNumberState.value,
                         sendOtpState.data?.second.toString(),
-                        viewModel.selectedCountryCode
+                        viewModel.selectedCountryCodeState.value
                     )
                 )
                 viewModel.resetStateFlow()
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
             viewModel.snackBarMessageState.value =
                 if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == ErrorCodes.NoUserFound) context.getString(
                     R.string.something_went_wrong
                 )
                 else sendOtpState.message.toString()
-
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -215,12 +226,12 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
             }
         },
         label = {
-            Text(text = stringResource(R.string.please_enter_mobile_number))
+            Text(text = stringResource(R.string.mobile_number))
         },
         leadingIcon = {
             Text(
-                text = viewModel.selectedCountryCode,
-                color = MaterialTheme.colorScheme.scrim
+                text = viewModel.selectedCountryCodeState.value,
+                fontWeight = FontWeight.Medium
             )
         },
         modifier = Modifier
@@ -234,13 +245,22 @@ private fun handleButtonClick(
     viewModel: MobileNumberInputViewModel,
     context: Context
 ) {
-    if (!viewModel.isValidMobileNumber()) {
+    val mobileNumberValidationResponseCode =
+        Validator.isValidMobileNumber(viewModel.userMobileNumberState.value)
+    if (mobileNumberValidationResponseCode == 1) {
         viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_a_valid_mobile_number)
+            context.getString(R.string.please_enter_mobile_number)
         FunctionHelper.vibrateDevice(context)
-    } else if (context.isNetworkAvailable()) {
-        viewModel.sendOTP()
-    } else {
-        viewModel.snackBarMessageState.value = context.getString(R.string.no_internet_connection)
+    } else if (mobileNumberValidationResponseCode == 2) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.invalid_mobile_number)
+        FunctionHelper.vibrateDevice(context)
+    } else if (mobileNumberValidationResponseCode == 0) {
+        if (context.isNetworkAvailable()) {
+            viewModel.sendOTP()
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
     }
 }

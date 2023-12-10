@@ -8,5 +8,7 @@ object ConstantsHelper {
     const val NavigationAnimationDuration = 300
     const val ErrorTag = "Error"
     const val UserProfileFriendColumns = 4
+    const val NameMaxCharacterLimit = 50
+    const val BioMaxCharacterLimit = 100
     val BottomSheetRoundness = 32.dp
 }

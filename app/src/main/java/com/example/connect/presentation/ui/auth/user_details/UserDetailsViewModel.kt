@@ -8,22 +8,22 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getUserId
-import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
+    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
     val userNameState = mutableStateOf("")
     val selectedDOBState = mutableLongStateOf(-1)
     val selectedGenderState = mutableStateOf("")
@@ -32,9 +32,6 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
     val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
 
 
-    fun isValidName(): Boolean = userNameState.value.isNotBlank()
-    fun isGenderSelected(): Boolean = selectedGenderState.value.isNotBlank()
-    fun isDobSelected(): Boolean = selectedDOBState.longValue != -1L
     fun createUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -44,7 +41,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                 val currentUserByNameResponseState =
                     authenticationUseCase.getUsersFromName(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
-                    val createdDate = Date().time
+                    val createdDate = FunctionHelper.getCurrentTimeInMillis()
                     val user = UserDetails(
                         fireBaseAuth.currentUser!!.uid,
                         getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),

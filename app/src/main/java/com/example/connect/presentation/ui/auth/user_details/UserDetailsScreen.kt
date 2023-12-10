@@ -3,14 +3,15 @@ package com.example.connect.presentation.ui.auth.user_details
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.rounded.DateRange
@@ -22,7 +23,6 @@ import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -57,13 +57,15 @@ import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeels
 import com.example.connect.presentation.ui.common.SpacerHeight18
 import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
+import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
-import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.validation.Validator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.Calendar
@@ -84,13 +86,19 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
+                .verticalScroll(rememberScrollState())
         ) {
             TopPageSection(
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
-                stringResource(R.string.create_an_account)
+                stringResource(R.string.create_an_account),
+//                buildAnnotatedString {
+//                    append(
+//                        stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
+//                    )
+//                }
             )
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 NameInputTextField(viewModel)
                 SpacerHeight18()
                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -122,22 +130,20 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NameInputTextField(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
-    val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
         value = viewModel.userNameState.value,
         onValueChange = { updatedValue ->
-            val pattern = Regex("[0-9!$@#%^&*()_+{}\\[\\]:;<>,.?~|]")
-            if (!updatedValue.contains(pattern)) {
+            if (updatedValue.length <= ConstantsHelper.NameMaxCharacterLimit) {
                 viewModel.userNameState.value = updatedValue
             } else {
-                viewModel.snackBarMessageState.value =
-                    context.getString(R.string.name_can_t_contain_digits_or_special_characters)
+                viewModel.snackBarMessageState.value = context.getString(
+                    R.string.name_cannot_be_greater_than_max_characters,
+                    ConstantsHelper.NameMaxCharacterLimit
+                )
                 FunctionHelper.vibrateDevice(context)
-                keyboardController?.hide()
             }
         },
         label = {
@@ -188,7 +194,6 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
         DropdownMenu(
             expanded = true, onDismissRequest = { isDialogVisible = false },
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth(.9f),
         ) {
             genderList.forEach { item ->
@@ -264,7 +269,7 @@ private fun HandleAddUserState(
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -272,14 +277,14 @@ private fun HandleAddUserState(
             val intent = Intent(context, HomeActivity::class.java)
             context.startActivity(intent)
             LocalActivity.current.finish()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
         }
 
         RequestStatusEnum.EXCEPTION -> {
             viewModel.snackBarMessageState.value =
                 if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
                 else uiState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -297,29 +302,91 @@ private fun handleButtonClick(
     context: Context,
     navigator: DestinationsNavigator
 ) {
-    if (!viewModel.isValidName()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_valid_name)
-        FunctionHelper.vibrateDevice(context)
-    } else if (!viewModel.isGenderSelected()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_a_gender)
-        FunctionHelper.vibrateDevice(context)
-    } else if (!viewModel.isDobSelected()) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_select_your_dob)
-        FunctionHelper.vibrateDevice(context)
-    } else {
-        if (viewModel.fireBaseAuth.currentUser != null) {
-            if (context.isNetworkAvailable()) {
-                viewModel.createUserProfile()
-            } else {
-                viewModel.snackBarMessageState.value =
-                    context.getString(R.string.no_internet_connection)
-            }
-        } else {
-            context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-            navigator.popBackStack()
+    when (val userNameValidationResponseCode =
+        Validator.isValidName(viewModel.userNameState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_enter_name)
+            FunctionHelper.vibrateDevice(context)
+            return
         }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        3 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(
+                    R.string.name_can_t_contain_digits_or_special_characters,
+                    ConstantsHelper.NameMaxCharacterLimit
+                )
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (userNameValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+    when (val genderValidationResponseCode =
+        Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (genderValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+    when (val dobValidationResponseCode = Validator.isValidDob(viewModel.selectedDOBState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (dobValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+    if (viewModel.fireBaseAuth.currentUser != null) {
+        if (context.isNetworkAvailable()) {
+            viewModel.createUserProfile()
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
+    } else {
+        context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+        navigator.popBackStack()
+        navigator.navigate(MobileNumberInputScreenDestination)
     }
 }

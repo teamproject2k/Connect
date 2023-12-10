@@ -7,6 +7,7 @@ import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -55,11 +56,12 @@ class IAuthenticationRepositoryImpl @Inject constructor(
             ) {
                 responseStateFlow.value = ResponseState.success(Pair("", verificationId))
             }
+
         }
 
         val options = PhoneAuthOptions.newBuilder(firebaseAuth)
             .setPhoneNumber(countryCode + mobileNumber)
-            .setTimeout(1, TimeUnit.SECONDS)
+            .setTimeout(ConstantsHelper.OTPTimeOutTime, TimeUnit.SECONDS)
             .setCallbacks(callbacks)
         if (AuthenticationActivity.Instance != null) {
             options.setActivity(AuthenticationActivity.Instance!!)
@@ -137,7 +139,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) :Int{
-      return  appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
+    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int {
+        return appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
     }
 }

@@ -7,7 +7,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.presentation.base.BaseViewModel
-import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +21,8 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
     BaseViewModel() {
     val userMobileNumberState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonLoadingEnum.NotLoading)
-    val selectedCountryCode = "+91"
+    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
+    val selectedCountryCodeState = mutableStateOf("+91")
 
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =
         MutableStateFlow(ResponseState.none())
@@ -32,18 +32,15 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow: StateFlow<ResponseState<UserDetails?>> get() = _getUserDetailsStateFlow
 
-
-    fun isValidMobileNumber(): Boolean {
-        val phoneRegex = "^[0-9]{10}$"
-        return phoneRegex.toRegex().matches(userMobileNumberState.value)
-    }
-
+    /**
+     * Sends OTP to the user's mobile number.
+     */
     fun sendOTP() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendOtpUIStateFlow.value = ResponseState.loading()
                 authenticationUseCase.sendOtp(
-                    selectedCountryCode,
+                    selectedCountryCodeState.value,
                     userMobileNumberState.value,
                     _sendOtpUIStateFlow
                 )

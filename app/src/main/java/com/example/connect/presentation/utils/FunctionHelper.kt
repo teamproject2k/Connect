@@ -5,8 +5,13 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
@@ -92,6 +97,29 @@ object FunctionHelper {
             )
         )
         return postVisibilityScopeList
+    }
+
+
+    fun getExoPlayer(context: Context, uri: String): ExoPlayer {
+        val exoPlayer = ExoPlayer.Builder(context)
+            .build().apply {
+                val defaultSourceFactory = DefaultDataSource.Factory(context)
+                val dataSourceFactory = DefaultDataSource.Factory(context, defaultSourceFactory)
+                val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(uri))
+                setMediaSource(mediaSource)
+                prepare()
+            }
+        return exoPlayer
+    }
+
+    fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+    }
+
+
+    fun getCurrentTimeInMillis(): Long {
+        return Date().time
     }
 
 }

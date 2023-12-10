@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.add_post
 
 import android.content.Context
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.VideoCameraFront
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -35,20 +38,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.presentation.ui.common.IconTextSection
@@ -59,18 +69,21 @@ import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
-@HomeNavGraph(start = true)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@HomeNavGraph
 @Destination
 @Composable
-fun AddPost() {
+fun AddPostScreen() {
     val viewModel: AddPostViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val keyboardController = LocalSoftwareKeyboardController.current
     if (viewModel.isFirstTimeSetup) {
         viewModel.setUpData(context)
     }
@@ -115,7 +128,7 @@ fun AddPost() {
                     )
                 }, actions = {
                     Button(onClick = {
-
+                        handleButtonClick(viewModel, context)
                     }) {
                         Text(text = stringResource(R.string.post))
                     }
@@ -126,15 +139,11 @@ fun AddPost() {
             modifier = Modifier
                 .fillMaxSize()
         ) {
+
             TopDetailsSection(viewModel = viewModel) {
-                if (bottomSheetState.isVisible) {
-                    coroutineScope.launch {
-                        bottomSheetState.hide()
-                    }
-                } else {
-                    coroutineScope.launch {
-                        bottomSheetState.show()
-                    }
+                coroutineScope.launch {
+                    keyboardController?.hide()
+                    bottomSheetState.show()
                 }
             }
             Column(
@@ -229,6 +238,8 @@ fun MediaSection(viewModel: AddPostViewModel, context: Context) {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.some_error_occurred)
                 }
+            } else {
+                ShowSelectedVideo(selectedMediaData = selectedMedia, context = context)
             }
             Box(
                 Modifier
@@ -268,8 +279,25 @@ fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
 
 
 @Composable
-fun ShowSelectedVideo(selectedMediaData: PostMediaData) {
-
+fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
+    val exoPlayer = remember {
+        FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
+    }
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val height = FunctionHelper.convertDpToPixel(screenHeight * .50f, context)
+    DisposableEffect(AndroidView(factory = {
+        PlayerView(context).apply {
+            player = exoPlayer
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                height.toInt()
+            )
+        }
+    })) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
 }
 
 
@@ -314,10 +342,10 @@ fun PostVisibilityInTopSection(
         Image(
             painterResource(id = currentSelectedPostVisibility.drawableId),
             contentDescription = currentSelectedPostVisibility.scopeName,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(14.dp)
         )
         SpacerWidth6()
-        Text(text = currentSelectedPostVisibility.scopeName, fontSize = 14.sp)
+        Text(text = currentSelectedPostVisibility.scopeName, fontSize = 12.sp)
     }
 }
 
@@ -351,14 +379,14 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconTextSection(
-                resourceId = R.drawable.ic_image,
+                icon = Icons.Rounded.Image,
                 text = stringResource(R.string.add_image),
                 modifier = Modifier.weight(1f)
             ) {
                 selectFileClick(ActivityResultContracts.PickVisualMedia.ImageOnly)
             }
             IconTextSection(
-                resourceId = R.drawable.ic_video,
+                icon = Icons.Rounded.VideoCameraFront,
                 text = stringResource(R.string.add_video),
                 modifier = Modifier.weight(1f),
                 contentArrangement = Arrangement.End
@@ -366,6 +394,16 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
                 selectFileClick(ActivityResultContracts.PickVisualMedia.VideoOnly)
             }
         }
+    }
+}
+
+
+private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
+    if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.please_either_attach_image_video_or_add_some_description)
+    } else {
+        viewModel.uploadUserPost("123")
     }
 }
 

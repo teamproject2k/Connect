@@ -80,4 +80,21 @@ class IHomeRepositoryImpl(
         return appDatabase.getPostDao().insertPostList(postDetailList)
     }
 
+    override suspend fun uploadPostToServer(
+        postDetails: PostDetails,
+        fireBaseId: String
+    ): ResponseState<String> {
+        return try {
+            val response = fireStore.collection(FirebaseConstants.MediaKey).document(fireBaseId)
+                .collection(FirebaseConstants.PostsKey).add(postDetails)
+                .await()
+            ResponseState.success(response.id)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+
+
+
 }

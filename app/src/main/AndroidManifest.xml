@@ -17,7 +17,8 @@
         <activity
             android:name=".presentation.ui.auth.AuthenticationActivity"
             android:exported="true"
-            android:theme="@style/SplashScreenTheme">
+            android:windowSoftInputMode="adjustResize"
+        android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

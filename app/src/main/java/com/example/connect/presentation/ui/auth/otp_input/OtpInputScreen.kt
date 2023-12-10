@@ -28,7 +28,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -37,12 +36,15 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
@@ -54,6 +56,7 @@ import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.ui.common.LoaderButton
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.presentation.ui.common.SpacerHeight18
 import com.example.connect.presentation.ui.common.SpacerHeight48
@@ -62,14 +65,14 @@ import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
-import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.enums.ButtonLoadingEnum
+import com.example.connect.presentation.validation.Validator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -103,7 +106,25 @@ fun OTPScreen(
             TopPageSection(
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
-                stringResource(R.string.enter_otp)
+                stringResource(R.string.enter_otp),
+                buildAnnotatedString {
+                    append(
+                        stringResource(
+                            id = R.string.an_otp_has_been_sent_to,
+                            countryCode,
+                            mobileNumber
+                        )
+                    )
+                    append(" ")
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append("$countryCode $mobileNumber.")
+                    }
+                }
+
             )
             Column(modifier = Modifier.padding(16.dp)) {
                 OTPField(viewModel)
@@ -145,18 +166,15 @@ fun OTPScreen(
 @Composable
 fun OTPTTimer(viewModel: OtpInputViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(key1 = viewModel.showTimerState.value) {
-        if (viewModel.showTimerState.value) {
-            viewModel.startTimer()
-        }
-    }
+    val countDownTimeLeft =
+        viewModel.timeLeftFlow.collectAsState(initial = ConstantsHelper.OTPTimeOutTime)
     if (viewModel.showTimerState.value) {
         Text(
             text = stringResource(
                 id = R.string.string_digit_string_placeholder,
                 stringResource(R.string.resend_in),
-                viewModel.timeLeftState.longValue,
-                if (viewModel.timeLeftState.longValue > 1) {
+                countDownTimeLeft.value,
+                if (countDownTimeLeft.value > 1) {
                     stringResource(id = R.string.secs)
                 } else {
                     stringResource(id = R.string.sec)
@@ -220,7 +238,10 @@ fun OTPField(viewModel: OtpInputViewModel) {
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 ),
-                textStyle = TextStyle(textAlign = TextAlign.Center, color = Color.Black),
+                textStyle = TextStyle(
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold
+                ),
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
@@ -262,7 +283,7 @@ fun HandleUserDetailsState(
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -275,7 +296,7 @@ fun HandleUserDetailsState(
                 context.startActivity(intent)
                 LocalActivity.current.finish()
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -285,7 +306,7 @@ fun HandleUserDetailsState(
                 )
                 else userDetailsState.message.toString()
 
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -310,10 +331,11 @@ fun HandleVerifyOTPState(
 
     when (verifyOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             if (verifyOtpState.data != null) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(verifyOtpState.data.uid)
@@ -333,7 +355,7 @@ fun HandleVerifyOTPState(
                     R.string.something_went_wrong
                 )
                 else verifyOtpState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -358,7 +380,7 @@ fun HandleResendOTPState(
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.LOADING -> {
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -373,7 +395,7 @@ fun HandleResendOTPState(
                 viewModel.snackBarMessageState.value =
                     stringResource(R.string.otp_sent_successfully)
             }
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -382,8 +404,7 @@ fun HandleResendOTPState(
                     R.string.something_went_wrong
                 )
                 else resendOtpState.message.toString()
-
-            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ConstantsHelper.ErrorTag,
@@ -400,15 +421,24 @@ fun HandleResendOTPState(
 }
 
 private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
-    if (!viewModel.isValidOTP()) {
+    val otpValidationResponseCode = Validator.isValidOTP(viewModel.otpState.value)
+    if (otpValidationResponseCode == 1) {
         viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_valid_otp)
+            context.getString(R.string.please_enter_an_otp)
         FunctionHelper.vibrateDevice(context)
-    } else if (context.isNetworkAvailable()) {
-        viewModel.verifyOTP(viewModel.verificationId)
-    } else {
-        viewModel.snackBarMessageState.value = context.getString(R.string.no_internet_connection)
+    } else if (otpValidationResponseCode == 2) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.invalid_otp)
+        FunctionHelper.vibrateDevice(context)
+    } else if (otpValidationResponseCode == 0) {
+        if (context.isNetworkAvailable()) {
+            viewModel.verifyOTP(viewModel.verificationId)
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
     }
+
 }
 
 

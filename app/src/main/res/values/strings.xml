@@ -6,15 +6,22 @@
     <string name="enter_otp">Enter OTP</string>
     <string name="verify_otp">Verify OTP</string>
     <string name="create_account">Create Account</string>
-    <string name="please_enter_mobile_number">Please Enter Mobile Number</string>
+    <string name="mobile_number">Mobile Number</string>
     <string name="full_name">Full Name</string>
     <string name="please_wait">Please Wait...</string>
     <string name="get_otp">Get OTP</string>
-    <string name="please_enter_a_valid_mobile_number">Please Enter A Valid Mobile Number</string>
-    <string name="please_enter_valid_otp">Please Enter Valid OTP</string>
-    <string name="please_enter_valid_name">Please Enter Valid Name</string>
-    <string name="please_select_a_gender">Please Select A Gender</string>
-    <string name="please_select_your_dob">Please Select Your DOB</string>
+    <string name="please_enter_mobile_number">Please enter mobile number</string>
+    <string name="an_otp_has_been_sent_to">An OTP has been sent to </string>
+    <string name="invalid_mobile_number">Invalid mobile number</string>
+    <string name="please_enter_an_otp">Please enter an OTP</string>
+    <string name="invalid_otp">Invalid OTP</string>
+    <string name="please_enter_name">Please enter name</string>
+    <string name="invalid_name">Invalid name</string>
+    <string name="name_cannot_be_greater_than_max_characters">Name can\'t be greater than %1$d characters.</string>
+    <string name="please_select_your_gender">Please select your gender</string>
+    <string name="invalid_gender">Invalid gender</string>
+    <string name="please_select_your_date_of_birth">Please select your date of birth</string>
+    <string name="invalid_date_of_birth">Invalid date of birth</string>
     <string name="_91">+91</string>
     <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than 10 digits</string>
     <string name="name_can_t_contain_digits_or_special_characters">Name can\'t contain digits or special characters</string>
@@ -66,4 +73,7 @@
     <string name="some_error_occurred">Some error occurred</string>
     <string name="add_image">Add Image</string>
     <string name="add_video">Add Video</string>
+    <string name="an_otp_will_be_send_to_the_below_entered_mobile_number">An OTP will be send to the below entered mobile number.</string>
+    <string name="please_either_attach_image_video_or_add_some_description">Please either attach image/video or add some description</string>
+    <string name="try_again">Try Again</string>
 </resources>

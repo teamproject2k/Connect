@@ -32,4 +32,8 @@ class HomeUseCase @Inject constructor(private val repository: IHomeRepository) {
     suspend fun getUserDetailsFromIds(idList: List<String>) =
         repository.getUserDetailsFromIds(idList)
 
+
+    suspend fun uploadPostToServer(postDetails: PostDetails, fireBaseId: String) =
+        repository.uploadPostToServer(postDetails, fireBaseId)
+
 }
