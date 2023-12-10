@@ -1,4 +1,4 @@
-package com.example.connect.domain.useCase
+package com.example.connect.domain.useCase.device
 
 import com.example.connect.domain.repository.IAuthenticationRepository
 import javax.inject.Inject

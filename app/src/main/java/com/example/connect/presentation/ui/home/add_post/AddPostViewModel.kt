@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
-import com.example.connect.domain.useCase.UploadPostToRemoteUseCase
+import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope

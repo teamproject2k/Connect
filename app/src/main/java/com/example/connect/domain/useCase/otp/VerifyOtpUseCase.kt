@@ -1,4 +1,4 @@
-package com.example.connect.domain.useCase
+package com.example.connect.domain.useCase.otp
 
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.repository.IAuthenticationRepository
