@@ -7,12 +7,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun getHeightToMaintainAspectRatio(
-    horizontalPadding: Dp,
-    verticalPadding: Dp,
-    itemsRequiredPerRow: Int,
-    itemsHorizontalPadding: Dp,
     noOfRows: Int,
-    itemsVerticalPadding: Dp
+    itemsRequiredPerRow: Int,
+    horizontalPadding: Dp = 0.dp,
+    verticalPadding: Dp = 0.dp,
+    itemsHorizontalPadding: Dp = 0.dp,
+    itemsVerticalPadding: Dp = 0.dp
 ): Dp {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val availableScreenWidth =

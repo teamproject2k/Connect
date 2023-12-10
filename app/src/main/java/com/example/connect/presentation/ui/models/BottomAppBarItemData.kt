@@ -6,4 +6,5 @@ data class BottomAppBarItemData(
     val text: String,
     val selectedIcon: ImageVector,
     val unSelectedIcon: ImageVector,
+    val routeName: String
 )

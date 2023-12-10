@@ -66,6 +66,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.home.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -80,9 +81,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddPostScreen() {
     val viewModel: AddPostViewModel = hiltViewModel()
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
     val keyboardController = LocalSoftwareKeyboardController.current
     if (viewModel.isFirstTimeSetup) {
         viewModel.setUpData(context)
@@ -140,7 +141,7 @@ fun AddPostScreen() {
                 .fillMaxSize()
         ) {
 
-            TopDetailsSection(viewModel = viewModel) {
+            TopDetailsSection(viewModel = viewModel, sharedViewModel) {
                 coroutineScope.launch {
                     keyboardController?.hide()
                     bottomSheetState.show()
@@ -302,7 +303,11 @@ fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
 
 
 @Composable
-fun TopDetailsSection(viewModel: AddPostViewModel, onVisibilityScopeClick: () -> Unit) {
+fun TopDetailsSection(
+    viewModel: AddPostViewModel,
+    sharedViewModel: HomeSharedViewModel,
+    onVisibilityScopeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,9 +315,9 @@ fun TopDetailsSection(viewModel: AddPostViewModel, onVisibilityScopeClick: () ->
         verticalAlignment = Alignment.CenterVertically,
     ) {
         UserDetailsSection(
-            imageUrl = "",
-            userName = "Aryan",
-            userBio = "Android Developer",
+            imageUrl = sharedViewModel._userDetails.profilePhoto.toString(),
+            userName = FunctionHelper.getFormattedDisplayName(sharedViewModel._userDetails.name),
+            userBio = sharedViewModel._userDetails.bio,
             modifier = Modifier.weight(1f)
         )
         PostVisibilityInTopSection(viewModel) {

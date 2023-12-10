@@ -2,64 +2,152 @@ package com.example.connect.presentation.ui.home
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.connect.R
+import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
+import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
+import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
+import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.example.connect.presentation.ui.destinations.HomeScreenDestination
+import com.example.connect.presentation.ui.destinations.UserProfileScreenDestination
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.ui.theme.ConnectTheme
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class HomeActivity : BaseActivity() {
+    private lateinit var viewModel: HomeSharedViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            viewModel = hiltViewModel()
             CompositionLocalProvider(LocalActivity provides this) {
                 ConnectTheme {
-                    var selectedIndex by rememberSaveable {
-                        mutableIntStateOf(0)
-                    }
-//                    Scaffold(bottomBar = {
-//                        NavigationBar {
-//                            getBottomNavBarItemList().forEachIndexed { index, data ->
-//                                NavigationBarItem(
-//                                    selected = selectedIndex == index,
-//                                    onClick = {
-//                                        selectedIndex = index
-//                                    },
-//                                    icon = {
-//                                        Image(
-//                                            imageVector = if (selectedIndex == index) data.selectedIcon else data.unSelectedIcon,
-//                                            contentDescription = data.text
-//                                        )
-//                                    },
-////                                    label = { Text(text = data.text) },
-//                                )
-//                            }
-//                        }
-//                    }) {
-//
-//                    }
-                    DestinationsNavHost(
-                        navGraph = NavGraphs.home,
-                        engine = getAnimatedNavHostEngine()
-                    )
+                    HandleUserDetailsFlow()
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun HandleUserDetailsFlow() {
+        val getUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
+        when (getUserDetailsState.status) {
+            RequestStatusEnum.LOADING -> {
+                LoaderFullScreen(stringResource(R.string.getting_user_details))
+            }
+
+            RequestStatusEnum.SUCCESS -> {
+                CreateUi()
+            }
+
+            RequestStatusEnum.EXCEPTION -> {
+                if (getUserDetailsState.message.isNullOrBlank()) {
+                    showToast(stringResource(id = R.string.something_went_wrong))
+                } else {
+                    showToast(getUserDetailsState.message)
+                }
+            }
+
+            RequestStatusEnum.NONE -> {
+
+            }
+        }
+    }
+
+
+    @Composable
+    private fun CreateUi() {
+        val selectedRouteState = rememberSaveable {
+            mutableStateOf(HomeScreenDestination.route)
+        }
+        val navController = rememberNavController()
+        Scaffold(bottomBar = {
+            Surface(tonalElevation = 4.dp) {
+                NavigationBar(
+                    modifier = Modifier
+                        .height(
+                            getHeightToMaintainAspectRatio(
+                                noOfRows = 1, itemsRequiredPerRow = 6
+                            )
+                        )
+                ) {
+                    getBottomNavBarItemList().forEach { data ->
+                        NavigationBarItem(
+                            selected = selectedRouteState.value == data.routeName,
+                            onClick = {
+                                selectedRouteState.value = data.routeName
+                                navController.popBackStack()
+                                navController.navigate(
+                                    data.routeName
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primary
+                            ),
+                            icon = {
+                                Image(
+                                    imageVector = if (selectedRouteState.value == data.routeName) data.selectedIcon else data.unSelectedIcon,
+                                    contentDescription = data.text,
+                                    colorFilter = if (selectedRouteState.value == data.routeName) {
+                                        ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                                    } else null
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+        }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                DestinationsNavHost(
+                    navGraph = NavGraphs.home,
+                    engine = getAnimatedNavHostEngine(),
+                    navController = navController
+                )
             }
         }
     }
@@ -67,19 +155,44 @@ class HomeActivity : BaseActivity() {
 
     private fun getBottomNavBarItemList(): ArrayList<BottomAppBarItemData> {
         val bottomNavList = arrayListOf<BottomAppBarItemData>()
-        bottomNavList.add(BottomAppBarItemData("Home", Icons.Filled.Home, Icons.Outlined.Home))
         bottomNavList.add(
             BottomAppBarItemData(
-                "Add Post",
-                Icons.Filled.AddCircle,
-                Icons.Outlined.AddCircle
+                getString(R.string.home),
+                Icons.Filled.Home,
+                Icons.Outlined.Home,
+                HomeScreenDestination.route
             )
         )
         bottomNavList.add(
             BottomAppBarItemData(
-                "Profile",
+                getString(R.string.search),
+                Icons.Filled.Search,
+                Icons.Outlined.Search,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                getString(R.string.add_post),
+                Icons.Filled.AddCircle,
+                Icons.Outlined.AddCircleOutline,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                getString(R.string.chat),
+                Icons.Filled.ChatBubble,
+                Icons.Outlined.ChatBubbleOutline,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                getString(R.string.profile),
                 Icons.Filled.Person,
-                Icons.Outlined.Person
+                Icons.Outlined.Person,
+                UserProfileScreenDestination.route
             )
         )
         return bottomNavList
