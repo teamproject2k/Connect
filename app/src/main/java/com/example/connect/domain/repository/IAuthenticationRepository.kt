@@ -38,12 +38,12 @@ interface IAuthenticationRepository {
 
 
     /**
-     * Gets the number of users with the given name.
+     * Gets the number of users with the given name from remote.
      *
      * @param name The name.
      * @return The response state.
      */
-    suspend fun getUsersCountFromName(name: String): ResponseState<Int>
+    suspend fun getUsersCountFromNameFromRemote(name: String): ResponseState<Int>
 
     /**
      * Adds the user to the remote database.
@@ -59,7 +59,7 @@ interface IAuthenticationRepository {
      * @param userDetails The user details.
      * @return The row ID of the inserted row.
      */
-    suspend fun addUserToLocalDb(userDetails: UsersBean): Long
+    suspend fun addUserToDb(userDetails: UsersBean): Long
 
     /**
      * Updates the device ID on the remote database.
@@ -81,7 +81,7 @@ interface IAuthenticationRepository {
      * @param updatedDeviceId The updated device ID.
      * @return The number of rows affected.
      */
-    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int
+    suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int
 
 
 }

@@ -123,7 +123,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUsersCountFromName(name: String): ResponseState<Int> {
+    override suspend fun getUsersCountFromNameFromRemote(name: String): ResponseState<Int> {
         // Try to get the users from the Firestore database whose name matches the given name.
         return try {
             val result = fireStore.collection(FirebaseConstants.UsersKey)
@@ -155,7 +155,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToLocalDb(userDetails: UsersBean): Long {
+    override suspend fun addUserToDb(userDetails: UsersBean): Long {
         // Add the user to the local database.
         return appDatabase.getUsersDao().insertUser(userDetails.toUserDbEntity())
     }
@@ -182,7 +182,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int {
+    override suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int {
         // Get the UsersDao object from the AppDatabase object.
         val usersDao = appDatabase.getUsersDao()
 

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetUsersFromNameUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
     suspend fun invoke(name: String): ResponseState<Int> {
-        return repository.getUsersCountFromName(name)
+        return repository.getUsersCountFromNameFromRemote(name)
     }
 
 }

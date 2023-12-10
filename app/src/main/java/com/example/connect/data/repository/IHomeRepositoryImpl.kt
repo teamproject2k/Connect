@@ -15,12 +15,12 @@ class IHomeRepositoryImpl(
     private val fireStore: FirebaseFirestore
 ) : IHomeRepository {
 
-    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean? {
+    override suspend fun getUserDetailsFromDb(fireBaseId: String): UsersBean? {
         // Get the user details from the local database.
         return appDatabase.getUsersDao().getUserDetails(fireBaseId)?.toUserBean()
     }
 
-    override suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UsersBean>> {
+    override suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UsersBean>> {
         // Get the user details from the server for the given list of IDs.
         return try {
             val response = fireStore.collection(FirebaseConstants.UsersKey)
@@ -37,12 +37,12 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostDetails>? {
+    override suspend fun getPostDetailsFromDb(fireBaseId: String): List<PostDetails>? {
         // Get the post details from the local database.
         return appDatabase.getPostDao().getPostList(fireBaseId)
     }
 
-    override suspend fun getPostDetailsFromServer(fireBaseId: String): ResponseState<List<PostDetails>> {
+    override suspend fun getPostDetailsFromRemote(fireBaseId: String): ResponseState<List<PostDetails>> {
         // Get the post details from the server.
         return try {
             val response = fireStore.collection(FirebaseConstants.PostsKey)
@@ -61,17 +61,17 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun addPostToLocal(postDetails: PostDetails): Long {
+    override suspend fun addPostToDb(postDetails: PostDetails): Long {
         // Add the post details to the local database.
         return appDatabase.getPostDao().insertPost(postDetails)
     }
 
-    override suspend fun addPostListToLocal(postDetailList: List<PostDetails>): LongArray {
+    override suspend fun addPostListToDb(postDetailList: List<PostDetails>): LongArray {
         // Add the post details to the local database.
         return appDatabase.getPostDao().insertPostList(postDetailList)
     }
 
-    override suspend fun uploadPostToServer(
+    override suspend fun uploadPostToRemote(
         postDetails: PostDetails,
         fireBaseId: String
     ): ResponseState<String> {

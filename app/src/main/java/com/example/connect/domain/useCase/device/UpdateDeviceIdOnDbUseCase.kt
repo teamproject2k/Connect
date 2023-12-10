@@ -13,6 +13,6 @@ class UpdateDeviceIdOnDbUseCase @Inject constructor(private val repository: IAut
      * @return The number of rows affected.
      */
     suspend fun invoke(fireBaseId: String, updatedDeviceId: String): Int {
-        return repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
+        return repository.updateDeviceIdOnDb(fireBaseId, updatedDeviceId)
     }
 }

@@ -15,6 +15,6 @@ class UploadPostToRemoteUseCase @Inject constructor(private val repository: IHom
      * @return The response state.
      */
     suspend fun invoke(postDetails: PostDetails, fireBaseId: String): ResponseState<String> {
-        return repository.uploadPostToServer(postDetails, fireBaseId)
+        return repository.uploadPostToRemote(postDetails, fireBaseId)
     }
 }

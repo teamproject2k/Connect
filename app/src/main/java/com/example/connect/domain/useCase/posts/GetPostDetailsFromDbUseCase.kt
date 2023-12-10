@@ -13,7 +13,7 @@ class GetPostDetailsFromDbUseCase @Inject constructor(private val repository: IH
      * @return The post details.
      */
     suspend fun invoke(fireBaseId: String): List<PostDetails>? {
-        return repository.getPostDetailsFromLocal(fireBaseId)
+        return repository.getPostDetailsFromDb(fireBaseId)
     }
 
 }

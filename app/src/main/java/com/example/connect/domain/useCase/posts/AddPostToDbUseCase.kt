@@ -13,6 +13,6 @@ class AddPostToDbUseCase @Inject constructor(private val repository: IHomeReposi
      * @return The IDs of the posts that were added.
      */
     suspend fun invoke(postDetailList: List<PostDetails>): LongArray {
-        return repository.addPostListToLocal(postDetailList)
+        return repository.addPostListToDb(postDetailList)
     }
 }
