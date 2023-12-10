@@ -1,11 +1,11 @@
 package com.example.connect.data.repository
 
-import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.local_db.posts.PostDetails
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.data.models.UserRemoteEntity
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IHomeRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -15,43 +15,20 @@ class IHomeRepositoryImpl(
     private val fireStore: FirebaseFirestore
 ) : IHomeRepository {
 
-    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UserDetails? {
+    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean? {
         // Get the user details from the local database.
-        return appDatabase.getUsersDao().getUserDetails(fireBaseId)
+        return appDatabase.getUsersDao().getUserDetails(fireBaseId)?.toUserBean()
     }
 
-    override suspend fun getUserDetailsFromServer(fireBaseId: String): ResponseState<UserDetails> {
-        // Get the user details from the server.
-        return try {
-            val result =
-                fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId).get().await()
-            val user = result.toObject(UserDetails::class.java)
-            if (result.exists() && user != null) {
-                // The user details were found on the server.
-                ResponseState.success(user)
-            } else {
-                // The user details were not found on the server.
-                ResponseState.error(ErrorCodes.NoUserFound)
-            }
-        } catch (exception: Exception) {
-            // An error occurred while getting the user details from the server.
-            ResponseState.error(exception.localizedMessage ?: "")
-        }
-    }
-
-    override suspend fun addUserToLocalDb(userDetails: UserDetails): Long {
-        // Add the user details to the local database.
-        return appDatabase.getUsersDao().insertUser(userDetails)
-    }
-
-    override suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UserDetails>> {
+    override suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UsersBean>> {
         // Get the user details from the server for the given list of IDs.
         return try {
             val response = fireStore.collection(FirebaseConstants.UsersKey)
-                .whereIn(UserDetails::firebaseUserId.name, idList).get().await()
-            val usersList = arrayListOf<UserDetails>()
+                .whereIn(UserRemoteEntity::firebaseUserId.name, idList).get().await()
+            val usersList = arrayListOf<UsersBean>()
             response.documents.forEach { document ->
-                document.toObject(UserDetails::class.java)?.let { usersList.add(it) }
+                document.toObject(UserRemoteEntity::class.java)
+                    ?.let { usersList.add(it.toUserBean()) }
             }
             ResponseState.success(usersList)
         } catch (exception: Exception) {

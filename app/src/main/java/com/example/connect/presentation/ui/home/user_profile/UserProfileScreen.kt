@@ -80,9 +80,8 @@ import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.data.local_db.posts.PostDetails
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
-import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -154,10 +153,10 @@ fun UserProfileScreen() {
             }
         }
     }
-    LaunchedEffect(key1 = true) {
-        viewModel.getUserDetails()
-        viewModel.getPostDetails()
-    }
+//    LaunchedEffect(key1 = true) {
+//        viewModel.getUserDetails()
+//        viewModel.getPostDetails()
+//    }
 
 }
 
@@ -255,56 +254,56 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
 
 @Composable
 fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () -> Unit) {
-    val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
-        mutableStateOf(false)
-    }
-    val context = LocalContext.current
-    when (userDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
-            LoaderFullScreen(loadingText = stringResource(R.string.getting_details))
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
-        }
-
-        RequestStatusEnum.SUCCESS -> {
-            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
-        }
-
-        RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
-                if (userDetailsState.message == ErrorCodes.NoUserFound) {
-                    viewModel.sharedPreference.isUserDetailsEntered = false
-                    context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
-                    val intent = Intent(context, AuthenticationActivity::class.java)
-                    context.startActivity(intent)
-                    LocalActivity.current.finish()
-                } else {
-                    viewModel.snackBarMessageState.value =
-                        userDetailsState.message
-                            ?: stringResource(id = R.string.something_went_wrong)
-                }
-                isExceptionHandled = true
-            }
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserProfileScreen",
-                userDetailsState.message.toString()
-            )
-        }
-
-        RequestStatusEnum.NONE -> {
-            //no need to handle it
-        }
-    }
+//    val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
+//    var isExceptionHandled by remember {
+//        mutableStateOf(false)
+//    }
+//    val context = LocalContext.current
+//    when (userDetailsState.status) {
+//        RequestStatusEnum.LOADING -> {
+//            LoaderFullScreen(loadingText = stringResource(R.string.getting_details))
+//            if (isExceptionHandled) {
+//                isExceptionHandled = false
+//            }
+//        }
+//
+//        RequestStatusEnum.SUCCESS -> {
+//            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
+//        }
+//
+//        RequestStatusEnum.EXCEPTION -> {
+//            if (!isExceptionHandled) {
+//                if (userDetailsState.message == ErrorCodes.NoUserFound) {
+//                    viewModel.sharedPreference.isUserDetailsEntered = false
+//                    context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
+//                    val intent = Intent(context, AuthenticationActivity::class.java)
+//                    context.startActivity(intent)
+//                    LocalActivity.current.finish()
+//                } else {
+//                    viewModel.snackBarMessageState.value =
+//                        userDetailsState.message
+//                            ?: stringResource(id = R.string.something_went_wrong)
+//                }
+//                isExceptionHandled = true
+//            }
+//            LoggingHelper.logData(
+//                LoggingLevelEnum.Error,
+//                ConstantsHelper.ErrorTag,
+//                "UserProfileScreen",
+//                userDetailsState.message.toString()
+//            )
+//        }
+//
+//        RequestStatusEnum.NONE -> {
+//            //no need to handle it
+//        }
+//    }
 }
 
 
 @Composable
 fun ProfileScreen(
-    userDetails: UserDetails,
+    userDetails: UsersBean,
     viewModel: UserProfileViewModel,
     onOptionsMenuClick: () -> Unit
 ) {
@@ -326,7 +325,7 @@ fun ProfileScreen(
 
 
 @Composable
-fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
+fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -396,13 +395,13 @@ fun ImageSection(userDetails: UserDetails, onOptionsMenuClick: () -> Unit) {
 
 
 @Composable
-fun UserDetailsSection(userDetails: UserDetails) {
+fun UserDetailsSection(userDetails: UsersBean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        TextBold18(text = FunctionHelper.getFormattedDisplayName(userDetails.name))
+        TextBold18(text = userDetails.name)
         SpacerHeight6()
         Text(text = userDetails.bio, fontSize = 12.sp)
         SpacerHeight12()
@@ -439,41 +438,41 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
 
 @Composable
 fun HandleFriendListSection(viewModel: UserProfileViewModel) {
-    val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
-        mutableStateOf(false)
-    }
-    when (friendsDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
-            FriendsListLoading()
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
-        }
-
-        RequestStatusEnum.SUCCESS -> {
-            FriendsListSection(friendsList = friendsDetailsState.data!!)
-        }
-
-        RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    friendsDetailsState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
-                isExceptionHandled = true
-            }
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserProfileScreen",
-                friendsDetailsState.message.toString()
-            )
-        }
-
-        RequestStatusEnum.NONE -> {
-            FriendsListSection(listOf())
-        }
-    }
+//    val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
+//    var isExceptionHandled by remember {
+//        mutableStateOf(false)
+//    }
+//    when (friendsDetailsState.status) {
+//        RequestStatusEnum.LOADING -> {
+//            FriendsListLoading()
+//            if (isExceptionHandled) {
+//                isExceptionHandled = false
+//            }
+//        }
+//
+//        RequestStatusEnum.SUCCESS -> {
+//            FriendsListSection(friendsList = friendsDetailsState.data!!)
+//        }
+//
+//        RequestStatusEnum.EXCEPTION -> {
+//            if (!isExceptionHandled) {
+//                viewModel.snackBarMessageState.value =
+//                    friendsDetailsState.message
+//                        ?: stringResource(id = R.string.something_went_wrong)
+//                isExceptionHandled = true
+//            }
+//            LoggingHelper.logData(
+//                LoggingLevelEnum.Error,
+//                ConstantsHelper.ErrorTag,
+//                "UserProfileScreen",
+//                friendsDetailsState.message.toString()
+//            )
+//        }
+//
+//        RequestStatusEnum.NONE -> {
+//            FriendsListSection(listOf())
+//        }
+//    }
 }
 
 @Composable
@@ -503,7 +502,7 @@ fun FriendsListLoading() {
 
 
 @Composable
-fun FriendsListSection(friendsList: List<UserDetails>) {
+fun FriendsListSection(friendsList: List<UsersBean>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -570,7 +569,7 @@ fun FriendsListSection(friendsList: List<UserDetails>) {
 
 @Composable
 fun FriendItem(
-    friendDetails: UserDetails?,
+    friendDetails: UsersBean?,
     showShimmer: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}

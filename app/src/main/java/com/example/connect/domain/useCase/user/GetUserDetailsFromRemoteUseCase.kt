@@ -1,14 +1,14 @@
-package com.example.connect.domain.useCase
+package com.example.connect.domain.useCase.user
 
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IAuthenticationRepository
 import javax.inject.Inject
 
 class GetUserDetailsFromRemoteUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
-    suspend fun invoke(userId: String): ResponseState<UserDetails?> {
-        return repository.getUserDetails(userId)
+    suspend fun invoke(userId: String): ResponseState<UsersBean?> {
+        return repository.getUserDetailsFromRemote(userId)
     }
 
 }

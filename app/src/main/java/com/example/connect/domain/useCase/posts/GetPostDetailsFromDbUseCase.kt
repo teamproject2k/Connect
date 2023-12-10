@@ -1,7 +1,6 @@
-package com.example.connect.domain.useCase
+package com.example.connect.domain.useCase.posts
 
 import com.example.connect.data.local_db.posts.PostDetails
-import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.repository.IHomeRepository
 import javax.inject.Inject
 

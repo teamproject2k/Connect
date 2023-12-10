@@ -1,6 +1,6 @@
-package com.example.connect.domain.useCase
+package com.example.connect.domain.useCase.user
 
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IHomeRepository
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ class GetUserDetailsFromDbUseCase @Inject constructor(private val repository: IH
      * @param fireBaseId The user's Firebase ID.
      * @return The user details, or null if the user does not exist.
      */
-    suspend fun invoke(fireBaseId: String): UserDetails? {
+    suspend fun invoke(fireBaseId: String): UsersBean? {
         return repository.getUserDetailsFromLocal(fireBaseId)
     }
 }

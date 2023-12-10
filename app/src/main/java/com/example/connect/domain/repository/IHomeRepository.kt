@@ -2,7 +2,7 @@ package com.example.connect.domain.repository
 
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.models.UsersBean
 
 interface IHomeRepository {
 
@@ -12,23 +12,7 @@ interface IHomeRepository {
      * @param fireBaseId The user's Firebase ID.
      * @return The user details, or null if the user is not found.
      */
-    suspend fun getUserDetailsFromLocal(fireBaseId: String): UserDetails?
-
-    /**
-     * Gets user details from server.
-     *
-     * @param fireBaseId The user's Firebase ID.
-     * @return A response state containing the user details, or an error if the request failed.
-     */
-    suspend fun getUserDetailsFromServer(fireBaseId: String): ResponseState<UserDetails>
-
-    /**
-     * Adds a user to the local database.
-     *
-     * @param userDetails The user details to add.
-     * @return The row ID of the newly added user.
-     */
-    suspend fun addUserToLocalDb(userDetails: UserDetails): Long
+    suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean?
 
     /**
      * Gets user details from local database by ids.
@@ -36,7 +20,7 @@ interface IHomeRepository {
      * @param idList The list of user ids.
      * @return A response state containing the list of user details, or an error if the request failed.
      */
-    suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UserDetails>>
+    suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UsersBean>>
 
     /**
      * Gets post details from local database.

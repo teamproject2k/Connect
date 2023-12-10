@@ -4,11 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.AddUserToDbUseCase
-import com.example.connect.domain.useCase.GetPostDetailsFromDbUseCase
-import com.example.connect.domain.useCase.GetUserDetailsFromDbUseCase
-import com.example.connect.domain.useCase.GetUserDetailsFromRemoteUseCase
+import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +25,7 @@ class HomeSharedViewModel @Inject constructor(
     private val addUserToDbUseCase: AddUserToDbUseCase
 ) :
     BaseViewModel() {
-    lateinit var _userDetails: UserDetails
+    lateinit var _userDetails: UsersBean
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
 

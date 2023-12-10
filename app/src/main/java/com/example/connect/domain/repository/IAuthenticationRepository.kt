@@ -1,7 +1,7 @@
 package com.example.connect.domain.repository
 
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.models.UsersBean
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -34,7 +34,7 @@ interface IAuthenticationRepository {
      * @param userId The user ID.
      * @return The response state.
      */
-    suspend fun getUserDetails(userId: String): ResponseState<UserDetails?>
+    suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?>
 
 
     /**
@@ -43,7 +43,7 @@ interface IAuthenticationRepository {
      * @param name The name.
      * @return The response state.
      */
-    suspend fun getUsersFromName(name: String): ResponseState<Int>
+    suspend fun getUsersCountFromName(name: String): ResponseState<Int>
 
     /**
      * Adds the user to the remote database.
@@ -51,7 +51,7 @@ interface IAuthenticationRepository {
      * @param userDetails The user details.
      * @return The response state.
      */
-    suspend fun addUserToRemote(userDetails: UserDetails): ResponseState<Nothing>
+    suspend fun addUserToRemote(userDetails: UsersBean): ResponseState<Nothing>
 
     /**
      * Adds the user to the local database.
@@ -59,7 +59,7 @@ interface IAuthenticationRepository {
      * @param userDetails The user details.
      * @return The row ID of the inserted row.
      */
-    suspend fun addUserToLocalDb(userDetails: UserDetails): Long
+    suspend fun addUserToLocalDb(userDetails: UsersBean): Long
 
     /**
      * Updates the device ID on the remote database.
@@ -68,7 +68,10 @@ interface IAuthenticationRepository {
      * @param updatedDeviceId The updated device ID.
      * @return The response state.
      */
-    suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String): ResponseState<Nothing>
+    suspend fun updateDeviceIdOnRemote(
+        fireBaseId: String,
+        updatedDeviceId: String
+    ): ResponseState<Nothing>
 
 
     /**
@@ -78,7 +81,7 @@ interface IAuthenticationRepository {
      * @param updatedDeviceId The updated device ID.
      * @return The number of rows affected.
      */
-    suspend fun updateDeviceIdOnLocal(fireBaseId: String,updatedDeviceId: String): Int
+    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int
 
 
 }

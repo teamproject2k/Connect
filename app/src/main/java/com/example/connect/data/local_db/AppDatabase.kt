@@ -6,10 +6,10 @@ import androidx.room.TypeConverters
 import com.example.connect.data.local_db.posts.IPostDao
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.IUsersDao
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.data.models.UsersDbEntity
 
 
-@Database(entities = [UserDetails::class, PostDetails::class], version = 1)
+@Database(entities = [UsersDbEntity::class, PostDetails::class], version = 1)
 @TypeConverters(AppTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
 

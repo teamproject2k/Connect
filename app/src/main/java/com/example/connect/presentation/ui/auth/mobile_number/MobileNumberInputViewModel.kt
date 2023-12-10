@@ -4,12 +4,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.AddUserToDbUseCase
-import com.example.connect.domain.useCase.GetUserDetailsFromRemoteUseCase
-import com.example.connect.domain.useCase.SendOtpUseCase
-import com.example.connect.domain.useCase.UpdateDeviceIdOnDbUseCase
-import com.example.connect.domain.useCase.UpdateDeviceIdOnRemoteUseCase
+import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
+import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
+import com.example.connect.domain.useCase.otp.SendOtpUseCase
+import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,9 +38,9 @@ class MobileNumberInputViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val sendOtpUIStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _sendOtpUIStateFlow
 
-    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UserDetails?>> =
+    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
-    val getUserDetailsStateFlow: StateFlow<ResponseState<UserDetails?>> get() = _getUserDetailsStateFlow
+    val getUserDetailsStateFlow: StateFlow<ResponseState<UsersBean?>> get() = _getUserDetailsStateFlow
 
     /**
      * Sends OTP to the user's mobile number.

@@ -4,7 +4,8 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
-import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.data.models.UserRemoteEntity
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -103,15 +104,15 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUserDetails(userId: String): ResponseState<UserDetails?> {
+    override suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?> {
         // Try to get the user details from the Firestore database.
         return try {
             val result =
                 fireStore.collection(FirebaseConstants.UsersKey).document(userId).get().await()
             // If the document exists, get the user details object and return a success response.
             if (result.exists()) {
-                val userModel = result.toObject(UserDetails::class.java)
-                ResponseState.success(userModel)
+                val userModel = result.toObject(UserRemoteEntity::class.java)
+                ResponseState.success(userModel?.toUserBean())
             } else {
                 // If the document does not exist, return a success response with null.
                 ResponseState.success(null)
@@ -122,11 +123,11 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUsersFromName(name: String): ResponseState<Int> {
+    override suspend fun getUsersCountFromName(name: String): ResponseState<Int> {
         // Try to get the users from the Firestore database whose name matches the given name.
         return try {
             val result = fireStore.collection(FirebaseConstants.UsersKey)
-                .whereEqualTo(UserDetails::name.name, name).get().await()
+                .whereEqualTo(UserRemoteEntity::name.name, name).get().await()
             // Return a success response with the number of users found.
             ResponseState.success(result.size())
         } catch (exception: Exception) {
@@ -135,7 +136,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToRemote(userDetails: UserDetails): ResponseState<Nothing> {
+    override suspend fun addUserToRemote(userDetails: UsersBean): ResponseState<Nothing> {
         // Add the user to the remote database.
         return try {
             // Get the user's Firestore document reference.
@@ -144,7 +145,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                     .document(userDetails.firebaseUserId)
 
             // Set the user's details in the document.
-            documentReference.set(userDetails).await()
+            documentReference.set(userDetails.toUserRemoteEntity()).await()
 
             // Return a success response.
             ResponseState.success(null)
@@ -154,9 +155,9 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToLocalDb(userDetails: UserDetails): Long {
+    override suspend fun addUserToLocalDb(userDetails: UsersBean): Long {
         // Add the user to the local database.
-        return appDatabase.getUsersDao().insertUser(userDetails)
+        return appDatabase.getUsersDao().insertUser(userDetails.toUserDbEntity())
     }
 
     override suspend fun updateDeviceIdOnRemote(
@@ -170,7 +171,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                 fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId)
 
             // Update the user's device ID in the document.
-            documentReference.update(UserDetails::currentLoggedInDeviceId.name, updatedDeviceId)
+            documentReference.update(UserRemoteEntity::currentLoggedInDeviceId.name, updatedDeviceId)
                 .await()
 
             // Return a success response.

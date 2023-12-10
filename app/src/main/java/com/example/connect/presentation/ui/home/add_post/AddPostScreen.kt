@@ -316,7 +316,7 @@ fun TopDetailsSection(
     ) {
         UserDetailsSection(
             imageUrl = sharedViewModel._userDetails.profilePhoto.toString(),
-            userName = FunctionHelper.getFormattedDisplayName(sharedViewModel._userDetails.name),
+            userName = sharedViewModel._userDetails.name,
             userBio = sharedViewModel._userDetails.bio,
             modifier = Modifier.weight(1f)
         )

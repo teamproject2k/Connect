@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.AddUserToDbUseCase
-import com.example.connect.domain.useCase.AddUserToRemoteUseCase
-import com.example.connect.domain.useCase.GetUsersFromNameUseCase
+import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
+import com.example.connect.domain.useCase.user.GetUsersFromNameUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -51,7 +51,7 @@ class UserDetailsViewModel @Inject constructor(
                     getUsersFromNameUseCase.invoke(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
-                    val user = UserDetails(
+                    val user = UsersBean(
                         fireBaseAuth.currentUser!!.uid,
                         getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
                         formattedUserName,
@@ -59,7 +59,8 @@ class UserDetailsViewModel @Inject constructor(
                         selectedDOBState.longValue,
                         createdDate,
                         createdDate,
-                        sharedPreference.deviceId!!
+                        sharedPreference.deviceId!!,
+                        "Connect User"
                     )
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
