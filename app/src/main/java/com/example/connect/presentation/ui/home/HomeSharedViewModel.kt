@@ -5,7 +5,6 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.HomeUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class HomeSharedViewModel @Inject constructor(private val homeUseCase: HomeUseCase) :
+class HomeSharedViewModel @Inject constructor(private val getUserDetails ) :
     BaseViewModel() {
     lateinit var _userDetails: UserDetails
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
@@ -36,15 +35,14 @@ class HomeSharedViewModel @Inject constructor(private val homeUseCase: HomeUseCa
                 _userDetailsStateFlow.value = ResponseState.loading()
                 val fireBaseId = fireBaseAuth.currentUser?.uid
                 if (fireBaseId != null) {
-                    val userDetails =
-                        homeUseCase.getUserDetailsFromLocal(fireBaseId)
+                    val userDetails = get.getUserDetailsFromLocal(fireBaseId)
                     if (userDetails != null) {
                         _userDetails = userDetails
                         _userDetailsStateFlow.value = ResponseState.success(null)
 
                     } else {
                         val userDetailsFromServerResponseState =
-                            homeUseCase.getUserDetailsFromServer(fireBaseId)
+                            Get.getUserDetailsFromServer(fireBaseId)
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
                             homeUseCase.addUserToLocalDb(userDetailsFromServerResponseState.data!!)
                             _userDetails = userDetailsFromServerResponseState.data

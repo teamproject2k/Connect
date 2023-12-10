@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IAuthenticationRepository {
+
     suspend fun sendOtp(
         countryCode: String,
         mobileNumber: String,
@@ -16,7 +17,6 @@ interface IAuthenticationRepository {
 
     suspend fun getUserDetails(userId: String): ResponseState<UserDetails?>
 
-
     suspend fun getUsersFromName(name: String): ResponseState<Int>
 
     suspend fun addUserToRemote(userDetails: UserDetails): ResponseState<Nothing>
@@ -25,8 +25,6 @@ interface IAuthenticationRepository {
 
     suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String): ResponseState<Nothing>
 
-
     suspend fun updateDeviceIdOnLocal(fireBaseId: String,updatedDeviceId: String): Int
-
 
 }

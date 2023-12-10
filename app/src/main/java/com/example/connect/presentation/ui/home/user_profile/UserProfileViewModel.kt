@@ -7,7 +7,6 @@ import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.HomeUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

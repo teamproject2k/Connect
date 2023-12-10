@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.AuthenticationUseCase
 import com.example.connect.domain.useCase.VerifyOtpUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum

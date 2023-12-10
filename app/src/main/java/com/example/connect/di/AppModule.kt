@@ -34,13 +34,11 @@ class AppModule {
         return firebaseAuth
     }
 
-
     @Provides
     @Singleton
     fun getSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences("com.example.connect_shared_pref", MODE_PRIVATE)
     }
-
 
     @Provides
     @Singleton
@@ -62,7 +60,6 @@ class AppModule {
         return database.build()
     }
 
-
     @Provides
     @Singleton
     fun getHomeRepository(
@@ -70,4 +67,5 @@ class AppModule {
         fireStore: FirebaseFirestore
     ): IHomeRepository =
         IHomeRepositoryImpl(appDatabase, fireStore)
+
 }

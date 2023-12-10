@@ -8,6 +8,7 @@ import java.util.Date
 object Validator {
 
     /**
+     *  Validates mobile number
      *  @param userMobileNumber [String] user entered mobile number
      *  @return response code of validation
      *  0 -> Correct
@@ -29,6 +30,7 @@ object Validator {
     }
 
     /**
+     * Validates otp
      * @param otp [String] user entered OTP
      * @return response code of validation
      * 0 -> Correct
@@ -51,6 +53,7 @@ object Validator {
 
 
     /**
+     * Validates name
      * @param userName [String] user entered name
      * @return response code of validation
      * 0 -> Correct
@@ -77,6 +80,7 @@ object Validator {
     }
 
     /**
+     * Validates gender
      *  @param gender [String] user selected gender
      *  @param context [String]
      *  @return response code of validation
@@ -101,6 +105,7 @@ object Validator {
 
 
     /**
+     * Validates dob
      * @param dob [Long] user entered dob
      * @return response code of validation
      * 0-> correct
@@ -123,6 +128,7 @@ object Validator {
 
 
     /**
+     * Validates bio
      *  @param bio [String] user entered
      *  @return response code of validation
      *  0 -> Correct
