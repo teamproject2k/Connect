@@ -1,7 +1,7 @@
 package com.example.connect.domain.models
 
-import com.example.connect.data.models.UserRemoteEntity
-import com.example.connect.data.models.UsersDbEntity
+import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.data.models.user.UsersDbEntity
 
 data class UsersBean(
     val firebaseUserId: String,

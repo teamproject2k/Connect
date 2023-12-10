@@ -1,13 +1,10 @@
-package com.example.connect.data.models
+package com.example.connect.data.models.user
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
-@Entity
-data class UsersDbEntity(
-    @PrimaryKey
+
+data class UserRemoteEntity(
     val firebaseUserId: String,
     val connectUserId: String,
     val name: String,
@@ -21,6 +18,8 @@ data class UsersDbEntity(
     val coverPhoto: String? = null,
     val friendList: List<String> = listOf()
 ) {
+    constructor() : this("1", "", "", "", -1, 0, 0, "", "")
+
     fun toUserBean(): UsersBean {
         return UsersBean(
             firebaseUserId,

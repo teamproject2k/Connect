@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.example.connect.data.local_db.posts.IPostDao
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.IUsersDao
-import com.example.connect.data.models.UsersDbEntity
+import com.example.connect.data.models.user.UsersDbEntity
 
 
 @Database(entities = [UsersDbEntity::class, PostDetails::class], version = 1)

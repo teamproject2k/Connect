@@ -4,7 +4,7 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
-import com.example.connect.data.models.UserRemoteEntity
+import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
