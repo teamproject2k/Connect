@@ -32,9 +32,12 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         responseStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>>
     ) {
 
+        // Create a callback object to handle the verification process.
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                // If the verification is completed, check if the user is already logged in.
                 if (firebaseAuth.currentUser?.uid != null) {
+                    // If the user is already logged in, send a success response with the user's ID.
                     responseStateFlow.value = ResponseState.success(
                         Pair(
                             FirebaseConstants.AutoLogin,
@@ -42,11 +45,13 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                         )
                     )
                 } else {
+                    // If the user is not logged in, send an error response.
                     responseStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
                 }
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
+                // If the verification fails, send an error response with the error message.
                 responseStateFlow.value = ResponseState.error(e.localizedMessage ?: "")
             }
 
@@ -54,18 +59,24 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                 verificationId: String,
                 token: PhoneAuthProvider.ForceResendingToken,
             ) {
+                // If the code is sent, send a success response with the verification ID.
                 responseStateFlow.value = ResponseState.success(Pair("", verificationId))
             }
 
         }
 
+        // Create a PhoneAuthOptions object to configure the verification process.
         val options = PhoneAuthOptions.newBuilder(firebaseAuth)
             .setPhoneNumber(countryCode + mobileNumber)
             .setTimeout(ConstantsHelper.OTPTimeOutTime, TimeUnit.SECONDS)
             .setCallbacks(callbacks)
+
+        // If the AuthenticationActivity is not null, set the activity to the options object.
         if (AuthenticationActivity.Instance != null) {
             options.setActivity(AuthenticationActivity.Instance!!)
         }
+
+        // Verify the phone number using the PhoneAuthProvider.
         PhoneAuthProvider.verifyPhoneNumber(options.build())
     }
 
@@ -73,56 +84,78 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         verificationId: String,
         otp: String
     ): ResponseState<FirebaseUser> {
+        // Create a PhoneAuthCredential object using the verification ID and the OTP.
         val credentials = PhoneAuthProvider.getCredential(verificationId, otp)
+        // Try to sign in the user with the credentials.
         return try {
             val result = firebaseAuth.signInWithCredential(credentials).await()
+            // If the sign in is successful, return a success response with the user object.
             if (result.user != null) {
                 ResponseState.success(result.user!!)
             } else {
+                // If the sign in fails, sign out the user and return an error response.
                 firebaseAuth.signOut()
                 ResponseState.error(ErrorCodes.NoUserFound)
             }
         } catch (exception: Exception) {
+            // If there is an exception, return an error response with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun getUserDetails(userId: String): ResponseState<UserDetails?> {
+        // Try to get the user details from the Firestore database.
         return try {
             val result =
                 fireStore.collection(FirebaseConstants.UsersKey).document(userId).get().await()
+            // If the document exists, get the user details object and return a success response.
             if (result.exists()) {
                 val userModel = result.toObject(UserDetails::class.java)
                 ResponseState.success(userModel)
             } else {
+                // If the document does not exist, return a success response with null.
                 ResponseState.success(null)
             }
         } catch (exception: Exception) {
+            // If there is an exception, return an error response with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun getUsersFromName(name: String): ResponseState<Int> {
+        // Try to get the users from the Firestore database whose name matches the given name.
         return try {
             val result = fireStore.collection(FirebaseConstants.UsersKey)
                 .whereEqualTo(UserDetails::name.name, name).get().await()
+            // Return a success response with the number of users found.
             ResponseState.success(result.size())
         } catch (exception: Exception) {
+            // If there is an exception, return an error response with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun addUserToRemote(userDetails: UserDetails): ResponseState<Nothing> {
+        // Add the user to the remote database.
         return try {
-            fireStore.collection(FirebaseConstants.UsersKey).document(userDetails.firebaseUserId)
-                .set(userDetails).await()
+            // Get the user's Firestore document reference.
+            val documentReference =
+                fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(userDetails.firebaseUserId)
+
+            // Set the user's details in the document.
+            documentReference.set(userDetails).await()
+
+            // Return a success response.
             ResponseState.success(null)
         } catch (exception: Exception) {
+            // Return an error response if an exception occurs.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun addUserToLocalDb(userDetails: UserDetails): Long {
+        // Add the user to the local database.
         return appDatabase.getUsersDao().insertUser(userDetails)
     }
 
@@ -130,16 +163,29 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         fireBaseId: String,
         updatedDeviceId: String
     ): ResponseState<Nothing> {
+        // Update the user's device ID on the remote database.
         return try {
-            fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId)
-                .update(UserDetails::currentLoggedInDeviceId.name, updatedDeviceId).await()
+            // Get the user's Firestore document reference.
+            val documentReference =
+                fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId)
+
+            // Update the user's device ID in the document.
+            documentReference.update(UserDetails::currentLoggedInDeviceId.name, updatedDeviceId)
+                .await()
+
+            // Return a success response.
             ResponseState.success(null)
         } catch (exception: Exception) {
+            // Return an error response if an exception occurs.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int {
-        return appDatabase.getUsersDao().updateDeviceId(fireBaseId, updatedDeviceId)
+        // Get the UsersDao object from the AppDatabase object.
+        val usersDao = appDatabase.getUsersDao()
+
+        // Update the device ID for the user with the specified Firebase ID.
+        return usersDao.updateDeviceId(fireBaseId, updatedDeviceId)
     }
 }

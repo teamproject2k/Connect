@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.useCase.AddUserToDbUseCase
+import com.example.connect.domain.useCase.AddUserToRemoteUseCase
+import com.example.connect.domain.useCase.GetUsersFromNameUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -19,7 +22,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class UserDetailsViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
+class UserDetailsViewModel @Inject constructor(
+    private val addUserToRemoteUseCase: AddUserToRemoteUseCase,
+    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val getUsersFromNameUseCase: GetUsersFromNameUseCase
+) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
@@ -38,7 +45,7 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                 val formattedUserName = getFormattedUserName()
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
-                    authenticationUseCase.getUsersFromName(formattedUserName)
+                    getUsersFromNameUseCase.invoke(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
                     val user = UserDetails(
@@ -51,11 +58,11 @@ class UserDetailsViewModel @Inject constructor(private val authenticationUseCase
                         createdDate,
                         sharedPreference.deviceId!!
                     )
-                    val userDetailsResponseState = authenticationUseCase.addUserToRemote(user)
+                    val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
-                        authenticationUseCase.addUserToLocalDb(user)
+                        addUserToDbUseCase.invoke(user)
                     }
-                    _addUserStateFlow.value = authenticationUseCase.addUserToRemote(user)
+                    _addUserStateFlow.value = userDetailsResponseState
                 } else {
                     _addUserStateFlow.value =
                         ResponseState.error(currentUserByNameResponseState.message ?: "")
