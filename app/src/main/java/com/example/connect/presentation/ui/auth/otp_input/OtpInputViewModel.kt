@@ -6,6 +6,7 @@ import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.domain.useCase.AuthenticationUseCase
+import com.example.connect.domain.useCase.VerifyOtpUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -21,7 +22,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class OtpInputViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
+class OtpInputViewModel @Inject constructor(
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val verifyOtpUseCase: VerifyOtpUseCase
+) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
@@ -100,7 +104,7 @@ class OtpInputViewModel @Inject constructor(private val authenticationUseCase: A
             withContext(Dispatchers.IO) {
                 _verifyOtpStateFlow.value = ResponseState.loading()
                 _verifyOtpStateFlow.value =
-                    authenticationUseCase.verifyOtp(verificationId, otpState.value)
+                    verifyOtpUseCase.invoke(verificationId, otpState.value)
             }
         }
     }

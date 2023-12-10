@@ -7,32 +7,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 class AuthenticationUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
-
     suspend fun sendOtp(
         countryCode: String,
         mobileNumber: String,
         responseStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>>
     ) = repository.sendOtp(countryCode, mobileNumber, responseStateFlow)
 
-    suspend fun verifyOtp(verificationId: String, otp: String) =
-        repository.verifyOtp(verificationId, otp)
 
     suspend fun getUserDetails(userId: String) = repository.getUserDetails(userId)
 
     suspend fun getUsersFromName(name: String) = repository.getUsersFromName(name)
 
 
-    suspend fun addUserToRemote(userDetails: UserDetails) = repository.addUserToRemote(userDetails)
 
-
-    suspend fun addUserToLocalDb(userDetails: UserDetails) =
-        repository.addUserToLocalDb(userDetails)
-
-
-    suspend fun updateDeviceIdOnRemote(fireBaseId: String, updatedDeviceId: String) =
-        repository.updateDeviceIdOnRemote(fireBaseId, updatedDeviceId)
-
-
-    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) =
-        repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
 }
