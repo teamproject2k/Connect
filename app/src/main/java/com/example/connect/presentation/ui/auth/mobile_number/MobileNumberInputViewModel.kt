@@ -59,6 +59,11 @@ class MobileNumberInputViewModel @Inject constructor(
     }
 
 
+    /**
+     * Gets user details from remote and updates the user in the database.
+     *
+     * @param userId The user ID.
+     */
     fun getUserDetails(userId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -87,6 +92,9 @@ class MobileNumberInputViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Resets the state of the UI state flows.
+     */
     fun resetStateFlow() {
         _sendOtpUIStateFlow.value = ResponseState.none()
         _getUserDetailsStateFlow.value = ResponseState.none()
