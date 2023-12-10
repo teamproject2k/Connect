@@ -31,7 +31,6 @@ class HomeSharedViewModel @Inject constructor(
 
     val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
 
-
     init {
         getUserDetails()
     }

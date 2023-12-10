@@ -47,7 +47,6 @@ class AddPostViewModel @Inject constructor(private val uploadPostToRemoteUseCase
             withContext(Dispatchers.IO) {
                 _uploadPostStateFlow.value = ResponseState.loading()
                 if (selectedMediaState.value != null) {
-
                 }
                 val postDetails = PostDetails(
                     "",

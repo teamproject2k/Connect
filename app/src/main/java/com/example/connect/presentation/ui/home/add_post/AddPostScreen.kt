@@ -169,7 +169,6 @@ fun AddPostScreen() {
     }
 }
 
-
 @Composable
 fun PostVisibilityScopeBottomSheet(viewModel: AddPostViewModel, onDismissRequest: () -> Unit) {
     Column {
