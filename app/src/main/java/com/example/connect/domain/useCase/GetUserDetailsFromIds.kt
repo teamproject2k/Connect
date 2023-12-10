@@ -14,7 +14,7 @@ class GetUserDetailsFromIds @Inject constructor(private val repository: IHomeRep
      * @param idList The list of user ids.
      * @return A [ResponseState] containing the user details.
      */
-    suspend fun getUserDetailsFromIds(idList: List<String>): ResponseState<List<UserDetails>> {
+    suspend fun invoke(idList: List<String>): ResponseState<List<UserDetails>> {
         return repository.getUserDetailsFromIds(idList)
     }
 }

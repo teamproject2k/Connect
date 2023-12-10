@@ -7,6 +7,13 @@ import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.data.local_db.users.UserDetails
+import com.example.connect.domain.useCase.AddPostListToDbUseCase
+import com.example.connect.domain.useCase.AddUserToDbUseCase
+import com.example.connect.domain.useCase.GetPostDetailsFromDbUseCase
+import com.example.connect.domain.useCase.GetPostDetailsFromRemoteUseCase
+import com.example.connect.domain.useCase.GetUserDetailsFromDbUseCase
+import com.example.connect.domain.useCase.GetUserDetailsFromIds
+import com.example.connect.domain.useCase.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -18,13 +25,19 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseCase) :
-    BaseViewModel() {
+class UserProfileViewModel @Inject constructor(
+    private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
+    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
+    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
+    private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
+    private val addPostListToDbUseCase: AddPostListToDbUseCase,
+    private val getUserDetailsFromIds: GetUserDetailsFromIds
+) : BaseViewModel() {
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<UserDetails>> =
         MutableStateFlow(ResponseState.none())
 
     val userDetailsStateFlow: StateFlow<ResponseState<UserDetails>> get() = _userDetailsStateFlow
-
 
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UserDetails>>> =
         MutableStateFlow(ResponseState.none())
@@ -45,7 +58,7 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                 val fireBaseId = fireBaseAuth.currentUser?.uid
                 if (fireBaseId != null) {
                     val userDetails =
-                        homeUseCase.getUserDetailsFromLocal(fireBaseId)
+                        getUserDetailsFromDbUseCase.invoke(fireBaseId)
                     if (userDetails != null) {
                         _userDetailsStateFlow.value = ResponseState.success(userDetails)
                         if (userDetails.friendList.isNotEmpty()) {
@@ -53,16 +66,18 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                         }
                     } else {
                         val userDetailsFromServerResponseState =
-                            homeUseCase.getUserDetailsFromServer(fireBaseId)
+                            getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
-                            homeUseCase.addUserToLocalDb(userDetailsFromServerResponseState.data!!)
+                            addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                             _userDetailsStateFlow.value =
                                 ResponseState.success(userDetailsFromServerResponseState.data)
                             if (userDetailsFromServerResponseState.data.friendList.isNotEmpty()) {
                                 getFriendListFromIds(userDetailsFromServerResponseState.data.friendList)
                             }
                         } else {
-                            _userDetailsStateFlow.value = userDetailsFromServerResponseState
+                            _userDetailsStateFlow.value = ResponseState.error(
+                                userDetailsFromServerResponseState.message ?: ""
+                            )
                         }
                     }
                 } else {
@@ -79,14 +94,14 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
                 _postDetailsStateFlow.value = ResponseState.loading()
                 val fireBaseId = fireBaseAuth.currentUser?.uid
                 if (fireBaseId != null) {
-                    val postDetails = homeUseCase.getPostDetailsFromLocal(fireBaseId)
+                    val postDetails = getPostDetailsFromDbUseCase.invoke(fireBaseId)
                     if (!postDetails.isNullOrEmpty()) {
                         _postDetailsStateFlow.value = ResponseState.success(postDetails)
                     } else {
                         val postDetailsFromServerResponseState =
-                            homeUseCase.getPostDetailsFromServer(fireBaseId)
+                            getPostDetailsFromRemoteUseCase.invoke(fireBaseId)
                         if (postDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
-                            homeUseCase.addPostListToLocal(postDetailsFromServerResponseState.data!!)
+                            addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data!!)
                             _postDetailsStateFlow.value =
                                 ResponseState.success(postDetailsFromServerResponseState.data)
                         } else {
@@ -104,7 +119,7 @@ class UserProfileViewModel @Inject constructor(private val homeUseCase: HomeUseC
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _friendsDetailsStateFlow.value = ResponseState.loading()
-                _friendsDetailsStateFlow.value = homeUseCase.getUserDetailsFromIds(friendIdList)
+                _friendsDetailsStateFlow.value = getUserDetailsFromIds.invoke(friendIdList)
             }
         }
     }

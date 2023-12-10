@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.useCase.UploadPostToRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
@@ -23,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 @SuppressLint("StateNameRule")
-class AddPostViewModel @Inject constructor(private val useCase: HomeUseCase) : BaseViewModel() {
+class AddPostViewModel @Inject constructor(private val uploadPostToRemoteUseCase: UploadPostToRemoteUseCase) :
+    BaseViewModel() {
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<PostMediaData?> = mutableStateOf(null)
     lateinit var postVisibilityScopeList: List<PostVisibilityScope>
@@ -39,7 +41,6 @@ class AddPostViewModel @Inject constructor(private val useCase: HomeUseCase) : B
         currentPostVisibilityState = mutableStateOf(postVisibilityScopeList[0])
         isFirstTimeSetup = false
     }
-
 
     fun uploadUserPost(firebaseId: String) {
         viewModelScope.launch {
@@ -57,7 +58,7 @@ class AddPostViewModel @Inject constructor(private val useCase: HomeUseCase) : B
                     "",
                     ""
                 )
-                val serverResponse = useCase.uploadPostToServer(postDetails, firebaseId)
+                val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
                 if (serverResponse.status == RequestStatusEnum.SUCCESS) {
 
                 }

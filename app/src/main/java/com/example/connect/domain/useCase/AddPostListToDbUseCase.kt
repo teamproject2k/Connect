@@ -9,13 +9,13 @@ import javax.inject.Inject
 class AddPostListToDbUseCase @Inject constructor(private val repository: IHomeRepository) {
 
     /**
-     * Adds a post to the local database.
+     * Invokes the repository to add a list of posts to local storage.
      *
-     * @param postDetails The details of the post to add.
-     * @return The ID of the newly added post.
+     * @param postDetails The list of posts to add.
+     * @return The IDs of the posts that were added.
      */
-    suspend fun addPostToDb(postDetails: PostDetails): Long {
-        return repository.addPostToLocal(postDetails)
+    suspend fun invoke(postDetails: List<PostDetails>): LongArray {
+        return repository.addPostListToLocal(postDetails)
     }
 
 }
