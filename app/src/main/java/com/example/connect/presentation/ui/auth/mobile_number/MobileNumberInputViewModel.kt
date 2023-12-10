@@ -5,7 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.users.UserDetails
-import com.example.connect.domain.useCase.AuthenticationUseCase
+import com.example.connect.domain.useCase.AddUserToDbUseCase
+import com.example.connect.domain.useCase.GetUserDetailsFromRemoteUseCase
+import com.example.connect.domain.useCase.SendOtpUseCase
+import com.example.connect.domain.useCase.UpdateDeviceIdOnDbUseCase
+import com.example.connect.domain.useCase.UpdateDeviceIdOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +21,13 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class MobileNumberInputViewModel @Inject constructor(private val authenticationUseCase: AuthenticationUseCase) :
+class MobileNumberInputViewModel @Inject constructor(
+    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val sendOtpUseCase: SendOtpUseCase,
+    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
+    private val updateDeviceIdOnDbUseCase: UpdateDeviceIdOnDbUseCase,
+    private val updateDeviceIdOnRemoteUseCase: UpdateDeviceIdOnRemoteUseCase
+) :
     BaseViewModel() {
     val userMobileNumberState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
@@ -39,7 +49,7 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendOtpUIStateFlow.value = ResponseState.loading()
-                authenticationUseCase.sendOtp(
+                sendOtpUseCase.invoke(
                     selectedCountryCodeState.value,
                     userMobileNumberState.value,
                     _sendOtpUIStateFlow
@@ -53,19 +63,19 @@ class MobileNumberInputViewModel @Inject constructor(private val authenticationU
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getUserDetailsStateFlow.value = ResponseState.loading()
-                val userDetailsResponseState = authenticationUseCase.getUserDetails(userId)
+                val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
                 if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS && userDetailsResponseState.data != null) {
-                    authenticationUseCase.addUserToLocalDb(userDetailsResponseState.data)
+                    addUserToDbUseCase.invoke(userDetailsResponseState.data)
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
                     ) {
                         val updateDeviceIdOnRemoteResponseState =
-                            authenticationUseCase.updateDeviceIdOnRemote(
+                            updateDeviceIdOnRemoteUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.SUCCESS) {
-                            authenticationUseCase.updateDeviceIdOnLocal(
+                            updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )

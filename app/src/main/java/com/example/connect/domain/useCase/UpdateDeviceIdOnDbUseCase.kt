@@ -5,6 +5,14 @@ import javax.inject.Inject
 
 class UpdateDeviceIdOnDbUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
-    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String) =
-        repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
+    /**
+     * Updates the device ID on the local database.
+     *
+     * @param fireBaseId The Firebase ID of the user.
+     * @param updatedDeviceId The updated device ID.
+     * @return The number of rows affected.
+     */
+    suspend fun invoke(fireBaseId: String, updatedDeviceId: String): Int {
+        return repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
+    }
 }

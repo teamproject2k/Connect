@@ -5,6 +5,13 @@ import com.example.connect.domain.repository.IAuthenticationRepository
 import javax.inject.Inject
 
 class UpdateDeviceIdOnRemoteUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
+    /**
+     * Invokes the updateDeviceIdOnRemote method on the repository.
+     *
+     * @param fireBaseId The Firebase ID of the user.
+     * @param updatedDeviceId The updated device ID of the user.
+     * @return A ResponseState object containing the result of the update.
+     */
     suspend fun invoke(
         fireBaseId: String,
         updatedDeviceId: String
