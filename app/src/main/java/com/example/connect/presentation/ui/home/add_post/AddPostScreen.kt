@@ -38,6 +38,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,8 +63,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.common.ErrorCodes
+import com.example.connect.common.RequestStatusEnum.EXCEPTION
+import com.example.connect.common.RequestStatusEnum.LOADING
+import com.example.connect.common.RequestStatusEnum.NONE
+import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
+import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
@@ -73,15 +82,17 @@ import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @HomeNavGraph
 @Destination
 @Composable
-fun AddPostScreen() {
+fun AddPostScreen(navigator: DestinationsNavigator) {
     val viewModel: AddPostViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -131,6 +142,7 @@ fun AddPostScreen() {
                 .fillMaxSize()
                 .padding(it)
         ) {
+            HandleAddPostSection(viewModel, context, navigator)
             TopDetailsSection(viewModel = viewModel, sharedViewModel) {
                 coroutineScope.launch {
                     keyboardController?.hide()
@@ -176,6 +188,40 @@ fun AddPostScreen() {
             }
         }
     }
+}
+
+@Composable
+fun HandleAddPostSection(
+    viewModel: AddPostViewModel,
+    context: Context,
+    navigator: DestinationsNavigator
+) {
+    val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
+    when (addPostState.status) {
+        LOADING -> {
+            LoaderDialog()
+        }
+
+        SUCCESS -> {
+            context.showToast(stringResource(R.string.post_uploaded_successfully))
+            navigator.popBackStack()
+        }
+
+        EXCEPTION -> {
+            if (addPostState.message == ErrorCodes.NoUserFound) {
+                context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
+                (LocalActivity.current as BaseActivity).logout()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    addPostState.message ?: stringResource(id = R.string.some_error_occurred)
+            }
+        }
+
+        NONE -> {
+            // no need to handle it
+        }
+    }
+
 }
 
 @Composable
@@ -420,7 +466,7 @@ private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
-        viewModel.uploadUserPost("123")
+        viewModel.uploadUserPost()
     }
 }
 

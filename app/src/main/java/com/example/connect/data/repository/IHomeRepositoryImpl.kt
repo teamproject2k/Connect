@@ -1,18 +1,22 @@
 package com.example.connect.data.repository
 
+import android.net.Uri
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
-import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IHomeRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 class IHomeRepositoryImpl(
     private val appDatabase: AppDatabase,
-    private val fireStore: FirebaseFirestore
+    private val fireStore: FirebaseFirestore,
+    private val firebaseStorage: FirebaseStorage
 ) : IHomeRepository {
 
     override suspend fun getUserDetailsFromDb(fireBaseId: String): UsersBean? {
@@ -37,21 +41,21 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun getPostDetailsFromDb(fireBaseId: String): List<PostDetails>? {
+    override suspend fun getPostDetailsFromDb(fireBaseId: String): List<PostBean> {
         // Get the post details from the local database.
-        return appDatabase.getPostDao().getPostList(fireBaseId)
+        return appDatabase.getPostDao().getPostList(fireBaseId).map { it.toPostBean() }
     }
 
-    override suspend fun getPostDetailsFromRemote(fireBaseId: String): ResponseState<List<PostDetails>> {
+    override suspend fun getPostDetailsFromRemote(fireBaseId: String): ResponseState<List<PostBean>> {
         // Get the post details from the server.
         return try {
             val response = fireStore.collection(FirebaseConstants.PostsKey)
-                .whereEqualTo(PostDetails::fireBaseUserId.name, fireBaseId).get().await()
-            val postList = arrayListOf<PostDetails>()
+                .whereEqualTo(PostRemoteEntity::fireBaseUserId.name, fireBaseId).get().await()
+            val postList = arrayListOf<PostBean>()
             response.documents.forEach { document ->
-                val post = document.toObject(PostDetails::class.java)
+                val post = document.toObject(PostRemoteEntity::class.java)
                 if (post != null) {
-                    postList.add(post)
+                    postList.add(post.toPostBean(document.id))
                 }
             }
             ResponseState.success(postList)
@@ -61,28 +65,41 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun addPostToDb(postDetails: PostDetails): Long {
+    override suspend fun addPostToDb(postDetails: PostBean): Long {
         // Add the post details to the local database.
-        return appDatabase.getPostDao().insertPost(postDetails)
+        return appDatabase.getPostDao().insertPost(postDetails.toPostDbEntity())
     }
 
-    override suspend fun addPostListToDb(postDetailList: List<PostDetails>): LongArray {
+    override suspend fun addPostListToDb(postDetailList: List<PostBean>): LongArray {
         // Add the post details to the local database.
-        return appDatabase.getPostDao().insertPostList(postDetailList)
+        return appDatabase.getPostDao().insertPostList(postDetailList.map { it.toPostDbEntity() })
     }
 
     override suspend fun uploadPostToRemote(
-        postDetails: PostDetails,
+        postDetails: PostBean,
         fireBaseId: String
     ): ResponseState<String> {
         // Upload the post details to the server.
         return try {
             val response = fireStore.collection(FirebaseConstants.MediaKey).document(fireBaseId)
-                .collection(FirebaseConstants.PostsKey).add(postDetails)
+                .collection(FirebaseConstants.PostsKey).add(postDetails.toPostRemoteEntity())
                 .await()
             ResponseState.success(response.id)
         } catch (exception: Exception) {
             // An error occurred while uploading the post details to the server.
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun uploadFileToRemote(url: Uri, path: String): ResponseState<String> {
+        // Upload the file to the specified path in Firebase Storage.
+        return try {
+            val downloadUrl = firebaseStorage.reference.child(path).putFile(url)
+                .await().storage.downloadUrl.await()
+            // Return the download URL as a success state.
+            ResponseState.success(downloadUrl.toString())
+        } catch (exception: Exception) {
+            // Return an error state with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }

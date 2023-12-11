@@ -77,7 +77,7 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
-import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
@@ -642,7 +642,7 @@ fun PostLoadingSection() {
 }
 
 @Composable
-fun PostSection(postDetailsList: List<PostDetails>) {
+fun PostSection(postDetailsList: List<PostBean>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -722,7 +722,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
 
 @Composable
 fun PostItem(
-    postDetails: PostDetails?,
+    postDetails: PostBean?,
     modifier: Modifier = Modifier,
     showShimmer: Boolean = false,
     onClick: () -> Unit = {}
@@ -753,7 +753,7 @@ fun PostItem(
             }
             if (!isImageLoadingFailed) {
                 AsyncImage(
-                    model = postDetails.thumbnailUrl,
+                    model = postDetails.postUrl,
                     contentDescription = postDetails.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),

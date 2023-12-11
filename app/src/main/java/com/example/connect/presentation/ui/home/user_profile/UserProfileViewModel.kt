@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
@@ -33,10 +33,10 @@ class UserProfileViewModel @Inject constructor(
 
     val friendsDetailsStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _friendsDetailsStateFlow
 
-    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostDetails>>> =
+    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
 
-    val postDetailsStateFlow: StateFlow<ResponseState<List<PostDetails>>> get() = _postDetailsStateFlow
+    val postDetailsStateFlow: StateFlow<ResponseState<List<PostBean>>> get() = _postDetailsStateFlow
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -50,7 +50,7 @@ class UserProfileViewModel @Inject constructor(
                 val fireBaseId = fireBaseAuth.currentUser?.uid
                 if (fireBaseId != null) {
                     val postDetails = getPostDetailsFromDbUseCase.invoke(fireBaseId)
-                    if (!postDetails.isNullOrEmpty()) {
+                    if (postDetails.isNotEmpty()) {
                         _postDetailsStateFlow.value = ResponseState.success(postDetails)
                     } else {
                         val postDetailsFromServerResponseState =

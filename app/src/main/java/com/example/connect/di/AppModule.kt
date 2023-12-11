@@ -14,6 +14,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,6 +46,11 @@ class AppModule {
     @Singleton
     fun getFireStore(): FirebaseFirestore = Firebase.firestore
 
+
+    @Provides
+    @Singleton
+    fun getFirebaseStorage(): FirebaseStorage = Firebase.storage
+
     @Provides
     @Singleton
     fun getAuthRepository(
@@ -56,7 +63,11 @@ class AppModule {
     @Provides
     @Singleton
     fun getRoomDatabase(@ApplicationContext context: Context): AppDatabase {
-        val database = Room.databaseBuilder(context, AppDatabase::class.java, "com.example.connect.app_database")
+        val database = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "com.example.connect.app_database"
+        )
         return database.build()
     }
 
@@ -64,8 +75,9 @@ class AppModule {
     @Singleton
     fun getHomeRepository(
         appDatabase: AppDatabase,
-        fireStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
+        firebaseStorage: FirebaseStorage
     ): IHomeRepository =
-        IHomeRepositoryImpl(appDatabase, fireStore)
+        IHomeRepositoryImpl(appDatabase, fireStore, firebaseStorage)
 
 }
