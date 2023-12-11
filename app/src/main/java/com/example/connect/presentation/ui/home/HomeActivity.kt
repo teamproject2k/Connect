@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -110,6 +109,7 @@ class HomeActivity : BaseActivity() {
                         showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                         logout()
                     }
+
                     ErrorCodes.NewLogin -> {
                         showNewDeviceLoginAlertDialog = true
                         Handler(Looper.getMainLooper()).postDelayed({
@@ -117,6 +117,7 @@ class HomeActivity : BaseActivity() {
                             logout()
                         }, ConstantsHelper.NewDeviceDialogDismissTime)
                     }
+
                     else -> {
                         showToast(
                             getDeviceIdState.message
@@ -301,17 +302,4 @@ class HomeActivity : BaseActivity() {
         )
         return bottomNavList
     }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AlertDialogHelper() {
-
-}
-
-@Preview
-@Composable
-fun PreviewAlertDialogHelper() {
-    AlertDialogHelper()
 }
