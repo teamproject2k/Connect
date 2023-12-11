@@ -81,4 +81,5 @@
     <string name="chat">Chat</string>
     <string name="profile">Profile</string>
     <string name="getting_user_details">Getting user details...</string>
+    <string name="settings">Settings</string>
 </resources>

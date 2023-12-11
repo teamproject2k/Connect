@@ -6,13 +6,11 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIds
-import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,18 +23,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
-    private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
-    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase,
     private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
     private val addPostListToDbUseCase: AddPostListToDbUseCase,
     private val getUserDetailsFromIds: GetUserDetailsFromIds
 ) : BaseViewModel() {
-//    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UserDetails>>> =
-//        MutableStateFlow(ResponseState.none())
-//
-//    val friendsDetailsStateFlow: StateFlow<ResponseState<List<UserDetails>>> get() = _friendsDetailsStateFlow
+    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+        MutableStateFlow(ResponseState.none())
+
+    val friendsDetailsStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _friendsDetailsStateFlow
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostDetails>>> =
         MutableStateFlow(ResponseState.none())
@@ -44,43 +39,6 @@ class UserProfileViewModel @Inject constructor(
     val postDetailsStateFlow: StateFlow<ResponseState<List<PostDetails>>> get() = _postDetailsStateFlow
 
     val snackBarMessageState = mutableStateOf("")
-
-
-//    fun getUserDetails() {
-//        viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                _userDetailsStateFlow.value = ResponseState.loading()
-//                val fireBaseId = fireBaseAuth.currentUser?.uid
-//                if (fireBaseId != null) {
-//                    val userDetails =
-//                        getUserDetailsFromDbUseCase.invoke(fireBaseId)
-//                    if (userDetails != null) {
-//                        _userDetailsStateFlow.value = ResponseState.success(userDetails)
-//                        if (userDetails.friendList.isNotEmpty()) {
-//                            getFriendListFromIds(userDetails.friendList)
-//                        }
-//                    } else {
-//                        val userDetailsFromServerResponseState =
-//                            getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
-//                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
-//                            addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
-//                            _userDetailsStateFlow.value =
-//                                ResponseState.success(userDetailsFromServerResponseState.data)
-//                            if (userDetailsFromServerResponseState.data.friendList.isNotEmpty()) {
-//                                getFriendListFromIds(userDetailsFromServerResponseState.data.friendList)
-//                            }
-//                        } else {
-//                            _userDetailsStateFlow.value = ResponseState.error(
-//                                userDetailsFromServerResponseState.message ?: ""
-//                            )
-//                        }
-//                    }
-//                } else {
-//                    _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
-//                }
-//            }
-//        }
-//    }
 
 
     fun getPostDetails() {
@@ -110,19 +68,16 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    private fun getFriendListFromIds(friendIdList: List<String>) {
+    fun getFriendListFromIds(friendIdList: List<String>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-//                _friendsDetailsStateFlow.value = ResponseState.loading()
-//                _friendsDetailsStateFlow.value = getUserDetailsFromIds.invoke(friendIdList)
+                if (friendIdList.isEmpty()) {
+                    _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
+                } else {
+                    _friendsDetailsStateFlow.value = ResponseState.loading()
+                    _friendsDetailsStateFlow.value = getUserDetailsFromIds.invoke(friendIdList)
+                }
             }
         }
     }
-
-
-    fun logout() {
-        sharedPreference.isUserDetailsEntered = false
-        fireBaseAuth.signOut()
-    }
-
 }

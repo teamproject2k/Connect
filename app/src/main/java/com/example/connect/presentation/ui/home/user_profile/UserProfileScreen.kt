@@ -25,22 +25,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,6 +80,7 @@ import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
@@ -95,6 +95,7 @@ import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.ui.home.HomeSharedViewModel
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -111,40 +112,37 @@ import kotlin.math.ceil
 @Composable
 fun UserProfileScreen() {
     val viewModel: UserProfileViewModel = hiltViewModel()
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
-    val bottomSheetState =
-        SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
-    val scaffoldState = BottomSheetScaffoldState(bottomSheetState, snackBarHostState)
-    BottomSheetScaffold(
-        sheetContent = {
-            BottomSheetSection(viewModel, bottomSheetState)
-        },
-        scaffoldState = scaffoldState,
-        sheetShape = RoundedCornerShape(
-            topEnd = ConstantsHelper.BottomSheetRoundness,
-            topStart = ConstantsHelper.BottomSheetRoundness
-        )
-    ) {
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleUserDetails(viewModel = viewModel) {
-                if (bottomSheetState.isVisible) {
-                    coroutineScope.launch {
-                        bottomSheetState.hide()
-                    }
-                } else {
-                    coroutineScope.launch {
-                        bottomSheetState.show()
-                    }
+            ProfileScreen(sharedViewModel._userDetails, viewModel) {
+                showBottomSheet = true
+            }
+        }
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false }, shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                )
+            ) {
+                BottomSheetSection(
+                    Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                ) { showSheet ->
+                    showBottomSheet = showSheet
                 }
             }
         }
     }
-
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -153,43 +151,41 @@ fun UserProfileScreen() {
             }
         }
     }
-//    LaunchedEffect(key1 = true) {
-//        viewModel.getUserDetails()
-//        viewModel.getPostDetails()
-//    }
-
+    LaunchedEffect(key1 = true) {
+        viewModel.getFriendListFromIds(sharedViewModel._userDetails.friendList)
+        viewModel.getPostDetails()
+    }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetSection(viewModel: UserProfileViewModel, bottomSheetState: SheetState) {
-    val context = LocalContext.current
-    val currentActivity = LocalActivity.current
-    val coroutineScope = rememberCoroutineScope()
+fun BottomSheetSection(
+    modifier: Modifier,
+    onBottomSheetStateChange: (showSheet: Boolean) -> Unit
+) {
+    val currentActivity = LocalActivity.current as BaseActivity
     var showLogoutDialog by remember {
         mutableStateOf(false)
     }
-    Column(modifier = Modifier.fillMaxWidth()) {
-        BottomSheetItem(imageVector = Icons.Default.Settings, text = "Settings") {
+    Column(modifier = modifier.fillMaxWidth()) {
+        BottomSheetItem(
+            imageVector = Icons.Default.Settings,
+            text = stringResource(R.string.settings)
+        ) {
+            onBottomSheetStateChange(false)
             // TODO: navigate to settings screen
         }
         BottomSheetItem(
-            imageVector = Icons.Default.ExitToApp,
+            imageVector = Icons.Default.Logout,
             text = stringResource(id = R.string.logout)
         ) {
-            coroutineScope.launch {
-                bottomSheetState.hide()
-            }
             showLogoutDialog = true
+            onBottomSheetStateChange(false)
         }
     }
     if (showLogoutDialog) {
         LogoutAlertDialog(onDismiss = { showLogoutDialog = false }) {
-            viewModel.logout()
-            val intent = Intent(context, AuthenticationActivity::class.java)
-            context.startActivity(intent)
-            currentActivity.finish()
+            currentActivity.logout()
             showLogoutDialog = false
         }
     }
@@ -250,54 +246,6 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
         }
         Divider()
     }
-}
-
-@Composable
-fun HandleUserDetails(viewModel: UserProfileViewModel, onOptionsMenuClick: () -> Unit) {
-//    val userDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
-//    var isExceptionHandled by remember {
-//        mutableStateOf(false)
-//    }
-//    val context = LocalContext.current
-//    when (userDetailsState.status) {
-//        RequestStatusEnum.LOADING -> {
-//            LoaderFullScreen(loadingText = stringResource(R.string.getting_details))
-//            if (isExceptionHandled) {
-//                isExceptionHandled = false
-//            }
-//        }
-//
-//        RequestStatusEnum.SUCCESS -> {
-//            ProfileScreen(userDetailsState.data!!, viewModel, onOptionsMenuClick)
-//        }
-//
-//        RequestStatusEnum.EXCEPTION -> {
-//            if (!isExceptionHandled) {
-//                if (userDetailsState.message == ErrorCodes.NoUserFound) {
-//                    viewModel.sharedPreference.isUserDetailsEntered = false
-//                    context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
-//                    val intent = Intent(context, AuthenticationActivity::class.java)
-//                    context.startActivity(intent)
-//                    LocalActivity.current.finish()
-//                } else {
-//                    viewModel.snackBarMessageState.value =
-//                        userDetailsState.message
-//                            ?: stringResource(id = R.string.something_went_wrong)
-//                }
-//                isExceptionHandled = true
-//            }
-//            LoggingHelper.logData(
-//                LoggingLevelEnum.Error,
-//                ConstantsHelper.ErrorTag,
-//                "UserProfileScreen",
-//                userDetailsState.message.toString()
-//            )
-//        }
-//
-//        RequestStatusEnum.NONE -> {
-//            //no need to handle it
-//        }
-//    }
 }
 
 
@@ -438,41 +386,41 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
 
 @Composable
 fun HandleFriendListSection(viewModel: UserProfileViewModel) {
-//    val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
-//    var isExceptionHandled by remember {
-//        mutableStateOf(false)
-//    }
-//    when (friendsDetailsState.status) {
-//        RequestStatusEnum.LOADING -> {
-//            FriendsListLoading()
-//            if (isExceptionHandled) {
-//                isExceptionHandled = false
-//            }
-//        }
-//
-//        RequestStatusEnum.SUCCESS -> {
-//            FriendsListSection(friendsList = friendsDetailsState.data!!)
-//        }
-//
-//        RequestStatusEnum.EXCEPTION -> {
-//            if (!isExceptionHandled) {
-//                viewModel.snackBarMessageState.value =
-//                    friendsDetailsState.message
-//                        ?: stringResource(id = R.string.something_went_wrong)
-//                isExceptionHandled = true
-//            }
-//            LoggingHelper.logData(
-//                LoggingLevelEnum.Error,
-//                ConstantsHelper.ErrorTag,
-//                "UserProfileScreen",
-//                friendsDetailsState.message.toString()
-//            )
-//        }
-//
-//        RequestStatusEnum.NONE -> {
-//            FriendsListSection(listOf())
-//        }
-//    }
+    val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (friendsDetailsState.status) {
+        RequestStatusEnum.LOADING -> {
+            FriendsListLoading()
+            if (isExceptionHandled) {
+                isExceptionHandled = false
+            }
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            FriendsListSection(friendsList = friendsDetailsState.data!!)
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    friendsDetailsState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                isExceptionHandled = true
+            }
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "UserProfileScreen",
+                friendsDetailsState.message.toString()
+            )
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle it 
+        }
+    }
 }
 
 @Composable

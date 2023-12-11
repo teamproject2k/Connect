@@ -11,4 +11,5 @@ object ConstantsHelper {
     const val NameMaxCharacterLimit = 50
     const val BioMaxCharacterLimit = 100
     val BottomSheetRoundness = 32.dp
+    val NavigationBarHeight = 48.dp
 }
