@@ -116,7 +116,6 @@ class HomeActivity : BaseActivity() {
                             selected = selectedRouteState.value == data.routeName,
                             onClick = {
                                 selectedRouteState.value = data.routeName
-                                navController.popBackStack()
                                 navController.navigate(
                                     data.routeName
                                 )
