@@ -12,4 +12,6 @@ object ConstantsHelper {
     const val BioMaxCharacterLimit = 100
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp
+    val CoverImageHeight = 200.dp
+    val ProfileImageHeight = 150.dp
 }

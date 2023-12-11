@@ -66,7 +66,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -94,6 +93,7 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
+import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
 import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.home.HomeSharedViewModel
 import com.example.connect.presentation.ui.theme.OnBlack
@@ -103,6 +103,8 @@ import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -110,7 +112,7 @@ import kotlin.math.ceil
 @HomeNavGraph
 @Destination
 @Composable
-fun UserProfileScreen() {
+fun UserProfileScreen(navigator: DestinationsNavigator) {
     val viewModel: UserProfileViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
@@ -191,7 +193,6 @@ fun BottomSheetSection(
     }
 }
 
-
 @Composable
 fun LogoutAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
     AlertDialog(
@@ -253,7 +254,8 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
 fun ProfileScreen(
     userDetails: UsersBean,
     viewModel: UserProfileViewModel,
-    onOptionsMenuClick: () -> Unit
+    onOptionsMenuClick: () -> Job,
+    navigator: DestinationsNavigator
 ) {
     Column(
         modifier = Modifier
@@ -261,7 +263,7 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails, onOptionsMenuClick)
+        ImageSection(userDetails, onOptionsMenuClick, navigator)
         SpacerHeight12()
         UserDetailsSection(userDetails)
         SpacerHeight24()
@@ -273,7 +275,8 @@ fun ProfileScreen(
 
 
 @Composable
-fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
+fun ImageSection(userDetails: UserBean, onOptionsMenuClick: () -> Job,    navigator: DestinationsNavigator
+) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -305,6 +308,7 @@ fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
                     top.linkTo(coverImageRef.bottom)
                     bottom.linkTo(coverImageRef.bottom)
                 },
+            contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
@@ -326,7 +330,7 @@ fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
 
         IconButton(
             onClick = {
-                // TODO: navigate user to user profile edit screen
+                navigator.navigate(EditProfileScreenDestination(userDetails))
             },
             modifier = Modifier.constrainAs(editImageRef) {
                 top.linkTo(coverImageRef.bottom, 16.dp)
@@ -340,7 +344,6 @@ fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun UserDetailsSection(userDetails: UsersBean) {
@@ -418,7 +421,7 @@ fun HandleFriendListSection(viewModel: UserProfileViewModel) {
         }
 
         RequestStatusEnum.NONE -> {
-            // no need to handle it 
+            // no need to handle it
         }
     }
 }
@@ -719,7 +722,6 @@ fun PostSection(postDetailsList: List<PostBean>) {
     }
 }
 
-
 @Composable
 fun PostItem(
     postDetails: PostBean?,
@@ -781,7 +783,6 @@ fun PostItem(
     }
 }
 
-
 @Composable
 fun PostTextOnlyItem(caption: String) {
     Box(
@@ -830,7 +831,6 @@ fun TextCountSeeAll(
     }
 }
 
-
 @Composable
 fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean = true) {
     Text(text = buildAnnotatedString {
@@ -843,10 +843,4 @@ fun TextCountItem(text: String, count: Int, isCountSurroundedByBracket: Boolean 
             append(countText)
         }
     }, textAlign = TextAlign.Center)
-}
-
-@Preview
-@Composable
-fun PreviewUserDetailsScreen() {
-    UserProfileScreen()
 }

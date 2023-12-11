@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.connect.data.models.user.UsersDbEntity
+import androidx.room.RawQuery
+import androidx.sqlite.db.SimpleSQLiteQuery
 
 @Dao
 interface IUsersDao {
@@ -17,4 +19,6 @@ interface IUsersDao {
 
     @Query("SELECT * FROM UsersDbEntity WHERE firebaseUserId = :fireBaseId")
     fun getUserDetails(fireBaseId: String): UsersDbEntity?
+    @RawQuery
+    fun updateUserDetails(queryToExecute: SimpleSQLiteQuery): Long
 }
