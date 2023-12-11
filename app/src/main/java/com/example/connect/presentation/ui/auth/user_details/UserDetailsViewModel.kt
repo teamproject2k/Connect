@@ -37,7 +37,6 @@ class UserDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
 
-
     /**
      * Creates a user profile in the database.
      */
@@ -45,8 +44,8 @@ class UserDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addUserStateFlow.value = ResponseState.loading()
-                val formattedUserName = getFormattedUserName()
-                //get no of users with name to set user id
+                val formattedUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
+                // get no of users with name to set user id
                 val currentUserByNameResponseState =
                     getUsersFromNameUseCase.invoke(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
@@ -74,20 +73,4 @@ class UserDetailsViewModel @Inject constructor(
             }
         }
     }
-
-    /**
-     * Formats the user name to be used in the database.
-     */
-    private fun getFormattedUserName(): String {
-        var formattedUserName = ""
-        val formattedUserNameList = userNameState.value.trim().split(" ")
-        formattedUserNameList.forEach {
-            if (it.isNotBlank()) {
-                formattedUserName += "$it "
-            }
-        }
-        return formattedUserName.trimEnd().lowercase()
-    }
-
-
 }

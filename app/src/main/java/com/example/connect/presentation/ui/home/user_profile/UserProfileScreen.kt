@@ -275,7 +275,7 @@ fun ProfileScreen(
 
 @Composable
 fun ImageSection(
-    userDetails: UsersBean   , navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit,
+    userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
@@ -369,7 +369,6 @@ fun UserDetailsSection(userDetails: UsersBean) {
         SpacerHeight8()
         ImageTextItem(imageVector = Icons.Default.Face, text = userDetails.gender)
     }
-
 }
 
 
@@ -383,7 +382,6 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
         )
         SpacerWidth6()
         Text(text = text, fontSize = 12.sp, fontWeight = fontWeight)
-
     }
 }
 
@@ -421,7 +419,7 @@ fun HandleFriendListSection(viewModel: UserProfileViewModel) {
         }
 
         RequestStatusEnum.NONE -> {
-            // no need to handle it
+            // no need to handle this
         }
     }
 }
@@ -509,7 +507,7 @@ fun FriendsListSection(friendsList: List<UsersBean>) {
                 repeat(ConstantsHelper.UserProfileFriendColumns - postCount) {
                     SpacerWidth8()
                     FriendItem(friendDetails = null, modifier = Modifier.weight(1f)) {
-                        //no need to handle
+                        // no need to handle
                     }
                 }
             }
@@ -591,7 +589,7 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
         }
 
         RequestStatusEnum.NONE -> {
-            //no need to handle it
+            // no need to handle it
         }
     }
 }

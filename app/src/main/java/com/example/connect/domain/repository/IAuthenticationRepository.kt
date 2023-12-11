@@ -36,7 +36,6 @@ interface IAuthenticationRepository {
      */
     suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?>
 
-
     /**
      * Gets the number of users with the given name from remote.
      *
@@ -73,7 +72,6 @@ interface IAuthenticationRepository {
         updatedDeviceId: String
     ): ResponseState<Nothing>
 
-
     /**
      * Updates the device ID on the local database.
      *
@@ -82,6 +80,5 @@ interface IAuthenticationRepository {
      * @return The number of rows affected.
      */
     suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int
-
 
 }

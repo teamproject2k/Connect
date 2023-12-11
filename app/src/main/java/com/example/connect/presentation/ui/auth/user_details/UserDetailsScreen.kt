@@ -92,11 +92,6 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
                 stringResource(R.string.create_an_account),
-//                buildAnnotatedString {
-//                    append(
-//                        stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
-//                    )
-//                }
             )
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 NameInputTextField(viewModel)
@@ -238,7 +233,7 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
                     .padding(end = 16.dp, bottom = 16.dp)
                     .clickable {
                         if (dateSelectionState.selectedDateMillis != null) {
-                            viewModel.selectedDOBState.value =
+                            viewModel.selectedDOBState.longValue =
                                 dateSelectionState.selectedDateMillis!!
                         }
                         showDatePickerState = false
@@ -321,7 +316,7 @@ private fun handleButtonClick(
         3 -> {
             viewModel.snackBarMessageState.value =
                 context.getString(
-                    R.string.name_can_t_contain_digits_or_special_characters,
+                    R.string.name_cannot_be_greater_than_max_characters,
                     ConstantsHelper.NameMaxCharacterLimit
                 )
             FunctionHelper.vibrateDevice(context)
@@ -334,6 +329,30 @@ private fun handleButtonClick(
             }
         }
     }
+
+    when (val bioValidationResponseCode =
+        Validator.isValidBio(viewModel.userNameState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_enter_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (bioValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+
     when (val genderValidationResponseCode =
         Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
         1 -> {
@@ -356,7 +375,9 @@ private fun handleButtonClick(
             }
         }
     }
-    when (val dobValidationResponseCode = Validator.isValidDob(viewModel.selectedDOBState.value)) {
+
+    when (val dobValidationResponseCode =
+        Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
         1 -> {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.please_select_your_date_of_birth)
@@ -377,6 +398,7 @@ private fun handleButtonClick(
             }
         }
     }
+
     if (viewModel.fireBaseAuth.currentUser != null) {
         if (context.isNetworkAvailable()) {
             viewModel.createUserProfile()

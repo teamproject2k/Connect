@@ -106,7 +106,7 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun updateUserDetailsOnServer(
+    override suspend fun updateUserDetailsOnRemote(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): ResponseState<Nothing?> {
@@ -140,7 +140,7 @@ class IHomeRepositoryImpl(
         }
     }
 
-    override suspend fun updateUserDetailsOnLocal(
+    override suspend fun updateUserDetailsOnDb(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long {

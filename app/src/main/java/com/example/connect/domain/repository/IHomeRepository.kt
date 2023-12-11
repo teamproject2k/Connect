@@ -77,7 +77,7 @@ interface IHomeRepository {
      */
     suspend fun uploadFileToRemote(url: Uri, path: String): ResponseState<String>
 
-    suspend fun updateUserDetailsOnServer(
+    suspend fun updateUserDetailsOnRemote(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): ResponseState<Nothing?>
@@ -90,7 +90,7 @@ interface IHomeRepository {
         parameterToUpdate: String
     ): ResponseState<String>
 
-    suspend fun updateUserDetailsOnLocal(
+    suspend fun updateUserDetailsOnDb(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long
