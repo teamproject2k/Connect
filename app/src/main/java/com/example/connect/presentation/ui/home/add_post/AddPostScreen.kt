@@ -199,7 +199,7 @@ fun HandleAddPostSection(
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
         LOADING -> {
-            LoaderDialog()
+            LoaderDialog(stringResource(R.string.uploading_post))
         }
 
         SUCCESS -> {
