@@ -40,7 +40,9 @@ class UserProfileViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-
+    /**
+     * Gets the details of the post.
+     */
     fun getPostDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -68,6 +70,11 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Gets the list of friends from their ids.
+     *
+     * @param friendIdList The list of friend ids.
+     */
     fun getFriendListFromIds(friendIdList: List<String>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

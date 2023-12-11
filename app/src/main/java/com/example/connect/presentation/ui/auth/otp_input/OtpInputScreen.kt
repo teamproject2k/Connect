@@ -2,6 +2,7 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -135,7 +136,7 @@ fun OTPScreen(
                 ) {
                     Text(text = stringResource(R.string.didn_t_receive_otp), fontSize = 12.sp)
                     SpacerWidth6()
-                    OTPTTimer(viewModel)
+                    OTPTimer(viewModel)
                 }
                 SpacerHeight48()
                 LoaderButton(
@@ -164,7 +165,7 @@ fun OTPScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun OTPTTimer(viewModel: OtpInputViewModel) {
+fun OTPTimer(viewModel: OtpInputViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val countDownTimeLeft =
         viewModel.timeLeftFlow.collectAsState(initial = ConstantsHelper.OTPTimeOutTime)
@@ -432,6 +433,7 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
         FunctionHelper.vibrateDevice(context)
     } else if (otpValidationResponseCode == 0) {
         if (context.isNetworkAvailable()) {
+            Log.e("aryan", "called")
             viewModel.verifyOTP(viewModel.verificationId)
         } else {
             viewModel.snackBarMessageState.value =

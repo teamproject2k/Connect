@@ -23,25 +23,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.VideoCameraFront
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
@@ -88,15 +90,15 @@ fun AddPostScreen() {
     if (viewModel.isFirstTimeSetup) {
         viewModel.setUpData(context)
     }
-    val bottomSheetState =
-        SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
+
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
 
     val snackBarHostState = SnackbarHostState()
-    val bottomSheetScaffoldState =
-        rememberBottomSheetScaffoldState(bottomSheetState, snackBarHostState)
     val imageResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            //uri will be null in case user doesn't select any image
+            // uri will be null in case user doesn't select any image
             if (uri != null) {
                 val contentResolver = context.contentResolver
                 val mediaType = contentResolver.getType(uri)?.substringBefore("/")
@@ -107,44 +109,32 @@ fun AddPostScreen() {
             }
         }
 
-    BottomSheetScaffold({
-        PostVisibilityScopeBottomSheet(viewModel = viewModel) {
-            coroutineScope.launch {
-                bottomSheetState.hide()
-            }
+    Scaffold(topBar = {
+        Surface(shadowElevation = 3.dp) {
+            TopAppBar(title = {
+                Text(
+                    text = stringResource(R.string.create_post),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }, actions = {
+                Button(onClick = {
+                    handleButtonClick(viewModel, context)
+                }) {
+                    Text(text = stringResource(R.string.post))
+                }
+            })
         }
-    },
-        sheetShape = RoundedCornerShape(
-            topEnd = ConstantsHelper.BottomSheetRoundness,
-            topStart = ConstantsHelper.BottomSheetRoundness
-        ),
-        scaffoldState = bottomSheetScaffoldState,
-        topBar = {
-            Surface(shadowElevation = 3.dp) {
-                TopAppBar(title = {
-                    Text(
-                        text = stringResource(R.string.create_post),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }, actions = {
-                    Button(onClick = {
-                        handleButtonClick(viewModel, context)
-                    }) {
-                        Text(text = stringResource(R.string.post))
-                    }
-                })
-            }
-        }) {
+    }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(it)
         ) {
-
             TopDetailsSection(viewModel = viewModel, sharedViewModel) {
                 coroutineScope.launch {
                     keyboardController?.hide()
-                    bottomSheetState.show()
+                    showBottomSheet = true
                 }
             }
             Column(
@@ -158,7 +148,26 @@ fun AddPostScreen() {
                 imageResultLauncher.launch(PickVisualMediaRequest(mediaType))
             }
         }
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                ),
+            ) {
+                PostVisibilityScopeBottomSheet(
+                    modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    viewModel = viewModel
+                ) {
+                    coroutineScope.launch {
+                        showBottomSheet = false
+                    }
+                }
+            }
+        }
     }
+
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -170,8 +179,12 @@ fun AddPostScreen() {
 }
 
 @Composable
-fun PostVisibilityScopeBottomSheet(viewModel: AddPostViewModel, onDismissRequest: () -> Unit) {
-    Column {
+fun PostVisibilityScopeBottomSheet(
+    modifier: Modifier,
+    viewModel: AddPostViewModel,
+    onDismissRequest: () -> Unit
+) {
+    Column(modifier = modifier) {
         viewModel.postVisibilityScopeList.forEach { postScope ->
             PostVisibilityScopeBottomSheetItem(postScope) {
                 viewModel.currentPostVisibilityState.value = postScope
@@ -362,7 +375,7 @@ fun PostCaptionField(viewModel: AddPostViewModel) {
             Text(
                 text = stringResource(R.string.add_description),
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = ColorsHelper.gray()
             )
         },
         onValueChange = { updatedValue ->

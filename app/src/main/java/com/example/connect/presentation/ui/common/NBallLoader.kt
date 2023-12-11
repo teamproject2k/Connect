@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import java.util.Timer
 import java.util.TimerTask
 
@@ -71,11 +70,4 @@ fun NBallLoader(
             timer.cancel()
         }
     }
-
-}
-
-@Preview
-@Composable
-fun PreviewNBallLoader() {
-    NBallLoader(activatedColor = Color.Black, deactivatedColor = Color.Blue)
 }

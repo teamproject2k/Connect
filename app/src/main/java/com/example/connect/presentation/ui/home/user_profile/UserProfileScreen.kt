@@ -53,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -82,6 +81,7 @@ import com.example.connect.data.local_db.posts.PostDetails
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -284,7 +284,7 @@ fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .background(Color.LightGray)
+                .background(ColorsHelper.lightGray())
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -299,7 +299,7 @@ fun ImageSection(userDetails: UsersBean, onOptionsMenuClick: () -> Unit) {
                 .size(150.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
-                .border(4.dp, Color.White, CircleShape)
+                .border(4.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 .constrainAs(profileImageRef) {
                     start.linkTo(parent.start, 16.dp)
                     top.linkTo(coverImageRef.bottom)
@@ -517,9 +517,9 @@ fun FriendsListSection(friendsList: List<UsersBean>) {
 
 @Composable
 fun FriendItem(
+    modifier: Modifier = Modifier,
     friendDetails: UsersBean?,
     showShimmer: Boolean = false,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     val updatedModifier = if (friendDetails != null) {
@@ -697,8 +697,7 @@ fun PostSection(postDetailsList: List<PostDetails>) {
                             noOfRows = ceil(postDetailsList.size.toFloat() / 3).toInt(),
                             itemsVerticalPadding = 8.dp
                         )
-                    )
-                    .background(Color.Red),
+                    ),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -788,13 +787,13 @@ fun PostTextOnlyItem(caption: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .padding(8.dp), contentAlignment = Alignment.Center
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = caption,
             fontSize = 12.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onPrimary,
             lineHeight = 12.sp,
             overflow = TextOverflow.Ellipsis
         )

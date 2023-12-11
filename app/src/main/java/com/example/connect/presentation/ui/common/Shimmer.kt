@@ -10,15 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 
 fun Modifier.shimmer(
     durationMillis: Int = 1000,
 ): Modifier = composed {
     val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f),
+        ColorsHelper.lightGray().copy(alpha = 0.6f),
+        ColorsHelper.lightGray().copy(alpha = 0.2f),
+        ColorsHelper.lightGray().copy(alpha = 0.6f),
     )
 
     val transition = rememberInfiniteTransition(label = "infinite_shimmer")
