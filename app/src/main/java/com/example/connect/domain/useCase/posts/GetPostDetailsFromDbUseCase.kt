@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.posts
 
-import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.repository.IHomeRepository
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ class GetPostDetailsFromDbUseCase @Inject constructor(private val repository: IH
      * @param fireBaseId The fire base id of the post.
      * @return The post details.
      */
-    suspend fun invoke(fireBaseId: String): List<PostDetails>? {
+    suspend fun invoke(fireBaseId: String): List<PostBean> {
         return repository.getPostDetailsFromDb(fireBaseId)
     }
 

@@ -4,15 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.connect.data.models.post.PostDbEntity
 
 @Dao
 interface IPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertPost(postDetails: PostDetails): Long
+    fun insertPost(postDetails: PostDbEntity): Long
 
     @Insert
-    fun insertPostList(postDetailsList: List<PostDetails>): LongArray
+    fun insertPostList(postDetailsList: List<PostDbEntity>): LongArray
 
-    @Query("SELECT * FROM PostDetails WHERE fireBaseUserId = :fireBaseId")
-    fun getPostList(fireBaseId: String): List<PostDetails>?
+    @Query("SELECT * FROM PostDbEntity WHERE fireBaseUserId = :fireBaseId")
+    fun getPostList(fireBaseId: String): List<PostDbEntity>
 }

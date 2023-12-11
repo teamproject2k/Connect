@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.posts
 
-import com.example.connect.data.local_db.posts.PostDetails
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.repository.IHomeRepository
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ class AddPostListToDbUseCase @Inject constructor(private val repository: IHomeRe
      * @param postDetails The list of posts to add.
      * @return The IDs of the posts that were added.
      */
-    suspend fun invoke(postDetails: List<PostDetails>): LongArray {
+    suspend fun invoke(postDetails: List<PostBean>): LongArray {
         return repository.addPostListToDb(postDetails)
     }
 
