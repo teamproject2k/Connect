@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetUsersFromNameUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
     /**
-     * Invokes the repository to get user count of name from remote.
+     * Invokes the repository to get user count from name from remote.
      *
      * @param name The user name.
      * @return The response state.
