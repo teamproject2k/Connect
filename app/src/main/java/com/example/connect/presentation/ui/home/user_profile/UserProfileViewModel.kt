@@ -10,7 +10,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromIds
+import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemote
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ class UserProfileViewModel @Inject constructor(
     private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
     private val addPostListToDbUseCase: AddPostListToDbUseCase,
-    private val getUserDetailsFromIds: GetUserDetailsFromIds
+    private val getUserDetailsFromIds: GetUserDetailsFromIdsFromRemote
 ) : BaseViewModel() {
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())

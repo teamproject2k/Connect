@@ -13,7 +13,7 @@ import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUsersFromNameUseCase
+import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
@@ -33,7 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
-    private val getUsersFromNameUseCase: GetUsersFromNameUseCase,
+    private val getUsersFromNameUseCaseFromRemote: GetUsersFromNameUseCaseFromRemote,
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
     private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase
 ) :
@@ -126,7 +126,7 @@ class EditProfileViewModel @Inject constructor(
                     if (fieldsToUpdate.containsKey(UsersBean::name.name)) {
                         val userName = fieldsToUpdate[UsersBean::name.name]
                         val currentUserByNameResponseState = userName?.let {
-                            getUsersFromNameUseCase.invoke(it.toString())
+                            getUsersFromNameUseCaseFromRemote.invoke(it.toString())
                         }
                         if (userName == null || currentUserByNameResponseState?.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value =

@@ -5,7 +5,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IHomeRepository
 import javax.inject.Inject
 
-class GetUserDetailsFromIds @Inject constructor(private val repository: IHomeRepository) {
+class GetUserDetailsFromIdsFromRemote @Inject constructor(private val repository: IHomeRepository) {
 
     /**
      * Gets user details from a list of user ids.

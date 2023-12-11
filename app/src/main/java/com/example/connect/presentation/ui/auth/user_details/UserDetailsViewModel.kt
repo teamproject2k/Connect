@@ -8,7 +8,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUsersFromNameUseCase
+import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class UserDetailsViewModel @Inject constructor(
     private val addUserToRemoteUseCase: AddUserToRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getUsersFromNameUseCase: GetUsersFromNameUseCase
+    private val getUsersFromNameUseCaseFromRemote: GetUsersFromNameUseCaseFromRemote
 ) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
@@ -47,7 +47,7 @@ class UserDetailsViewModel @Inject constructor(
                 val formattedUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
                 // get no of users with name to set user id
                 val currentUserByNameResponseState =
-                    getUsersFromNameUseCase.invoke(formattedUserName)
+                    getUsersFromNameUseCaseFromRemote.invoke(formattedUserName)
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
                     val user = UsersBean(
