@@ -11,6 +11,7 @@ object ConstantsHelper {
     const val UserProfileFriendColumns = 4
     const val NameMaxCharacterLimit = 50
     const val BioMaxCharacterLimit = 100
+    const val NewDeviceDialogDismissTime:Long=30000
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp
     val CoverImageHeight = 200.dp

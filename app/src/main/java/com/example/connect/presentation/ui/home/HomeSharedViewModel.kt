@@ -5,6 +5,7 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class HomeSharedViewModel @Inject constructor(
     private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase
+    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase
 ) :
     BaseViewModel() {
     lateinit var _userDetails: UsersBean
@@ -31,8 +33,38 @@ class HomeSharedViewModel @Inject constructor(
 
     val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
 
+    private val _deviceIdStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+
+    val deviceIdStateFlow: StateFlow<ResponseState<Nothing>> get() = _deviceIdStateFlow
+
     init {
-        getUserDetails()
+        getDeviceIdFromRemote()
+    }
+
+    private fun getDeviceIdFromRemote() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _deviceIdStateFlow.value = ResponseState.loading()
+                val firebaseId = fireBaseAuth.currentUser?.uid
+                if (firebaseId != null) {
+                    val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
+                    if (responseState.status == RequestStatusEnum.SUCCESS) {
+                        if (sharedPreference.deviceId != responseState.data) {
+                            _deviceIdStateFlow.value = ResponseState.error(ErrorCodes.NewLogin)
+                        } else {
+                            getUserDetails()
+                            _deviceIdStateFlow.value = ResponseState.success(null)
+                        }
+                    } else {
+                        _deviceIdStateFlow.value = ResponseState.error(responseState.message ?: "")
+                    }
+                } else {
+                    _deviceIdStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                }
+            }
+        }
+
     }
 
     private fun getUserDetails() {

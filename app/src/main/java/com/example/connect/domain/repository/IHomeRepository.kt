@@ -94,4 +94,7 @@ interface IHomeRepository {
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long
+
+
+    suspend fun getDeviceIdFromRemote(firebaseUserId: String): ResponseState<String>
 }

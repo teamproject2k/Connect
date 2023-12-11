@@ -92,4 +92,6 @@
     <string name="uploading_post">Uploading Post...</string>
     <string name="connect_id">Connect ID</string>
     <string name="user_details_updated_successfully">User details updated successfully</string>
+    <string name="logging_you_out">Logging you out</string>
+    <string name="we_have_detected_your_account_logged_into_another_device">We have detected your account logged into another device</string>
 </resources>

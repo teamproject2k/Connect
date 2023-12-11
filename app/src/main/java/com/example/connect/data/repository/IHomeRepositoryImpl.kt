@@ -2,6 +2,7 @@ package com.example.connect.data.repository
 
 import android.net.Uri
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
@@ -156,4 +157,23 @@ class IHomeRepositoryImpl(
         return appDatabase.getUsersDao().updateUserDetails(queryToExecute)
     }
 
+    override suspend fun getDeviceIdFromRemote(firebaseUserId: String): ResponseState<String> {
+        return try {
+            val result =
+                fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId).get()
+                    .await()
+            if (result.exists()) {
+                val userModel = result.toObject(UserRemoteEntity::class.java)
+                if (userModel != null) {
+                    ResponseState.success(userModel.currentLoggedInDeviceId)
+                } else {
+                    ResponseState.error(ErrorCodes.NoUserFound)
+                }
+            } else {
+                ResponseState.error(ErrorCodes.NoUserFound)
+            }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 }
