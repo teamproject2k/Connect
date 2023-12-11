@@ -31,6 +31,6 @@ fun LoaderFullScreen(loadingText: String = stringResource(id = R.string.please_w
 
 @Preview
 @Composable
-fun PreviewLoaderDialog() {
+fun PreviewFullScreenLoaderDialog() {
     LoaderFullScreen(loadingText = "Loading...")
 }
