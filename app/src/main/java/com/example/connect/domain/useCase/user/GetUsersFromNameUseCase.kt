@@ -6,6 +6,12 @@ import javax.inject.Inject
 
 class GetUsersFromNameUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
 
+    /**
+     * Invokes the repository to get user count of name from remote.
+     *
+     * @param name The user name.
+     * @return The response state.
+     */
     suspend fun invoke(name: String): ResponseState<Int> {
         return repository.getUsersCountFromNameFromRemote(name)
     }
