@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -146,8 +146,7 @@ class HomeActivity : BaseActivity() {
             ) {
                 Column(
                     modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.onPrimary,
+                        .clip(
                             RoundedCornerShape(12.dp)
                         )
                         .padding(24.dp)
