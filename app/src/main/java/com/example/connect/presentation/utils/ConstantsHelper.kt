@@ -3,6 +3,7 @@ package com.example.connect.presentation.utils
 import androidx.compose.ui.unit.dp
 
 object ConstantsHelper {
+    val MediaTypeImage: String=""
     const val OTPTimeOutTime: Long = 30
     const val OTPCharCount = 6
     const val NavigationAnimationDuration = 300

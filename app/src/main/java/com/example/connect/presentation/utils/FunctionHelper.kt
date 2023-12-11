@@ -15,7 +15,6 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.users.UserDetails
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

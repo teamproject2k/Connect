@@ -2,17 +2,15 @@ package com.example.connect.data.repository
 
 import android.net.Uri
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.example.connect.common.ErrorCodes
-import android.net.Uri
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IHomeRepository
-import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -122,7 +120,7 @@ class IHomeRepositoryImpl(
     }
 
     override suspend fun getUsersFromName(name: Any): ResponseState<Int> {
-        return FunctionHelper.getUsersFromName(fireStore, name.toString())
+        return ResponseState.error("")
     }
 
     override suspend fun updateImageOnRemoteStorage(
@@ -149,7 +147,7 @@ class IHomeRepositoryImpl(
 
         val setClause = fieldsToUpdate.entries.joinToString(", ") { "${it.key} = ?" }
         val sql =
-            "UPDATE ${UserDetails::class.simpleName} SET $setClause WHERE ${UserDetails::firebaseUserId.name} = ?"
+            "UPDATE ${UsersDbEntity::class.simpleName} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
         val bindArgs = fieldsToUpdate.values.toMutableList()
         bindArgs.add(firebaseUserId)
 

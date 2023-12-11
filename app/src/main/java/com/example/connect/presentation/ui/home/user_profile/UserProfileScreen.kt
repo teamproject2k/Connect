@@ -104,7 +104,6 @@ import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -126,7 +125,7 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            ProfileScreen(sharedViewModel._userDetails, viewModel) {
+            ProfileScreen(sharedViewModel._userDetails, viewModel, navigator) {
                 showBottomSheet = true
             }
         }
@@ -254,8 +253,8 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
 fun ProfileScreen(
     userDetails: UsersBean,
     viewModel: UserProfileViewModel,
-    onOptionsMenuClick: () -> Job,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    onOptionsMenuClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -263,7 +262,7 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails, onOptionsMenuClick, navigator)
+        ImageSection(userDetails, navigator, onOptionsMenuClick)
         SpacerHeight12()
         UserDetailsSection(userDetails)
         SpacerHeight24()
@@ -275,7 +274,8 @@ fun ProfileScreen(
 
 
 @Composable
-fun ImageSection(userDetails: UserBean, onOptionsMenuClick: () -> Job,    navigator: DestinationsNavigator
+fun ImageSection(
+    userDetails: UsersBean   , navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit,
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
@@ -330,7 +330,7 @@ fun ImageSection(userDetails: UserBean, onOptionsMenuClick: () -> Job,    naviga
 
         IconButton(
             onClick = {
-                navigator.navigate(EditProfileScreenDestination(userDetails))
+                navigator.navigate(EditProfileScreenDestination())
             },
             modifier = Modifier.constrainAs(editImageRef) {
                 top.linkTo(coverImageRef.bottom, 16.dp)

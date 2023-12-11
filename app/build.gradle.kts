@@ -63,7 +63,6 @@ dependencies {
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
     androidTestImplementation(Dependencies.composeTestJunit)
