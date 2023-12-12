@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.common.ErrorCodes
@@ -214,6 +216,7 @@ fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
         value = viewModel.userMobileNumberState.value,
+        textStyle = TextStyle(letterSpacing = 2.sp, fontWeight = FontWeight.Medium),
         onValueChange = { updatedValue ->
             if (updatedValue.length <= 10) {
                 viewModel.userMobileNumberState.value = updatedValue

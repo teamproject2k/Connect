@@ -2,10 +2,10 @@ package com.example.connect.domain.useCase.user
 
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.domain.repository.IHomeRepository
+import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class GetUserDetailsFromIds @Inject constructor(private val repository: IHomeRepository) {
+class GetUserDetailsFromIds @Inject constructor(private val repository: IUserRepository) {
 
     /**
      * Gets user details from a list of user ids.

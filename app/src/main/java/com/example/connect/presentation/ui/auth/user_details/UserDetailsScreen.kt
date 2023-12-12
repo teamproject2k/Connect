@@ -92,11 +92,6 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.welcome),
                 stringResource(R.string.let_s_connect),
                 stringResource(R.string.create_an_account),
-//                buildAnnotatedString {
-//                    append(
-//                        stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
-//                    )
-//                }
             )
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 NameInputTextField(viewModel)
@@ -213,7 +208,7 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     var showDatePickerState by remember {
         mutableStateOf(false)
     }
-    val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
         value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
             viewModel.selectedDOBState.longValue

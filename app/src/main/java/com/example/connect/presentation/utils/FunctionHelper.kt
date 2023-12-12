@@ -13,11 +13,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.ResponseState
 import com.example.connect.presentation.ui.models.PostVisibilityScope
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -219,12 +215,21 @@ object FunctionHelper {
         return Date().time
     }
 
+    /**
+     * Gets the lower case version of the user name.
+     *
+     * @param userName The user name to be formatted.
+     * @return The formatted user name.
+     */
     fun getLowerCaseUserName(userName: String): String {
         var formattedUserName = ""
-        val formattedUserNameList = userName.trim().split(" ")
-        formattedUserNameList.forEach {
-            if (it.isNotBlank()) {
-                formattedUserName += "$it "
+
+        val formattedUserNameList =
+            userName.trim().split(" ") // Split the user name into a list of words
+
+        formattedUserNameList.forEach { // Iterate over the list of words
+            if (it.isNotBlank()) { // Check if the word is not empty
+                formattedUserName += "$it " // Add the word to the formatted user name
             }
         }
         return formattedUserName.trimEnd().lowercase()

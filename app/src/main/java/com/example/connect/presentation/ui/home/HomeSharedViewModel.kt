@@ -38,11 +38,7 @@ class HomeSharedViewModel @Inject constructor(
 
     val deviceIdStateFlow: StateFlow<ResponseState<Nothing>> get() = _deviceIdStateFlow
 
-    init {
-        getDeviceIdFromRemote()
-    }
-
-    private fun getDeviceIdFromRemote() {
+    fun getDeviceIdFromRemote() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _deviceIdStateFlow.value = ResponseState.loading()

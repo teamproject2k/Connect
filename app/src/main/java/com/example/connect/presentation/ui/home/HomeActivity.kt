@@ -81,6 +81,7 @@ class HomeActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             viewModel = hiltViewModel()
+            viewModel.getDeviceIdFromRemote()
             CompositionLocalProvider(LocalActivity provides this) {
                 ConnectTheme {
                     HandleGetDeviceIdFlow()

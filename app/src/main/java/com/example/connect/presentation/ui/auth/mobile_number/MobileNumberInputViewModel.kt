@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
-import com.example.connect.domain.useCase.otp.SendOtpUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel

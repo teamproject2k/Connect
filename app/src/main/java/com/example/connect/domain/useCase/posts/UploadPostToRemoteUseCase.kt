@@ -2,10 +2,10 @@ package com.example.connect.domain.useCase.posts
 
 import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.repository.IHomeRepository
+import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
-class UploadPostToRemoteUseCase @Inject constructor(private val repository: IHomeRepository) {
+class UploadPostToRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
 
     /**
      * Invokes the upload post to server use case.

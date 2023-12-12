@@ -97,7 +97,6 @@ fun OTPScreen(
     HandleVerifyOTPState(viewModel, navigator, context)
     HandleUserDetailsState(viewModel, navigator, context)
     HandleResendOTPState(viewModel, context)
-
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -329,14 +328,12 @@ fun HandleVerifyOTPState(
     context: Context
 ) {
     val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
-
     when (verifyOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             if (verifyOtpState.data != null) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(verifyOtpState.data.uid)
@@ -348,6 +345,7 @@ fun HandleVerifyOTPState(
                 context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
                 navigator.popBackStack()
             }
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.EXCEPTION -> {

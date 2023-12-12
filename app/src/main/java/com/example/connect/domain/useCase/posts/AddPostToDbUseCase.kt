@@ -1,10 +1,10 @@
 package com.example.connect.domain.useCase.posts
 
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.repository.IHomeRepository
+import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
-class AddPostToDbUseCase @Inject constructor(private val repository: IHomeRepository) {
+class AddPostToDbUseCase @Inject constructor(private val repository: IPostRepository) {
 
     /**
      * Adds a list of posts to the local database.

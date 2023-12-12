@@ -1,10 +1,10 @@
 package com.example.connect.domain.useCase.device
 
 import com.example.connect.common.ResponseState
-import com.example.connect.domain.repository.IAuthenticationRepository
+import com.example.connect.domain.repository.IDeviceIdRepository
 import javax.inject.Inject
 
-class UpdateDeviceIdOnRemoteUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
+class UpdateDeviceIdOnRemoteUseCase @Inject constructor(private val repository: IDeviceIdRepository) {
     /**
      * Invokes the updateDeviceIdOnRemote method on the repository.
      *
