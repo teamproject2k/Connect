@@ -129,9 +129,12 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                     fontSize = 18.sp
                 )
             }, actions = {
-                Button(onClick = {
-                    handleButtonClick(viewModel, context)
-                }) {
+                Button(
+                    enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
+                    onClick = {
+                        handleButtonClick(viewModel, context)
+                    }
+                ) {
                     Text(text = stringResource(R.string.post))
                 }
             })

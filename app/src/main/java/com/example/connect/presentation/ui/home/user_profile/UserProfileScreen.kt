@@ -139,7 +139,7 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                 ) { showSheet ->
-                    showBottomSheet = showSheet
+                    showBottomSheet = !showSheet
                 }
             }
         }
