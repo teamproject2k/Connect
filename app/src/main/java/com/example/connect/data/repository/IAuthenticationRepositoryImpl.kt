@@ -3,7 +3,6 @@ package com.example.connect.data.repository
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
-import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -13,16 +12,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class IAuthenticationRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val fireStore: FirebaseFirestore,
-    private val appDatabase: AppDatabase
+    private val firebaseAuth: FirebaseAuth
 ) :
     IAuthenticationRepository {
     override suspend fun sendOtp(
