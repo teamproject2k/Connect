@@ -5,15 +5,10 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ChatBubble
@@ -25,16 +20,12 @@ import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -43,12 +34,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
@@ -58,9 +47,7 @@ import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.SpacerHeight18
-import com.example.connect.presentation.ui.common.SpacerWidth18
-import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.LogoutAlertDialog
 import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
@@ -92,7 +79,6 @@ class HomeActivity : BaseActivity() {
     }
 
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun HandleGetDeviceIdFlow() {
         var showNewDeviceLoginAlertDialog by remember {
@@ -138,35 +124,8 @@ class HomeActivity : BaseActivity() {
             }
         }
         if (showNewDeviceLoginAlertDialog) {
-            AlertDialog(
-                onDismissRequest = { showNewDeviceLoginAlertDialog = false },
-                properties = DialogProperties(
-                    dismissOnBackPress = false,
-                    dismissOnClickOutside = false
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surface,
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(24.dp)
-                ) {
-                    TextBold18(text = stringResource(R.string.logging_you_out))
-                    SpacerHeight18()
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(32.dp),
-                            strokeWidth = 3.dp
-                        )
-                        SpacerWidth18()
-                        Text(text = stringResource(R.string.we_have_detected_your_account_logged_into_another_device))
-                    }
-                }
+            LogoutAlertDialog {
+                showNewDeviceLoginAlertDialog = false
             }
         }
     }

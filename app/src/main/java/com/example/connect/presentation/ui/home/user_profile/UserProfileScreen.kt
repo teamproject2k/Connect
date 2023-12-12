@@ -330,7 +330,7 @@ fun ImageSection(
 
         IconButton(
             onClick = {
-                navigator.navigate(EditProfileScreenDestination())
+                navigator.navigate(EditProfileScreenDestination(userDetails))
             },
             modifier = Modifier.constrainAs(editImageRef) {
                 top.linkTo(coverImageRef.bottom, 16.dp)

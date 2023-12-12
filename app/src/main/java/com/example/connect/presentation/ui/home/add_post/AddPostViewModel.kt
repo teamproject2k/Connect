@@ -32,8 +32,7 @@ class AddPostViewModel @Inject constructor(
     private val uploadPostToRemoteUseCase: UploadPostToRemoteUseCase,
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
     private val addPostToDbUseCase: AddPostToDbUseCase
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<PostMediaData?> = mutableStateOf(null)
     lateinit var postVisibilityScopeList: List<PostVisibilityScope>

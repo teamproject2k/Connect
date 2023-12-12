@@ -73,11 +73,9 @@ class AppModule {
     @Provides
     @Singleton
     fun getAuthRepository(
-        firebaseAuth: FirebaseAuth,
-        fireStore: FirebaseFirestore,
-        appDatabase: AppDatabase
+        firebaseAuth: FirebaseAuth
     ): IAuthenticationRepository =
-        IAuthenticationRepositoryImpl(firebaseAuth, fireStore, appDatabase)
+        IAuthenticationRepositoryImpl(firebaseAuth)
 
 
     @Provides
