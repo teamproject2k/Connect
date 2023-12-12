@@ -14,6 +14,7 @@ import com.example.connect.domain.useCase.posts.AddPostToDbUseCase
 import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
@@ -70,13 +71,40 @@ class AddPostViewModel @Inject constructor(
                             fileUrl = uploadFileToRemoteResponse.data ?: ""
                         }
                     }
+                    val postType =
+                        when {
+                            selectedMediaState.value == null -> {
+                                PostTypeEnum.Text.name
+                            }
+
+                            selectedMediaState.value!!.mediaType.contains("image") -> {
+                                if (captionTextState.value.isNotBlank()) {
+                                    PostTypeEnum.TextImage.name
+                                } else {
+                                    PostTypeEnum.Image.name
+                                }
+                            }
+
+                            selectedMediaState.value!!.mediaType.contains("video") -> {
+                                if (captionTextState.value.isNotBlank()) {
+                                    PostTypeEnum.TextVideo.name
+                                } else {
+                                    PostTypeEnum.Video.name
+                                }
+                            }
+
+                            else -> {
+                                ""
+                            }
+                        }
                     val postDetails = PostBean(
                         "",
                         firebaseId,
                         fileUrl,
                         captionTextState.value,
                         FunctionHelper.getCurrentTimeInMillis(),
-                        currentPostVisibilityState.value.scopeName
+                        currentPostVisibilityState.value.scopeName,
+                        postType
                     )
                     val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
                     if (serverResponse.status == RequestStatusEnum.SUCCESS) {

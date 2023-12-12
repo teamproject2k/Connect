@@ -7,17 +7,19 @@ import com.example.connect.data.models.post.PostRemoteEntity
 data class PostBean(
     var id: String,
     val fireBaseUserId: String,
-    val postUrl: String,
+    val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
+    val postScope: String,
     val postType: String
 ) {
     fun toPostRemoteEntity(): PostRemoteEntity {
         return PostRemoteEntity(
             fireBaseUserId,
-            postUrl,
+            mediaUrl,
             caption,
             createdAt,
+            postScope,
             postType
         )
     }
@@ -26,9 +28,10 @@ data class PostBean(
         return PostDbEntity(
             id,
             fireBaseUserId,
-            postUrl,
+            mediaUrl,
             caption,
             createdAt,
+            postScope,
             postType
         )
     }

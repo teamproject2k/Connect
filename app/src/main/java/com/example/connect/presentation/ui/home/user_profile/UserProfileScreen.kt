@@ -747,7 +747,7 @@ fun PostItem(
         }
     ) {
         if (showShimmer || postDetails == null) return
-        if (postDetails.postType == PostTypeEnum.Text.name) {
+        if (postDetails.postScope == PostTypeEnum.Text.name) {
             PostTextOnlyItem(caption = postDetails.caption)
         } else {
             var isImageLoadingFailed by remember {
@@ -755,7 +755,7 @@ fun PostItem(
             }
             if (!isImageLoadingFailed) {
                 AsyncImage(
-                    model = postDetails.postUrl,
+                    model = postDetails.mediaUrl,
                     contentDescription = postDetails.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
@@ -766,7 +766,7 @@ fun PostItem(
             } else {
                 PostTextOnlyItem(caption = postDetails.caption.ifBlank { stringResource(R.string.unable_to_load_post) })
             }
-            if (postDetails.postType.contains(PostTypeEnum.Video.name)) {
+            if (postDetails.postScope.contains(PostTypeEnum.Video.name)) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

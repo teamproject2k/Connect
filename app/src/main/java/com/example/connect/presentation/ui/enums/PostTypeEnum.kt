@@ -5,5 +5,5 @@ enum class PostTypeEnum {
     Image,
     TextImage,
     Video,
-    VideoText
+    TextVideo
 }

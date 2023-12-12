@@ -77,8 +77,6 @@ class HomeActivity : BaseActivity() {
             }
         }
     }
-
-
     @Composable
     private fun HandleGetDeviceIdFlow() {
         var showNewDeviceLoginAlertDialog by remember {
