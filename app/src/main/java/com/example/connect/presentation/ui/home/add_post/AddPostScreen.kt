@@ -94,7 +94,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddPostScreen(navigator: DestinationsNavigator) {
     val viewModel: AddPostViewModel = hiltViewModel()
-    val sharedViewModel: HomeSharedViewModel = hiltViewModel()
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current

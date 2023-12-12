@@ -113,7 +113,7 @@ import kotlin.math.ceil
 @Composable
 fun UserProfileScreen(navigator: DestinationsNavigator) {
     val viewModel: UserProfileViewModel = hiltViewModel()
-    val sharedViewModel: HomeSharedViewModel = hiltViewModel()
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     var showBottomSheet by remember {
