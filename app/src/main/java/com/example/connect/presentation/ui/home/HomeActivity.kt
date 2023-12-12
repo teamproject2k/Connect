@@ -77,6 +77,7 @@ class HomeActivity : BaseActivity() {
             }
         }
     }
+
     @Composable
     private fun HandleGetDeviceIdFlow() {
         var showNewDeviceLoginAlertDialog by remember {
@@ -175,14 +176,15 @@ class HomeActivity : BaseActivity() {
                             )
                         )
                 ) {
+
                     getBottomNavBarItemList().forEach { data ->
                         NavigationBarItem(
                             selected = selectedRouteState.value == data.routeName,
                             onClick = {
+                                navController.navigate(data.routeName) {
+                                    launchSingleTop = true
+                                }
                                 selectedRouteState.value = data.routeName
-                                navController.navigate(
-                                    data.routeName
-                                )
                             },
                             colors = NavigationBarItemDefaults.colors(
                                 indicatorColor = MaterialTheme.colorScheme.primary

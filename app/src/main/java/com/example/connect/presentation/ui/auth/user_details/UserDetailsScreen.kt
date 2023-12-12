@@ -166,6 +166,7 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
     }
     OutlinedTextFieldDisabledFeelsLikeEnabled(
         value = viewModel.selectedGenderState.value,
+        showEnabledByDefault = false,
         modifier = Modifier
             .fillMaxWidth(),
         leadingIcon = {
@@ -210,6 +211,7 @@ fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     }
     val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
+        showEnabledByDefault = false,
         value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
             viewModel.selectedDOBState.longValue
         ) else "",
