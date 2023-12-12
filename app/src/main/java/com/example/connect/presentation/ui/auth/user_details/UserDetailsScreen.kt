@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -261,10 +262,14 @@ private fun HandleAddUserState(
     viewModel: UserDetailsViewModel,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -276,16 +281,19 @@ private fun HandleAddUserState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
-                else uiState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserDetailsScreen",
-                uiState.message.toString()
-            )
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                    else uiState.message.toString()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "UserDetailsScreen",
+                    uiState.message.toString()
+                )
+            }
+            isExceptionHandled = true
         }
 
         else -> {}

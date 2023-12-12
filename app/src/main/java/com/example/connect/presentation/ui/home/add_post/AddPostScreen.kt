@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -199,10 +200,14 @@ fun HandleAddPostSection(
     context: Context,
     navigator: DestinationsNavigator
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
         LOADING -> {
             LoaderDialog(stringResource(R.string.uploading_post))
+            isExceptionHandled = false
         }
 
         SUCCESS -> {
@@ -211,13 +216,16 @@ fun HandleAddPostSection(
         }
 
         EXCEPTION -> {
-            if (addPostState.message == ErrorCodes.NoUserFound) {
-                context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                (LocalActivity.current as BaseActivity).logout()
-            } else {
-                viewModel.snackBarMessageState.value =
-                    addPostState.message ?: stringResource(id = R.string.some_error_occurred)
+            if (!isExceptionHandled) {
+                if (addPostState.message == ErrorCodes.NoUserFound) {
+                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
+                    (LocalActivity.current as BaseActivity).logout()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        addPostState.message ?: stringResource(id = R.string.some_error_occurred)
+                }
             }
+            isExceptionHandled = true
         }
 
         NONE -> {

@@ -77,8 +77,12 @@ class HomeActivity : BaseActivity() {
             }
         }
     }
+
     @Composable
     private fun HandleGetDeviceIdFlow() {
+        var isExceptionHandled by rememberSaveable {
+            mutableStateOf(false)
+        }
         var showNewDeviceLoginAlertDialog by remember {
             mutableStateOf(false)
         }
@@ -86,31 +90,34 @@ class HomeActivity : BaseActivity() {
         when (getDeviceIdState.status) {
             RequestStatusEnum.LOADING -> {
                 LoaderFullScreen()
+                isExceptionHandled = false
             }
 
             RequestStatusEnum.EXCEPTION -> {
-                when (getDeviceIdState.message) {
-                    ErrorCodes.NoUserFound -> {
-                        showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                        logout()
-                    }
-
-                    ErrorCodes.NewLogin -> {
-                        showNewDeviceLoginAlertDialog = true
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            showNewDeviceLoginAlertDialog = false
+                if (!isExceptionHandled) {
+                    when (getDeviceIdState.message) {
+                        ErrorCodes.NoUserFound -> {
+                            showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                             logout()
-                        }, ConstantsHelper.NewDeviceDialogDismissTime)
-                    }
+                        }
 
-                    else -> {
-                        showToast(
-                            getDeviceIdState.message
-                                ?: stringResource(id = R.string.something_went_wrong)
-                        )
+                        ErrorCodes.NewLogin -> {
+                            showNewDeviceLoginAlertDialog = true
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                showNewDeviceLoginAlertDialog = false
+                                logout()
+                            }, ConstantsHelper.NewDeviceDialogDismissTime)
+                        }
+
+                        else -> {
+                            showToast(
+                                getDeviceIdState.message
+                                    ?: stringResource(id = R.string.something_went_wrong)
+                            )
+                        }
                     }
+                    isExceptionHandled = true
                 }
-
             }
 
             RequestStatusEnum.SUCCESS -> {
@@ -130,10 +137,14 @@ class HomeActivity : BaseActivity() {
 
     @Composable
     private fun HandleUserDetailsFlow() {
+        var isExceptionHandled by rememberSaveable {
+            mutableStateOf(false)
+        }
         val getUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
         when (getUserDetailsState.status) {
             RequestStatusEnum.LOADING -> {
                 LoaderFullScreen(stringResource(R.string.getting_user_details))
+                isExceptionHandled = false
             }
 
             RequestStatusEnum.SUCCESS -> {
@@ -141,14 +152,17 @@ class HomeActivity : BaseActivity() {
             }
 
             RequestStatusEnum.EXCEPTION -> {
-                if (getUserDetailsState.message == ErrorCodes.NoUserFound) {
-                    logout()
-                } else {
-                    if (getUserDetailsState.message.isNullOrBlank()) {
-                        showToast(stringResource(id = R.string.something_went_wrong))
+                if (!isExceptionHandled) {
+                    if (getUserDetailsState.message == ErrorCodes.NoUserFound) {
+                        logout()
                     } else {
-                        showToast(getUserDetailsState.message)
+                        if (getUserDetailsState.message.isNullOrBlank()) {
+                            showToast(stringResource(id = R.string.something_went_wrong))
+                        } else {
+                            showToast(getUserDetailsState.message)
+                        }
                     }
+                    isExceptionHandled = true
                 }
             }
 

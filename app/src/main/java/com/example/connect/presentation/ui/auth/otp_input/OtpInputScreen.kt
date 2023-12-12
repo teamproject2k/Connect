@@ -2,7 +2,6 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -280,10 +280,14 @@ fun HandleUserDetailsState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -300,19 +304,22 @@ fun HandleUserDetailsState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
-                )
-                else userDetailsState.message.toString()
+            if(!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
+                        R.string.something_went_wrong
+                    )
+                    else userDetailsState.message.toString()
 
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "OTPInputScreen",
-                userDetailsState.message.toString()
-            )
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OTPInputScreen",
+                    userDetailsState.message.toString()
+                )
+                isExceptionHandled = true
+            }
         }
 
         RequestStatusEnum.NONE -> {
@@ -327,10 +334,14 @@ fun HandleVerifyOTPState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
     when (verifyOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -349,26 +360,27 @@ fun HandleVerifyOTPState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                        R.string.something_went_wrong
+                    )
+                    else verifyOtpState.message.toString()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OTPInputScreen",
+                    verifyOtpState.message.toString()
                 )
-                else verifyOtpState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "OTPInputScreen",
-                verifyOtpState.message.toString()
-            )
+                isExceptionHandled = true
+            }
         }
 
         RequestStatusEnum.NONE -> {
 
         }
     }
-
-
 }
 
 @Composable
@@ -376,10 +388,14 @@ fun HandleResendOTPState(
     viewModel: OtpInputViewModel,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -398,18 +414,21 @@ fun HandleResendOTPState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                        R.string.something_went_wrong
+                    )
+                    else resendOtpState.message.toString()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OTPInputScreen",
+                    resendOtpState.message.toString()
                 )
-                else resendOtpState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "OTPInputScreen",
-                resendOtpState.message.toString()
-            )
+            }
+            isExceptionHandled = true
         }
 
         RequestStatusEnum.NONE -> {
@@ -431,7 +450,6 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
         FunctionHelper.vibrateDevice(context)
     } else if (otpValidationResponseCode == 0) {
         if (context.isNetworkAvailable()) {
-            Log.e("aryan", "called")
             viewModel.verifyOTP(viewModel.verificationId)
         } else {
             viewModel.snackBarMessageState.value =

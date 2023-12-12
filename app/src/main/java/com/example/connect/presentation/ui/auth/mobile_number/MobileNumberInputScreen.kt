@@ -15,6 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -114,10 +118,14 @@ private fun HandleGetUserDetailsState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -135,18 +143,21 @@ private fun HandleGetUserDetailsState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
+                        R.string.something_went_wrong
+                    )
+                    else userDetailsState.message.toString()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "MobileNumberInputScreen",
+                    userDetailsState.message.toString()
                 )
-                else userDetailsState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "MobileNumberInputScreen",
-                userDetailsState.message.toString()
-            )
+                isExceptionHandled = true
+            }
         }
 
         RequestStatusEnum.NONE -> {
@@ -161,10 +172,14 @@ private fun HandleSendOTPState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
     when (sendOtpState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -189,18 +204,21 @@ private fun HandleSendOTPState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
-            viewModel.snackBarMessageState.value =
-                if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == ErrorCodes.NoUserFound) context.getString(
-                    R.string.something_went_wrong
+            if (!isExceptionHandled) {
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                viewModel.snackBarMessageState.value =
+                    if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                        R.string.something_went_wrong
+                    )
+                    else sendOtpState.message.toString()
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "MobileNumberInputScreen",
+                    sendOtpState.message.toString()
                 )
-                else sendOtpState.message.toString()
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "MobileNumberInputScreen",
-                sendOtpState.message.toString()
-            )
+                isExceptionHandled = true
+            }
         }
 
         RequestStatusEnum.NONE -> {
