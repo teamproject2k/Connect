@@ -65,6 +65,8 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.common.ErrorCodes
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum.EXCEPTION
 import com.example.connect.common.RequestStatusEnum.LOADING
 import com.example.connect.common.RequestStatusEnum.NONE
@@ -224,6 +226,12 @@ fun HandleAddPostSection(
                     viewModel.snackBarMessageState.value =
                         addPostState.message ?: stringResource(id = R.string.some_error_occurred)
                 }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "AddPostScreen",
+                    addPostState.message.toString()
+                )
             }
             isExceptionHandled = true
         }
