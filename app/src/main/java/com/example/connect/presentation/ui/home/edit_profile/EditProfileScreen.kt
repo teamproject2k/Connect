@@ -74,7 +74,7 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.presentation.ui.common.SpacerHeight24
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
-import com.example.connect.presentation.ui.home.HomeSharedViewModel
+import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -97,7 +97,7 @@ fun EditProfileScreen(
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.initializeStates(sharedViewModel._userDetails)
+        viewModel.initializeStates(sharedViewModel.usersBean)
     }
     val context = LocalContext.current
     HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)

@@ -78,7 +78,7 @@ class HomeSharedViewModel @Inject constructor(
     /**
      * Gets the user details from the database or the server.
      */
-    private fun getUserDetails() {
+    fun getUserDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _userDetailsStateFlow.value = ResponseState.loading()
