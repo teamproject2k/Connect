@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -581,13 +582,13 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
                             ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "UserProfileScreen",
+                    postDetailState.message.toString()
+                )
             }
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserProfileScreen",
-                postDetailState.message.toString()
-            )
         }
 
         RequestStatusEnum.NONE -> {
@@ -747,7 +748,7 @@ fun PostItem(
         }
     ) {
         if (showShimmer || postDetails == null) return
-        if (postDetails.postScope == PostTypeEnum.Text.name) {
+        if (postDetails.postType == PostTypeEnum.Text.name) {
             PostTextOnlyItem(caption = postDetails.caption)
         } else {
             var isImageLoadingFailed by remember {
@@ -766,7 +767,7 @@ fun PostItem(
             } else {
                 PostTextOnlyItem(caption = postDetails.caption.ifBlank { stringResource(R.string.unable_to_load_post) })
             }
-            if (postDetails.postScope.contains(PostTypeEnum.Video.name)) {
+            if (postDetails.postType.contains(PostTypeEnum.Video.name)) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -788,6 +789,7 @@ fun PostTextOnlyItem(caption: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
