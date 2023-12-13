@@ -78,7 +78,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
-import com.example.connect.presentation.ui.home.HomeSharedViewModel
+import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -384,9 +384,9 @@ fun TopDetailsSection(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         UserDetailsSection(
-            imageUrl = sharedViewModel._userDetails.profilePhoto.toString(),
-            userName = sharedViewModel._userDetails.name,
-            userBio = sharedViewModel._userDetails.bio,
+            imageUrl = sharedViewModel.usersBean.profilePhoto.toString(),
+            userName = sharedViewModel.usersBean.name,
+            userBio = sharedViewModel.usersBean.bio,
             modifier = Modifier.weight(1f)
         )
         PostVisibilityInTopSection(viewModel) {

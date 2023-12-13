@@ -60,7 +60,7 @@ import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
-import com.example.connect.presentation.ui.home.HomeActivity
+import com.example.connect.presentation.ui.home.base_screen.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper

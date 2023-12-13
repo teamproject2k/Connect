@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.ui.home.HomeActivity" />
+        <activity android:name=".presentation.ui.home.base_screen.HomeActivity" />
     </application>
 
 </manifest>
