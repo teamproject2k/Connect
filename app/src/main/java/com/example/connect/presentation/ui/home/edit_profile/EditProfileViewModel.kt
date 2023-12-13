@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
+import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
@@ -56,6 +57,11 @@ class EditProfileViewModel @Inject constructor(
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
     var isDataInitialized = false
 
+    /**
+     * Initializes the states of the user profile.
+     *
+     * @param userDetails The user details to initialize the states with.
+     */
     fun initializeStates(userDetails: UsersBean) {
         this.userDetails = userDetails
         userNameState = mutableStateOf(userDetails.name)
@@ -79,11 +85,13 @@ class EditProfileViewModel @Inject constructor(
         isDataInitialized = true
     }
 
+    /**
+     * Updates the user's profile.
+     */
     fun updateUserProfile() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _updateUserStateFlow.value = ResponseState.loading()
-
                 val fieldsToUpdate = getFieldsToUpdate()
                 if (fieldsToUpdate.isEmpty()) {
                     _updateUserStateFlow.value = ResponseState.success(null)
@@ -91,11 +99,11 @@ class EditProfileViewModel @Inject constructor(
                     var remoteProfilePhotoUrl: String? = null
                     var remoteCoverPhotoUrl: String? = null
 
-                    if (fieldsToUpdate.containsKey(UsersBean::profilePhoto.name) && profilePhotoState.value != null) {
+                    if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name) && profilePhotoState.value != null) {
                         val updateProfilePhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 profilePhotoState.value!!.uri,
-                                "${FirebaseConstants.ProfilePhotoKey}/${userDetails.firebaseUserId}"
+                                "${userDetails.firebaseUserId}/${FirebaseConstants.ProfilePhotoKey}"
                             )
                         if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = updateProfilePhotoResponseState
@@ -104,11 +112,11 @@ class EditProfileViewModel @Inject constructor(
                             remoteProfilePhotoUrl = updateProfilePhotoResponseState.data
                         }
                     }
-                    if (fieldsToUpdate.containsKey(UsersBean::coverPhoto.name) && coverPhotoState.value != null) {
+                    if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name) && coverPhotoState.value != null) {
                         val updateCoverPhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 coverPhotoState.value!!.uri,
-                                "${FirebaseConstants.CoverPhotoKey}/${userDetails.firebaseUserId}"
+                                "${userDetails.firebaseUserId}/${FirebaseConstants.CoverPhotoKey}"
                             )
                         if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = updateCoverPhotoResponseState
@@ -118,13 +126,13 @@ class EditProfileViewModel @Inject constructor(
                         }
                     }
                     if (!remoteProfilePhotoUrl.isNullOrEmpty()) {
-                        fieldsToUpdate[UsersBean::profilePhoto.name] = remoteProfilePhotoUrl
+                        fieldsToUpdate[UserRemoteEntity::profilePhoto.name] = remoteProfilePhotoUrl
                     }
                     if (!remoteCoverPhotoUrl.isNullOrEmpty()) {
-                        fieldsToUpdate[UsersBean::coverPhoto.name] = remoteCoverPhotoUrl
+                        fieldsToUpdate[UserRemoteEntity::coverPhoto.name] = remoteCoverPhotoUrl
                     }
-                    if (fieldsToUpdate.containsKey(UsersBean::name.name)) {
-                        val userName = fieldsToUpdate[UsersBean::name.name]
+                    if (fieldsToUpdate.containsKey(UserRemoteEntity::name.name)) {
+                        val userName = fieldsToUpdate[UserRemoteEntity::name.name]
                         val currentUserByNameResponseState = userName?.let {
                             getUsersFromNameUseCaseFromRemote.invoke(it.toString())
                         }
@@ -133,7 +141,7 @@ class EditProfileViewModel @Inject constructor(
                                 ResponseState.error(currentUserByNameResponseState?.message ?: "")
                             return@withContext
                         } else {
-                            fieldsToUpdate[UsersBean::connectUserId.name] =
+                            fieldsToUpdate[UserRemoteEntity::connectUserId.name] =
                                 FunctionHelper.getUserId(
                                     userName.toString(),
                                     currentUserByNameResponseState?.data ?: 0
@@ -151,6 +159,7 @@ class EditProfileViewModel @Inject constructor(
                             fieldsToUpdate,
                             userDetails.firebaseUserId
                         )
+
                     }
                     _updateUserStateFlow.value = updatedUserResponseState
                 }
@@ -158,42 +167,73 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Gets the fields that need to be updated.
+     *
+     * @return A map of fields to their updated values.
+     */
     private fun getFieldsToUpdate(): MutableMap<String, Any> {
 
         val fieldsToUpdate: MutableMap<String, Any> = mutableMapOf()
 
+        // Check if the cover image has been updated.
         val isCoverImageUpdated =
             coverPhotoState.value?.uri.toString() != userDetails.coverPhoto.toString()
 
+        // Check if the profile image has been updated.
         val isProfileImageUpdated =
             profilePhotoState.value?.uri.toString() != userDetails.profilePhoto.toString()
 
+        // Get the lower case version of the user name.
         val lowerCaseUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
-        val isUserNameUpdated = userDetails.name != lowerCaseUserName
+
+        // Check if the user name has been updated.
+        val isUserNameUpdated =
+            FunctionHelper.getLowerCaseUserName(userDetails.name) != lowerCaseUserName
+
+        // Check if the bio has been updated.
         val isBioUpdated = userDetails.bio != userBioState.value
+
+        // Check if the gender has been updated.
         val isGenderUpdated = userDetails.gender != selectedGenderState.value
+
+        // Check if the date of birth has been updated.
         val isDobUpdated = userDetails.dateOfBirth != selectedDOBState.longValue
 
+        // If the profile image has been updated, add it to the map of fields to update.
         if (isProfileImageUpdated) {
-            fieldsToUpdate[UsersBean::profilePhoto.name] = profilePhotoState.value?.uri.toString()
+            fieldsToUpdate[UserRemoteEntity::profilePhoto.name] =
+                profilePhotoState.value?.uri.toString()
         }
+
+        // If the cover image has been updated, add it to the map of fields to update.
         if (isCoverImageUpdated) {
-            fieldsToUpdate[UsersBean::coverPhoto.name] = coverPhotoState.value?.uri.toString()
+            fieldsToUpdate[UserRemoteEntity::coverPhoto.name] =
+                coverPhotoState.value?.uri.toString()
         }
+
+        // If the user name has been updated, add it to the map of fields to update.
         if (isUserNameUpdated) {
-            fieldsToUpdate[UsersBean::name.name] = lowerCaseUserName
+            fieldsToUpdate[UserRemoteEntity::name.name] = lowerCaseUserName
         }
+
+        // If the bio has been updated, add it to the map of fields to update.
         if (isBioUpdated) {
-            fieldsToUpdate[UsersBean::bio.name] = userBioState.value
+            fieldsToUpdate[UserRemoteEntity::bio.name] = userBioState.value
         }
+
+        // If the gender has been updated, add it to the map of fields to update.
         if (isGenderUpdated) {
-            fieldsToUpdate[UsersBean::gender.name] = selectedGenderState.value
+            fieldsToUpdate[UserRemoteEntity::gender.name] = selectedGenderState.value
         }
+
+        // If the date of birth has been updated, add it to the map of fields to update.
         if (isDobUpdated) {
-            fieldsToUpdate[UsersBean::dateOfBirth.name] =
+            fieldsToUpdate[UserRemoteEntity::dateOfBirth.name] =
                 selectedDOBState.longValue
         }
 
+        // Return the map of fields to update.
         return fieldsToUpdate
     }
 }

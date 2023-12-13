@@ -94,15 +94,13 @@ import java.util.Date
 fun EditProfileScreen(
     navigator: DestinationsNavigator
 ) {
-
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
         viewModel.initializeStates(sharedViewModel._userDetails)
     }
-
     val context = LocalContext.current
-    HandleUpdateUserState(viewModel, context, navigator)
+    HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)
 
     val imageResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -267,7 +265,10 @@ fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
-                    context.getString(R.string.name_can_t_contain_digits_or_special_characters)
+                    context.getString(
+                        R.string.name_cannot_be_greater_than_max_characters,
+                        ConstantsHelper.NameMaxCharacterLimit
+                    )
                 FunctionHelper.vibrateDevice(context)
                 keyboardController?.hide()
             }
@@ -355,7 +356,6 @@ fun EditProfileGenderPicker(viewModel: EditProfileViewModel) {
         DropdownMenu(
             expanded = true, onDismissRequest = { isDialogVisible = false },
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth(.9f)
         ) {
             genderList.forEach { gender ->
@@ -374,7 +374,7 @@ fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
     var showDatePickerState by remember {
         mutableStateOf(false)
     }
-    val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
         value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
             viewModel.selectedDOBState.longValue
@@ -521,32 +521,41 @@ private fun handleButtonClick(
 fun HandleUpdateUserState(
     viewModel: EditProfileViewModel,
     context: Context,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    sharedViewModel: HomeSharedViewModel
 ) {
     val uiState = viewModel.updateUserStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
 
     when (uiState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+            sharedViewModel.getUserDetails()
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             context.showToast(stringResource(R.string.user_details_updated_successfully))
             navigator.popBackStack()
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            viewModel.snackBarMessageState.value =
-                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
-                else uiState.message.toString()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "EditProfileScreen",
-                uiState.message.toString()
-            )
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                    else uiState.message.toString()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "EditProfileScreen",
+                    uiState.message.toString()
+                )
+                isExceptionHandled = true
+            }
         }
 
         else -> {}

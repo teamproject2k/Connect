@@ -326,7 +326,7 @@ private fun handleButtonClick(
         3 -> {
             viewModel.snackBarMessageState.value =
                 context.getString(
-                    R.string.name_can_t_contain_digits_or_special_characters,
+                    R.string.name_cannot_be_greater_than_max_characters,
                     ConstantsHelper.NameMaxCharacterLimit
                 )
             FunctionHelper.vibrateDevice(context)

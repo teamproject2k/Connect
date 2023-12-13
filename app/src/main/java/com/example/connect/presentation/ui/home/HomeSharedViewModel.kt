@@ -63,7 +63,7 @@ class HomeSharedViewModel @Inject constructor(
 
     }
 
-    private fun getUserDetails() {
+    fun getUserDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _userDetailsStateFlow.value = ResponseState.loading()
@@ -73,7 +73,6 @@ class HomeSharedViewModel @Inject constructor(
                     if (userDetails != null) {
                         _userDetails = userDetails
                         _userDetailsStateFlow.value = ResponseState.success(null)
-
                     } else {
                         val userDetailsFromServerResponseState =
                             getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
