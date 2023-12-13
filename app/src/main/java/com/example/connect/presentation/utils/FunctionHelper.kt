@@ -7,12 +7,27 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.DisplayMetrics
 import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.example.connect.presentation.ui.destinations.HomeScreenDestination
+import com.example.connect.presentation.ui.destinations.UserProfileScreenDestination
+import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -231,6 +246,58 @@ object FunctionHelper {
             }
         }
         return formattedUserName.trimEnd().lowercase()
+    }
+
+
+    /**
+     * Gets the list of items to be displayed in the bottom navigation bar of home activity.
+     *
+     * @param context The context of the application.
+     * @return The list of items to be displayed in the bottom navigation bar.
+     */
+    fun getBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
+        val bottomNavList = arrayListOf<BottomAppBarItemData>()
+        bottomNavList.add(
+            BottomAppBarItemData(
+                context.getString(R.string.home),
+                Icons.Filled.Home,
+                Icons.Outlined.Home,
+                HomeScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                context.getString(R.string.search),
+                Icons.Filled.Search,
+                Icons.Outlined.Search,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                context.getString(R.string.add_post),
+                Icons.Filled.AddCircle,
+                Icons.Outlined.AddCircleOutline,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                context.getString(R.string.chat),
+                Icons.Filled.ChatBubble,
+                Icons.Outlined.ChatBubbleOutline,
+                AddPostScreenDestination.route
+            )
+        )
+        bottomNavList.add(
+            BottomAppBarItemData(
+                context.getString(R.string.profile),
+                Icons.Filled.Person,
+                Icons.Outlined.Person,
+                UserProfileScreenDestination.route
+            )
+        )
+        return bottomNavList
     }
 
 }

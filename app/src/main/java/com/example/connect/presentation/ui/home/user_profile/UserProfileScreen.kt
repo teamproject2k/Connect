@@ -95,7 +95,7 @@ import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
 import com.example.connect.presentation.ui.enums.PostTypeEnum
-import com.example.connect.presentation.ui.home.HomeSharedViewModel
+import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.theme.OnBlack
 import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -125,7 +125,7 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            ProfileScreen(sharedViewModel._userDetails, viewModel, navigator) {
+            ProfileScreen(sharedViewModel.usersBean, viewModel, navigator) {
                 showBottomSheet = true
             }
         }
@@ -153,7 +153,7 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(key1 = true) {
-        viewModel.getFriendListFromIds(sharedViewModel._userDetails.friendList)
+        viewModel.getFriendListFromIds(sharedViewModel.usersBean.friendList)
         viewModel.getPostDetails()
     }
 }
