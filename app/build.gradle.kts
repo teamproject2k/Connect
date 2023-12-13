@@ -6,7 +6,6 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.devtools.ksp") version Versions.ksp
-    id("kotlin-parcelize")
 }
 
 android {

@@ -18,6 +18,7 @@
     <string name="please_enter_an_otp">Please enter an OTP</string>
     <string name="invalid_otp">Invalid OTP</string>
     <string name="please_enter_name">Please enter name</string>
+    <string name="please_enter_bio">Please enter bio</string>
     <string name="invalid_name">Invalid name</string>
     <string name="name_cannot_be_greater_than_max_characters">Name can\'t be greater than %1$d characters.</string>
     <string name="please_select_your_gender">Please select your gender</string>
@@ -27,6 +28,7 @@
     <string name="_91">+91</string>
     <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than 10 digits</string>
     <string name="name_can_t_contain_digits_or_special_characters">Name can\'t contain digits or special characters</string>
+    <string name="name_can_t_be_greater_than_max_length">Name can\'t be more than %1$d characters long</string>
     <string name="bio_can_t_be_more_than_limited_characters">Bio can\'t be more than %1$d characters long</string>
     <string name="resend_now">Resend Now</string>
     <string name="didn_t_receive_otp">Didn\'t Receive OTP?</string>

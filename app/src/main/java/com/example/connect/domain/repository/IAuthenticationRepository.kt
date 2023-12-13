@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IAuthenticationRepository {
+
     /**
      * Sends an OTP to the given mobile number.
      *

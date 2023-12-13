@@ -4,6 +4,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.PostBean
 
 interface IPostRepository {
+
     /**
      * Gets post details from local database.
      *

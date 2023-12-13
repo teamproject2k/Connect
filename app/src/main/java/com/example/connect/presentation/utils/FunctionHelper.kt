@@ -223,10 +223,8 @@ object FunctionHelper {
      */
     fun getLowerCaseUserName(userName: String): String {
         var formattedUserName = ""
-
         val formattedUserNameList =
             userName.trim().split(" ") // Split the user name into a list of words
-
         formattedUserNameList.forEach { // Iterate over the list of words
             if (it.isNotBlank()) { // Check if the word is not empty
                 formattedUserName += "$it " // Add the word to the formatted user name

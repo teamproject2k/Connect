@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,14 +65,23 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.domain.models.UsersBean
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
+import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.presentation.ui.common.SpacerHeight24
+import com.example.connect.presentation.ui.enums.ButtonStateEnum
+import com.example.connect.presentation.ui.home.HomeSharedViewModel
+import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
+import com.example.connect.presentation.validation.Validator
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.Calendar
@@ -82,13 +92,13 @@ import java.util.Date
 @Destination
 @Composable
 fun EditProfileScreen(
-    userDetails: UsersBean,
     navigator: DestinationsNavigator
 ) {
 
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.initializeStates(userDetails)
+        viewModel.initializeStates(sharedViewModel._userDetails)
     }
 
     val context = LocalContext.current
@@ -96,16 +106,16 @@ fun EditProfileScreen(
 
     val imageResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            //uri will be null in case user doesn't select any image
-//            if (uri != null) {
-//                if (viewModel.isProfileUri) {
-//                    viewModel.profilePhotoState.value =
-//                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
-//                } else {
-//                    viewModel.coverPhotoState.value =
-//                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
-//                }
-//            }
+            // uri will be null in case user doesn't select any image
+            if (uri != null) {
+                if (viewModel.isProfileUri) {
+                    viewModel.profilePhotoState.value =
+                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
+                } else {
+                    viewModel.coverPhotoState.value =
+                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
+                }
+            }
         }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -417,31 +427,94 @@ private fun handleButtonClick(
     context: Context,
     navigator: DestinationsNavigator
 ) {
-//    if (!Validator.isValidName(viewModel.userNameState.value)) {
-//        viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_name)
-//        FunctionHelper.vibrateDevice(context)
-//    } else if (!Validator.isValidBio(viewModel.userBioState.value)) {
-//        viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_valid_bio)
-//        FunctionHelper.vibrateDevice(context)
-//    } else if (!Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
-//        viewModel.snackBarMessageState.value = context.getString(R.string.please_select_your_gender)
-//        FunctionHelper.vibrateDevice(context)
-//    } else if (!Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
-//        viewModel.snackBarMessageState.value = context.getString(R.string.please_select_your_date_of_birth)
-//        FunctionHelper.vibrateDevice(context)
-//    } else {
-//        if (viewModel.fireBaseAuth.currentUser != null) {
-//            if (context.isNetworkAvailable()) {
-//                viewModel.updateUserProfile()
-//            } else {
-//                viewModel.snackBarMessageState.value =
-//                    context.getString(R.string.no_internet_connection)
-//            }
-//        } else {
-//            context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-//            navigator.popBackStack()
-//        }
-//    }
+    when (val userNameValidationResponseCode =
+        Validator.isValidName(viewModel.userNameState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_enter_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        3 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(
+                    R.string.name_cannot_be_greater_than_max_characters,
+                    ConstantsHelper.NameMaxCharacterLimit
+                )
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (userNameValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+    when (val genderValidationResponseCode =
+        Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (genderValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+    when (val dobValidationResponseCode =
+        Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (dobValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
+
+    if (viewModel.fireBaseAuth.currentUser != null) {
+        if (context.isNetworkAvailable()) {
+            viewModel.updateUserProfile()
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
+    } else {
+        context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+        navigator.popBackStack()
+    }
 }
 
 @Composable
@@ -450,33 +523,33 @@ fun HandleUpdateUserState(
     context: Context,
     navigator: DestinationsNavigator
 ) {
+    val uiState = viewModel.updateUserStateFlow.collectAsState().value
 
-//    val uiState = viewModel.updateUserStateFlow.collectAsState().value
-//
-//    when (uiState.status) {
-//        RequestStatusEnum.LOADING -> {
-//            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.Loading
-//        }
-//
-//        RequestStatusEnum.SUCCESS -> {
-//            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
-//            context.showToast(stringResource(R.string.user_details_updated_successfully))
-//            navigator.popBackStack()
-//        }
-//
-//        RequestStatusEnum.EXCEPTION -> {
-//            viewModel.snackBarMessageState.value =
-//                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
-//                else uiState.message.toString()
-//            viewModel.currentButtonLoadingState.value = ButtonLoadingEnum.NotLoading
-//            LoggingHelper.logData(
-//                LoggingLevelEnum.Error,
-//                ConstantsHelper.ErrorTag,
-//                "EditProfileScreen",
-//                uiState.message.toString()
-//            )
-//        }
-//
-//        else -> {}
-//    }
+    when (uiState.status) {
+        RequestStatusEnum.LOADING -> {
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+            context.showToast(stringResource(R.string.user_details_updated_successfully))
+            navigator.popBackStack()
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            viewModel.snackBarMessageState.value =
+                if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                else uiState.message.toString()
+            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ErrorTag,
+                "EditProfileScreen",
+                uiState.message.toString()
+            )
+        }
+
+        else -> {}
+    }
 }
+

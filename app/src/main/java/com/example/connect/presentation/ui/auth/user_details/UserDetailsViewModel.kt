@@ -8,7 +8,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUsersFromNameUseCase
+import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -25,7 +25,7 @@ import javax.inject.Inject
 class UserDetailsViewModel @Inject constructor(
     private val addUserToRemoteUseCase: AddUserToRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getUsersFromNameUseCase: GetUsersFromNameUseCase
+    private val getUsersFromNameUseCase: GetUsersFromNameUseCaseFromRemote
 ) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")

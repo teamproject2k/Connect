@@ -68,12 +68,12 @@ object Validator {
                 responseCode = 1
             }
 
-            userName.length > ConstantsHelper.NameMaxCharacterLimit -> {
-                responseCode = 3
-            }
-
             !Regex(RegexHelper.NameRegex).matches(userName) -> {
                 responseCode = 2
+            }
+
+            userName.length > ConstantsHelper.NameMaxCharacterLimit -> {
+                responseCode = 3
             }
         }
         return responseCode

@@ -13,7 +13,6 @@ interface IUserRepository {
      */
     suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?>
 
-
     /**
      * Gets the number of users with the given name from remote.
      *
@@ -54,4 +53,15 @@ interface IUserRepository {
      * @return A response state containing the list of user details, or an error if the request failed.
      */
     suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UsersBean>>
+
+    suspend fun updateUserDetailsOnRemote(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ): ResponseState<Nothing?>
+
+    suspend fun updateUserDetailsOnDb(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ): Long
+
 }

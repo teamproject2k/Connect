@@ -7,13 +7,13 @@ import androidx.room.Room
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
 import com.example.connect.data.repository.IDeviceIdRepositoryImpl
-import com.example.connect.data.repository.IHomeRepositoryImpl
 import com.example.connect.data.repository.IPostRepositoryImpl
+import com.example.connect.data.repository.IUploadRepositoryImpl
 import com.example.connect.data.repository.IUserRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.domain.repository.IDeviceIdRepository
-import com.example.connect.domain.repository.IHomeRepository
 import com.example.connect.domain.repository.IPostRepository
+import com.example.connect.domain.repository.IUploadFileRepository
 import com.example.connect.domain.repository.IUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -101,11 +101,9 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun getHomeRepository(
-        appDatabase: AppDatabase,
-        fireStore: FirebaseFirestore,
+    fun getIUploadFileRepository(
         firebaseStorage: FirebaseStorage
-    ): IHomeRepository =
-        IHomeRepositoryImpl(appDatabase, fireStore, firebaseStorage)
+    ): IUploadFileRepository =
+        IUploadRepositoryImpl(firebaseStorage)
 
 }

@@ -5,4 +5,6 @@ object FirebaseConstants {
     const val UsersKey = "users"
     const val PostsKey = "posts"
     const val MediaKey = "media"
+    const val ProfilePhotoKey = "profile_photo"
+    const val CoverPhotoKey = "cover_photo"
 }

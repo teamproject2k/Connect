@@ -1,9 +1,11 @@
 package com.example.connect.data.repository
 
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IUserRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -72,7 +74,6 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().insertUser(userDetails.toUserDbEntity())
     }
 
-
     override suspend fun getUserDetailsFromDb(fireBaseId: String): UsersBean? {
         // Get the user details from the local database.
         return appDatabase.getUsersDao().getUserDetails(fireBaseId)?.toUserBean()
@@ -93,6 +94,35 @@ class IUserRepositoryImpl @Inject constructor(
             // An error occurred while getting the user details from the server.
             ResponseState.error(exception.localizedMessage ?: "")
         }
+    }
+
+    override suspend fun updateUserDetailsOnRemote(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ): ResponseState<Nothing?> {
+        return try {
+            fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId)
+                .update(fieldsToUpdate).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun updateUserDetailsOnDb(
+        fieldsToUpdate: MutableMap<String, Any>,
+        firebaseUserId: String
+    ): Long {
+
+        val setClause = fieldsToUpdate.entries.joinToString(", ") { "${it.key} = ?" }
+        val sql =
+            "UPDATE ${UsersDbEntity::class.simpleName} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
+        val bindArgs = fieldsToUpdate.values.toMutableList()
+        bindArgs.add(firebaseUserId)
+
+        val queryToExecute = SimpleSQLiteQuery(sql, bindArgs.toTypedArray())
+
+        return appDatabase.getUsersDao().updateUserDetails(queryToExecute)
     }
 
 }
