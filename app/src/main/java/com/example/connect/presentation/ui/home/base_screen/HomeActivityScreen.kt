@@ -15,6 +15,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.getBottomNavBarItemList
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.utils.route
 
 
 @Composable
@@ -171,6 +173,13 @@ private fun CreateUi(context: Context) {
         mutableStateOf(HomeScreenDestination.route)
     }
     val navController = rememberNavController()
+
+    LaunchedEffect(Unit) {
+        navController.currentBackStackEntryFlow.collect {
+            selectedRouteState.value = it.route().route
+        }
+    }
+
     Scaffold(bottomBar = {
         Surface(tonalElevation = 4.dp) {
             NavigationBar(
