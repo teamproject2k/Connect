@@ -12,4 +12,5 @@ abstract class BaseViewModel : ViewModel() {
 
     @Inject
     lateinit var fireBaseAuth: FirebaseAuth
+
 }

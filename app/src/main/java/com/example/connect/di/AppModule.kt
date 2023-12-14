@@ -6,14 +6,22 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
-import com.example.connect.data.repository.IHomeRepositoryImpl
+import com.example.connect.data.repository.IDeviceIdRepositoryImpl
+import com.example.connect.data.repository.IPostRepositoryImpl
+import com.example.connect.data.repository.IUploadRepositoryImpl
+import com.example.connect.data.repository.IUserRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
-import com.example.connect.domain.repository.IHomeRepository
+import com.example.connect.domain.repository.IDeviceIdRepository
+import com.example.connect.domain.repository.IPostRepository
+import com.example.connect.domain.repository.IUploadFileRepository
+import com.example.connect.domain.repository.IUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,40 +42,68 @@ class AppModule {
         return firebaseAuth
     }
 
-
     @Provides
     @Singleton
     fun getSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences("com.example.connect_shared_pref", MODE_PRIVATE)
     }
 
-
     @Provides
     @Singleton
     fun getFireStore(): FirebaseFirestore = Firebase.firestore
 
+
     @Provides
     @Singleton
-    fun getAuthRepository(
-        firebaseAuth: FirebaseAuth,
-        fireStore: FirebaseFirestore,
-        appDatabase: AppDatabase
-    ): IAuthenticationRepository =
-        IAuthenticationRepositoryImpl(firebaseAuth, fireStore, appDatabase)
+    fun getFirebaseStorage(): FirebaseStorage = Firebase.storage
+
 
     @Provides
     @Singleton
     fun getRoomDatabase(@ApplicationContext context: Context): AppDatabase {
-        val database = Room.databaseBuilder(context, AppDatabase::class.java, "com.example.connect.app_database")
+        val database = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "com.example.connect.app_database"
+        )
         return database.build()
     }
 
 
     @Provides
     @Singleton
-    fun getHomeRepository(
-        appDatabase: AppDatabase,
-        fireStore: FirebaseFirestore
-    ): IHomeRepository =
-        IHomeRepositoryImpl(appDatabase, fireStore)
+    fun getAuthRepository(
+        firebaseAuth: FirebaseAuth
+    ): IAuthenticationRepository =
+        IAuthenticationRepositoryImpl(firebaseAuth)
+
+
+    @Provides
+    @Singleton
+    fun getUserRepository(
+        fireStore: FirebaseFirestore,
+        appDatabase: AppDatabase
+    ): IUserRepository = IUserRepositoryImpl(fireStore, appDatabase)
+
+    @Provides
+    @Singleton
+    fun getPostRepository(
+        fireStore: FirebaseFirestore,
+        appDatabase: AppDatabase
+    ): IPostRepository = IPostRepositoryImpl(fireStore, appDatabase)
+
+    @Provides
+    @Singleton
+    fun getDeviceIdRepository(
+        fireStore: FirebaseFirestore,
+        appDatabase: AppDatabase
+    ): IDeviceIdRepository = IDeviceIdRepositoryImpl(fireStore, appDatabase)
+
+    @Provides
+    @Singleton
+    fun getIUploadFileRepository(
+        firebaseStorage: FirebaseStorage
+    ): IUploadFileRepository =
+        IUploadRepositoryImpl(firebaseStorage)
+
 }

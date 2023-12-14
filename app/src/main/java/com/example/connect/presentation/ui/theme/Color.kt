@@ -14,10 +14,10 @@ val LightPrimaryColor = Color(0xFF00668B)
 val LightOnPrimaryColor = Color(0xffffffff)
 
 //Dark
-val DarkPrimaryColor = Color(0xFF00668B)
+val DarkPrimaryColor = Color(0xff0d0d0d)
 val DarkOnPrimaryColor = Color(0xffffffff)
 
-val OnBlack = Color(0x1A000000)
+val OnBlack = Color(0xE61A1A1A)
 
 
 val WarningColor = Color(0xFFFF9800)

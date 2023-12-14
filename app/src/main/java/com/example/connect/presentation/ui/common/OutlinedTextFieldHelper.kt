@@ -52,8 +52,8 @@ fun AppOutlinedTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
@@ -177,6 +177,7 @@ fun OutlinedTextFieldDisabledFeelsLikeEnabled(
     singleLine: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    showEnabledByDefault: Boolean = true,
     onClick: (Offset) -> Unit
 ) {
     val textColor = textStyle.color.takeOrElse {
@@ -184,9 +185,9 @@ fun OutlinedTextFieldDisabledFeelsLikeEnabled(
     }
     val colors = OutlinedTextFieldDefaults.colors(
         disabledTextColor = MaterialTheme.colorScheme.onSurface,
-        disabledBorderColor = if (value.isBlank()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
-        disabledLeadingIconColor = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
-        disabledLabelColor = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+        disabledBorderColor = if (!showEnabledByDefault) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
+        disabledLeadingIconColor = if (!showEnabledByDefault) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+        disabledLabelColor = if (!showEnabledByDefault) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
     )
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
@@ -235,7 +236,7 @@ fun OutlinedTextFieldDisabledFeelsLikeEnabled(
                             colors = colors,
                             shape = RoundedCornerShape(OutlinedTextFieldBorderRadius),
                             focusedBorderThickness = OutlinedTextFieldDefaults.FocusedBorderThickness,
-                            unfocusedBorderThickness = if (value.isBlank()) 1.dp else 2.dp,
+                            unfocusedBorderThickness = if (!showEnabledByDefault) 1.dp else 2.dp,
                         )
                     },
                 )

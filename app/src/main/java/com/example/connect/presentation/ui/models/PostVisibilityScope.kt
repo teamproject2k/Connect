@@ -6,5 +6,5 @@ data class PostVisibilityScope(
     val id: Int,
     val scopeName: String,
     val scopeDescription: String,
-    @DrawableRes val drawableId: Int
+    @DrawableRes val drawableId: Int,
 )

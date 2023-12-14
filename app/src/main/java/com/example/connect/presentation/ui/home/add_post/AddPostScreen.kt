@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.add_post
 
 import android.content.Context
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,69 +21,98 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.VideoCameraFront
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.common.ErrorCodes
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
+import com.example.connect.common.RequestStatusEnum.EXCEPTION
+import com.example.connect.common.RequestStatusEnum.LOADING
+import com.example.connect.common.RequestStatusEnum.NONE
+import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.presentation.base.BaseActivity
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
+import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
-@HomeNavGraph(start = true)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@HomeNavGraph
 @Destination
 @Composable
-fun AddPost() {
+fun AddPostScreen(navigator: DestinationsNavigator) {
     val viewModel: AddPostViewModel = hiltViewModel()
+    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     if (viewModel.isFirstTimeSetup) {
         viewModel.setUpData(context)
     }
-    val bottomSheetState =
-        SheetState(skipPartiallyExpanded = true, initialValue = SheetValue.Hidden)
+
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
 
     val snackBarHostState = SnackbarHostState()
-    val bottomSheetScaffoldState =
-        rememberBottomSheetScaffoldState(bottomSheetState, snackBarHostState)
     val imageResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            //uri will be null in case user doesn't select any image
+            // uri will be null in case user doesn't select any image
             if (uri != null) {
                 val contentResolver = context.contentResolver
                 val mediaType = contentResolver.getType(uri)?.substringBefore("/")
@@ -93,48 +123,36 @@ fun AddPost() {
             }
         }
 
-    BottomSheetScaffold({
-        PostVisibilityScopeBottomSheet(viewModel = viewModel) {
-            coroutineScope.launch {
-                bottomSheetState.hide()
-            }
-        }
-    },
-        sheetShape = RoundedCornerShape(
-            topEnd = ConstantsHelper.BottomSheetRoundness,
-            topStart = ConstantsHelper.BottomSheetRoundness
-        ),
-        scaffoldState = bottomSheetScaffoldState,
-        topBar = {
-            Surface(shadowElevation = 3.dp) {
-                TopAppBar(title = {
-                    Text(
-                        text = stringResource(R.string.create_post),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }, actions = {
-                    Button(onClick = {
-
-                    }) {
-                        Text(text = stringResource(R.string.post))
+    Scaffold(topBar = {
+        Surface(shadowElevation = 3.dp) {
+            TopAppBar(title = {
+                Text(
+                    text = stringResource(R.string.create_post),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }, actions = {
+                Button(
+                    enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
+                    onClick = {
+                        handleButtonClick(viewModel, context)
                     }
-                })
-            }
-        }) {
+                ) {
+                    Text(text = stringResource(R.string.post))
+                }
+            })
+        }
+    }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(it)
         ) {
-            TopDetailsSection(viewModel = viewModel) {
-                if (bottomSheetState.isVisible) {
-                    coroutineScope.launch {
-                        bottomSheetState.hide()
-                    }
-                } else {
-                    coroutineScope.launch {
-                        bottomSheetState.show()
-                    }
+            HandleAddPostSection(viewModel, context, navigator)
+            TopDetailsSection(viewModel = viewModel, sharedViewModel) {
+                coroutineScope.launch {
+                    keyboardController?.hide()
+                    showBottomSheet = true
                 }
             }
             Column(
@@ -148,7 +166,26 @@ fun AddPost() {
                 imageResultLauncher.launch(PickVisualMediaRequest(mediaType))
             }
         }
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                ),
+            ) {
+                PostVisibilityScopeBottomSheet(
+                    modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    viewModel = viewModel
+                ) {
+                    coroutineScope.launch {
+                        showBottomSheet = false
+                    }
+                }
+            }
+        }
     }
+
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -159,10 +196,60 @@ fun AddPost() {
     }
 }
 
+@Composable
+fun HandleAddPostSection(
+    viewModel: AddPostViewModel,
+    context: Context,
+    navigator: DestinationsNavigator
+) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
+    when (addPostState.status) {
+        LOADING -> {
+            LoaderDialog(stringResource(R.string.uploading_post))
+            isExceptionHandled = false
+        }
+
+        SUCCESS -> {
+            context.showToast(stringResource(R.string.post_uploaded_successfully))
+            navigator.popBackStack()
+        }
+
+        EXCEPTION -> {
+            if (!isExceptionHandled) {
+                if (addPostState.message == ErrorCodes.NoUserFound) {
+                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
+                    (LocalActivity.current as BaseActivity).logout()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        addPostState.message ?: stringResource(id = R.string.some_error_occurred)
+                }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "AddPostScreen",
+                    addPostState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        NONE -> {
+            // no need to handle it
+        }
+    }
+
+}
 
 @Composable
-fun PostVisibilityScopeBottomSheet(viewModel: AddPostViewModel, onDismissRequest: () -> Unit) {
-    Column {
+fun PostVisibilityScopeBottomSheet(
+    modifier: Modifier,
+    viewModel: AddPostViewModel,
+    onDismissRequest: () -> Unit
+) {
+    Column(modifier = modifier) {
         viewModel.postVisibilityScopeList.forEach { postScope ->
             PostVisibilityScopeBottomSheetItem(postScope) {
                 viewModel.currentPostVisibilityState.value = postScope
@@ -229,6 +316,8 @@ fun MediaSection(viewModel: AddPostViewModel, context: Context) {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.some_error_occurred)
                 }
+            } else {
+                ShowSelectedVideo(selectedMediaData = selectedMedia, context = context)
             }
             Box(
                 Modifier
@@ -268,13 +357,34 @@ fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
 
 
 @Composable
-fun ShowSelectedVideo(selectedMediaData: PostMediaData) {
-
+fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
+    val exoPlayer = remember {
+        FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
+    }
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val height = FunctionHelper.convertDpToPixel(screenHeight * .50f, context)
+    DisposableEffect(AndroidView(factory = {
+        PlayerView(context).apply {
+            player = exoPlayer
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                height.toInt()
+            )
+        }
+    })) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
 }
 
 
 @Composable
-fun TopDetailsSection(viewModel: AddPostViewModel, onVisibilityScopeClick: () -> Unit) {
+fun TopDetailsSection(
+    viewModel: AddPostViewModel,
+    sharedViewModel: HomeSharedViewModel,
+    onVisibilityScopeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -282,9 +392,9 @@ fun TopDetailsSection(viewModel: AddPostViewModel, onVisibilityScopeClick: () ->
         verticalAlignment = Alignment.CenterVertically,
     ) {
         UserDetailsSection(
-            imageUrl = "",
-            userName = "Aryan",
-            userBio = "Android Developer",
+            imageUrl = sharedViewModel.usersBean.profilePhoto.toString(),
+            userName = sharedViewModel.usersBean.name,
+            userBio = sharedViewModel.usersBean.bio,
             modifier = Modifier.weight(1f)
         )
         PostVisibilityInTopSection(viewModel) {
@@ -314,10 +424,10 @@ fun PostVisibilityInTopSection(
         Image(
             painterResource(id = currentSelectedPostVisibility.drawableId),
             contentDescription = currentSelectedPostVisibility.scopeName,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(14.dp)
         )
         SpacerWidth6()
-        Text(text = currentSelectedPostVisibility.scopeName, fontSize = 14.sp)
+        Text(text = currentSelectedPostVisibility.scopeName, fontSize = 12.sp)
     }
 }
 
@@ -330,7 +440,7 @@ fun PostCaptionField(viewModel: AddPostViewModel) {
             Text(
                 text = stringResource(R.string.add_description),
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = ColorsHelper.gray()
             )
         },
         onValueChange = { updatedValue ->
@@ -351,14 +461,14 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconTextSection(
-                resourceId = R.drawable.ic_image,
+                icon = Icons.Rounded.Image,
                 text = stringResource(R.string.add_image),
                 modifier = Modifier.weight(1f)
             ) {
                 selectFileClick(ActivityResultContracts.PickVisualMedia.ImageOnly)
             }
             IconTextSection(
-                resourceId = R.drawable.ic_video,
+                icon = Icons.Rounded.VideoCameraFront,
                 text = stringResource(R.string.add_video),
                 modifier = Modifier.weight(1f),
                 contentArrangement = Arrangement.End
@@ -366,6 +476,16 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
                 selectFileClick(ActivityResultContracts.PickVisualMedia.VideoOnly)
             }
         }
+    }
+}
+
+
+private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
+    if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.please_either_attach_image_video_or_add_some_description)
+    } else {
+        viewModel.uploadUserPost()
     }
 }
 

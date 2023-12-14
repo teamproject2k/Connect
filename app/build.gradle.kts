@@ -23,7 +23,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -64,7 +63,6 @@ dependencies {
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
     testImplementation(Dependencies.junitTest)
-    androidTestImplementation(Dependencies.junitAndroidTest)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
     androidTestImplementation(Dependencies.composeTestJunit)
@@ -80,6 +78,7 @@ dependencies {
     implementation(Dependencies.firebaseCrashlytics)
     implementation(Dependencies.firebaseAuth)
     implementation(Dependencies.firebaseFirestore)
+    implementation(Dependencies.firebaseStorage)
     //coil
     implementation(Dependencies.coil)
     //view model
@@ -95,16 +94,22 @@ dependencies {
     implementation(Dependencies.dialog)
     //Room
     implementation(Dependencies.roomRuntime)
+    implementation(Dependencies.gson)
     annotationProcessor(Dependencies.roomCompiler)
     kapt(Dependencies.roomKapt)
-    //constraint layout
-    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation ("com.google.code.gson:gson:2.10.1")
-
+    //Constraint layout
+    implementation(Dependencies.constraintLayout)
+    //Exoplayer
+    implementation(Dependencies.exoplayer)
     implementation ("androidx.media3:media3-exoplayer:1.2.0")
-//    implementation "androidx.media3:media3-exoplayer-dash:1.2.0"
-//    implementation "androidx.media3:media3-ui:1.2.0"
-
+    implementation ("androidx.media3:media3-ui:1.2.0")
+    implementation ("androidx.compose.material:material-icons-extended")
+}
+tasks {
+    // Configure the test task to use JUnit Platform
+    withType<Test> {
+        useJUnitPlatform()
+    }
 }
 kapt {
     correctErrorTypes = true

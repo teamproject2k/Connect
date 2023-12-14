@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -20,16 +21,6 @@ fun TextBoldOnPrimary28(text: String, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun TextBold18(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        modifier = modifier,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold
-    )
-}
-
-@Composable
 fun TextBold16(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
@@ -40,12 +31,12 @@ fun TextBold16(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TextBlack18(text: String, modifier: Modifier = Modifier) {
+fun TextBold18(text: String, modifier: Modifier = Modifier, textAlign: TextAlign? = null) {
     Text(
         text = text,
         modifier = modifier,
         fontSize = 18.sp,
-        color = MaterialTheme.colorScheme.scrim,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.Bold,
+        textAlign = textAlign
     )
 }

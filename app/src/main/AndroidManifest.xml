@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:name=".presentation.base.BaseApp"
         android:allowBackup="true"
@@ -17,14 +19,15 @@
         <activity
             android:name=".presentation.ui.auth.AuthenticationActivity"
             android:exported="true"
-            android:theme="@style/SplashScreenTheme">
+            android:windowSoftInputMode="adjustResize"
+        android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.ui.home.HomeActivity" />
+        <activity android:name=".presentation.ui.home.base_screen.HomeActivity" />
     </application>
 
 </manifest>

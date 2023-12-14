@@ -84,7 +84,7 @@ class RulesDetector : Detector(), Detector.UastScanner {
                         )
                     }
                 }
-                if (!node.text.contains("fun")) {
+                if (!node.text.contains("fun") && !node.isStatic) {
                     if (variableType.canonicalText.contains("StateFlow")) {
                         if (variableName?.endsWith("StateFlow") == false) {
                             context.report(

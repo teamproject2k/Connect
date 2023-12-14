@@ -9,6 +9,13 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
         private const val DeviceId = "device_id"
     }
 
+
+    /**
+     * A boolean value that indicates whether the user has entered their details.
+     *
+     * @property get Returns the value of the user detail entered.
+     * @property set Sets the value of the user detail entered.
+     */
     var isUserDetailsEntered
         get() = sharedPreferences.getBoolean(IsUserDetailEntered, false)
         set(isEntered) {
@@ -17,6 +24,13 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
             editor.apply()
         }
 
+
+    /**
+     * A string value that represent the device id on which app is running
+     *
+     * @property get Returns the value of the device id.
+     * @property set Sets the value of the device id.
+     */
     var deviceId
         get() = sharedPreferences.getString(DeviceId, "")
         set(updatedDeviceId) {
