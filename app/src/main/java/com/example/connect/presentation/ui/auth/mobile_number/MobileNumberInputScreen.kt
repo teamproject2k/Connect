@@ -139,7 +139,6 @@ private fun HandleGetUserDetailsState(
                 LocalActivity.current.finish()
             }
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
-
         }
 
         RequestStatusEnum.EXCEPTION -> {

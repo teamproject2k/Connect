@@ -276,7 +276,7 @@ fun ProfileScreen(
 
 @Composable
 fun ImageSection(
-    userDetails: UsersBean   , navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit,
+    userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit,
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
@@ -411,14 +411,14 @@ fun HandleFriendListSection(viewModel: UserProfileViewModel) {
                 viewModel.snackBarMessageState.value =
                     friendsDetailsState.message
                         ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "UserProfileScreen",
+                    friendsDetailsState.message.toString()
+                )
                 isExceptionHandled = true
             }
-            LoggingHelper.logData(
-                LoggingLevelEnum.Error,
-                ConstantsHelper.ErrorTag,
-                "UserProfileScreen",
-                friendsDetailsState.message.toString()
-            )
         }
 
         RequestStatusEnum.NONE -> {
@@ -581,13 +581,13 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
                         postDetailState.message
                             ?: stringResource(id = R.string.something_went_wrong)
                 }
-                isExceptionHandled = true
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "UserProfileScreen",
                     postDetailState.message.toString()
                 )
+                isExceptionHandled = true
             }
         }
 

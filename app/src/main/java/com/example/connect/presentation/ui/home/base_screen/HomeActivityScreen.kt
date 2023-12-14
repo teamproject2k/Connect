@@ -30,6 +30,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
 import com.example.connect.common.ErrorCodes
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
@@ -93,6 +95,12 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
                         )
                     }
                 }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "HomeActivityScreen",
+                    getDeviceIdState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -140,6 +148,12 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
                         context.showToast(getUserDetailsState.message)
                     }
                 }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "HomeActivityScreen",
+                    getUserDetailsState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }

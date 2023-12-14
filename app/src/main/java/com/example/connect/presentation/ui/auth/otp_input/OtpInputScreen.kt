@@ -427,8 +427,8 @@ fun HandleResendOTPState(
                     "OTPInputScreen",
                     resendOtpState.message.toString()
                 )
+                isExceptionHandled = true
             }
-            isExceptionHandled = true
         }
 
         RequestStatusEnum.NONE -> {

@@ -232,8 +232,8 @@ fun HandleAddPostSection(
                     "AddPostScreen",
                     addPostState.message.toString()
                 )
+                isExceptionHandled = true
             }
-            isExceptionHandled = true
         }
 
         NONE -> {

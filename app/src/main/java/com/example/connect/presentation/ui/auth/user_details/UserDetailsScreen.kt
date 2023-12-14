@@ -294,8 +294,8 @@ private fun HandleAddUserState(
                     "UserDetailsScreen",
                     uiState.message.toString()
                 )
+                isExceptionHandled = true
             }
-            isExceptionHandled = true
         }
 
         else -> {}
