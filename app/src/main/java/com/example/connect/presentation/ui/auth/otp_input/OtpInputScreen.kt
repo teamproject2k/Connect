@@ -468,7 +468,7 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
 }
 
 @Composable
-fun HandleBackPressed(navigator: DestinationsNavigator) {
+private fun HandleBackPressed(navigator: DestinationsNavigator) {
 
     var showLogoutDialog by remember {
         mutableStateOf(false)
@@ -487,7 +487,7 @@ fun HandleBackPressed(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun OnBackPressedAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
+private fun OnBackPressedAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
     AlertDialog(
         onDismissRequest = { onDismiss() },
         confirmButton = {
