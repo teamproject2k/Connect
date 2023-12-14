@@ -5,11 +5,12 @@ import com.example.connect.common.ResponseState
 import com.example.connect.domain.repository.IUploadFileRepository
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class IUploadRepositoryImpl(
+class IUploadRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage
 ) : IUploadFileRepository {
-    
+
     override suspend fun uploadFileToRemote(url: Uri, path: String): ResponseState<String> {
         // Upload the file to the specified path in Firebase Storage.
         return try {

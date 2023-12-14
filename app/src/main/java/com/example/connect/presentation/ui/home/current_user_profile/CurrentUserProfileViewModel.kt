@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.user_profile
+package com.example.connect.presentation.ui.home.current_user_profile
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class UserProfileViewModel @Inject constructor(
+class CurrentUserProfileViewModel @Inject constructor(
     private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
     private val addPostListToDbUseCase: AddPostListToDbUseCase,

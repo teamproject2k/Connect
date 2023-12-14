@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.user_profile
+package com.example.connect.presentation.ui.home.current_user_profile
 
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -113,7 +113,7 @@ import kotlin.math.ceil
 @Destination
 @Composable
 fun UserProfileScreen(navigator: DestinationsNavigator) {
-    val viewModel: UserProfileViewModel = hiltViewModel()
+    val viewModel: CurrentUserProfileViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
@@ -253,7 +253,7 @@ fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit)
 @Composable
 fun ProfileScreen(
     userDetails: UsersBean,
-    viewModel: UserProfileViewModel,
+    viewModel: CurrentUserProfileViewModel,
     navigator: DestinationsNavigator,
     onOptionsMenuClick: () -> Unit
 ) {
@@ -389,7 +389,7 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
 }
 
 @Composable
-fun HandleFriendListSection(viewModel: UserProfileViewModel) {
+fun HandleFriendListSection(viewModel: CurrentUserProfileViewModel) {
     val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -550,7 +550,7 @@ fun FriendItem(
 
 
 @Composable
-fun HandlePostSection(viewModel: UserProfileViewModel) {
+fun HandlePostSection(viewModel: CurrentUserProfileViewModel) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
