@@ -565,7 +565,7 @@ fun HandlePostSection(viewModel: UserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            PostSection(postDetailsList = postDetailState.data!!)
+            PostSection(postDetailsList = postDetailState.data!!.reversed())
         }
 
         RequestStatusEnum.EXCEPTION -> {
