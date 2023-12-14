@@ -2,6 +2,8 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -25,10 +30,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -61,13 +68,16 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.presentation.ui.common.SpacerHeight18
 import com.example.connect.presentation.ui.common.SpacerHeight48
+import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
+import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeActivity
+import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -97,6 +107,7 @@ fun OTPScreen(
     HandleVerifyOTPState(viewModel, navigator, context)
     HandleUserDetailsState(viewModel, navigator, context)
     HandleResendOTPState(viewModel, context)
+    HandleBackPressed(navigator)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -124,7 +135,6 @@ fun OTPScreen(
                         append("$countryCode $mobileNumber.")
                     }
                 }
-
             )
             Column(modifier = Modifier.padding(16.dp)) {
                 OTPField(viewModel)
@@ -160,7 +170,6 @@ fun OTPScreen(
         }
     }
 }
-
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -304,7 +313,7 @@ fun HandleUserDetailsState(
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if(!isExceptionHandled) {
+            if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
                         R.string.something_went_wrong
@@ -456,7 +465,61 @@ private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
                 context.getString(R.string.no_internet_connection)
         }
     }
+}
 
+@Composable
+fun HandleBackPressed(navigator: DestinationsNavigator) {
+
+    var showLogoutDialog by remember {
+        mutableStateOf(false)
+    }
+
+    BackHandler {
+        showLogoutDialog = true
+    }
+
+    if (showLogoutDialog) {
+        OnBackPressedAlertDialog(onDismiss = { showLogoutDialog = false }) {
+            showLogoutDialog = false
+            navigator.popBackStack()
+        }
+    }
+}
+
+@Composable
+fun OnBackPressedAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            Text(text = stringResource(id = R.string.ok), modifier = Modifier.clickable {
+                onOk()
+            })
+        },
+        dismissButton = {
+            Text(
+                text = stringResource(id = R.string.cancel),
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .clickable {
+                        onDismiss()
+                    }
+            )
+        },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = stringResource(R.string.warning),
+                    colorFilter = ColorFilter.tint(WarningColor)
+                )
+                SpacerWidth12()
+                TextBold18(text = stringResource(R.string.go_back))
+            }
+        },
+        text = {
+            Text(text = stringResource(R.string.do_you_want_to_edit_your_phone_number))
+        }
+    )
 }
 
 
