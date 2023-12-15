@@ -392,9 +392,9 @@ fun TopDetailsSection(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         UserDetailsSection(
-            imageUrl = sharedViewModel.usersBean.profilePhoto.toString(),
-            userName = sharedViewModel.usersBean.name,
-            userBio = sharedViewModel.usersBean.bio,
+            imageUrl = sharedViewModel.usersDetails.profilePhoto.toString(),
+            userName = sharedViewModel.usersDetails.name,
+            userBio = sharedViewModel.usersDetails.bio,
             modifier = Modifier.weight(1f)
         )
         PostVisibilityInTopSection(viewModel) {

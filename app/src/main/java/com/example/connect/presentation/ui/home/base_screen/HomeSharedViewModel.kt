@@ -27,7 +27,7 @@ class HomeSharedViewModel @Inject constructor(
     private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase
 ) :
     BaseViewModel() {
-    lateinit var usersBean: UsersBean
+    lateinit var usersDetails: UsersBean
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
 
@@ -92,7 +92,7 @@ class HomeSharedViewModel @Inject constructor(
 
                     // If the user details are not null, set the user details and set the user details state flow to success.
                     if (userDetails != null) {
-                        usersBean = userDetails
+                        usersDetails = userDetails
                         _userDetailsStateFlow.value = ResponseState.success(null)
 
                         // If the user details are null, get the user details from the server.
@@ -103,7 +103,7 @@ class HomeSharedViewModel @Inject constructor(
                         // If the user details from the server are successful, add the user to the database and set the user details and set the user details state flow to success.
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
                             addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
-                            usersBean = userDetailsFromServerResponseState.data
+                            usersDetails = userDetailsFromServerResponseState.data
                             _userDetailsStateFlow.value = ResponseState.success(null)
                             // If the user details from the server are not successful, set the user details state flow to error.
                         } else {

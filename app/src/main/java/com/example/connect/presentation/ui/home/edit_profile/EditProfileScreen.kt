@@ -97,7 +97,7 @@ fun EditProfileScreen(
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.initializeStates(sharedViewModel.usersBean)
+        viewModel.initializeStates(sharedViewModel.usersDetails)
     }
     val context = LocalContext.current
     HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)

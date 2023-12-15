@@ -96,4 +96,6 @@
     <string name="we_have_detected_your_account_logged_into_another_device">We have detected your account logged into another device</string>
     <string name="do_you_want_to_edit_your_phone_number">Do you want to edit your phone number?</string>
     <string name="go_back">Go Back</string>
+    <string name="add_friend">Add Friend</string>
+    <string name="block_user">Block User</string>
 </resources>
