@@ -190,7 +190,6 @@ private fun CreateUi(context: Context) {
                         )
                     )
             ) {
-
                 getBottomNavBarItemList(context).forEach { data ->
                     NavigationBarItem(
                         selected = selectedRouteState.value == data.routeName,

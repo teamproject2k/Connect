@@ -96,4 +96,11 @@
     <string name="we_have_detected_your_account_logged_into_another_device">We have detected your account logged into another device</string>
     <string name="do_you_want_to_edit_your_phone_number">Do you want to edit your phone number?</string>
     <string name="go_back">Go Back</string>
+    <string name="no_user_found">No User Found</string>
+    <string name="friend_request_sent_successfully">Friend request sent successfully</string>
+    <string name="friend_request_already_sent">Friend request already sent</string>
+    <string name="sending_friend_request">Sending Friend Request...</string>
+    <string name="adding_friend">Adding Friend...</string>
+    <string name="friend_added_successfully">Friend Added Successfully</string>
+    <string name="already_added_as_friends">Already added as friends</string>
 </resources>

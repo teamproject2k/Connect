@@ -60,7 +60,7 @@ class UserDetailsViewModel @Inject constructor(
                         createdDate,
                         createdDate,
                         sharedPreference.deviceId!!,
-                        "Connect User"
+                        "Connect User",
                     )
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {

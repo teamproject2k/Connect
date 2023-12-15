@@ -26,6 +26,7 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
+import com.example.connect.presentation.ui.destinations.SearchScreenDestination
 import com.example.connect.presentation.ui.destinations.UserProfileScreenDestination
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
@@ -270,7 +271,7 @@ object FunctionHelper {
                 context.getString(R.string.search),
                 Icons.Filled.Search,
                 Icons.Outlined.Search,
-                AddPostScreenDestination.route
+                SearchScreenDestination.route
             )
         )
         bottomNavList.add(

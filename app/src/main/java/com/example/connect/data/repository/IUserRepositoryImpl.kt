@@ -6,6 +6,7 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IUserRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -100,11 +101,19 @@ class IUserRepositoryImpl @Inject constructor(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): ResponseState<Nothing?> {
+        // Update the user details on the remote database.
         return try {
-            fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId)
-                .update(fieldsToUpdate).await()
+            // Get the reference to the user document in the FireStore database.
+            val userDocumentReference =
+                fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId)
+
+            // Update the user details in the document.
+            userDocumentReference.update(fieldsToUpdate).await()
+
+            // Return a success response.
             ResponseState.success(null)
         } catch (exception: Exception) {
+            // Return an error response if an exception occurs.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
@@ -114,15 +123,184 @@ class IUserRepositoryImpl @Inject constructor(
         firebaseUserId: String
     ): Long {
 
+        // Create a string of the set clause, which is the list of fields to update and their new values.
         val setClause = fieldsToUpdate.entries.joinToString(", ") { "${it.key} = ?" }
+
+        // Create the SQL query to update the user details.
         val sql =
             "UPDATE ${UsersDbEntity::class.simpleName} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
+
+        // Create a list of the bind arguments, which are the values of the fields to update.
         val bindArgs = fieldsToUpdate.values.toMutableList()
         bindArgs.add(firebaseUserId)
 
+        // Create a SimpleSQLiteQuery object with the SQL query and bind arguments.
         val queryToExecute = SimpleSQLiteQuery(sql, bindArgs.toTypedArray())
 
+        // Execute the query and return the number of rows affected.
         return appDatabase.getUsersDao().updateUserDetails(queryToExecute)
     }
 
+    override suspend fun getAllUsersNotInList(
+        excludeUserIdList: List<String>,
+        currentUserFirebaseId: String
+    ): ResponseState<ArrayList<UsersBean>> {
+        // Try to get the users from the FireStore database whose id is not in excludeUserIdList.
+        return try {
+            val usersList = arrayListOf<UsersBean>()
+            val result = fireStore.collection(FirebaseConstants.UsersKey)
+                .whereNotIn(UserRemoteEntity::firebaseUserId.name, excludeUserIdList).get()
+                .await()
+            result.documents.forEach { document ->
+                val user = document.toObject(UserRemoteEntity::class.java)
+                if (user != null) {
+                    val statusWithCurrentUser = user.otherUsersStatus[currentUserFirebaseId]
+                    if (statusWithCurrentUser != StatusWithCurrentEnum.Blocked.name) {
+                        usersList.add(user.toUserBean())
+                    }
+                }
+            }
+            // Return a success response with the list of users found.
+            ResponseState.success(usersList)
+        } catch (exception: Exception) {
+            // If there is an exception, return an error response with the exception message.
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun sendFriendRequest(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus[requestedUserFirebaseId] =
+                        StatusWithCurrentEnum.RequestedByCurrentUser.name
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus[currentUserFirebaseId] =
+                        StatusWithCurrentEnum.RequestedByOtherUser.name
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun acceptFriendRequest(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus[requestedUserFirebaseId] =
+                        StatusWithCurrentEnum.Friends.name
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus[currentUserFirebaseId] =
+                        StatusWithCurrentEnum.Friends.name
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun denyFriendRequest(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun blockUser(currentUserFirebaseId: String, requestedUserFirebaseId: String) {
+
+    }
+
+    override suspend fun removeFriend(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ) {
+
+    }
+
+    override suspend fun updateOtherUsersStatus(
+        currentUserFirebaseId: String,
+        otherUsersStatus: MutableMap<String, String>
+    ): Int {
+        return appDatabase.getUsersDao()
+            .updateOtherUsersStatus(currentUserFirebaseId, otherUsersStatus)
+    }
 }

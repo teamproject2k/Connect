@@ -7,15 +7,15 @@ import com.google.gson.Gson
 class AppTypeConverters {
 
     @TypeConverter
-    fun fromFriendList(listOfString: List<String>): String {
-        return Gson().toJson(listOfString)
+    fun fromMapOfStringStringToString(map: MutableMap<String, String>): String {
+        return Gson().toJson(map)
     }
 
     @TypeConverter
-    fun toFriendList(listOfString: String): List<String> {
+    fun toMapOfStringStringFromString(string: String): MutableMap<String, String> {
         return Gson().fromJson(
-            listOfString,
-            object : TypeToken<List<String?>?>() {}.type
+            string,
+            object : TypeToken<MutableMap<String, String>>() {}.type
         )
     }
 }
