@@ -53,7 +53,7 @@ import com.ramcosta.composedestinations.utils.route
 fun HomeActivityScreen() {
     val viewModel = hiltViewModel<HomeSharedViewModel>()
     val context = LocalContext.current
-    viewModel.getDeviceIdFromRemote()
+    viewModel.getDeviceIdFromRemote(context)
     HandleGetDeviceIdFlow(viewModel, context)
     HandleUserDetailsFlow(viewModel, context)
 

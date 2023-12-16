@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.base_screen
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
@@ -10,6 +11,7 @@ import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +43,7 @@ class HomeSharedViewModel @Inject constructor(
     /**
      * Gets the device ID from the remote server.
      */
-    fun getDeviceIdFromRemote() {
+    fun getDeviceIdFromRemote(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _deviceIdStateFlow.value = ResponseState.loading()
@@ -59,7 +61,7 @@ class HomeSharedViewModel @Inject constructor(
                             _deviceIdStateFlow.value = ResponseState.error(ErrorCodes.NewLogin)
                         } else {
                             // Get the user details.
-                            getUserDetails()
+                            getUserDetails(context)
                             // Set the device ID state flow to success with null data.
                             _deviceIdStateFlow.value = ResponseState.success(null)
                         }
@@ -78,41 +80,38 @@ class HomeSharedViewModel @Inject constructor(
     /**
      * Gets the user details from the database or the server.
      */
-    fun getUserDetails() {
+    fun getUserDetails(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _userDetailsStateFlow.value = ResponseState.loading()
 
-                // Get the current user's Firebase ID.
                 val fireBaseId = fireBaseAuth.currentUser?.uid
 
-                // If the Firebase ID is not null, get the user details from the database.
                 if (fireBaseId != null) {
-                    val userDetails = getUserDetailsFromDbUseCase.invoke(fireBaseId)
-
-                    // If the user details are not null, set the user details and set the user details state flow to success.
-                    if (userDetails != null) {
-                        usersDetails = userDetails
-                        _userDetailsStateFlow.value = ResponseState.success(null)
-
-                        // If the user details are null, get the user details from the server.
-                    } else {
+                    if (context.isNetworkAvailable()) {
                         val userDetailsFromServerResponseState =
                             getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
-                        // If the user details from the server are successful, add the user to the database and set the user details and set the user details state flow to success.
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
                             addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                             usersDetails = userDetailsFromServerResponseState.data
                             _userDetailsStateFlow.value = ResponseState.success(null)
-                            // If the user details from the server are not successful, set the user details state flow to error.
                         } else {
                             _userDetailsStateFlow.value = ResponseState.error(
                                 userDetailsFromServerResponseState.message ?: ""
                             )
                         }
+                    } else {
+                        val userDetails = getUserDetailsFromDbUseCase.invoke(fireBaseId)
+
+                        if (userDetails != null) {
+                            usersDetails = userDetails
+                            _userDetailsStateFlow.value = ResponseState.success(null)
+                        } else {
+                            _userDetailsStateFlow.value =
+                                ResponseState.error(ErrorCodes.NoUserFound)
+                        }
                     }
-                    // If the Firebase ID is null, set the user details state flow to error.
                 } else {
                     _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
                 }

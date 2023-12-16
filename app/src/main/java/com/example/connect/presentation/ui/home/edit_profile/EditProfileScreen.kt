@@ -536,7 +536,7 @@ fun HandleUpdateUserState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            sharedViewModel.getUserDetails()
+            sharedViewModel.getUserDetails(context)
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             context.showToast(stringResource(R.string.user_details_updated_successfully))
             navigator.popBackStack()
