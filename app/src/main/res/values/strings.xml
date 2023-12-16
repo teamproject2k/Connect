@@ -98,4 +98,13 @@
     <string name="go_back">Go Back</string>
     <string name="add_friend">Add Friend</string>
     <string name="block_user">Block User</string>
+    <string name="no_user_found">No User Found</string>
+    <string name="friend_request_sent_successfully">Friend request sent successfully</string>
+    <string name="friend_request_already_sent">Friend request already sent</string>
+    <string name="sending_friend_request">Sending Friend Request...</string>
+    <string name="adding_friend">Adding Friend...</string>
+    <string name="friend_added_successfully">Friend Added Successfully</string>
+    <string name="already_added_as_friends">Already added as friends</string>
+    <string name="clear">Clear</string>
+    <string name="search_user_by_name_or_user_id">Search user by name or user id</string>
 </resources>

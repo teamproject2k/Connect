@@ -1,5 +1,6 @@
 package com.example.connect.data.models.user
 
+import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
@@ -16,11 +17,34 @@ data class UserRemoteEntity(
     val bio: String,
     val profilePhoto: String? = null,
     val coverPhoto: String? = null,
-    val friendList: List<String> = listOf()
+    val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
 ) {
     constructor() : this("1", "", "", "", -1, 0, 0, "", "")
 
     fun toUserBean(): UsersBean {
+        val friendList = mutableListOf<String>()
+        val requestedFriendRequestList = mutableListOf<String>()
+        val receivedFriendRequestList = mutableListOf<String>()
+        val blockedUsersList = mutableListOf<String>()
+        otherUsersStatus.forEach { entry ->
+            when (entry.value) {
+                StatusWithCurrentEnum.Friends.name -> {
+                    friendList.add(entry.key)
+                }
+
+                StatusWithCurrentEnum.RequestedByCurrentUser.name -> {
+                    requestedFriendRequestList.add(entry.key)
+                }
+
+                StatusWithCurrentEnum.RequestedByOtherUser.name -> {
+                    receivedFriendRequestList.add(entry.key)
+                }
+
+                StatusWithCurrentEnum.Blocked.name -> {
+                    blockedUsersList.add(entry.key)
+                }
+            }
+        }
         return UsersBean(
             firebaseUserId,
             connectUserId,
@@ -33,7 +57,10 @@ data class UserRemoteEntity(
             bio,
             profilePhoto,
             coverPhoto,
-            friendList
+            friendList,
+            requestedFriendRequestList,
+            receivedFriendRequestList,
+            blockedUsersList
         )
     }
 }

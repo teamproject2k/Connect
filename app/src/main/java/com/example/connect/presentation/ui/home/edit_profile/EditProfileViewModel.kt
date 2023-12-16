@@ -185,11 +185,12 @@ class EditProfileViewModel @Inject constructor(
             profilePhotoState.value?.uri.toString() != userDetails.profilePhoto.toString()
 
         // Get the lower case version of the user name.
-        val lowerCaseUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
+        val lowerCaseUserName =
+            FunctionHelper.getLowerCaseTextWithOutExtraSpace(userNameState.value)
 
         // Check if the user name has been updated.
         val isUserNameUpdated =
-            FunctionHelper.getLowerCaseUserName(userDetails.name) != lowerCaseUserName
+            FunctionHelper.getLowerCaseTextWithOutExtraSpace(userDetails.name) != lowerCaseUserName
 
         // Check if the bio has been updated.
         val isBioUpdated = userDetails.bio != userBioState.value
