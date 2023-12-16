@@ -45,7 +45,8 @@ class UserDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addUserStateFlow.value = ResponseState.loading()
-                val formattedUserName = FunctionHelper.getLowerCaseUserName(userNameState.value)
+                val formattedUserName =
+                    FunctionHelper.getLowerCaseTextWithOutExtraSpace(userNameState.value)
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
                     getUsersFromNameUseCase.invoke(formattedUserName)

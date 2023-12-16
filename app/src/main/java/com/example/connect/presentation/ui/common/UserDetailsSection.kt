@@ -43,7 +43,12 @@ fun UserDetailsSection(
                 .padding(start = 12.dp),
         ) {
             TextBold16(text = user.name)
-            Text(text = user.bio, fontSize = 13.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
+            Text(
+                text = user.connectUserId,
+                fontSize = 13.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
         }
     }
 }

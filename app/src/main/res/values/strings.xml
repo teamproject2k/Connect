@@ -103,4 +103,6 @@
     <string name="adding_friend">Adding Friend...</string>
     <string name="friend_added_successfully">Friend Added Successfully</string>
     <string name="already_added_as_friends">Already added as friends</string>
+    <string name="clear">Clear</string>
+    <string name="search_user_by_name_or_user_id">Search user by name or user id</string>
 </resources>

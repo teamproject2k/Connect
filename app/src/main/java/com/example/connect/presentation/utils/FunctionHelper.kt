@@ -8,22 +8,30 @@ import android.os.Vibrator
 import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.domain.enums.StatusWithCurrentEnum
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
@@ -232,21 +240,21 @@ object FunctionHelper {
     }
 
     /**
-     * Gets the lower case version of the user name.
+     * Gets the lower case version of the text without extra space.
      *
-     * @param userName The user name to be formatted.
-     * @return The formatted user name.
+     * @param stringToFormat The text to be formatted.
+     * @return The formatted text without extra space.
      */
-    fun getLowerCaseUserName(userName: String): String {
-        var formattedUserName = ""
-        val formattedUserNameList =
-            userName.trim().split(" ") // Split the user name into a list of words
-        formattedUserNameList.forEach { // Iterate over the list of words
+    fun getLowerCaseTextWithOutExtraSpace(stringToFormat: String): String {
+        var formattedString = ""
+        val formattedStringList =
+            stringToFormat.trim().split(" ") // Split the user name into a list of words
+        formattedStringList.forEach { // Iterate over the list of words
             if (it.isNotBlank()) { // Check if the word is not empty
-                formattedUserName += "$it " // Add the word to the formatted user name
+                formattedString += "$it " // Add the word to the formatted user name
             }
         }
-        return formattedUserName.trimEnd().lowercase()
+        return formattedString.trimEnd().lowercase()
     }
 
 
@@ -300,5 +308,37 @@ object FunctionHelper {
         )
         return bottomNavList
     }
+
+    fun getStatusAndDisplayIconWithCurrentUser(
+        currentUsersBean: UsersBean,
+        requiredUsersBean: UsersBean
+    ): Pair<String, ImageVector> {
+        val statusAndDisplayIcon = when {
+            currentUsersBean.friendList.contains(requiredUsersBean.firebaseUserId) -> {
+                Pair(
+                    StatusWithCurrentEnum.Friends.name,
+                    Icons.Default.CheckCircleOutline
+                )
+            }
+
+            currentUsersBean.blockedUsersList.contains(requiredUsersBean.firebaseUserId) -> {
+                Pair(StatusWithCurrentEnum.Blocked.name, Icons.Default.Block)
+            }
+
+            currentUsersBean.receivedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
+                Pair(StatusWithCurrentEnum.RequestedByOtherUser.name, Icons.Default.ArrowCircleDown)
+            }
+
+            currentUsersBean.requestedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
+                Pair(StatusWithCurrentEnum.RequestedByCurrentUser.name, Icons.Default.AccessTime)
+            }
+
+            else -> {
+                Pair(StatusWithCurrentEnum.NotFriends.name, Icons.Default.PersonAddAlt1)
+            }
+        }
+        return statusAndDisplayIcon
+    }
+
 
 }
