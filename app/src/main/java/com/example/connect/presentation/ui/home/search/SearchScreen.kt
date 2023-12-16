@@ -199,6 +199,9 @@ private fun CreateUi(
     currentUsersBean: UsersBean,
     viewModel: SearchViewModel
 ) {
+    val showCancelFriendRequestAlertDialog by remember {
+        mutableStateOf(false)
+    }
     val context = LocalContext.current
     if (usersList.isEmpty()) {
         Column(

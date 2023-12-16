@@ -3,7 +3,6 @@ package com.example.connect.presentation.ui.auth.otp_input
 import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -30,12 +28,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -63,21 +59,20 @@ import com.example.connect.common.FirebaseConstants
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
+import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
 import com.example.connect.presentation.ui.common.SpacerHeight18
 import com.example.connect.presentation.ui.common.SpacerHeight48
-import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
-import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeActivity
-import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -479,47 +474,14 @@ private fun HandleBackPressed(navigator: DestinationsNavigator) {
     }
 
     if (showLogoutDialog) {
-        OnBackPressedAlertDialog(onDismiss = { showLogoutDialog = false }) {
+        TitleMessageIconOkCancelDialog(
+            title = stringResource(id = R.string.go_back),
+            iconTint = warning(),
+            imageVector = Icons.Default.Warning,
+            subTitle = stringResource(id = R.string.do_you_want_to_edit_your_phone_number),
+            onCancel = { showLogoutDialog = false }) {
             showLogoutDialog = false
             navigator.popBackStack()
         }
     }
 }
-
-@Composable
-private fun OnBackPressedAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {
-            Text(text = stringResource(id = R.string.ok), modifier = Modifier.clickable {
-                onOk()
-            })
-        },
-        dismissButton = {
-            Text(
-                text = stringResource(id = R.string.cancel),
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .clickable {
-                        onDismiss()
-                    }
-            )
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = stringResource(R.string.warning),
-                    colorFilter = ColorFilter.tint(WarningColor)
-                )
-                SpacerWidth12()
-                TextBold18(text = stringResource(R.string.go_back))
-            }
-        },
-        text = {
-            Text(text = stringResource(R.string.do_you_want_to_edit_your_phone_number))
-        }
-    )
-}
-
-

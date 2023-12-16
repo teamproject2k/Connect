@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -54,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -82,6 +80,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -91,6 +90,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.getWidthToMaintainAspectRatio
 import com.example.connect.presentation.ui.common.shimmer
@@ -98,7 +98,6 @@ import com.example.connect.presentation.ui.destinations.EditProfileScreenDestina
 import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.theme.OnBlack
-import com.example.connect.presentation.ui.theme.WarningColor
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -186,48 +185,17 @@ fun BottomSheetSection(
         }
     }
     if (showLogoutDialog) {
-        LogoutAlertDialog(onDismiss = { showLogoutDialog = false }) {
+        TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
+            subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
+            imageVector = Icons.Default.Warning,
+            iconTint = warning(),
+            onCancel = { showLogoutDialog = false }) {
             currentActivity.logout()
             showLogoutDialog = false
         }
     }
 }
 
-@Composable
-fun LogoutAlertDialog(onDismiss: () -> Unit, onOk: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {
-            Text(text = stringResource(id = R.string.ok), modifier = Modifier.clickable {
-                onOk()
-            })
-        },
-        dismissButton = {
-            Text(
-                text = stringResource(id = R.string.cancel),
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .clickable {
-                        onDismiss()
-                    }
-            )
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = stringResource(R.string.warning),
-                    colorFilter = ColorFilter.tint(WarningColor)
-                )
-                SpacerWidth12()
-                TextBold18(text = stringResource(R.string.logout))
-            }
-        },
-        text = {
-            Text(text = stringResource(R.string.do_you_really_want_to_logout_from_the_app))
-        }
-    )
-}
 
 @Composable
 fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit) {
@@ -495,7 +463,7 @@ fun FriendsListSection(friendsList: List<UsersBean>) {
                     fontSize = 14.sp,
                     textDecoration = TextDecoration.Underline,
                     modifier = Modifier.clickable {
-                        // TODO: navigate user to add post screen
+                        // TODO: navigate user to friend details screen
                     })
             }
         } else {
