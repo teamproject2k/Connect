@@ -118,4 +118,11 @@
     <string name="user_unblocked_successfully">User unblocked successfully</string>
     <string name="user_blocked_successfully">User blocked successfully</string>
     <string name="requests">Requests</string>
+    <string name="removing_friend_request">Removing Friend Request...</string>
+    <string name="accepting_friend_request">Accepting Friend Request...</string>
+    <string name="unblocking_user">Unblocking user...</string>
+    <string name="blocking_user">Blocking user...</string>
+    <string name="removing_friend">Removing Friend...</string>
+    <string name="friend_removed_successfully">Friend Removed Successfully</string>
+    <string name="friend_removed_and_blocked_successfully">Friend removed and blocked successfully</string>
 </resources>

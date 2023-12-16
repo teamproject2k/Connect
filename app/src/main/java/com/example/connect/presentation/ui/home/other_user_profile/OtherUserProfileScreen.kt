@@ -69,6 +69,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -130,6 +131,8 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    homeSharedViewModel.usersDetails,
+                    requestedUser,
                     viewModel
                 ) { showSheet ->
                     showBottomSheet = !showSheet
@@ -157,6 +160,8 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     HandleRemoveFriendRequestStateFlow(viewModel = viewModel)
     HandleUnBlockUserStateFlow(viewModel = viewModel)
     HandleBlockUserStateFlow(viewModel = viewModel)
+    HandleUnfriendUserStateFlow(viewModel = viewModel)
+    HandleUnfriendAndBlockUserStateFlow(viewModel = viewModel)
 }
 
 @Composable
@@ -285,8 +290,8 @@ private fun ActionButtonsSection(
                     buttonText = stringResource(R.string.unblock_user),
                     onButtonClick = {
                         viewModel.unBlockUser(
-                            currentUser.firebaseUserId,
-                            requestedUser.firebaseUserId
+                            currentUser,
+                            requestedUser
                         )
                     }
                 )
@@ -300,8 +305,8 @@ private fun ActionButtonsSection(
                     buttonText = stringResource(R.string.withdraw_request),
                     onButtonClick = {
                         viewModel.withdrawFriendRequest(
-                            currentUser.firebaseUserId,
-                            requestedUser.firebaseUserId
+                            currentUser,
+                            requestedUser
                         )
                     }
                 )
@@ -315,8 +320,8 @@ private fun ActionButtonsSection(
                     buttonText = stringResource(R.string.accept),
                     onButtonClick = {
                         viewModel.acceptFriendRequest(
-                            currentUser.firebaseUserId,
-                            requestedUser.firebaseUserId
+                            currentUser,
+                            requestedUser
                         )
                     }
                 )
@@ -330,8 +335,8 @@ private fun ActionButtonsSection(
                     buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
                     onButtonClick = {
                         viewModel.removeFriendRequest(
-                            currentUser.firebaseUserId,
-                            requestedUser.firebaseUserId
+                            currentUser,
+                            requestedUser
                         )
                     }
                 )
@@ -345,8 +350,8 @@ private fun ActionButtonsSection(
                     buttonText = stringResource(R.string.add_friend),
                     onButtonClick = {
                         viewModel.sendFriendRequest(
-                            currentUser.firebaseUserId,
-                            requestedUser.firebaseUserId
+                            currentUser,
+                            requestedUser
                         )
                     }
                 )
@@ -396,9 +401,7 @@ private fun HandleFriendListSection(
     when (friendsDetailsState.status) {
         RequestStatusEnum.LOADING -> {
             UserProfileFriendsListLoadingSection()
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -442,9 +445,7 @@ private fun HandlePostSection(
     when (postDetailState.status) {
         RequestStatusEnum.LOADING -> {
             UserProfilePostLoadingSection()
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -484,6 +485,8 @@ private fun HandlePostSection(
 @Composable
 private fun BottomSheetSection(
     modifier: Modifier,
+    currentUser: UsersBean,
+    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
     onBottomSheetStateChange: (showSheet: Boolean) -> Unit
 ) {
@@ -494,12 +497,14 @@ private fun BottomSheetSection(
                 text = stringResource(R.string.unfriend_user)
             ) {
                 onBottomSheetStateChange(false)
+                viewModel.unfriendUser(currentUser, requestedUser)
             }
             BottomSheetItem(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.unfriend_and_block_user)
             ) {
                 onBottomSheetStateChange(false)
+                viewModel.unfriendAndBlockUser(currentUser, requestedUser)
             }
         } else if (viewModel.statusWithCurrentUserState.value != StatusWithCurrentEnum.Blocked.name) {
             BottomSheetItem(
@@ -507,6 +512,7 @@ private fun BottomSheetSection(
                 text = stringResource(R.string.block_user)
             ) {
                 onBottomSheetStateChange(false)
+                viewModel.blockUser(currentUser, requestedUser)
             }
         }
     }
@@ -522,6 +528,7 @@ fun HandleSendFriendRequestStateFlow(
     }
     when (sendFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(id = R.string.sending_friend_request))
             isResponseHandled = false
         }
 
@@ -566,6 +573,7 @@ fun HandleWithdrawFriendRequestStateFlow(
     }
     when (withDrawRequestState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(R.string.removing_friend_request))
             isResponseHandled = false
         }
 
@@ -610,6 +618,7 @@ fun HandleAcceptFriendRequestStateFlow(
     }
     when (acceptFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(R.string.accepting_friend_request))
             isResponseHandled = false
         }
 
@@ -654,6 +663,7 @@ fun HandleRemoveFriendRequestStateFlow(
     }
     when (removeFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(id = R.string.removing_friend_request))
             isResponseHandled = false
         }
 
@@ -698,6 +708,7 @@ fun HandleUnBlockUserStateFlow(
     }
     when (unblockUserState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(R.string.unblocking_user))
             isResponseHandled = false
         }
 
@@ -743,6 +754,7 @@ fun HandleBlockUserStateFlow(
     }
     when (blockUserState.status) {
         RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(R.string.blocking_user))
             isResponseHandled = false
         }
 
@@ -754,7 +766,6 @@ fun HandleBlockUserStateFlow(
                     stringResource(R.string.user_blocked_successfully)
                 isResponseHandled = true
             }
-
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -767,6 +778,96 @@ fun HandleBlockUserStateFlow(
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
                     blockUserState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleUnfriendUserStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val unfriendUserState = viewModel.unfriendUserStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (unfriendUserState.status) {
+        RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(R.string.removing_friend))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.NotFriends.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(R.string.friend_removed_successfully)
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    unfriendUserState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    unfriendUserState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleUnfriendAndBlockUserStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val unfriendAndBlockUserState = viewModel.unfriendAndBlockUserStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (unfriendAndBlockUserState.status) {
+        RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(id = R.string.blocking_user))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.Blocked.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(R.string.friend_removed_and_blocked_successfully)
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    unfriendAndBlockUserState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    unfriendAndBlockUserState.message.toString()
                 )
                 isResponseHandled = true
             }

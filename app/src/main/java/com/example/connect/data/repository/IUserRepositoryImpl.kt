@@ -207,6 +207,43 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun withdrawFriendRequest(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
     override suspend fun acceptFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
@@ -246,7 +283,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun denyFriendRequest(
+    override suspend fun removeFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -283,15 +320,142 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun blockUser(currentUserFirebaseId: String, requestedUserFirebaseId: String) {
-
-    }
-
-    override suspend fun removeFriend(
+    override suspend fun blockUser(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
-    ) {
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus[requestedUserFirebaseId] =
+                        StatusWithCurrentEnum.Blocked.name
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 
+    override suspend fun unBlockUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun unFriendUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun unFriendAndBlockUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val currentUserDocumentPath =
+                    fireStore.collection(FirebaseConstants.UsersKey).document(currentUserFirebaseId)
+                val currentUser =
+                    transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
+                val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.UsersKey)
+                    .document(requestedUserFirebaseId)
+                val requestUser = transaction.get(requestedUserDocumentPath)
+                    .toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    currentUser.otherUsersStatus[requestedUserFirebaseId] =
+                        StatusWithCurrentEnum.Blocked.name
+                    transaction.update(
+                        currentUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        currentUser.otherUsersStatus
+                    )
+                }
+                if (requestUser != null) {
+                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    transaction.update(
+                        requestedUserDocumentPath,
+                        UserRemoteEntity::otherUsersStatus.name,
+                        requestUser.otherUsersStatus
+                    )
+                }
+            }.await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
     }
 
     override suspend fun updateOtherUsersStatusOnDb(

@@ -90,30 +90,45 @@ interface IUserRepository {
         currentUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>>
 
-
     suspend fun sendFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    suspend fun withdrawFriendRequest(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing>
 
     suspend fun acceptFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
-
-    suspend fun denyFriendRequest(
+    suspend fun removeFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    suspend fun blockUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing>
 
-    suspend fun blockUser(currentUserFirebaseId: String, requestedUserFirebaseId: String)
+    suspend fun unBlockUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing>
 
+    suspend fun unFriendUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing>
 
-    suspend fun removeFriend(currentUserFirebaseId: String, requestedUserFirebaseId: String)
-
+    suspend fun unFriendAndBlockUser(
+        currentUserFirebaseId: String,
+        requestedUserFirebaseId: String
+    ): ResponseState<Nothing>
 
     suspend fun updateOtherUsersStatusOnDb(
         currentUserFirebaseId: String,

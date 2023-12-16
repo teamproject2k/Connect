@@ -6,15 +6,23 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.common.ErrorCodes
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
-import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
+import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
+import com.example.connect.domain.useCase.user.BlockUserUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
+import com.example.connect.domain.useCase.user.RemoveFriendRequestUseCase
 import com.example.connect.domain.useCase.user.SendFriendRequestUseCase
+import com.example.connect.domain.useCase.user.UnBlockUserUseCase
+import com.example.connect.domain.useCase.user.UnfriendAndBlockUserUseCase
+import com.example.connect.domain.useCase.user.UnfriendUserUseCase
+import com.example.connect.domain.useCase.user.UpdateOtherUserStatusOnDbUseCase
+import com.example.connect.domain.useCase.user.WithdrawFriendRequestUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +37,15 @@ class OtherUserProfileViewModel @Inject constructor(
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
     private val addPostListToDbUseCase: AddPostListToDbUseCase,
     private val getUserDetailsFromIdsUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
-    private val sendFriendRequestUseCase: SendFriendRequestUseCase
+    private val sendFriendRequestUseCase: SendFriendRequestUseCase,
+    private val withdrawFriendRequestUseCase: WithdrawFriendRequestUseCase,
+    private val acceptFriendRequestUseCase: AcceptFriendRequestUseCase,
+    private val removeFriendRequestUseCase: RemoveFriendRequestUseCase,
+    private val blockUserUseCase: BlockUserUseCase,
+    private val unBlockUserUseCase: UnBlockUserUseCase,
+    private val updateOtherUserStatusOnDbUseCase: UpdateOtherUserStatusOnDbUseCase,
+    private val unfriendAndBlockUserUseCase: UnfriendAndBlockUserUseCase,
+    private val unfriendUserUseCase: UnfriendUserUseCase
 ) : BaseViewModel() {
     var isDataInitialized = false
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
@@ -39,7 +55,6 @@ class OtherUserProfileViewModel @Inject constructor(
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val postDetailsStateFlow: StateFlow<ResponseState<List<PostBean>>> get() = _postDetailsStateFlow
 
     val snackBarMessageState = mutableStateOf("")
@@ -68,10 +83,18 @@ class OtherUserProfileViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val blockUserStateFlow: StateFlow<ResponseState<List<Nothing>>> get() = _blockUserStateFlow
 
+    private val _unfriendUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
+        MutableStateFlow(ResponseState.none())
+    val unfriendUserStateFlow: StateFlow<ResponseState<List<Nothing>>> get() = _unfriendUserStateFlow
+
+    private val _unfriendAndBlockUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
+        MutableStateFlow(ResponseState.none())
+    val unfriendAndBlockUserStateFlow: StateFlow<ResponseState<List<Nothing>>> get() = _unfriendAndBlockUserStateFlow
+
     val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
     fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
-        // statusWithCurrentUser = FunctionHelper.getStatusWithCurrentUser(currentUser, requestedUser)
-        statusWithCurrentUserState.value = StatusWithCurrentEnum.NotFriends.name
+        statusWithCurrentUserState.value =
+            FunctionHelper.getStatusWithCurrentUser(currentUser, requestedUser)
         isDataInitialized = true
     }
 
@@ -125,79 +148,221 @@ class OtherUserProfileViewModel @Inject constructor(
     }
 
     fun sendFriendRequest(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendFriendRequestStateFlow.value = ResponseState.loading()
-                _sendFriendRequestStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    sendFriendRequestUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.requestedFriendRequestList.add(requestedUser.firebaseUserId)
+                    requestedUser.receivedFriendRequestList.add(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _sendFriendRequestStateFlow.value = responseState
+                } else {
+                    _sendFriendRequestStateFlow.value = responseState
+                }
             }
         }
     }
 
     fun withdrawFriendRequest(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _withdrawFriendRequestStateFlow.value = ResponseState.loading()
-                _withdrawFriendRequestStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    withdrawFriendRequestUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.requestedFriendRequestList.remove(requestedUser.firebaseUserId)
+                    requestedUser.receivedFriendRequestList.remove(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _withdrawFriendRequestStateFlow.value = responseState
+                } else {
+                    _withdrawFriendRequestStateFlow.value = responseState
+                }
             }
         }
     }
 
     fun acceptFriendRequest(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _acceptFriendRequestStateFlow.value = ResponseState.loading()
-                _acceptFriendRequestStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    acceptFriendRequestUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.receivedFriendRequestList.remove(requestedUser.firebaseUserId)
+                    currentUser.friendList.add(requestedUser.firebaseUserId)
+                    requestedUser.requestedFriendRequestList.remove(currentUser.firebaseUserId)
+                    requestedUser.friendList.add(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _acceptFriendRequestStateFlow.value = responseState
+                } else {
+                    _acceptFriendRequestStateFlow.value = responseState
+                }
             }
         }
     }
 
     fun removeFriendRequest(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _removeFriendRequestStateFlow.value = ResponseState.loading()
-                _removeFriendRequestStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    removeFriendRequestUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.receivedFriendRequestList.remove(requestedUser.firebaseUserId)
+                    requestedUser.requestedFriendRequestList.remove(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _removeFriendRequestStateFlow.value = responseState
+                } else {
+                    _removeFriendRequestStateFlow.value = responseState
+                }
             }
         }
     }
 
     fun unBlockUser(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _unBlockUserStateFlow.value = ResponseState.loading()
-                _unBlockUserStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    unBlockUserUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.blockedUsersList.remove(requestedUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _unBlockUserStateFlow.value = responseState
+                } else {
+                    _unBlockUserStateFlow.value = responseState
+                }
             }
         }
     }
 
     fun blockUser(
-        currentUserFirebaseId: String,
-        requestedUserFirebaseId: String
+        currentUser: UsersBean,
+        requestedUser: UsersBean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _blockUserStateFlow.value = ResponseState.loading()
-                _blockUserStateFlow.value =
-                    sendFriendRequestUseCase.invoke(currentUserFirebaseId, requestedUserFirebaseId)
+                val responseState =
+                    blockUserUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.blockedUsersList.add(requestedUser.firebaseUserId)
+                    currentUser.friendList.remove(requestedUser.firebaseUserId)
+                    currentUser.requestedFriendRequestList.remove(requestedUser.firebaseUserId)
+                    currentUser.receivedFriendRequestList.remove(requestedUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _blockUserStateFlow.value = responseState
+                } else {
+                    _blockUserStateFlow.value = responseState
+                }
+            }
+        }
+    }
+
+    fun unfriendUser(
+        currentUser: UsersBean,
+        requestedUser: UsersBean
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _unfriendUserStateFlow.value = ResponseState.loading()
+                val responseState =
+                    unfriendUserUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.friendList.remove(requestedUser.firebaseUserId)
+                    requestedUser.friendList.remove(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _unfriendUserStateFlow.value = responseState
+                } else {
+                    _unfriendUserStateFlow.value = responseState
+                }
+            }
+        }
+    }
+
+    fun unfriendAndBlockUser(
+        currentUser: UsersBean,
+        requestedUser: UsersBean
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _unfriendAndBlockUserStateFlow.value = ResponseState.loading()
+                val responseState =
+                    unfriendAndBlockUserUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        requestedUser.firebaseUserId
+                    )
+                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    currentUser.friendList.remove(requestedUser.firebaseUserId)
+                    currentUser.blockedUsersList.add(requestedUser.firebaseUserId)
+                    requestedUser.friendList.remove(currentUser.firebaseUserId)
+                    updateOtherUserStatusOnDbUseCase.invoke(
+                        currentUser.firebaseUserId,
+                        currentUser.toUserDbEntity().otherUsersStatus
+                    )
+                    _unfriendAndBlockUserStateFlow.value = responseState
+                } else {
+                    _unfriendAndBlockUserStateFlow.value = responseState
+                }
             }
         }
     }
