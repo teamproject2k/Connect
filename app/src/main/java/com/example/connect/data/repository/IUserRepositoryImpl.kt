@@ -200,7 +200,6 @@ class IUserRepositoryImpl @Inject constructor(
                         requestUser.otherUsersStatus
                     )
                 }
-
             }.await()
             ResponseState.success(null)
         } catch (exception: Exception) {
@@ -240,7 +239,6 @@ class IUserRepositoryImpl @Inject constructor(
                         requestUser.otherUsersStatus
                     )
                 }
-
             }.await()
             ResponseState.success(null)
         } catch (exception: Exception) {
@@ -296,7 +294,7 @@ class IUserRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun updateOtherUsersStatus(
+    override suspend fun updateOtherUsersStatusOnDb(
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {

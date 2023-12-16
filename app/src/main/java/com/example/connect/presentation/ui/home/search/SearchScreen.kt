@@ -37,6 +37,7 @@ import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWithOutExtraSpace
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -44,7 +45,6 @@ import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
-
 
 @HomeNavGraph
 @Destination
@@ -153,13 +153,12 @@ private fun CreateUi(
         LazyColumn {
             items(filteredUserList) { user ->
                 SearchUsersListItem(usersBean = user) {
-//                    navigator.navigate(OtherUserProfileScreenDestination(user))
+                    navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
             }
         }
     }
 }
-
 
 @Composable
 private fun SearchUsersListItem(usersBean: UsersBean, onClick: () -> Unit) {

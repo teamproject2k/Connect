@@ -115,7 +115,7 @@ interface IUserRepository {
     suspend fun removeFriend(currentUserFirebaseId: String, requestedUserFirebaseId: String)
 
 
-    suspend fun updateOtherUsersStatus(
+    suspend fun updateOtherUsersStatusOnDb(
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int

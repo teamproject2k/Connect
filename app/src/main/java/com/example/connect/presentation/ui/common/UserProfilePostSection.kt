@@ -22,10 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
+import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlin.math.ceil
 
 @Composable
-fun UserProfilePostSection(postDetailsList: List<PostBean>) {
+fun UserProfilePostSection(
+    navigator: DestinationsNavigator,
+    postDetailsList: List<PostBean>,
+    isLoggedInUser: Boolean = false
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,13 +65,15 @@ fun UserProfilePostSection(postDetailsList: List<PostBean>) {
                     fontSize = 14.sp,
                 )
                 SpacerWidth8()
-                Text(text = stringResource(R.string.add_post),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable {
-                        // TODO: navigate user to add post screen
-                    })
+                if (isLoggedInUser) {
+                    Text(text = stringResource(R.string.add_post),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            navigator.navigate(AddPostScreenDestination())
+                        })
+                }
             }
         } else {
             LazyVerticalGrid(

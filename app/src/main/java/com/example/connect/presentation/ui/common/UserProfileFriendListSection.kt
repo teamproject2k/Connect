@@ -19,9 +19,14 @@ import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
-fun UserProfileFriendsListSection(friendsList: List<UsersBean>) {
+fun UserProfileFriendsListSection(
+    navigator: DestinationsNavigator,
+    friendsList: List<UsersBean>,
+    isLoggedInUser: Boolean = false
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,13 +62,15 @@ fun UserProfileFriendsListSection(friendsList: List<UsersBean>) {
                     fontSize = 14.sp,
                 )
                 SpacerWidth8()
-                Text(text = stringResource(R.string.add_friends),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable {
-                        // TODO: navigate user to add post screen
-                    })
+                if (isLoggedInUser) {
+                    Text(text = stringResource(R.string.add_friends),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            // Todo: navigate to friends screen
+                        })
+                }
             }
         } else {
             Row(modifier = Modifier.fillMaxWidth()) {

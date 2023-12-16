@@ -8,22 +8,16 @@ import android.os.Vibrator
 import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
@@ -33,9 +27,9 @@ import com.example.connect.R
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
-import com.example.connect.presentation.ui.destinations.UserProfileScreenDestination
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
@@ -303,42 +297,36 @@ object FunctionHelper {
                 context.getString(R.string.profile),
                 Icons.Filled.Person,
                 Icons.Outlined.Person,
-                UserProfileScreenDestination.route
+                CurrentUserProfileScreenDestination.route
             )
         )
         return bottomNavList
     }
 
-    fun getStatusAndDisplayIconWithCurrentUser(
+    fun getStatusWithCurrentUser(
         currentUsersBean: UsersBean,
         requiredUsersBean: UsersBean
-    ): Pair<String, ImageVector> {
-        val statusAndDisplayIcon = when {
+    ): String {
+        return when {
             currentUsersBean.friendList.contains(requiredUsersBean.firebaseUserId) -> {
-                Pair(
-                    StatusWithCurrentEnum.Friends.name,
-                    Icons.Default.CheckCircleOutline
-                )
+                StatusWithCurrentEnum.Friends.name
             }
 
             currentUsersBean.blockedUsersList.contains(requiredUsersBean.firebaseUserId) -> {
-                Pair(StatusWithCurrentEnum.Blocked.name, Icons.Default.Block)
+                StatusWithCurrentEnum.Blocked.name
             }
 
             currentUsersBean.receivedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
-                Pair(StatusWithCurrentEnum.RequestedByOtherUser.name, Icons.Default.ArrowCircleDown)
+                StatusWithCurrentEnum.RequestedByOtherUser.name
             }
 
             currentUsersBean.requestedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
-                Pair(StatusWithCurrentEnum.RequestedByCurrentUser.name, Icons.Default.AccessTime)
+                StatusWithCurrentEnum.RequestedByCurrentUser.name
             }
 
             else -> {
-                Pair(StatusWithCurrentEnum.NotFriends.name, Icons.Default.PersonAddAlt1)
+                StatusWithCurrentEnum.NotFriends.name
             }
         }
-        return statusAndDisplayIcon
     }
-
-
 }

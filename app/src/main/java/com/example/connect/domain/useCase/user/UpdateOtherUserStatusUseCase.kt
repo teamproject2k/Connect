@@ -9,6 +9,6 @@ class UpdateOtherUserStatusUseCase @Inject constructor(private val repository: I
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {
-        return repository.updateOtherUsersStatus(currentUserFirebaseId, otherUsersStatus)
+        return repository.updateOtherUsersStatusOnDb(currentUserFirebaseId, otherUsersStatus)
     }
 }

@@ -107,4 +107,11 @@
     <string name="already_added_as_friends">Already added as friends</string>
     <string name="clear">Clear</string>
     <string name="search_user_by_name_or_user_id">Search user by name or user id</string>
+    <string name="message">Message</string>
+    <string name="unblock_user">Unblock User</string>
+    <string name="withdraw_request">Withdraw Request</string>
+    <string name="accept">Accept</string>
+    <string name="remove">Remove</string>
+    <string name="unfriend_user">Unfriend user</string>
+    <string name="unfriend_and_block_user">Unfriend and block user</string>
 </resources>

@@ -10,15 +10,31 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.LockReset
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PersonAddAlt1
+import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.PersonRemove
+import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.outlined.ArrowCircleLeft
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,11 +64,15 @@ import com.example.connect.common.ErrorCodes
 import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.ui.common.BottomSheetItem
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
+import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.UserProfileFriendsListLoadingSection
 import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
 import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
@@ -66,21 +86,56 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
-fun OtherUserProfileScreen(navigator: DestinationsNavigator, userDetails: UsersBean) {
+fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: UsersBean) {
     val viewModel: OtherUserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
 
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        ProfileScreen(
-            userDetails = homeSharedViewModel.usersDetails,
-            viewModel = viewModel
-        )
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(homeSharedViewModel.usersDetails, requestedUser)
+    }
+
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            ProfileScreen(
+                currentUser = homeSharedViewModel.usersDetails,
+                requestedUser = requestedUser,
+                viewModel = viewModel,
+                navigator
+            ) {
+                showBottomSheet = true
+            }
+        }
+
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false }, shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                )
+            ) {
+                BottomSheetSection(
+                    Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    viewModel
+                ) { showSheet ->
+                    showBottomSheet = !showSheet
+                }
+            }
+        }
     }
 
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -95,12 +150,22 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, userDetails: UsersB
         viewModel.getFriendListFromIds(homeSharedViewModel.usersDetails.friendList)
         viewModel.getPostDetails()
     }
+
+    HandleSendFriendRequestStateFlow(viewModel = viewModel)
+    HandleWithdrawFriendRequestStateFlow(viewModel = viewModel)
+    HandleAcceptFriendRequestStateFlow(viewModel = viewModel)
+    HandleRemoveFriendRequestStateFlow(viewModel = viewModel)
+    HandleUnBlockUserStateFlow(viewModel = viewModel)
+    HandleBlockUserStateFlow(viewModel = viewModel)
 }
 
 @Composable
 private fun ProfileScreen(
-    userDetails: UsersBean,
-    viewModel: OtherUserProfileViewModel
+    currentUser: UsersBean,
+    requestedUser: UsersBean,
+    viewModel: OtherUserProfileViewModel,
+    navigator: DestinationsNavigator,
+    onOptionsMenuClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -108,28 +173,36 @@ private fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails)
+        ImageSection(
+            requestedUser,
+            viewModel,
+            onOptionsMenuClick
+        )
         SpacerHeight12()
-        UserProfileUserInfoSection(userDetails)
+        UserProfileUserInfoSection(requestedUser)
         SpacerHeight24()
-        ActionButtonsSection()
+        ActionButtonsSection(currentUser, requestedUser, viewModel)
         SpacerHeight24()
-        HandleFriendListSection(viewModel = viewModel)
+        HandleFriendListSection(viewModel = viewModel, navigator)
         SpacerHeight24()
-        HandlePostSection(viewModel)
+        HandlePostSection(viewModel, navigator)
     }
 }
 
 @Composable
 private fun ImageSection(
-    userDetails: UsersBean
+    requestedUser: UsersBean,
+    viewModel: OtherUserProfileViewModel,
+    onOptionsMenuClick: () -> Unit
 ) {
+    val showOptionsMenu =
+        viewModel.statusWithCurrentUserState.value != StatusWithCurrentEnum.Blocked.name
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
-            coverImageRef, profileImageRef
+            coverImageRef, profileImageRef, moreOptionsRef
         ) = createRefs()
         AsyncImage(
-            model = userDetails.coverPhoto,
+            model = requestedUser.coverPhoto,
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,7 +216,7 @@ private fun ImageSection(
             contentScale = ContentScale.Crop,
         )
         AsyncImage(
-            model = userDetails.profilePhoto,
+            model = requestedUser.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
                 .size(150.dp)
@@ -159,44 +232,163 @@ private fun ImageSection(
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
         )
-    }
-}
-
-@Composable
-private fun ActionButtonsSection() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        CustomIconButton(Icons.Default.PersonAddAlt1, stringResource(R.string.add_friend))
-        CustomIconButton(Icons.Default.Block, stringResource(R.string.block_user))
-    }
-}
-
-@Composable
-fun CustomIconButton(buttonImage: ImageVector, buttonText: String) {
-    Button(
-        onClick = { },
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Image(
-                modifier = Modifier.size(20.dp),
-                imageVector = buttonImage,
-                contentDescription = buttonText,
-                colorFilter = ColorFilter.tint(
-                    MaterialTheme.colorScheme.onPrimary
+        if (showOptionsMenu) {
+            IconButton(onClick = {
+                onOptionsMenuClick()
+            },
+                colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
+                modifier = Modifier.constrainAs(moreOptionsRef) {
+                    top.linkTo(coverImageRef.top, 16.dp)
+                    end.linkTo(coverImageRef.end, 16.dp)
+                }
+            ) {
+                Image(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more_options)
                 )
-            )
-            Text(text = buttonText)
+            }
         }
     }
 }
 
 @Composable
-private fun HandleFriendListSection(viewModel: OtherUserProfileViewModel) {
+private fun ActionButtonsSection(
+    currentUser: UsersBean,
+    requestedUser: UsersBean,
+    viewModel: OtherUserProfileViewModel
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        when (viewModel.statusWithCurrentUserState.value) {
+            StatusWithCurrentEnum.Friends.name -> {
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Default.Message,
+                    buttonText = stringResource(R.string.message),
+                    textColor = ColorsHelper.black(),
+                    buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
+                    onButtonClick = {
+                        // TODO: 16/12/23 aryan Navigate to chats screen
+                    }
+                )
+            }
+
+            StatusWithCurrentEnum.Blocked.name -> {
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Default.LockReset,
+                    buttonText = stringResource(R.string.unblock_user),
+                    onButtonClick = {
+                        viewModel.unBlockUser(
+                            currentUser.firebaseUserId,
+                            requestedUser.firebaseUserId
+                        )
+                    }
+                )
+            }
+
+            StatusWithCurrentEnum.RequestedByCurrentUser.name -> {
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Outlined.ArrowCircleLeft,
+                    buttonText = stringResource(R.string.withdraw_request),
+                    onButtonClick = {
+                        viewModel.withdrawFriendRequest(
+                            currentUser.firebaseUserId,
+                            requestedUser.firebaseUserId
+                        )
+                    }
+                )
+            }
+
+            StatusWithCurrentEnum.RequestedByOtherUser.name -> {
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Default.CheckCircleOutline,
+                    buttonText = stringResource(R.string.accept),
+                    onButtonClick = {
+                        viewModel.acceptFriendRequest(
+                            currentUser.firebaseUserId,
+                            requestedUser.firebaseUserId
+                        )
+                    }
+                )
+                SpacerWidth16()
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Default.RemoveCircleOutline,
+                    buttonText = stringResource(R.string.remove),
+                    textColor = ColorsHelper.black(),
+                    buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
+                    onButtonClick = {
+                        viewModel.removeFriendRequest(
+                            currentUser.firebaseUserId,
+                            requestedUser.firebaseUserId
+                        )
+                    }
+                )
+            }
+
+            StatusWithCurrentEnum.NotFriends.name -> {
+                IconTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    buttonImage = Icons.Default.PersonAddAlt1,
+                    buttonText = stringResource(R.string.add_friend),
+                    onButtonClick = {
+                        viewModel.sendFriendRequest(
+                            currentUser.firebaseUserId,
+                            requestedUser.firebaseUserId
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun IconTextButton(
+    modifier: Modifier = Modifier,
+    buttonImage: ImageVector,
+    buttonText: String,
+    textColor: Color = MaterialTheme.colorScheme.onPrimary,
+    buttonBackgroundColor: Color = MaterialTheme.colorScheme.primary,
+    onButtonClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        onClick = { onButtonClick() },
+        colors = ButtonDefaults.buttonColors(containerColor = buttonBackgroundColor)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Image(
+                modifier = Modifier.size(20.dp),
+                imageVector = buttonImage,
+                contentDescription = buttonText,
+                colorFilter = ColorFilter.tint(textColor)
+            )
+            Text(text = buttonText, color = textColor)
+        }
+    }
+}
+
+@Composable
+private fun HandleFriendListSection(
+    viewModel: OtherUserProfileViewModel,
+    navigator: DestinationsNavigator
+) {
     val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -210,7 +402,10 @@ private fun HandleFriendListSection(viewModel: OtherUserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            UserProfileFriendsListSection(friendsList = friendsDetailsState.data!!)
+            UserProfileFriendsListSection(
+                navigator = navigator,
+                friendsList = friendsDetailsState.data!!
+            )
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -221,7 +416,7 @@ private fun HandleFriendListSection(viewModel: OtherUserProfileViewModel) {
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
-                    "UserProfileScreen",
+                    "OtherUserProfileScreen",
                     friendsDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -235,7 +430,10 @@ private fun HandleFriendListSection(viewModel: OtherUserProfileViewModel) {
 }
 
 @Composable
-private fun HandlePostSection(viewModel: OtherUserProfileViewModel) {
+private fun HandlePostSection(
+    viewModel: OtherUserProfileViewModel,
+    navigator: DestinationsNavigator
+) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -250,7 +448,7 @@ private fun HandlePostSection(viewModel: OtherUserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            UserProfilePostSection(postDetailsList = postDetailState.data!!.reversed())
+            UserProfilePostSection(navigator, postDetailsList = postDetailState.data!!.reversed())
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -269,7 +467,7 @@ private fun HandlePostSection(viewModel: OtherUserProfileViewModel) {
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
-                    "UserProfileScreen",
+                    "OtherUserProfileScreen",
                     postDetailState.message.toString()
                 )
                 isExceptionHandled = true
@@ -278,6 +476,272 @@ private fun HandlePostSection(viewModel: OtherUserProfileViewModel) {
 
         RequestStatusEnum.NONE -> {
             //no need to handle it
+        }
+    }
+}
+
+
+@Composable
+private fun BottomSheetSection(
+    modifier: Modifier,
+    viewModel: OtherUserProfileViewModel,
+    onBottomSheetStateChange: (showSheet: Boolean) -> Unit
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentEnum.Friends.name) {
+            BottomSheetItem(
+                imageVector = Icons.Default.PersonRemove,
+                text = stringResource(R.string.unfriend_user)
+            ) {
+                onBottomSheetStateChange(false)
+            }
+            BottomSheetItem(
+                imageVector = Icons.Default.PersonOff,
+                text = stringResource(R.string.unfriend_and_block_user)
+            ) {
+                onBottomSheetStateChange(false)
+            }
+        } else if (viewModel.statusWithCurrentUserState.value != StatusWithCurrentEnum.Blocked.name) {
+            BottomSheetItem(
+                imageVector = Icons.Default.PersonOff,
+                text = stringResource(R.string.block_user)
+            ) {
+                onBottomSheetStateChange(false)
+            }
+        }
+    }
+}
+
+@Composable
+fun HandleSendFriendRequestStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.sendFriendRequestStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.RequestedByCurrentUser.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleWithdrawFriendRequestStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.withdrawFriendRequestStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.NotFriends.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleAcceptFriendRequestStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.acceptFriendRequestStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.Friends.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleRemoveFriendRequestStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.removeFriendRequestStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.NotFriends.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleUnBlockUserStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.unBlockUserStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.NotFriends.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleBlockUserStateFlow(
+    viewModel: OtherUserProfileViewModel
+) {
+    val sendFriendRequestState = viewModel.blockUserStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (sendFriendRequestState.status) {
+        RequestStatusEnum.LOADING -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            viewModel.statusWithCurrentUserState.value =
+                StatusWithCurrentEnum.RequestedByCurrentUser.name
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    sendFriendRequestState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    sendFriendRequestState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
         }
     }
 }

@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -63,12 +61,12 @@ import com.example.connect.common.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
+import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
-import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.UserProfileFriendsListLoadingSection
@@ -89,7 +87,7 @@ import kotlinx.coroutines.launch
 @HomeNavGraph
 @Destination
 @Composable
-fun UserProfileScreen(navigator: DestinationsNavigator) {
+fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     val viewModel: CurrentUserProfileViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
@@ -136,7 +134,6 @@ fun UserProfileScreen(navigator: DestinationsNavigator) {
     }
 }
 
-
 @Composable
 private fun BottomSheetSection(
     modifier: Modifier,
@@ -174,28 +171,6 @@ private fun BottomSheetSection(
     }
 }
 
-
-@Composable
-private fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onClick()
-                }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(imageVector = imageVector, contentDescription = text)
-            SpacerWidth12()
-            Text(text = text)
-        }
-        Divider()
-    }
-}
-
-
 @Composable
 private fun ProfileScreen(
     userDetails: UsersBean,
@@ -213,12 +188,11 @@ private fun ProfileScreen(
         SpacerHeight12()
         UserProfileUserInfoSection(userDetails)
         SpacerHeight24()
-        HandleFriendListSection(viewModel = viewModel)
+        HandleFriendListSection(viewModel = viewModel, navigator)
         SpacerHeight24()
-        HandlePostSection(viewModel)
+        HandlePostSection(viewModel, navigator)
     }
 }
-
 
 @Composable
 private fun ImageSection(
@@ -306,7 +280,10 @@ fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight
 }
 
 @Composable
-private fun HandleFriendListSection(viewModel: CurrentUserProfileViewModel) {
+private fun HandleFriendListSection(
+    viewModel: CurrentUserProfileViewModel,
+    navigator: DestinationsNavigator
+) {
     val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -320,7 +297,7 @@ private fun HandleFriendListSection(viewModel: CurrentUserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            UserProfileFriendsListSection(friendsList = friendsDetailsState.data!!)
+            UserProfileFriendsListSection(navigator, friendsList = friendsDetailsState.data!!, true)
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -345,7 +322,10 @@ private fun HandleFriendListSection(viewModel: CurrentUserProfileViewModel) {
 }
 
 @Composable
-private fun HandlePostSection(viewModel: CurrentUserProfileViewModel) {
+private fun HandlePostSection(
+    viewModel: CurrentUserProfileViewModel,
+    navigator: DestinationsNavigator
+) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -360,7 +340,11 @@ private fun HandlePostSection(viewModel: CurrentUserProfileViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            UserProfilePostSection(postDetailsList = postDetailState.data!!.reversed())
+            UserProfilePostSection(
+                navigator,
+                postDetailsList = postDetailState.data!!.reversed(),
+                true
+            )
         }
 
         RequestStatusEnum.EXCEPTION -> {

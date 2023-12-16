@@ -6,6 +6,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.devtools.ksp") version Versions.ksp
+    id("kotlin-parcelize")
 }
 
 android {
@@ -101,9 +102,9 @@ dependencies {
     implementation(Dependencies.constraintLayout)
     //Exoplayer
     implementation(Dependencies.exoplayer)
-    implementation ("androidx.media3:media3-exoplayer:1.2.0")
-    implementation ("androidx.media3:media3-ui:1.2.0")
-    implementation ("androidx.compose.material:material-icons-extended")
+    implementation("androidx.media3:media3-exoplayer:1.2.0")
+    implementation("androidx.media3:media3-ui:1.2.0")
+    implementation("androidx.compose.material:material-icons-extended")
 }
 tasks {
     // Configure the test task to use JUnit Platform

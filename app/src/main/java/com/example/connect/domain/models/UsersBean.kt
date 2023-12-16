@@ -1,9 +1,12 @@
 package com.example.connect.domain.models
 
+import android.os.Parcelable
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.enums.StatusWithCurrentEnum
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class UsersBean(
     val firebaseUserId: String,
     val connectUserId: String,
@@ -20,7 +23,7 @@ data class UsersBean(
     val requestedFriendRequestList: MutableList<String> = mutableListOf(),
     val receivedFriendRequestList: MutableList<String> = mutableListOf(),
     val blockedUsersList: MutableList<String> = mutableListOf()
-) {
+) : Parcelable {
     fun toUserRemoteEntity(): UserRemoteEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
         friendList.forEach { key ->
