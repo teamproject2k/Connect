@@ -135,7 +135,10 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             ) {
                 showBottomSheet = true
             }
-            PullRefreshIndicator(refreshing = refreshing, refreshState = pullRefreshState)
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                refreshState = pullRefreshState
+            )
         }
         if (showBottomSheet) {
             ModalBottomSheet(
