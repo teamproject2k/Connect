@@ -178,11 +178,11 @@ class EditProfileViewModel @Inject constructor(
 
         // Check if the cover image has been updated.
         val isCoverImageUpdated =
-            coverPhotoState.value?.uri.toString() != userDetails.coverPhoto.toString()
+            coverPhotoState.value?.uri != Uri.EMPTY && (coverPhotoState.value?.uri.toString() != userDetails.coverPhoto)
 
         // Check if the profile image has been updated.
         val isProfileImageUpdated =
-            profilePhotoState.value?.uri.toString() != userDetails.profilePhoto.toString()
+            profilePhotoState.value?.uri != Uri.EMPTY && (profilePhotoState.value?.uri.toString() != userDetails.profilePhoto)
 
         // Get the lower case version of the user name.
         val lowerCaseUserName =
