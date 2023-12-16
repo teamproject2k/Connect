@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,7 +82,11 @@ import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
+import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
+import com.example.connect.presentation.ui.pull_refresh.pullRefresh
+import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -102,26 +108,35 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
         viewModel.initializeData(homeSharedViewModel.usersDetails, requestedUser)
     }
 
-    var showBottomSheet by remember {
+    var showBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
+    var refreshing by rememberSaveable { mutableStateOf(false) }
 
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            viewModel.getUserDetails()
+            refreshing = false
+        })
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
             ProfileScreen(
-                currentUser = homeSharedViewModel.usersDetails,
+                currentUser = viewModel.currentUserState.value,
                 requestedUser = requestedUser,
                 viewModel = viewModel,
                 navigator
             ) {
                 showBottomSheet = true
             }
+            PullRefreshIndicator(refreshing = refreshing, refreshState = pullRefreshState)
         }
-
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false }, shape = RoundedCornerShape(
@@ -131,7 +146,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    homeSharedViewModel.usersDetails,
+                    currentUser = viewModel.currentUserState.value,
                     requestedUser,
                     viewModel
                 ) { showSheet ->
@@ -150,7 +165,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
         }
     }
     LaunchedEffect(key1 = true) {
-        viewModel.getFriendListFromIds(homeSharedViewModel.usersDetails.friendList)
+        viewModel.getFriendListFromIds(viewModel.currentUserState.value.friendList)
         viewModel.getPostDetails()
     }
 
@@ -162,6 +177,11 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     HandleBlockUserStateFlow(viewModel = viewModel)
     HandleUnfriendUserStateFlow(viewModel = viewModel)
     HandleUnfriendAndBlockUserStateFlow(viewModel = viewModel)
+    HandleGetCurrentUserDetailsStateFlow(
+        viewModel = viewModel,
+        homeSharedViewModel = homeSharedViewModel,
+        requestedUser
+    )
 }
 
 @Composable
@@ -868,6 +888,55 @@ fun HandleUnfriendAndBlockUserStateFlow(
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
                     unfriendAndBlockUserState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleGetCurrentUserDetailsStateFlow(
+    viewModel: OtherUserProfileViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
+    requestedUser: UsersBean
+) {
+    val getCurrentUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getCurrentUserDetailsState.status) {
+        RequestStatusEnum.LOADING -> {
+            LoaderDialog(loadingText = stringResource(id = R.string.getting_user_details))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.SUCCESS -> {
+            if (!isResponseHandled) {
+                homeSharedViewModel.usersDetails = viewModel.currentUserState.value
+                viewModel.statusWithCurrentUserState.value =
+                    FunctionHelper.getStatusWithCurrentUser(
+                        homeSharedViewModel.usersDetails,
+                        requestedUser
+                    )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    getCurrentUserDetailsState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ErrorTag,
+                    "OtherUserProfileScreen",
+                    getCurrentUserDetailsState.message.toString()
                 )
                 isResponseHandled = true
             }

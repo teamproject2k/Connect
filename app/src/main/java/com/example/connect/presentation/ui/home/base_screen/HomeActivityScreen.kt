@@ -56,7 +56,6 @@ fun HomeActivityScreen() {
     viewModel.getDeviceIdFromRemote(context)
     HandleGetDeviceIdFlow(viewModel, context)
     HandleUserDetailsFlow(viewModel, context)
-
 }
 
 @Composable

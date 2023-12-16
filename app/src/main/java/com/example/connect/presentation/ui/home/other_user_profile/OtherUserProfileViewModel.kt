@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.other_user_profile
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -12,8 +13,10 @@ import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
+import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.BlockUserUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.RemoveFriendRequestUseCase
 import com.example.connect.domain.useCase.user.SendFriendRequestUseCase
 import com.example.connect.domain.useCase.user.UnBlockUserUseCase
@@ -31,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@SuppressLint("StateNameRule")
 @HiltViewModel
 class OtherUserProfileViewModel @Inject constructor(
     private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
@@ -45,9 +49,12 @@ class OtherUserProfileViewModel @Inject constructor(
     private val unBlockUserUseCase: UnBlockUserUseCase,
     private val updateOtherUserStatusOnDbUseCase: UpdateOtherUserStatusOnDbUseCase,
     private val unfriendAndBlockUserUseCase: UnfriendAndBlockUserUseCase,
-    private val unfriendUserUseCase: UnfriendUserUseCase
+    private val unfriendUserUseCase: UnfriendUserUseCase,
+    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
+    private val addUserToDbUseCase: AddUserToDbUseCase
 ) : BaseViewModel() {
     var isDataInitialized = false
+    lateinit var currentUserState: MutableState<UsersBean>
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
 
@@ -91,10 +98,15 @@ class OtherUserProfileViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val unfriendAndBlockUserStateFlow: StateFlow<ResponseState<List<Nothing>>> get() = _unfriendAndBlockUserStateFlow
 
+    private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
+
     val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
     fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
         statusWithCurrentUserState.value =
             FunctionHelper.getStatusWithCurrentUser(currentUser, requestedUser)
+        currentUserState = mutableStateOf(currentUser)
         isDataInitialized = true
     }
 
@@ -362,6 +374,36 @@ class OtherUserProfileViewModel @Inject constructor(
                     _unfriendAndBlockUserStateFlow.value = responseState
                 } else {
                     _unfriendAndBlockUserStateFlow.value = responseState
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the user details from the server.
+     */
+    fun getUserDetails() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _userDetailsStateFlow.value = ResponseState.loading()
+
+                val fireBaseId = fireBaseAuth.currentUser?.uid
+
+                if (fireBaseId != null) {
+                    val userDetailsFromServerResponseState =
+                        getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
+
+                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
+                        addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
+                        currentUserState.value = userDetailsFromServerResponseState.data
+                        _userDetailsStateFlow.value = ResponseState.success(null)
+                    } else {
+                        _userDetailsStateFlow.value = ResponseState.error(
+                            userDetailsFromServerResponseState.message ?: ""
+                        )
+                    }
+                } else {
+                    _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
                 }
             }
         }
