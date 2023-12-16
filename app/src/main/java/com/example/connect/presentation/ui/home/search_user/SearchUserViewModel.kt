@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.search
+package com.example.connect.presentation.ui.home.search_user
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class SearchUserViewModel @Inject constructor(
     private val getAllUsersNotInListFromRemoteUseCase: GetAllUsersNotInListFromRemoteUseCase
 ) :
     BaseViewModel() {

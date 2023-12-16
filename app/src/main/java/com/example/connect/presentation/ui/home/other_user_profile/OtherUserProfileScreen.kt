@@ -529,9 +529,9 @@ fun HandleSendFriendRequestStateFlow(
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentEnum.RequestedByCurrentUser.name
+                isResponseHandled = true
                 viewModel.snackBarMessageState.value =
                     stringResource(id = R.string.friend_request_sent_successfully)
-                isResponseHandled = true
             }
         }
 

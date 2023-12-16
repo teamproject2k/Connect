@@ -117,4 +117,5 @@
     <string name="friend_request_removed_successfully">Friend request removed successfully</string>
     <string name="user_unblocked_successfully">User unblocked successfully</string>
     <string name="user_blocked_successfully">User blocked successfully</string>
+    <string name="requests">Requests</string>
 </resources>

@@ -75,6 +75,7 @@ import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
 import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.SettingsScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -114,6 +115,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    navigator
                 ) { showSheet ->
                     showBottomSheet = !showSheet
                 }
@@ -137,6 +139,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 @Composable
 private fun BottomSheetSection(
     modifier: Modifier,
+    navigator: DestinationsNavigator,
     onBottomSheetStateChange: (showSheet: Boolean) -> Unit
 ) {
     val currentActivity = LocalActivity.current as BaseActivity
@@ -149,7 +152,7 @@ private fun BottomSheetSection(
             text = stringResource(R.string.settings)
         ) {
             onBottomSheetStateChange(false)
-            // TODO: navigate to settings screen
+            navigator.navigate(SettingsScreenDestination)
         }
         BottomSheetItem(
             imageVector = Icons.Default.Logout,
@@ -207,7 +210,7 @@ private fun ImageSection(
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(ConstantsHelper.CoverImageHeight)
                 .background(ColorsHelper.lightGray())
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
@@ -220,7 +223,7 @@ private fun ImageSection(
             model = userDetails.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
-                .size(150.dp)
+                .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
                 .border(4.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)

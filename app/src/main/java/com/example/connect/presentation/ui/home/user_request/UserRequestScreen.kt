@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.search
+package com.example.connect.presentation.ui.home.user_request
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,7 +58,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 @HomeNavGraph
 @Destination
 @Composable
-fun SearchUserScreen() {
+fun UserRequestScreen() {
     Column {
         SpacerHeight12()
         FriendsTitleBar()

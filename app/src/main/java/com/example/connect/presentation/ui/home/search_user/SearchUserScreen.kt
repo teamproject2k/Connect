@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.search
+package com.example.connect.presentation.ui.home.search_user
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun SearchScreen(navigator: DestinationsNavigator) {
-    val viewModel: SearchViewModel = hiltViewModel()
+    val viewModel: SearchUserViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     if (!viewModel.isUserDetailsFetched) {
         val fetchDetailsNotForList = arrayListOf<String>()
@@ -80,7 +80,10 @@ fun SearchScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-private fun HandleSearchUserState(viewModel: SearchViewModel, navigator: DestinationsNavigator) {
+private fun HandleSearchUserState(
+    viewModel: SearchUserViewModel,
+    navigator: DestinationsNavigator
+) {
     val context = LocalContext.current
     val searchUserState = viewModel.searchUserStateFlow.collectAsState().value
     var isExceptionHandled by remember {

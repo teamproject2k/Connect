@@ -9,14 +9,14 @@ import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RequestPage
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.RequestPage
 import androidx.compose.material.icons.outlined.Search
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
@@ -30,6 +30,7 @@ import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
+import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
@@ -258,7 +259,7 @@ object FunctionHelper {
      * @param context The context of the application.
      * @return The list of items to be displayed in the bottom navigation bar.
      */
-    fun getBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
+    fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
         val bottomNavList = arrayListOf<BottomAppBarItemData>()
         bottomNavList.add(
             BottomAppBarItemData(
@@ -286,10 +287,10 @@ object FunctionHelper {
         )
         bottomNavList.add(
             BottomAppBarItemData(
-                context.getString(R.string.chat),
-                Icons.Filled.ChatBubble,
-                Icons.Outlined.ChatBubbleOutline,
-                AddPostScreenDestination.route
+                context.getString(R.string.requests),
+                Icons.Filled.RequestPage,
+                Icons.Outlined.RequestPage,
+                UserRequestScreenDestination.route
             )
         )
         bottomNavList.add(

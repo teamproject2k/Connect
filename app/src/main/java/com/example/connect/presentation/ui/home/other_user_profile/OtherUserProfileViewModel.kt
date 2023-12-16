@@ -71,8 +71,8 @@ class OtherUserProfileViewModel @Inject constructor(
     val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
     fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
         // statusWithCurrentUser = FunctionHelper.getStatusWithCurrentUser(currentUser, requestedUser)
-        statusWithCurrentUserState.value = StatusWithCurrentEnum.RequestedByOtherUser.name
-        // isDataInitialized = true
+        statusWithCurrentUserState.value = StatusWithCurrentEnum.NotFriends.name
+        isDataInitialized = true
     }
 
     /**

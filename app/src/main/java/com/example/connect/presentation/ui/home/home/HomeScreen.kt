@@ -1,24 +1,22 @@
 package com.example.connect.presentation.ui.home.home
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.connect.R
-import com.example.connect.presentation.ui.destinations.SearchScreenDestination
+import com.example.connect.presentation.ui.chat.ChatActivity
+import com.example.connect.presentation.ui.common.AppTopAppBar
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -29,20 +27,20 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun HomeScreen(navigator: DestinationsNavigator) {
+    val activity = LocalActivity.current
+    val context = LocalContext.current
     Scaffold(topBar = {
-        Surface(shadowElevation = 3.dp) {
-            TopAppBar(title = {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+        AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
+            IconButton(onClick = {
+                val intent = Intent(context, ChatActivity::class.java)
+                activity.startActivity(intent)
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Chat,
+                    contentDescription = stringResource(id = R.string.chat)
                 )
-            }, actions = {
-                IconButton(onClick = { navigator.navigate(SearchScreenDestination.route) }) {
-                    Icon(imageVector = Icons.Outlined.Search, contentDescription = "Search")
-                }
-            })
-        }
+            }
+        })
     }) {
         Column(modifier = Modifier.padding(it)) {
 

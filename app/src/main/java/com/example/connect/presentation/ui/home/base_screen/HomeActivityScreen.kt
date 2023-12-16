@@ -43,7 +43,7 @@ import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.FunctionHelper.getBottomNavBarItemList
+import com.example.connect.presentation.utils.FunctionHelper.getHomeBottomNavBarItemList
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
@@ -192,7 +192,7 @@ private fun CreateUi(context: Context) {
                         )
                     )
             ) {
-                getBottomNavBarItemList(context).forEach { data ->
+                getHomeBottomNavBarItemList(context).forEach { data ->
                     NavigationBarItem(
                         selected = selectedRouteState.value == data.routeName,
                         onClick = {
