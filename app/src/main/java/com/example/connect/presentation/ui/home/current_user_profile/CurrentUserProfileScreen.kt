@@ -311,7 +311,7 @@ private fun HandleFriendListSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
-                    "UserProfileScreen",
+                    "CurrentUserProfileScreen",
                     friendsDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -366,7 +366,7 @@ private fun HandlePostSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
-                    "UserProfileScreen",
+                    "CurrentUserProfileScreen",
                     postDetailState.message.toString()
                 )
                 isExceptionHandled = true
