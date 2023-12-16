@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 @HomeNavGraph
 @Destination
 @Composable
-fun OtherUserProfileScreen(navigator: DestinationsNavigator) {//}, userDetails: UsersBean) {
+fun OtherUserProfileScreen(navigator: DestinationsNavigator, userDetails: UsersBean) {
     val viewModel: OtherUserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()

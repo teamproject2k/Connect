@@ -42,20 +42,21 @@ import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWit
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 
 @HomeNavGraph
 @Destination
 @Composable
-fun SearchScreen() {
+fun SearchScreen(navigator: DestinationsNavigator) {
     val viewModel: SearchViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     if (!viewModel.isUserDetailsFetched) {
         val fetchDetailsNotForList = arrayListOf<String>()
-        fetchDetailsNotForList.add(sharedViewModel.usersBean.firebaseUserId)
-        fetchDetailsNotForList.addAll(sharedViewModel.usersBean.blockedUsersList)
-        viewModel.getAllUsers(fetchDetailsNotForList, sharedViewModel.usersBean.firebaseUserId)
+        fetchDetailsNotForList.add(sharedViewModel.usersDetails.firebaseUserId)
+        fetchDetailsNotForList.addAll(sharedViewModel.usersDetails.blockedUsersList)
+        viewModel.getAllUsers(fetchDetailsNotForList, sharedViewModel.usersDetails.firebaseUserId)
     }
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
@@ -65,7 +66,7 @@ fun SearchScreen() {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleSearchUserState(viewModel)
+            HandleSearchUserState(viewModel, navigator)
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -79,7 +80,7 @@ fun SearchScreen() {
 }
 
 @Composable
-private fun HandleSearchUserState(viewModel: SearchViewModel) {
+private fun HandleSearchUserState(viewModel: SearchViewModel, navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val searchUserState = viewModel.searchUserStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -105,7 +106,7 @@ private fun HandleSearchUserState(viewModel: SearchViewModel) {
         }
 
         RequestStatusEnum.SUCCESS -> {
-            CreateUi(searchUserState.data ?: emptyList())
+            CreateUi(searchUserState.data ?: emptyList(), navigator)
         }
 
         RequestStatusEnum.NONE -> {
@@ -116,7 +117,8 @@ private fun HandleSearchUserState(viewModel: SearchViewModel) {
 
 @Composable
 private fun CreateUi(
-    usersList: List<UsersBean>
+    usersList: List<UsersBean>,
+    navigator: DestinationsNavigator
 ) {
     var searchQuery by rememberSaveable {
         mutableStateOf("")
@@ -151,7 +153,7 @@ private fun CreateUi(
         LazyColumn {
             items(filteredUserList) { user ->
                 SearchUsersListItem(usersBean = user) {
-                    // TODO: 16/12/23 cd-user navigate to other user profile
+//                    navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
             }
         }
