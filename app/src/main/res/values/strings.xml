@@ -114,4 +114,7 @@
     <string name="remove">Remove</string>
     <string name="unfriend_user">Unfriend user</string>
     <string name="unfriend_and_block_user">Unfriend and block user</string>
+    <string name="friend_request_removed_successfully">Friend request removed successfully</string>
+    <string name="user_unblocked_successfully">User unblocked successfully</string>
+    <string name="user_blocked_successfully">User blocked successfully</string>
 </resources>

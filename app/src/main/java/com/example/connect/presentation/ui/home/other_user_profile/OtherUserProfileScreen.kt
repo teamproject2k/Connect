@@ -206,7 +206,7 @@ private fun ImageSection(
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(ConstantsHelper.CoverImageHeight)
                 .background(Color.LightGray)
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
@@ -219,7 +219,7 @@ private fun ImageSection(
             model = requestedUser.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
-                .size(150.dp)
+                .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
                 .border(4.dp, Color.White, CircleShape)
@@ -517,21 +517,26 @@ fun HandleSendFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val sendFriendRequestState = viewModel.sendFriendRequestStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (sendFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.RequestedByCurrentUser.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.RequestedByCurrentUser.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(id = R.string.friend_request_sent_successfully)
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     sendFriendRequestState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -541,7 +546,7 @@ fun HandleSendFriendRequestStateFlow(
                     "OtherUserProfileScreen",
                     sendFriendRequestState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -555,32 +560,37 @@ fun HandleSendFriendRequestStateFlow(
 fun HandleWithdrawFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
-    val sendFriendRequestState = viewModel.withdrawFriendRequestStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    val withDrawRequestState = viewModel.withdrawFriendRequestStateFlow.collectAsState().value
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
-    when (sendFriendRequestState.status) {
+    when (withDrawRequestState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.NotFriends.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.NotFriends.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(R.string.friend_request_removed_successfully)
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
+                    withDrawRequestState.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
-                    sendFriendRequestState.message.toString()
+                    withDrawRequestState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -594,32 +604,37 @@ fun HandleWithdrawFriendRequestStateFlow(
 fun HandleAcceptFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
-    val sendFriendRequestState = viewModel.acceptFriendRequestStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    val acceptFriendRequestState = viewModel.acceptFriendRequestStateFlow.collectAsState().value
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
-    when (sendFriendRequestState.status) {
+    when (acceptFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.Friends.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.Friends.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(id = R.string.friend_added_successfully)
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
+                    acceptFriendRequestState.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
-                    sendFriendRequestState.message.toString()
+                    acceptFriendRequestState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -633,32 +648,37 @@ fun HandleAcceptFriendRequestStateFlow(
 fun HandleRemoveFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
-    val sendFriendRequestState = viewModel.removeFriendRequestStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    val removeFriendRequestState = viewModel.removeFriendRequestStateFlow.collectAsState().value
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
-    when (sendFriendRequestState.status) {
+    when (removeFriendRequestState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.NotFriends.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.NotFriends.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(id = R.string.friend_request_removed_successfully)
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
+                    removeFriendRequestState.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
-                    sendFriendRequestState.message.toString()
+                    removeFriendRequestState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -672,32 +692,38 @@ fun HandleRemoveFriendRequestStateFlow(
 fun HandleUnBlockUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
-    val sendFriendRequestState = viewModel.unBlockUserStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    val unblockUserState = viewModel.unBlockUserStateFlow.collectAsState().value
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
-    when (sendFriendRequestState.status) {
+    when (unblockUserState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.NotFriends.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.NotFriends.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(R.string.user_unblocked_successfully)
+                isResponseHandled = true
+            }
+
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
+                    unblockUserState.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
-                    sendFriendRequestState.message.toString()
+                    unblockUserState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -711,32 +737,38 @@ fun HandleUnBlockUserStateFlow(
 fun HandleBlockUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
-    val sendFriendRequestState = viewModel.blockUserStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    val blockUserState = viewModel.blockUserStateFlow.collectAsState().value
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
-    when (sendFriendRequestState.status) {
+    when (blockUserState.status) {
         RequestStatusEnum.LOADING -> {
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            viewModel.statusWithCurrentUserState.value =
-                StatusWithCurrentEnum.RequestedByCurrentUser.name
+            if (!isResponseHandled) {
+                viewModel.statusWithCurrentUserState.value =
+                    StatusWithCurrentEnum.Blocked.name
+                viewModel.snackBarMessageState.value =
+                    stringResource(R.string.user_blocked_successfully)
+                isResponseHandled = true
+            }
+
         }
 
         RequestStatusEnum.EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
+                    blockUserState.message
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ErrorTag,
                     "OtherUserProfileScreen",
-                    sendFriendRequestState.message.toString()
+                    blockUserState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 

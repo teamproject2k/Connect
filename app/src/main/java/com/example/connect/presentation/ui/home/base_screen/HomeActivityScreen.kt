@@ -56,6 +56,7 @@ fun HomeActivityScreen() {
     viewModel.getDeviceIdFromRemote()
     HandleGetDeviceIdFlow(viewModel, context)
     HandleUserDetailsFlow(viewModel, context)
+
 }
 
 @Composable
@@ -173,6 +174,7 @@ private fun CreateUi(context: Context) {
         mutableStateOf(HomeScreenDestination.route)
     }
     val navController = rememberNavController()
+
 
     LaunchedEffect(Unit) {
         navController.currentBackStackEntryFlow.collect {
