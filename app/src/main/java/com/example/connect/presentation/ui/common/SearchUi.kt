@@ -68,6 +68,5 @@ fun SearchUi(onSearchQueryChange: (String) -> Unit) {
                 )
             }
         }) {
-
     }
 }

@@ -6,8 +6,7 @@
         <item>Other</item>
     </string-array>
     <string-array name="friends_tab_list">
-        <item>My Friends</item>
-        <item>Received</item>
-        <item>Requested</item>
+        <item>Friends</item>
+        <item>Pending</item>
     </string-array>
 </resources>

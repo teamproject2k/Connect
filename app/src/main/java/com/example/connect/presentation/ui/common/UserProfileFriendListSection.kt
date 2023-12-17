@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -37,7 +38,7 @@ fun UserProfileFriendsListSection(
             count = friendsList.size,
             showSeeAll = friendsList.size > ConstantsHelper.UserProfileFriendColumns
         ) {
-            // TODO: navigate to see all screen
+            navigator.navigate(UserRequestScreenDestination())
         }
         SpacerHeight12()
         if (friendsList.isEmpty()) {

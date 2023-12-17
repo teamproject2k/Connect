@@ -125,4 +125,6 @@
     <string name="removing_friend">Removing Friend...</string>
     <string name="friend_removed_successfully">Friend Removed Successfully</string>
     <string name="friend_removed_and_blocked_successfully">Friend removed and blocked successfully</string>
+    <string name="no_friends_found">No Friends Found</string>
+    <string name="no_pending_requests">No Pending Requests</string>
 </resources>
