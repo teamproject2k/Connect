@@ -14,6 +14,8 @@ import com.example.connect.common.ResponseState
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
@@ -36,11 +38,13 @@ class EditProfileViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
     private val getUsersFromNameUseCaseFromRemote: GetUsersFromNameUseCaseFromRemote,
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
-    private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase
+    private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase,
+    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
+    private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase
 ) :
     BaseViewModel() {
 
-    private val _updateUserStateFlow: MutableStateFlow<ResponseState<String?>> =
+    private val _updateUserStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
     val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
 
@@ -94,7 +98,7 @@ class EditProfileViewModel @Inject constructor(
                 _updateUserStateFlow.value = ResponseState.loading()
                 val fieldsToUpdate = getFieldsToUpdate()
                 if (fieldsToUpdate.isEmpty()) {
-                    _updateUserStateFlow.value = ResponseState.success(null)
+                    _updateUserStateFlow.value = ResponseState.success(userDetails)
                 } else {
                     var remoteProfilePhotoUrl: String? = null
                     var remoteCoverPhotoUrl: String? = null
@@ -106,7 +110,9 @@ class EditProfileViewModel @Inject constructor(
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.ProfilePhotoKey}"
                             )
                         if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
-                            _updateUserStateFlow.value = updateProfilePhotoResponseState
+                            _updateUserStateFlow.value = ResponseState.error(
+                                msg = updateProfilePhotoResponseState.message ?: ""
+                            )
                             return@withContext
                         } else {
                             remoteProfilePhotoUrl = updateProfilePhotoResponseState.data
@@ -119,7 +125,9 @@ class EditProfileViewModel @Inject constructor(
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.CoverPhotoKey}"
                             )
                         if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
-                            _updateUserStateFlow.value = updateCoverPhotoResponseState
+                            _updateUserStateFlow.value = ResponseState.error(
+                                msg = updateCoverPhotoResponseState.message ?: ""
+                            )
                             return@withContext
                         } else {
                             remoteCoverPhotoUrl = updateCoverPhotoResponseState.data
@@ -159,9 +167,20 @@ class EditProfileViewModel @Inject constructor(
                             fieldsToUpdate,
                             userDetails.firebaseUserId
                         )
-
+                        val getUserDetailsFromRemoteResponse =
+                            getUserDetailsFromRemoteUseCase.invoke(userDetails.firebaseUserId)
+                        if (getUserDetailsFromRemoteResponse.status == RequestStatusEnum.EXCEPTION) {
+                            val getUserDetailsFromDbResponse =
+                                getUserDetailsFromDbUseCase.invoke(userDetails.firebaseUserId)
+                            _updateUserStateFlow.value =
+                                ResponseState.success(getUserDetailsFromDbResponse)
+                        }
+                        _updateUserStateFlow.value =
+                            ResponseState.success(getUserDetailsFromRemoteResponse.data)
+                    } else {
+                        _updateUserStateFlow.value =
+                            ResponseState.error(updatedUserResponseState.message ?: "")
                     }
-                    _updateUserStateFlow.value = updatedUserResponseState
                 }
             }
         }
