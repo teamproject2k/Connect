@@ -134,6 +134,7 @@ fun EditProfileScreen(
                 SpacerHeight24()
 
                 LoaderButton(
+                    isEnabled = isButtonEnabled(viewModel),
                     loaderButtonState = viewModel.currentButtonLoadingState,
                     loadingText = stringResource(R.string.updating_account),
                     buttonText = stringResource(id = R.string.update_account),
@@ -165,7 +166,6 @@ private fun EditProfileImageSection(
     viewModel: EditProfileViewModel,
     imageResultLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
 ) {
-
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editCoverRef, editProfileRef, connectIdRef
@@ -590,3 +590,31 @@ private fun HandleUpdateUserState(
     }
 }
 
+private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
+    //   var result = true
+//    if (
+//        viewModel.userNameState.value.isBlank()
+//        || viewModel.selectedGenderState.value.isBlank()
+//        || viewModel.userBioState.value.isBlank()
+//        || viewModel.selectedDOBState.value == -1L
+//    ) {
+//        result = false
+//    }
+//    if (result) {
+//        if (
+//            viewModel.userNameState.value == viewModel.userDetails.name
+//            && viewModel.selectedGenderState.value == viewModel.userDetails.gender
+//            && viewModel.selectedDOBState.value == viewModel.userDetails.dateOfBirth
+//            && viewModel.userBioState.value == viewModel.userDetails.bio
+//        ) {
+//            result = false
+//        }
+//    }
+//    if (viewModel.profilePhotoState.value?.uri.toString().isNotBlank()
+//        && viewModel.profilePhotoState.value?.uri.toString() == viewModel.userDetails.profilePhoto
+//    ) {
+//        result = false
+//    }
+
+    return true
+}

@@ -127,14 +127,6 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     }
 }
 
-private fun isButtonEnabled(viewModel: UserDetailsViewModel): Boolean {
-    var result = true
-    if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.value == -1L) {
-        result = false
-    }
-    return result
-}
-
 @Composable
 private fun NameInputTextField(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
@@ -403,4 +395,12 @@ private fun handleButtonClick(
         navigator.popBackStack()
         navigator.navigate(MobileNumberInputScreenDestination)
     }
+}
+
+private fun isButtonEnabled(viewModel: UserDetailsViewModel): Boolean {
+    var result = true
+    if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.value == -1L) {
+        result = false
+    }
+    return result
 }
