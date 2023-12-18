@@ -127,7 +127,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun NameInputTextField(viewModel: UserDetailsViewModel) {
+private fun NameInputTextField(viewModel: UserDetailsViewModel) {
     val context = LocalContext.current
     AppOutlinedTextField(
         value = viewModel.userNameState.value,
@@ -160,7 +160,7 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenderPickerSection(viewModel: UserDetailsViewModel) {
+private fun GenderPickerSection(viewModel: UserDetailsViewModel) {
     val genderList = stringArrayResource(id = R.array.gender_list)
     var isDialogVisible by remember {
         mutableStateOf(false)
@@ -206,7 +206,7 @@ fun GenderPickerSection(viewModel: UserDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DOBPickerSection(viewModel: UserDetailsViewModel) {
+private fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     var showDatePickerState by remember {
         mutableStateOf(false)
     }

@@ -168,7 +168,7 @@ fun OTPScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun OTPTimer(viewModel: OtpInputViewModel) {
+private fun OTPTimer(viewModel: OtpInputViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val countDownTimeLeft =
         viewModel.timeLeftFlow.collectAsState(initial = ConstantsHelper.OTP_TIMEOUT_TIME)
@@ -203,7 +203,7 @@ fun OTPTimer(viewModel: OtpInputViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OTPField(viewModel: OtpInputViewModel) {
+private fun OTPField(viewModel: OtpInputViewModel) {
     val focusRequesterList = List(ConstantsHelper.OTP_CHAR_COUNT) { FocusRequester() }
     var wasValueEntered by remember {
         mutableStateOf(false)
@@ -277,9 +277,8 @@ fun OTPField(viewModel: OtpInputViewModel) {
     }
 }
 
-
 @Composable
-fun HandleUserDetailsState(
+private fun HandleUserDetailsState(
     viewModel: OtpInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
@@ -333,7 +332,7 @@ fun HandleUserDetailsState(
 }
 
 @Composable
-fun HandleVerifyOTPState(
+private fun HandleVerifyOTPState(
     viewModel: OtpInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
@@ -388,7 +387,7 @@ fun HandleVerifyOTPState(
 }
 
 @Composable
-fun HandleResendOTPState(
+private fun HandleResendOTPState(
     viewModel: OtpInputViewModel,
     context: Context
 ) {

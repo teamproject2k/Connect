@@ -228,7 +228,7 @@ private fun HandleSendOTPState(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
+private fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(

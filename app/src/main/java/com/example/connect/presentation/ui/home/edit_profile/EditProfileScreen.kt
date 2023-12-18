@@ -161,7 +161,7 @@ fun EditProfileScreen(
 }
 
 @Composable
-fun EditProfileImageSection(
+private fun EditProfileImageSection(
     viewModel: EditProfileViewModel,
     imageResultLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
 ) {
@@ -252,7 +252,7 @@ fun EditProfileImageSection(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
+private fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
@@ -287,7 +287,7 @@ fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BioInputTextField(viewModel: EditProfileViewModel) {
+private fun BioInputTextField(viewModel: EditProfileViewModel) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     AppOutlinedTextField(
@@ -322,7 +322,7 @@ fun BioInputTextField(viewModel: EditProfileViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileGenderPicker(viewModel: EditProfileViewModel) {
+private fun EditProfileGenderPicker(viewModel: EditProfileViewModel) {
     val genderList = stringArrayResource(id = R.array.gender_list)
     var isDialogVisible by remember {
         mutableStateOf(false)
@@ -367,7 +367,7 @@ fun EditProfileGenderPicker(viewModel: EditProfileViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
+private fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
     var showDatePickerState by remember {
         mutableStateOf(false)
     }
@@ -515,7 +515,7 @@ private fun handleButtonClick(
 }
 
 @Composable
-fun HandleUpdateUserState(
+private fun HandleUpdateUserState(
     viewModel: EditProfileViewModel,
     context: Context,
     navigator: DestinationsNavigator,
