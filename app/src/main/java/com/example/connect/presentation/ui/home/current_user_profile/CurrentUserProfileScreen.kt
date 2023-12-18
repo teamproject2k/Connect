@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,6 +59,7 @@ import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.ColorsHelper.warning
+import com.example.connect.presentation.ui.common.ExpandedImage
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -193,6 +195,10 @@ private fun ProfileScreen(
 private fun ImageSection(
     userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
 ) {
+
+    var isProfilePhotoExpanded by remember {
+        mutableStateOf(false)
+    }
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
@@ -223,6 +229,9 @@ private fun ImageSection(
                     start.linkTo(parent.start, 16.dp)
                     top.linkTo(coverImageRef.bottom)
                     bottom.linkTo(coverImageRef.bottom)
+                }
+                .clickable {
+                    isProfilePhotoExpanded = !isProfilePhotoExpanded
                 },
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
@@ -257,6 +266,11 @@ private fun ImageSection(
                 imageVector = Icons.Default.Edit,
                 contentDescription = stringResource(R.string.edit_profile)
             )
+        }
+        if (isProfilePhotoExpanded && userDetails.profilePhoto != null) {
+            ExpandedImage(imageUrl = userDetails.profilePhoto) {
+                isProfilePhotoExpanded = false
+            }
         }
     }
 }

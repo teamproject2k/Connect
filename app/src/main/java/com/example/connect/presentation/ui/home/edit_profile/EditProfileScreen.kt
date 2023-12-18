@@ -500,6 +500,29 @@ private fun handleButtonClick(
             }
         }
     }
+    when (val bioValidationResponseCode = Validator.isValidBio(viewModel.userBioState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_bio)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(
+                    R.string.bio_can_t_be_more_than_limited_characters,
+                    ConstantsHelper.BIO_MAX_CHAR_LIMIT
+                )
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (bioValidationResponseCode != 0) {
+                return
+            }
+        }
+    }
 
     if (viewModel.fireBaseAuth.currentUser != null) {
         if (context.isNetworkAvailable()) {
@@ -521,35 +544,43 @@ private fun HandleUpdateUserState(
     navigator: DestinationsNavigator,
     sharedViewModel: HomeSharedViewModel
 ) {
-    val uiState = viewModel.updateUserStateFlow.collectAsState().value
+    val updateUserState = viewModel.updateUserStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
 
-    when (uiState.status) {
+    when (updateUserState.status) {
         RequestStatusEnum.LOADING -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
-            sharedViewModel.getUserDetails(context)
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
-            context.showToast(stringResource(R.string.user_details_updated_successfully))
-            navigator.popBackStack()
+            if (updateUserState.data != null) {
+                sharedViewModel.usersDetails = updateUserState.data
+                context.showToast(stringResource(R.string.user_details_updated_successfully))
+                navigator.popBackStack()
+            } else {
+                context.showToast(stringResource(R.string.error_while_getting_updated_data_please_reopen_app))
+                LocalActivity.current.finish()
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
-                    else uiState.message.toString()
+                    if (updateUserState.message.isNullOrBlank()) {
+                        context.getString(R.string.something_went_wrong)
+                    } else {
+                        updateUserState.message.toString()
+                    }
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
                     "EditProfileScreen",
-                    uiState.message.toString()
+                    updateUserState.message.toString()
                 )
                 isExceptionHandled = true
             }

@@ -132,4 +132,6 @@
     <string name="likeCount_likes">%1$d likes</string>
     <string name="video_thumbnail">video thumbnail</string>
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
+    <string name="error_while_getting_updated_data_please_reopen_app">Error while getting updated data, Please reopen app</string>
+    <string name="profile_photo">profile photo</string>
 </resources>
