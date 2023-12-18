@@ -3,7 +3,6 @@ package com.example.connect.presentation.ui.common
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.example.connect.presentation.ui.theme.WarningColor
 
 object ColorsHelper {
 
@@ -29,6 +28,12 @@ object ColorsHelper {
 
     @Composable
     fun warning(): Color {
-        return if (isSystemInDarkTheme()) WarningColor else WarningColor
+        return if (isSystemInDarkTheme()) Color(0xFFFF9800) else Color(0xFFFF9800)
+    }
+
+
+    @Composable
+    fun onBlack(): Color {
+        return if (isSystemInDarkTheme()) Color(0xE61A1A1A) else Color(0xE61A1A1A)
     }
 }

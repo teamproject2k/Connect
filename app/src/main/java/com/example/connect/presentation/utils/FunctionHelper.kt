@@ -1,10 +1,13 @@
 package com.example.connect.presentation.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
@@ -19,6 +22,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RequestPage
 import androidx.compose.material.icons.outlined.Search
 import androidx.core.content.ContextCompat
+import androidx.core.database.getLongOrNull
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -36,6 +40,8 @@ import com.example.connect.presentation.ui.models.PostVisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.log10
+import kotlin.math.pow
 
 
 object FunctionHelper {
@@ -329,5 +335,29 @@ object FunctionHelper {
                 StatusWithCurrentEnum.NotFriends.name
             }
         }
+    }
+
+
+    fun getFileSize(contentResolver: ContentResolver, uri: Uri): Long {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        var fileSize: Long = 0
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+                fileSize = it.getLongOrNull(sizeIndex) ?: 0
+            }
+        }
+        return fileSize
+    }
+
+    fun formatFileSize(size: Long): String {
+        if (size <= 0) return "0 B"
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
+        return String.format(
+            "%.2f %s",
+            size / 1024.0.pow(digitGroups.toDouble()),
+            units[digitGroups]
+        )
     }
 }

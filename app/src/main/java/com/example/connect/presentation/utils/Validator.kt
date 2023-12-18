@@ -15,7 +15,7 @@ object Validator {
     }
 
     fun isValidName(userName: String): Boolean {
-        return userName.isNotBlank() && userName.length <= ConstantsHelper.NameMaxCharacterLimit
+        return userName.isNotBlank() && userName.length <= ConstantsHelper.NAME_MAX_CHAR_LIMIT
                 && Regex(RegexHelper.NameRegex).matches(userName)
     }
 
@@ -29,7 +29,7 @@ object Validator {
     }
 
     fun isValidBio(bio: String): Boolean {
-        return bio.isNotBlank() && bio.length <= ConstantsHelper.BioMaxCharacterLimit
+        return bio.isNotBlank() && bio.length <= ConstantsHelper.BIO_MAX_CHAR_LIMIT
     }
 
 }

@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.presentation.ui.home.current_user_profile.ImageTextItem
 import com.example.connect.presentation.utils.FunctionHelper
 
 @Composable

@@ -151,7 +151,7 @@ private fun HandleGetUserDetailsState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "MobileNumberInputScreen",
                     userDetailsState.message.toString()
                 )
@@ -212,7 +212,7 @@ private fun HandleSendOTPState(
                     else sendOtpState.message.toString()
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "MobileNumberInputScreen",
                     sendOtpState.message.toString()
                 )

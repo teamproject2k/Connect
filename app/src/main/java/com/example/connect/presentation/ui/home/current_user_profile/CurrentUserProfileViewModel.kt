@@ -78,10 +78,10 @@ class CurrentUserProfileViewModel @Inject constructor(
     fun getFriendListFromIds(friendIdList: List<String>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                _friendsDetailsStateFlow.value = ResponseState.loading()
                 if (friendIdList.isEmpty()) {
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
-                    _friendsDetailsStateFlow.value = ResponseState.loading()
                     _friendsDetailsStateFlow.value = getUserDetailsFromIds.invoke(friendIdList)
                 }
             }

@@ -72,13 +72,13 @@ class EditProfileViewModel @Inject constructor(
             mutableStateOf(
                 PostMediaData(
                     userDetails.profilePhoto?.toUri() ?: Uri.EMPTY,
-                    ConstantsHelper.MediaTypeImage
+                    ConstantsHelper.MEDIA_TYPE_IMAGE
                 )
             )
         coverPhotoState = mutableStateOf(
             PostMediaData(
                 userDetails.coverPhoto?.toUri() ?: Uri.EMPTY,
-                ConstantsHelper.MediaTypeImage
+                ConstantsHelper.MEDIA_TYPE_IMAGE
             )
         )
         connectUserIdState = mutableStateOf(userDetails.connectUserId)

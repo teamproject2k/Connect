@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @SuppressLint("StateNameRule")
 @HiltViewModel
-class UserRequestScreenViewModel @Inject constructor(
+class UserRequestViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase
@@ -54,6 +54,8 @@ class UserRequestScreenViewModel @Inject constructor(
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
+
+    val filteredList: ArrayList<UsersBean> = arrayListOf()
 
     fun initializeData(defaultSelectedTab: Int) {
         selectedTabIndexState = defaultSelectedTab

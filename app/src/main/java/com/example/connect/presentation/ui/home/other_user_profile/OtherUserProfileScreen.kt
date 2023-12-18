@@ -117,6 +117,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
             viewModel.getUserDetails()
+            viewModel.getFriendListFromIds(viewModel.currentUserState.value.friendList)
             refreshing = false
         })
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
@@ -441,7 +442,7 @@ private fun HandleFriendListSection(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     friendsDetailsState.message.toString()
                 )
@@ -490,7 +491,7 @@ private fun HandlePostSection(
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     postDetailState.message.toString()
                 )
@@ -572,7 +573,7 @@ fun HandleSendFriendRequestStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     sendFriendRequestState.message.toString()
                 )
@@ -617,7 +618,7 @@ fun HandleWithdrawFriendRequestStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     withDrawRequestState.message.toString()
                 )
@@ -662,7 +663,7 @@ fun HandleAcceptFriendRequestStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     acceptFriendRequestState.message.toString()
                 )
@@ -707,7 +708,7 @@ fun HandleRemoveFriendRequestStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     removeFriendRequestState.message.toString()
                 )
@@ -753,7 +754,7 @@ fun HandleUnBlockUserStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     unblockUserState.message.toString()
                 )
@@ -798,7 +799,7 @@ fun HandleBlockUserStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     blockUserState.message.toString()
                 )
@@ -843,7 +844,7 @@ fun HandleUnfriendUserStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     unfriendUserState.message.toString()
                 )
@@ -888,7 +889,7 @@ fun HandleUnfriendAndBlockUserStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     unfriendAndBlockUserState.message.toString()
                 )
@@ -937,7 +938,7 @@ fun HandleGetCurrentUserDetailsStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     getCurrentUserDetailsState.message.toString()
                 )

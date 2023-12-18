@@ -3,15 +3,16 @@ package com.example.connect.presentation.utils
 import androidx.compose.ui.unit.dp
 
 object ConstantsHelper {
-    val MediaTypeImage: String = ""
-    const val OTPTimeOutTime: Long = 30
-    const val OTPCharCount = 6
-    const val NavigationAnimationDuration = 300
-    const val ErrorTag = "Error"
-    const val UserProfileFriendColumns = 4
-    const val NameMaxCharacterLimit = 50
-    const val BioMaxCharacterLimit = 100
-    const val NewDeviceDialogDismissTime: Long = 3000
+    const val MEDIA_TYPE_IMAGE: String = "image"
+    const val OTP_TIMEOUT_TIME: Long = 30
+    const val OTP_CHAR_COUNT = 6
+    const val NAVIGATION_ANIMATION_DURATION = 300
+    const val ERROR_TAG = "Error"
+    const val PROFILE_FRIENDS_COLUMN_COUNT = 4
+    const val NAME_MAX_CHAR_LIMIT = 50
+    const val BIO_MAX_CHAR_LIMIT = 100
+    const val NEW_DEVICE_DIALOG_DISMISS_TIME: Long = 3000
+    const val MAX_ALLOWED_FILE_SIZE: Long = 10485760
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp
     val CoverImageHeight = 200.dp

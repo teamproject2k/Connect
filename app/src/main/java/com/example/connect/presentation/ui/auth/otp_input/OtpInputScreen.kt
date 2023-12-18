@@ -171,7 +171,7 @@ fun OTPScreen(
 fun OTPTimer(viewModel: OtpInputViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val countDownTimeLeft =
-        viewModel.timeLeftFlow.collectAsState(initial = ConstantsHelper.OTPTimeOutTime)
+        viewModel.timeLeftFlow.collectAsState(initial = ConstantsHelper.OTP_TIMEOUT_TIME)
     if (viewModel.showTimerState.value) {
         Text(
             text = stringResource(
@@ -204,7 +204,7 @@ fun OTPTimer(viewModel: OtpInputViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OTPField(viewModel: OtpInputViewModel) {
-    val focusRequesterList = List(ConstantsHelper.OTPCharCount) { FocusRequester() }
+    val focusRequesterList = List(ConstantsHelper.OTP_CHAR_COUNT) { FocusRequester() }
     var wasValueEntered by remember {
         mutableStateOf(false)
     }
@@ -213,7 +213,7 @@ fun OTPField(viewModel: OtpInputViewModel) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp), horizontalArrangement = Arrangement.Center
     ) {
-        repeat(ConstantsHelper.OTPCharCount) { index ->
+        repeat(ConstantsHelper.OTP_CHAR_COUNT) { index ->
             val enteredValue = viewModel.otpState.value[index].toString()
             OutlinedTextFieldNoLabel(
                 value = enteredValue.ifBlank { "" },
@@ -232,7 +232,7 @@ fun OTPField(viewModel: OtpInputViewModel) {
                         }$valueToFill${currentOtp.substring(index + 1)}"
                     }
                     viewModel.otpState.value = updatedOTP
-                    if (valueToFill.isDigitsOnly() && index + 1 != ConstantsHelper.OTPCharCount) {
+                    if (valueToFill.isDigitsOnly() && index + 1 != ConstantsHelper.OTP_CHAR_COUNT) {
                         focusRequesterList[index + 1].requestFocus()
                     } else if (valueToFill.isBlank()) {
                         wasValueEntered = true
@@ -265,7 +265,7 @@ fun OTPField(viewModel: OtpInputViewModel) {
                         }
                     },
             )
-            if (index + 1 != ConstantsHelper.OTPCharCount) {
+            if (index + 1 != ConstantsHelper.OTP_CHAR_COUNT) {
                 SpacerWidth8()
             }
         }
@@ -318,7 +318,7 @@ fun HandleUserDetailsState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OTPInputScreen",
                     userDetailsState.message.toString()
                 )
@@ -373,7 +373,7 @@ fun HandleVerifyOTPState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OTPInputScreen",
                     verifyOtpState.message.toString()
                 )
@@ -427,7 +427,7 @@ fun HandleResendOTPState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OTPInputScreen",
                     resendOtpState.message.toString()
                 )

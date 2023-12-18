@@ -37,7 +37,7 @@ class OtpInputViewModel @Inject constructor(
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
-    val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTPCharCount))
+    val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTP_CHAR_COUNT))
     val showTimerState = mutableStateOf(true)
     lateinit var verificationId: String
     lateinit var mobileNumber: String
@@ -58,7 +58,7 @@ class OtpInputViewModel @Inject constructor(
      * A flow that emits the remaining time in seconds until the OTP expires.
      */
     val timeLeftFlow = flow {
-        var countDownTime = ConstantsHelper.OTPTimeOutTime
+        var countDownTime = ConstantsHelper.OTP_TIMEOUT_TIME
         while (countDownTime >= 0) {
             emit(countDownTime)
             delay(1000)

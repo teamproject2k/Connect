@@ -4,9 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +28,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,14 +39,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -67,7 +61,6 @@ import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
-import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.UserProfileFriendsListLoadingSection
 import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
@@ -192,7 +185,6 @@ private fun ProfileScreen(
         UserProfileUserInfoSection(userDetails)
         SpacerHeight24()
         HandleFriendListSection(viewModel = viewModel, navigator)
-        SpacerHeight24()
         HandlePostSection(viewModel, navigator)
     }
 }
@@ -269,18 +261,6 @@ private fun ImageSection(
     }
 }
 
-@Composable
-fun ImageTextItem(imageVector: ImageVector, text: String, fontWeight: FontWeight? = null) {
-    Row(horizontalArrangement = Arrangement.Center) {
-        Image(
-            imageVector = imageVector,
-            contentDescription = text,
-            modifier = Modifier.size(16.dp)
-        )
-        SpacerWidth6()
-        Text(text = text, fontSize = 12.sp, fontWeight = fontWeight)
-    }
-}
 
 @Composable
 private fun HandleFriendListSection(
@@ -294,9 +274,7 @@ private fun HandleFriendListSection(
     when (friendsDetailsState.status) {
         RequestStatusEnum.LOADING -> {
             UserProfileFriendsListLoadingSection()
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -310,7 +288,7 @@ private fun HandleFriendListSection(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "CurrentUserProfileScreen",
                     friendsDetailsState.message.toString()
                 )
@@ -337,9 +315,7 @@ private fun HandlePostSection(
     when (postDetailState.status) {
         RequestStatusEnum.LOADING -> {
             UserProfilePostLoadingSection()
-            if (isExceptionHandled) {
-                isExceptionHandled = false
-            }
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.SUCCESS -> {
@@ -365,7 +341,7 @@ private fun HandlePostSection(
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "CurrentUserProfileScreen",
                     postDetailState.message.toString()
                 )

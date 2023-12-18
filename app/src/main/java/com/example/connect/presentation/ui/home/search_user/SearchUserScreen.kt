@@ -139,7 +139,7 @@ private fun CreateUi(
             }
         }
     }
-    SearchUi {
+    SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
         searchQuery = it
     }
     if (filteredUserList.isEmpty()) {

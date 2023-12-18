@@ -408,4 +408,5 @@ class OtherUserProfileViewModel @Inject constructor(
             }
         }
     }
+
 }

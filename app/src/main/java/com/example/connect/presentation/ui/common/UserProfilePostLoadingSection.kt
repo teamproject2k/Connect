@@ -16,7 +16,7 @@ fun UserProfilePostLoadingSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         TextCountSeeAll(
             text = stringResource(id = R.string.posts),

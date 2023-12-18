@@ -132,12 +132,12 @@ fun NameInputTextField(viewModel: UserDetailsViewModel) {
     AppOutlinedTextField(
         value = viewModel.userNameState.value,
         onValueChange = { updatedValue ->
-            if (updatedValue.length <= ConstantsHelper.NameMaxCharacterLimit) {
+            if (updatedValue.length <= ConstantsHelper.NAME_MAX_CHAR_LIMIT) {
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value = context.getString(
                     R.string.name_cannot_be_greater_than_max_characters,
-                    ConstantsHelper.NameMaxCharacterLimit
+                    ConstantsHelper.NAME_MAX_CHAR_LIMIT
                 )
                 FunctionHelper.vibrateDevice(context)
             }
@@ -290,7 +290,7 @@ private fun HandleAddUserState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "UserDetailsScreen",
                     uiState.message.toString()
                 )
@@ -327,7 +327,7 @@ private fun handleButtonClick(
             viewModel.snackBarMessageState.value =
                 context.getString(
                     R.string.name_cannot_be_greater_than_max_characters,
-                    ConstantsHelper.NameMaxCharacterLimit
+                    ConstantsHelper.NAME_MAX_CHAR_LIMIT
                 )
             FunctionHelper.vibrateDevice(context)
             return

@@ -72,7 +72,7 @@ object Validator {
                 responseCode = 2
             }
 
-            userName.length > ConstantsHelper.NameMaxCharacterLimit -> {
+            userName.length > ConstantsHelper.NAME_MAX_CHAR_LIMIT -> {
                 responseCode = 3
             }
         }
@@ -142,7 +142,7 @@ object Validator {
                 responseCode = 1
             }
 
-            bio.length > ConstantsHelper.BioMaxCharacterLimit -> {
+            bio.length > ConstantsHelper.BIO_MAX_CHAR_LIMIT -> {
                 responseCode = 2
             }
         }

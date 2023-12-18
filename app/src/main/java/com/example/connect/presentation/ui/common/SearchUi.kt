@@ -19,11 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.connect.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchUi(onSearchQueryChange: (String) -> Unit) {
+fun SearchUi(searchHint: String, onSearchQueryChange: (String) -> Unit) {
     var searchString by rememberSaveable {
         mutableStateOf("")
     }
@@ -42,8 +43,9 @@ fun SearchUi(onSearchQueryChange: (String) -> Unit) {
             .padding(16.dp),
         placeholder = {
             Text(
-                text = stringResource(R.string.search_user_by_name_or_user_id),
-                color = ColorsHelper.gray()
+                text = searchHint,
+                color = ColorsHelper.gray(),
+                fontSize = 14.sp
             )
         },
         leadingIcon = {

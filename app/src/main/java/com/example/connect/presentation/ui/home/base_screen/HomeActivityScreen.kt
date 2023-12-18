@@ -87,7 +87,7 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
                         Handler(Looper.getMainLooper()).postDelayed({
                             showNewDeviceLoginAlertDialog = false
                             activity.logout()
-                        }, ConstantsHelper.NewDeviceDialogDismissTime)
+                        }, ConstantsHelper.NEW_DEVICE_DIALOG_DISMISS_TIME)
                     }
 
                     else -> {
@@ -99,7 +99,7 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "HomeActivityScreen",
                     getDeviceIdState.message.toString()
                 )
@@ -152,7 +152,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "HomeActivityScreen",
                     getUserDetailsState.message.toString()
                 )

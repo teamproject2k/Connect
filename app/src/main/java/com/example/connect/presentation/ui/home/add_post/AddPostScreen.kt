@@ -1,8 +1,8 @@
 package com.example.connect.presentation.ui.home.add_post
 
 import android.content.Context
+import android.net.Uri
 import android.view.ViewGroup
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -80,6 +80,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
 import com.example.connect.presentation.ui.models.PostVisibilityScope
@@ -110,18 +111,14 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
     }
 
     val snackBarHostState = SnackbarHostState()
-    val imageResultLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            // uri will be null in case user doesn't select any image
-            if (uri != null) {
-                val contentResolver = context.contentResolver
-                val mediaType = contentResolver.getType(uri)?.substringBefore("/")
-                if (mediaType != null) {
-                    viewModel.selectedMediaState.value =
-                        PostMediaData(uri, mediaType)
-                }
-            }
+    val imageResultLauncher = mediaPicker { uri: Uri ->
+        val contentResolver = context.contentResolver
+        val mediaType = contentResolver.getType(uri)?.substringBefore("/")
+        if (mediaType != null) {
+            viewModel.selectedMediaState.value =
+                PostMediaData(uri, mediaType)
         }
+    }
 
     Scaffold(topBar = {
         Surface(shadowElevation = 3.dp) {
@@ -228,7 +225,7 @@ fun HandleAddPostSection(
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "AddPostScreen",
                     addPostState.message.toString()
                 )

@@ -17,7 +17,5 @@ val LightOnPrimaryColor = Color(0xffffffff)
 val DarkPrimaryColor = Color(0xff0d0d0d)
 val DarkOnPrimaryColor = Color(0xffffffff)
 
-val OnBlack = Color(0xE61A1A1A)
 
 
-val WarningColor = Color(0xFFFF9800)

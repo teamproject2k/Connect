@@ -15,14 +15,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.decode.VideoFrameDecoder
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
 import com.example.connect.presentation.ui.enums.PostTypeEnum
-import com.example.connect.presentation.ui.theme.OnBlack
 
 @Composable
 fun UserProfilePostItem(
@@ -55,9 +57,18 @@ fun UserProfilePostItem(
             var isImageLoadingFailed by remember {
                 mutableStateOf(false)
             }
+            val imageLoader =
+                ImageLoader.Builder(LocalContext.current)
+                    .components {
+                        if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
+                            add(VideoFrameDecoder.Factory())
+                        }
+                    }
+                    .build()
             if (!isImageLoadingFailed) {
                 AsyncImage(
                     model = postDetails.mediaUrl,
+                    imageLoader = imageLoader,
                     contentDescription = postDetails.caption,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
@@ -68,11 +79,11 @@ fun UserProfilePostItem(
             } else {
                 UserProfilePostTextOnlyItem(caption = postDetails.caption.ifBlank { stringResource(R.string.unable_to_load_post) })
             }
-            if (postDetails.postType.contains(PostTypeEnum.Video.name)) {
+            if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(OnBlack),
+                        .background(ColorsHelper.onBlack()),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(

@@ -18,25 +18,25 @@ fun getAnimatedNavHostEngine(): NavHostEngine {
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
+                    animationSpec = tween(ConstantsHelper.NAVIGATION_ANIMATION_DURATION)
                 )
             },
             exitTransition = {
                 slideOutOfContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
+                    animationSpec = tween(ConstantsHelper.NAVIGATION_ANIMATION_DURATION)
                 )
             },
             popEnterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
+                    animationSpec = tween(ConstantsHelper.NAVIGATION_ANIMATION_DURATION)
                 )
             },
             popExitTransition = {
                 slideOutOfContainer(
                     AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(ConstantsHelper.NavigationAnimationDuration)
+                    animationSpec = tween(ConstantsHelper.NAVIGATION_ANIMATION_DURATION)
                 )
             }
         )

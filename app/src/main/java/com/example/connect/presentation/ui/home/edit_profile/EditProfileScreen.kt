@@ -3,7 +3,6 @@ package com.example.connect.presentation.ui.home.edit_profile
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -50,7 +49,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -69,10 +67,12 @@ import com.example.connect.common.LoggingHelper
 import com.example.connect.common.LoggingLevelEnum
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeelsLikeEnabled
 import com.example.connect.presentation.ui.common.SpacerHeight24
+import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
@@ -103,16 +103,13 @@ fun EditProfileScreen(
     HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)
 
     val imageResultLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            // uri will be null in case user doesn't select any image
-            if (uri != null) {
-                if (viewModel.isProfileUri) {
-                    viewModel.profilePhotoState.value =
-                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
-                } else {
-                    viewModel.coverPhotoState.value =
-                        PostMediaData(uri, ConstantsHelper.MediaTypeImage)
-                }
+        mediaPicker { uri ->
+            if (viewModel.isProfileUri) {
+                viewModel.profilePhotoState.value =
+                    PostMediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
+            } else {
+                viewModel.coverPhotoState.value =
+                    PostMediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
             }
         }
 
@@ -179,7 +176,7 @@ fun EditProfileImageSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(ConstantsHelper.CoverImageHeight)
-                .background(Color.LightGray)
+                .background(ColorsHelper.lightGray())
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -195,7 +192,7 @@ fun EditProfileImageSection(
                 .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
-                .border(4.dp, Color.White, CircleShape)
+                .border(4.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 .constrainAs(profileImageRef) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
@@ -261,13 +258,13 @@ fun EditProfileNameInputTextField(viewModel: EditProfileViewModel) {
     AppOutlinedTextField(
         value = FunctionHelper.getFormattedDisplayName(viewModel.userNameState.value),
         onValueChange = { updatedValue ->
-            if (updatedValue.length <= ConstantsHelper.NameMaxCharacterLimit) {
+            if (updatedValue.length <= ConstantsHelper.NAME_MAX_CHAR_LIMIT) {
                 viewModel.userNameState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(
                         R.string.name_cannot_be_greater_than_max_characters,
-                        ConstantsHelper.NameMaxCharacterLimit
+                        ConstantsHelper.NAME_MAX_CHAR_LIMIT
                     )
                 FunctionHelper.vibrateDevice(context)
                 keyboardController?.hide()
@@ -296,13 +293,13 @@ fun BioInputTextField(viewModel: EditProfileViewModel) {
     AppOutlinedTextField(
         value = viewModel.userBioState.value,
         onValueChange = { updatedValue ->
-            if (updatedValue.length <= ConstantsHelper.BioMaxCharacterLimit) {
+            if (updatedValue.length <= ConstantsHelper.BIO_MAX_CHAR_LIMIT) {
                 viewModel.userBioState.value = updatedValue
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(
                         R.string.bio_can_t_be_more_than_limited_characters,
-                        ConstantsHelper.BioMaxCharacterLimit
+                        ConstantsHelper.BIO_MAX_CHAR_LIMIT
                     )
                 FunctionHelper.vibrateDevice(context)
                 keyboardController?.hide()
@@ -447,7 +444,7 @@ private fun handleButtonClick(
             viewModel.snackBarMessageState.value =
                 context.getString(
                     R.string.name_cannot_be_greater_than_max_characters,
-                    ConstantsHelper.NameMaxCharacterLimit
+                    ConstantsHelper.NAME_MAX_CHAR_LIMIT
                 )
             FunctionHelper.vibrateDevice(context)
             return
@@ -550,7 +547,7 @@ fun HandleUpdateUserState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "EditProfileScreen",
                     uiState.message.toString()
                 )

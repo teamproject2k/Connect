@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.SearchScreenDestination
 import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -36,7 +37,7 @@ fun UserProfileFriendsListSection(
         TextCountSeeAll(
             text = stringResource(id = R.string.friends),
             count = friendsList.size,
-            showSeeAll = friendsList.size > ConstantsHelper.UserProfileFriendColumns
+            showSeeAll = friendsList.size > ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT
         ) {
             navigator.navigate(UserRequestScreenDestination())
         }
@@ -69,14 +70,15 @@ fun UserProfileFriendsListSection(
                         fontSize = 14.sp,
                         textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable {
-                            // Todo: navigate to friends screen
+                            navigator.navigate(SearchScreenDestination)
                         })
                 }
             }
         } else {
             Row(modifier = Modifier.fillMaxWidth()) {
-                val postCount = minOf(friendsList.count(), ConstantsHelper.UserProfileFriendColumns)
-                repeat(postCount) { index ->
+                val friendCount =
+                    minOf(friendsList.count(), ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT)
+                repeat(friendCount) { index ->
                     UserProfileFriendItem(
                         friendDetails = friendsList[index],
                         modifier = Modifier.weight(1f)
@@ -85,7 +87,7 @@ fun UserProfileFriendsListSection(
                     }
                     SpacerWidth8()
                 }
-                repeat(ConstantsHelper.UserProfileFriendColumns - postCount) {
+                repeat(ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT - friendCount) {
                     SpacerWidth8()
                     UserProfileFriendItem(friendDetails = null, modifier = Modifier.weight(1f)) {
                         // no need to handle

@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,10 +62,9 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
-import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
-import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.ConstantsHelper.ERROR_TAG
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
@@ -78,7 +76,16 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int = 0) {
-    val viewModel: UserRequestScreenViewModel = hiltViewModel()
+    if (defaultSelectedTab !in 0..1) {
+        navigator.popBackStack()
+        LoggingHelper.logData(
+            LoggingLevelEnum.Error,
+            ERROR_TAG,
+            "UserRequestScreen",
+            "Tab Index $defaultSelectedTab not in range 0..1"
+        )
+    }
+    val viewModel: UserRequestViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
 
     val snackBarHostState = SnackbarHostState()
@@ -86,11 +93,6 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
 
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(defaultSelectedTab)
-    }
-
-    if (viewModel.selectedTabIndexState !in 0..1) {
-        navigator.popBackStack()
-        // TODO: 17/12/23 aryan Add Logs
     }
 
     var refreshing by rememberSaveable { mutableStateOf(false) }
@@ -101,39 +103,49 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
             viewModel.getUserDetails()
             refreshing = false
         })
-
-    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
-        Box(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize()
-                .pullRefresh(pullRefreshState),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (viewModel.selectedTabIndexState == 0) {
-                    if (!viewModel.isFriendListFetched) {
-                        viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
-                    }
-                } else {
-                    if (!viewModel.isPendingFriendRequestListFetched) {
-                        viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.friendList)
-                    }
-                }
-                HandleGetFriendsListStateFlow(viewModel, navigator)
-                HandleGetPendingFriendRequestListStateFlow(viewModel, navigator)
-                HandleGetCurrentUserDetailsStateFlow(
-                    viewModel = viewModel,
-                    homeSharedViewModel = homeSharedViewModel
-                )
-            }
-            PullRefreshIndicator(
-                refreshing = refreshing,
-                refreshState = pullRefreshState
-            )
+    if (viewModel.selectedTabIndexState == 0) {
+        if (!viewModel.isFriendListFetched) {
+            viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
         }
+    } else {
+        if (!viewModel.isPendingFriendRequestListFetched) {
+            viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+        }
+    }
+    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            SearchUi(searchHint = stringResource(id = R.string.search_user_by_name_or_user_id)) {
+
+            }
+            RequestTabs(viewModel = viewModel, navigator)
+        }
+//        Box(
+//            modifier = Modifier
+//                .padding(it)
+//                .fillMaxSize()
+//                .pullRefresh(pullRefreshState),
+//            contentAlignment = Alignment.TopCenter
+//        ) {
+//            Column(
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                // FriendsTabs(filteredUserList, navigator, viewModel)
+//                HandleGetFriendsListStateFlow(viewModel, navigator)
+//                HandleGetPendingFriendRequestListStateFlow(viewModel, navigator)
+//                HandleGetCurrentUserDetailsStateFlow(
+//                    viewModel = viewModel,
+//                    homeSharedViewModel = homeSharedViewModel
+//                )
+//            }
+//            PullRefreshIndicator(
+//                refreshing = refreshing,
+//                refreshState = pullRefreshState
+//            )
+//        }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
@@ -147,7 +159,7 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
 
 @Composable
 private fun HandleGetFriendsListStateFlow(
-    viewModel: UserRequestScreenViewModel,
+    viewModel: UserRequestViewModel,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -188,7 +200,7 @@ private fun HandleGetFriendsListStateFlow(
 
 @Composable
 private fun HandleGetPendingFriendRequestListStateFlow(
-    viewModel: UserRequestScreenViewModel,
+    viewModel: UserRequestViewModel,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -235,7 +247,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
 private fun CreateUi(
     usersList: List<UsersBean>,
     navigator: DestinationsNavigator,
-    viewModel: UserRequestScreenViewModel
+    viewModel: UserRequestViewModel
 ) {
     var searchQuery by rememberSaveable {
         mutableStateOf("")
@@ -253,54 +265,50 @@ private fun CreateUi(
             }
         }
     }
-    SearchUi {
+    SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
         searchQuery = it
     }
-    FriendsTabs(filteredUserList, navigator, viewModel)
 }
 
-@Composable
-fun FriendsTabs(
-    filteredUserList: MutableList<UsersBean>,
-    navigator: DestinationsNavigator,
-    viewModel: UserRequestScreenViewModel
-) {
-    val itemList = stringArrayResource(id = R.array.friends_tab_list)
-    val selectedTabIndex = viewModel.selectedTabIndexState
 
-    TabRow(selectedTabIndex = selectedTabIndex) {
+@Composable
+fun RequestTabs(viewModel: UserRequestViewModel, navigator: DestinationsNavigator) {
+    val itemList = stringArrayResource(id = R.array.friends_tab_list)
+    TabRow(selectedTabIndex = viewModel.selectedTabIndexState) {
         itemList.forEachIndexed { index, title ->
             Tab(
                 text = { Text(title) },
-                selected = selectedTabIndex == index,
+                selected = viewModel.selectedTabIndexState == index,
                 onClick = { viewModel.selectedTabIndexState = index },
                 unselectedContentColor = ColorsHelper.gray()
             )
         }
     }
-    when (selectedTabIndex) {
-        0 -> FriendsList(filteredUserList, navigator)
-        1 -> FriendRequestsList(filteredUserList, navigator)
+    when (viewModel.selectedTabIndexState) {
+        0 -> FriendsList(viewModel.filteredList, navigator)
+        1 -> FriendRequestsList(viewModel.filteredList, navigator)
     }
 }
 
 @Composable
-fun FriendsList(filteredUserList: MutableList<UsersBean>, navigator: DestinationsNavigator) {
-    if (filteredUserList.isEmpty()) {
+fun FriendsList(friendList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
+    if (friendList.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = stringResource(R.string.no_friends_found))
+            Text(text = stringResource(R.string.no_friends_added))
         }
         return
     }
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
-            items(filteredUserList) { user ->
-                SearchUsersListItem(usersBean = user) {
-                    navigator.navigate(OtherUserProfileScreenDestination(user))
+            items(friendList) { user ->
+                UserRequestListItem(usersBean = user) {
+                    navigator.navigate(
+                        OtherUserProfileScreenDestination(user)
+                    )
                 }
             }
         }
@@ -308,8 +316,8 @@ fun FriendsList(filteredUserList: MutableList<UsersBean>, navigator: Destination
 }
 
 @Composable
-fun FriendRequestsList(filteredUserList: MutableList<UsersBean>, navigator: DestinationsNavigator) {
-    if (filteredUserList.isEmpty()) {
+fun FriendRequestsList(friendRequestList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
+    if (friendRequestList.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -321,9 +329,11 @@ fun FriendRequestsList(filteredUserList: MutableList<UsersBean>, navigator: Dest
     }
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
-            items(filteredUserList) { user ->
-                SearchUsersListItem(usersBean = user) {
-                    navigator.navigate(OtherUserProfileScreenDestination(user))
+            items(friendRequestList) { user ->
+                UserRequestListItem(usersBean = user) {
+                    navigator.navigate(
+                        OtherUserProfileScreenDestination(user)
+                    )
                 }
             }
         }
@@ -331,7 +341,7 @@ fun FriendRequestsList(filteredUserList: MutableList<UsersBean>, navigator: Dest
 }
 
 @Composable
-private fun SearchUsersListItem(usersBean: UsersBean, onClick: () -> Unit) {
+private fun UserRequestListItem(usersBean: UsersBean, onClick: () -> Unit) {
     Column {
         UserDetailsSection(
             user = usersBean,
@@ -423,7 +433,7 @@ fun PosterDetails(
 
 @Composable
 fun HandleGetCurrentUserDetailsStateFlow(
-    viewModel: UserRequestScreenViewModel,
+    viewModel: UserRequestViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {
     val getCurrentUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
@@ -450,7 +460,7 @@ fun HandleGetCurrentUserDetailsStateFlow(
                         ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
-                    ConstantsHelper.ErrorTag,
+                    ConstantsHelper.ERROR_TAG,
                     "OtherUserProfileScreen",
                     getCurrentUserDetailsState.message.toString()
                 )

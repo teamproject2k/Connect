@@ -63,7 +63,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         // Create a PhoneAuthOptions object to configure the verification process.
         val options = PhoneAuthOptions.newBuilder(firebaseAuth)
             .setPhoneNumber(countryCode + mobileNumber)
-            .setTimeout(ConstantsHelper.OTPTimeOutTime, TimeUnit.SECONDS)
+            .setTimeout(ConstantsHelper.OTP_TIMEOUT_TIME, TimeUnit.SECONDS)
             .setCallbacks(callbacks)
 
         // If the AuthenticationActivity is not null, set the activity to the options object.
