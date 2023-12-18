@@ -53,7 +53,6 @@ class OtpInputViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val resendOtpStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _resendOtpStateFlow
 
-
     /**
      * A flow that emits the remaining time in seconds until the OTP expires.
      */
@@ -66,7 +65,6 @@ class OtpInputViewModel @Inject constructor(
         }
         showTimerState.value = false
     }
-
 
     /**
      * Resends the OTP to the user.
@@ -83,7 +81,6 @@ class OtpInputViewModel @Inject constructor(
             }
         }
     }
-
 
     /**
      * Gets the user details from the remote server.

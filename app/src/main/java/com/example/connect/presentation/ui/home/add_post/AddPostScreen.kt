@@ -194,7 +194,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun HandleAddPostSection(
+private fun HandleAddPostSection(
     viewModel: AddPostViewModel,
     context: Context,
     navigator: DestinationsNavigator
@@ -240,7 +240,7 @@ fun HandleAddPostSection(
 }
 
 @Composable
-fun PostVisibilityScopeBottomSheet(
+private fun PostVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: AddPostViewModel,
     onDismissRequest: () -> Unit
@@ -256,7 +256,7 @@ fun PostVisibilityScopeBottomSheet(
 }
 
 @Composable
-fun PostVisibilityScopeBottomSheetItem(
+private fun PostVisibilityScopeBottomSheetItem(
     postVisibilityScope: PostVisibilityScope,
     onClick: () -> Unit
 ) {
@@ -292,7 +292,7 @@ fun PostVisibilityScopeBottomSheetItem(
 }
 
 @Composable
-fun CaptionMediaSection(viewModel: AddPostViewModel) {
+private fun CaptionMediaSection(viewModel: AddPostViewModel) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         PostCaptionField(viewModel)
@@ -301,7 +301,7 @@ fun CaptionMediaSection(viewModel: AddPostViewModel) {
 }
 
 @Composable
-fun MediaSection(viewModel: AddPostViewModel, context: Context) {
+private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
     val selectedMedia = viewModel.selectedMediaState.value
     if (selectedMedia != null) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -337,7 +337,7 @@ fun MediaSection(viewModel: AddPostViewModel, context: Context) {
 }
 
 @Composable
-fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
+private fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
     AsyncImage(
         model = selectedMediaData.uri,
         contentDescription = stringResource(R.string.post_image),
@@ -350,7 +350,7 @@ fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
 }
 
 @Composable
-fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
+private fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
     val exoPlayer = remember {
         FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
     }
@@ -372,7 +372,7 @@ fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
 }
 
 @Composable
-fun TopDetailsSection(
+private fun TopDetailsSection(
     viewModel: AddPostViewModel,
     sharedViewModel: HomeSharedViewModel,
     onVisibilityScopeClick: () -> Unit
@@ -394,7 +394,7 @@ fun TopDetailsSection(
 }
 
 @Composable
-fun PostVisibilityInTopSection(
+private fun PostVisibilityInTopSection(
     viewModel: AddPostViewModel,
     onClick: () -> Unit
 ) {
@@ -423,7 +423,7 @@ fun PostVisibilityInTopSection(
 
 
 @Composable
-fun PostCaptionField(viewModel: AddPostViewModel) {
+private fun PostCaptionField(viewModel: AddPostViewModel) {
     TransparentTextField(
         value = viewModel.captionTextState.value,
         placeholder = {
@@ -477,4 +477,3 @@ private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
         viewModel.uploadUserPost()
     }
 }
-

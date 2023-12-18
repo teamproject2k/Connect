@@ -385,7 +385,7 @@ private fun ActionButtonsSection(
 }
 
 @Composable
-fun IconTextButton(
+private fun IconTextButton(
     modifier: Modifier = Modifier,
     buttonImage: ImageVector,
     buttonText: String,
@@ -543,7 +543,7 @@ private fun BottomSheetSection(
 }
 
 @Composable
-fun HandleSendFriendRequestStateFlow(
+private fun HandleSendFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val sendFriendRequestState = viewModel.sendFriendRequestStateFlow.collectAsState().value
@@ -588,7 +588,7 @@ fun HandleSendFriendRequestStateFlow(
 }
 
 @Composable
-fun HandleWithdrawFriendRequestStateFlow(
+private fun HandleWithdrawFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val withDrawRequestState = viewModel.withdrawFriendRequestStateFlow.collectAsState().value
@@ -633,7 +633,7 @@ fun HandleWithdrawFriendRequestStateFlow(
 }
 
 @Composable
-fun HandleAcceptFriendRequestStateFlow(
+private fun HandleAcceptFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val acceptFriendRequestState = viewModel.acceptFriendRequestStateFlow.collectAsState().value
@@ -678,7 +678,7 @@ fun HandleAcceptFriendRequestStateFlow(
 }
 
 @Composable
-fun HandleRemoveFriendRequestStateFlow(
+private fun HandleRemoveFriendRequestStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val removeFriendRequestState = viewModel.removeFriendRequestStateFlow.collectAsState().value
@@ -723,7 +723,7 @@ fun HandleRemoveFriendRequestStateFlow(
 }
 
 @Composable
-fun HandleUnBlockUserStateFlow(
+private fun HandleUnBlockUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val unblockUserState = viewModel.unBlockUserStateFlow.collectAsState().value
@@ -769,7 +769,7 @@ fun HandleUnBlockUserStateFlow(
 }
 
 @Composable
-fun HandleBlockUserStateFlow(
+private fun HandleBlockUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val blockUserState = viewModel.blockUserStateFlow.collectAsState().value
@@ -814,7 +814,7 @@ fun HandleBlockUserStateFlow(
 }
 
 @Composable
-fun HandleUnfriendUserStateFlow(
+private fun HandleUnfriendUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val unfriendUserState = viewModel.unfriendUserStateFlow.collectAsState().value
@@ -859,7 +859,7 @@ fun HandleUnfriendUserStateFlow(
 }
 
 @Composable
-fun HandleUnfriendAndBlockUserStateFlow(
+private fun HandleUnfriendAndBlockUserStateFlow(
     viewModel: OtherUserProfileViewModel
 ) {
     val unfriendAndBlockUserState = viewModel.unfriendAndBlockUserStateFlow.collectAsState().value
@@ -904,7 +904,7 @@ fun HandleUnfriendAndBlockUserStateFlow(
 }
 
 @Composable
-fun HandleGetCurrentUserDetailsStateFlow(
+private fun HandleGetCurrentUserDetailsStateFlow(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     requestedUser: UsersBean
