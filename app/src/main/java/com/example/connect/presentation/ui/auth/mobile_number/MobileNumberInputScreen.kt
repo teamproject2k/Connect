@@ -93,6 +93,7 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                     loaderButtonState = viewModel.currentButtonLoadingState,
                     loadingText = stringResource(R.string.sending_otp),
                     buttonText = stringResource(id = R.string.get_otp),
+                    isEnabled = viewModel.userMobileNumberState.value.isNotBlank(),
                     onClick = {
                         keyboardController?.hide()
                         handleButtonClick(viewModel, context)

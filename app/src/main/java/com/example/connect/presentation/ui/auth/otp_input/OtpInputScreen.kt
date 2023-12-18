@@ -147,6 +147,7 @@ fun OTPScreen(
                     loaderButtonState = viewModel.currentButtonLoadingState,
                     buttonText = stringResource(id = R.string.verify_otp),
                     loadingText = stringResource(R.string.verifying_otp),
+                    isEnabled = viewModel.otpState.value.all { char -> char.isDigit() },
                     onClick = {
                         keyboardController?.hide()
                         handleButtonClick(viewModel, context)

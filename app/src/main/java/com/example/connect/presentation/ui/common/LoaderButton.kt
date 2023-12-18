@@ -29,6 +29,7 @@ fun LoaderButton(
     loaderButtonState: MutableState<ButtonStateEnum>,
     buttonText: String,
     modifier: Modifier = Modifier,
+    isEnabled: Boolean = true,
     loadingText: String = stringResource(id = R.string.please_wait),
     successText: String = buttonText,
     errorText: String = stringResource(R.string.try_again),
@@ -37,10 +38,10 @@ fun LoaderButton(
     val currentButtonState by remember {
         loaderButtonState
     }
-    val isEnabled = currentButtonState != ButtonStateEnum.Loading
+    val updatedIsEnabled = currentButtonState != ButtonStateEnum.Loading
     Button(
         onClick = { onClick() },
-        enabled = isEnabled,
+        enabled = updatedIsEnabled && isEnabled,
         modifier = modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = .4f),
@@ -51,7 +52,7 @@ fun LoaderButton(
         )
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (!isEnabled) {
+            if (!updatedIsEnabled) {
                 NBallLoader(
                     activatedColor = MaterialTheme.colorScheme.onPrimary,
                     deactivatedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),

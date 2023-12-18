@@ -107,6 +107,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
                     loaderButtonState = viewModel.currentButtonLoadingState,
                     loadingText = stringResource(R.string.creating_account),
                     buttonText = stringResource(id = R.string.create_account),
+                    isEnabled = isButtonEnabled(viewModel),
                     onClick = {
                         keyboardController?.hide()
                         handleButtonClick(viewModel, context, navigator)
@@ -124,6 +125,14 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
             viewModel.snackBarMessageState.value = ""
         }
     }
+}
+
+private fun isButtonEnabled(viewModel: UserDetailsViewModel): Boolean {
+    var result = true
+    if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.value == -1L) {
+        result = false
+    }
+    return result
 }
 
 @Composable
