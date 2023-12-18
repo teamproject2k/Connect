@@ -237,7 +237,6 @@ fun HandleAddPostSection(
             // no need to handle it
         }
     }
-
 }
 
 @Composable
@@ -292,7 +291,6 @@ fun PostVisibilityScopeBottomSheetItem(
     }
 }
 
-
 @Composable
 fun CaptionMediaSection(viewModel: AddPostViewModel) {
     val context = LocalContext.current
@@ -338,7 +336,6 @@ fun MediaSection(viewModel: AddPostViewModel, context: Context) {
     }
 }
 
-
 @Composable
 fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
     AsyncImage(
@@ -351,7 +348,6 @@ fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
         }
     )
 }
-
 
 @Composable
 fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
@@ -374,7 +370,6 @@ fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
         }
     }
 }
-
 
 @Composable
 fun TopDetailsSection(
@@ -473,7 +468,6 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
         }
     }
 }
-
 
 private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
     if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {

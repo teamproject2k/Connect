@@ -126,6 +126,10 @@
     <string name="friend_removed_successfully">Friend Removed Successfully</string>
     <string name="friend_removed_and_blocked_successfully">Friend removed and blocked successfully</string>
     <string name="no_pending_requests">No Pending Requests</string>
+    <string name="like_post">Like post</string>
+    <string name="comment_on_post">Comment on post</string>
+    <string name="share_post">Share post</string>
+    <string name="likeCount_likes">%1$d likes</string>
     <string name="video_thumbnail">video thumbnail</string>
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
 </resources>
