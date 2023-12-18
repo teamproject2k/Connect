@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
 import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -83,7 +84,7 @@ fun UserProfileFriendsListSection(
                         friendDetails = friendsList[index],
                         modifier = Modifier.weight(1f)
                     ) {
-
+                        navigator.navigate(OtherUserProfileScreenDestination(friendsList[index]))
                     }
                     SpacerWidth8()
                 }
