@@ -127,4 +127,8 @@
     <string name="friend_removed_and_blocked_successfully">Friend removed and blocked successfully</string>
     <string name="no_friends_found">No Friends Found</string>
     <string name="no_pending_requests">No Pending Requests</string>
+    <string name="like_post">Like post</string>
+    <string name="comment_on_post">Comment on post</string>
+    <string name="share_post">Share post</string>
+    <string name="likeCount_likes">%1$d likes</string>
 </resources>
