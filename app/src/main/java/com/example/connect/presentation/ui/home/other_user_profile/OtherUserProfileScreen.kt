@@ -153,8 +153,8 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
                     currentUser = viewModel.currentUserState.value,
                     requestedUser,
                     viewModel
-                ) { showSheet ->
-                    showBottomSheet = !showSheet
+                ) {
+                    showBottomSheet = false
                 }
             }
         }
@@ -512,7 +512,7 @@ private fun BottomSheetSection(
     currentUser: UsersBean,
     requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
-    onBottomSheetStateChange: (showSheet: Boolean) -> Unit
+    onBottomSheetStateClick: () -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentEnum.Friends.name) {
@@ -520,23 +520,23 @@ private fun BottomSheetSection(
                 imageVector = Icons.Default.PersonRemove,
                 text = stringResource(R.string.unfriend_user)
             ) {
-                onBottomSheetStateChange(false)
                 viewModel.unfriendUser(currentUser, requestedUser)
+                onBottomSheetStateClick()
             }
             BottomSheetItem(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.unfriend_and_block_user)
             ) {
-                onBottomSheetStateChange(false)
                 viewModel.unfriendAndBlockUser(currentUser, requestedUser)
+                onBottomSheetStateClick()
             }
         } else if (viewModel.statusWithCurrentUserState.value != StatusWithCurrentEnum.Blocked.name) {
             BottomSheetItem(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.block_user)
             ) {
-                onBottomSheetStateChange(false)
                 viewModel.blockUser(currentUser, requestedUser)
+                onBottomSheetStateClick()
             }
         }
     }

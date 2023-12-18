@@ -8,6 +8,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Handshake
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -41,13 +52,16 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.LogoutAlertDialog
 import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
+import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
+import com.example.connect.presentation.ui.destinations.SearchScreenDestination
+import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
+import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.FunctionHelper.getHomeBottomNavBarItemList
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
-
 
 @Composable
 fun HomeActivityScreen() {
@@ -231,4 +245,55 @@ private fun CreateUi(context: Context) {
     }
 }
 
+
+/**
+ * Gets the list of items to be displayed in the bottom navigation bar of home activity.
+ *
+ * @param context The context of the application.
+ * @return The list of items to be displayed in the bottom navigation bar.
+ */
+fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
+    val bottomNavList = arrayListOf<BottomAppBarItemData>()
+    bottomNavList.add(
+        BottomAppBarItemData(
+            context.getString(R.string.home),
+            Icons.Filled.Home,
+            Icons.Outlined.Home,
+            HomeScreenDestination.route
+        )
+    )
+    bottomNavList.add(
+        BottomAppBarItemData(
+            context.getString(R.string.search),
+            Icons.Filled.Search,
+            Icons.Outlined.Search,
+            SearchScreenDestination.route
+        )
+    )
+    bottomNavList.add(
+        BottomAppBarItemData(
+            context.getString(R.string.add_post),
+            Icons.Filled.AddCircle,
+            Icons.Outlined.AddCircleOutline,
+            AddPostScreenDestination.route
+        )
+    )
+    bottomNavList.add(
+        BottomAppBarItemData(
+            context.getString(R.string.requests),
+            Icons.Filled.Handshake,
+            Icons.Outlined.Handshake,
+            UserRequestScreenDestination.route
+        )
+    )
+    bottomNavList.add(
+        BottomAppBarItemData(
+            context.getString(R.string.profile),
+            Icons.Filled.Person,
+            Icons.Outlined.Person,
+            CurrentUserProfileScreenDestination.route
+        )
+    )
+    return bottomNavList
+}
 

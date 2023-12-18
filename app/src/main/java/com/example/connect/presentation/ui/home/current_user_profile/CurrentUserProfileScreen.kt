@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,8 +112,8 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     navigator
-                ) { showSheet ->
-                    showBottomSheet = !showSheet
+                ) {
+                    showBottomSheet = false
                 }
             }
         }
@@ -135,10 +136,10 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 private fun BottomSheetSection(
     modifier: Modifier,
     navigator: DestinationsNavigator,
-    onBottomSheetStateChange: (showSheet: Boolean) -> Unit
+    onBottomSheetStateClick: () -> Unit
 ) {
     val currentActivity = LocalActivity.current as BaseActivity
-    var showLogoutDialog by remember {
+    var showLogoutDialog by rememberSaveable {
         mutableStateOf(false)
     }
     Column(modifier = modifier.fillMaxWidth()) {
@@ -146,7 +147,7 @@ private fun BottomSheetSection(
             imageVector = Icons.Default.Settings,
             text = stringResource(R.string.settings)
         ) {
-            onBottomSheetStateChange(false)
+            onBottomSheetStateClick()
             navigator.navigate(SettingsScreenDestination)
         }
         BottomSheetItem(
@@ -154,7 +155,7 @@ private fun BottomSheetSection(
             text = stringResource(id = R.string.logout)
         ) {
             showLogoutDialog = true
-            onBottomSheetStateChange(false)
+            onBottomSheetStateClick()
         }
     }
     if (showLogoutDialog) {
@@ -195,7 +196,6 @@ private fun ProfileScreen(
 private fun ImageSection(
     userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
 ) {
-
     var isProfilePhotoExpanded by remember {
         mutableStateOf(false)
     }
