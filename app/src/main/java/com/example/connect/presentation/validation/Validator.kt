@@ -22,7 +22,7 @@ object Validator {
                 responseCode = 1
             }
 
-            !RegexHelper.PhoneRegex.toRegex().matches(userMobileNumber) -> {
+            !RegexHelper.PHONE_REGEX.toRegex().matches(userMobileNumber) -> {
                 responseCode = 2
             }
         }
@@ -44,7 +44,7 @@ object Validator {
                 responseCode = 1
             }
 
-            !RegexHelper.OtpRegex.toRegex().matches(otp) -> {
+            !RegexHelper.OTP_REGEX.toRegex().matches(otp) -> {
                 responseCode = 2
             }
         }
@@ -68,7 +68,7 @@ object Validator {
                 responseCode = 1
             }
 
-            !Regex(RegexHelper.NameRegex).matches(userName) -> {
+            !Regex(RegexHelper.NAME_REGEX).matches(userName) -> {
                 responseCode = 2
             }
 
