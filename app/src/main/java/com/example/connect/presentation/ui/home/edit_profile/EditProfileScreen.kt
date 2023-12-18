@@ -591,30 +591,35 @@ private fun HandleUpdateUserState(
 }
 
 private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
-    //   var result = true
-//    if (
-//        viewModel.userNameState.value.isBlank()
-//        || viewModel.selectedGenderState.value.isBlank()
-//        || viewModel.userBioState.value.isBlank()
-//        || viewModel.selectedDOBState.value == -1L
-//    ) {
-//        result = false
-//    }
-//    if (result) {
-//        if (
-//            viewModel.userNameState.value == viewModel.userDetails.name
-//            && viewModel.selectedGenderState.value == viewModel.userDetails.gender
-//            && viewModel.selectedDOBState.value == viewModel.userDetails.dateOfBirth
-//            && viewModel.userBioState.value == viewModel.userDetails.bio
-//        ) {
-//            result = false
-//        }
-//    }
-//    if (viewModel.profilePhotoState.value?.uri.toString().isNotBlank()
-//        && viewModel.profilePhotoState.value?.uri.toString() == viewModel.userDetails.profilePhoto
-//    ) {
-//        result = false
-//    }
+    var result = true
+    if (
+        viewModel.userNameState.value.isBlank()
+        || viewModel.selectedGenderState.value.isBlank()
+        || viewModel.userBioState.value.isBlank()
+        || viewModel.selectedDOBState.value == -1L
+    ) {
+        result = false
+    }
+    if (result) {
+        if (
+            viewModel.userNameState.value == viewModel.userDetails.name
+            && viewModel.selectedGenderState.value == viewModel.userDetails.gender
+            && viewModel.selectedDOBState.value == viewModel.userDetails.dateOfBirth
+            && viewModel.userBioState.value == viewModel.userDetails.bio
+        ) {
+            result = false
+        }
+    }
+    if (viewModel.profilePhotoState.value?.uri.toString()
+            .isNotBlank() && viewModel.profilePhotoState.value?.uri.toString() != viewModel.userDetails.profilePhoto
+    ) {
+        result = true
+    }
+    if (viewModel.coverPhotoState.value?.uri.toString()
+            .isNotBlank() && viewModel.coverPhotoState.value?.uri.toString() != viewModel.userDetails.coverPhoto
+    ) {
+        result = true
+    }
 
-    return true
+    return result
 }
