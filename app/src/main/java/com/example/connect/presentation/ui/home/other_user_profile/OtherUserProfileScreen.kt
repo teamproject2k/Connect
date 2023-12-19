@@ -62,10 +62,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
@@ -478,7 +478,7 @@ private fun HandlePostSection(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (postDetailState.message == ErrorCodes.NoUserFound) {
+                if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.sharedPreference.isUserDetailsEntered = false
                     context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
                     val intent = Intent(context, AuthenticationActivity::class.java)
@@ -568,9 +568,14 @@ private fun HandleSendFriendRequestStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    sendFriendRequestState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (sendFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        sendFriendRequestState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -613,9 +618,14 @@ private fun HandleWithdrawFriendRequestStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    withDrawRequestState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (withDrawRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        withDrawRequestState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -658,9 +668,14 @@ private fun HandleAcceptFriendRequestStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    acceptFriendRequestState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (acceptFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        acceptFriendRequestState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -703,9 +718,14 @@ private fun HandleRemoveFriendRequestStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    removeFriendRequestState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (removeFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        removeFriendRequestState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -749,9 +769,14 @@ private fun HandleUnBlockUserStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    unblockUserState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (unblockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        unblockUserState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -794,9 +819,14 @@ private fun HandleBlockUserStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    blockUserState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (blockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        blockUserState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -839,9 +869,14 @@ private fun HandleUnfriendUserStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    unfriendUserState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (unfriendUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        unfriendUserState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -884,9 +919,14 @@ private fun HandleUnfriendAndBlockUserStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    unfriendAndBlockUserState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                if (unfriendAndBlockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        unfriendAndBlockUserState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

@@ -30,10 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
@@ -77,12 +77,12 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 when (getDeviceIdState.message) {
-                    ErrorCodes.NoUserFound -> {
+                    FirebaseErrorCodes.NO_USER_FOUND -> {
                         context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                         activity.logout()
                     }
 
-                    ErrorCodes.NewLogin -> {
+                    FirebaseErrorCodes.NEW_LOGIN -> {
                         showNewDeviceLoginAlertDialog = true
                         Handler(Looper.getMainLooper()).postDelayed({
                             showNewDeviceLoginAlertDialog = false
@@ -141,7 +141,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (getUserDetailsState.message == ErrorCodes.NoUserFound) {
+                if (getUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     (LocalActivity.current as BaseActivity).logout()
                 } else {
                     if (getUserDetailsState.message.isNullOrBlank()) {

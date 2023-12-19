@@ -49,10 +49,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
@@ -342,7 +342,7 @@ private fun HandlePostSection(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (postDetailState.message == ErrorCodes.NoUserFound) {
+                if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.sharedPreference.isUserDetailsEntered = false
                     context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
                     val intent = Intent(context, AuthenticationActivity::class.java)

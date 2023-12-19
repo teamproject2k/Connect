@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
@@ -134,7 +134,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         }
                     }
                 } else {
-                    _postDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    _postDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }
@@ -403,7 +403,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }

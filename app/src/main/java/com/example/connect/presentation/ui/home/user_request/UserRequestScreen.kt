@@ -47,10 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
@@ -176,7 +176,7 @@ private fun HandleGetFriendsListStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (getFriendsListAsUsersState.message == ErrorCodes.NoUserFound) {
+                if (getFriendsListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {
@@ -217,7 +217,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (getPendingFriendRequestListAsUsersState.message == ErrorCodes.NoUserFound) {
+                if (getPendingFriendRequestListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {

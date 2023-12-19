@@ -29,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.LoaderFullScreen
@@ -97,7 +97,7 @@ private fun HandleSearchUserState(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (searchUserState.message == ErrorCodes.NoUserFound) {
+                if (searchUserState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {

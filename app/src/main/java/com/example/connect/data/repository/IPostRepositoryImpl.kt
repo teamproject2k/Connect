@@ -1,7 +1,7 @@
 package com.example.connect.data.repository
 
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.domain.models.PostBean
@@ -23,7 +23,7 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun getPostDetailsFromRemote(fireBaseId: String): ResponseState<List<PostBean>> {
         // Get the post details from the server.
         return try {
-            val response = fireStore.collection(FirebaseConstants.PostsKey)
+            val response = fireStore.collection(FirebaseConstants.POST_KEY)
                 .whereEqualTo(PostRemoteEntity::fireBaseUserId.name, fireBaseId).get().await()
             val postList = arrayListOf<PostBean>()
             response.documents.forEach { document ->
@@ -55,8 +55,8 @@ class IPostRepositoryImpl @Inject constructor(
     ): ResponseState<String> {
         // Upload the post details to the server.
         return try {
-            val response = fireStore.collection(FirebaseConstants.MediaKey).document(fireBaseId)
-                .collection(FirebaseConstants.PostsKey).add(postDetails.toPostRemoteEntity())
+            val response = fireStore.collection(FirebaseConstants.MEDIA_KEY).document(fireBaseId)
+                .collection(FirebaseConstants.POST_KEY).add(postDetails.toPostRemoteEntity())
                 .await()
             ResponseState.success(response.id)
         } catch (exception: Exception) {

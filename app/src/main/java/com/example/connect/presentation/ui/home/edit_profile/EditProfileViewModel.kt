@@ -8,9 +8,9 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
@@ -107,7 +107,7 @@ class EditProfileViewModel @Inject constructor(
                         val updateProfilePhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 profilePhotoState.value!!.uri,
-                                "${userDetails.firebaseUserId}/${FirebaseConstants.ProfilePhotoKey}"
+                                "${userDetails.firebaseUserId}/${FirebaseConstants.PROFILE_PHOTO_KEY}"
                             )
                         if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = ResponseState.error(
@@ -122,7 +122,7 @@ class EditProfileViewModel @Inject constructor(
                         val updateCoverPhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 coverPhotoState.value!!.uri,
-                                "${userDetails.firebaseUserId}/${FirebaseConstants.CoverPhotoKey}"
+                                "${userDetails.firebaseUserId}/${FirebaseConstants.COVER_PHOTO_KEY}"
                             )
                         if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
                             _updateUserStateFlow.value = ResponseState.error(

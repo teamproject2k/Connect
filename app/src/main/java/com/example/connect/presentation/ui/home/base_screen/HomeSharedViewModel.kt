@@ -2,9 +2,9 @@ package com.example.connect.presentation.ui.home.base_screen
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
@@ -58,7 +58,7 @@ class HomeSharedViewModel @Inject constructor(
                         // If the device ID from the remote server does not match the device ID in the shared preferences,
                         if (sharedPreference.deviceId != responseState.data) {
                             // Set the device ID state flow to error with the NewLogin error code.
-                            _deviceIdStateFlow.value = ResponseState.error(ErrorCodes.NewLogin)
+                            _deviceIdStateFlow.value = ResponseState.error(FirebaseErrorCodes.NEW_LOGIN)
                         } else {
                             // Get the user details.
                             getUserDetails(context)
@@ -71,7 +71,7 @@ class HomeSharedViewModel @Inject constructor(
                     }
                 } else {
                     // Set the device ID state flow to error with the NoUserFound error code.
-                    _deviceIdStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    _deviceIdStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }
@@ -109,11 +109,11 @@ class HomeSharedViewModel @Inject constructor(
                             _userDetailsStateFlow.value = ResponseState.success(null)
                         } else {
                             _userDetailsStateFlow.value =
-                                ResponseState.error(ErrorCodes.NoUserFound)
+                                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                         }
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }

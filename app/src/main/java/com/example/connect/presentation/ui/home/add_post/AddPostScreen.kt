@@ -64,13 +64,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum.EXCEPTION
-import com.example.connect.common.RequestStatusEnum.LOADING
-import com.example.connect.common.RequestStatusEnum.NONE
-import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum.EXCEPTION
+import com.example.connect.domain.network_request_response.RequestStatusEnum.LOADING
+import com.example.connect.domain.network_request_response.RequestStatusEnum.NONE
+import com.example.connect.domain.network_request_response.RequestStatusEnum.SUCCESS
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
@@ -216,7 +216,7 @@ private fun HandleAddPostSection(
 
         EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (addPostState.message == ErrorCodes.NoUserFound) {
+                if (addPostState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {

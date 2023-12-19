@@ -5,10 +5,10 @@ import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.useCase.posts.AddPostToDbUseCase
 import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
@@ -61,7 +61,7 @@ class AddPostViewModel @Inject constructor(
                         val uploadFileToRemoteResponse =
                             uploadFileToRemoteUseCase.invoke(
                                 selectedMediaState.value!!.uri,
-                                "${FirebaseConstants.PostsKey}/$firebaseId/${System.currentTimeMillis()}"
+                                "${FirebaseConstants.POST_KEY}/$firebaseId/${System.currentTimeMillis()}"
                             )
                         if (uploadFileToRemoteResponse.status == RequestStatusEnum.EXCEPTION) {
                             _uploadPostStateFlow.value =
@@ -117,7 +117,7 @@ class AddPostViewModel @Inject constructor(
                     }
                 } else {
                     _uploadPostStateFlow.value =
-                        ResponseState.error(ErrorCodes.NoUserFound)
+                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
 
             }

@@ -1,6 +1,6 @@
 package com.example.connect.domain.repository
 
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
 
 interface IUserRepository {
@@ -90,46 +90,110 @@ interface IUserRepository {
         currentUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>>
 
+    /**
+     * Sends a friend request to the specified user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user to send the request to.
+     *
+     * @return A [ResponseState] containing either a success or failure message.
+     */
     suspend fun sendFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Withdraws a friend request from the current user to the requested user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the requested user.
+     * @return A [ResponseState] containing either a success or failure message.
+     */
     suspend fun withdrawFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Accepts a friend request.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
+     * @return A [ResponseState] containing either a success or error message.
+     */
     suspend fun acceptFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Removes a friend request from the database.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
+     * @return A [ResponseState] containing either a success message or an error message.
+     */
     suspend fun removeFriendRequest(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Blocks a user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user to be blocked.
+     * @return A [ResponseState] containing either a success or error message.
+     */
     suspend fun blockUser(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Unblocks a user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user to unblock.
+     * @return A [ResponseState] containing either a success or failure message.
+     */
     suspend fun unBlockUser(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Unfriends the requested user from the current user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the requested user.
+     * @return A [ResponseState] containing either a success or error message.
+     */
     suspend fun unFriendUser(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Unfriends and blocks a user.
+     *
+     * @param currentUserFirebaseId The current user's Firebase ID.
+     * @param requestedUserFirebaseId The requested user's Firebase ID.
+     * @return A [ResponseState] containing either a success or failure message.
+     */
     suspend fun unFriendAndBlockUser(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
+    /**
+     * Updates the status with other users on the database.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param otherUsersStatus A map of other users' Firebase IDs to their statuses.
+     * @return The number of rows affected.
+     */
     suspend fun updateOtherUsersStatusOnDb(
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>

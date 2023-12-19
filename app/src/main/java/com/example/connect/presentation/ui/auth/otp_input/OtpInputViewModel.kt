@@ -2,8 +2,8 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.auth.VerifyOtpUseCase

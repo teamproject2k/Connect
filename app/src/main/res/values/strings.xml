@@ -134,4 +134,5 @@
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
     <string name="error_while_getting_updated_data_please_reopen_app">Error while getting updated data, Please reopen app</string>
     <string name="profile_photo">profile photo</string>
+    <string name="user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates">User details updated since last update, Please refresh the page to see the latest updates</string>
 </resources>

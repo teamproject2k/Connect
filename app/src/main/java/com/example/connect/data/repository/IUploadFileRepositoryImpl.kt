@@ -1,7 +1,7 @@
 package com.example.connect.data.repository
 
 import android.net.Uri
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUploadFileRepository
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await

@@ -7,9 +7,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
@@ -117,7 +117,7 @@ class UserRequestViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }

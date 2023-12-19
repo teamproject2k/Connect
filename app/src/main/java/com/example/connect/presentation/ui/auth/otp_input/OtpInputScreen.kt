@@ -54,11 +54,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -310,7 +310,7 @@ private fun HandleUserDetailsState(
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
+                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
                     )
                     else userDetailsState.message.toString()
@@ -366,7 +366,7 @@ private fun HandleVerifyOTPState(
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                    if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
                     )
                     else verifyOtpState.message.toString()
@@ -403,7 +403,7 @@ private fun HandleResendOTPState(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            if (resendOtpState.data?.first == FirebaseConstants.AutoLogin) {
+            if (resendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(resendOtpState.data.second)
                 } else {
@@ -420,7 +420,7 @@ private fun HandleResendOTPState(
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                    if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
                     )
                     else resendOtpState.message.toString()
