@@ -287,7 +287,6 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
                 }
             }
         }
-
     }
 }
 
