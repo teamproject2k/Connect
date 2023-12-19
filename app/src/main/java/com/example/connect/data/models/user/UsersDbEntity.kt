@@ -2,6 +2,7 @@ package com.example.connect.data.models.user
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.connect.common.VisibilityEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
@@ -21,9 +22,9 @@ data class UsersDbEntity(
     val profilePhoto: String? = null,
     val coverPhoto: String? = null,
     val otherUsersStatus: MutableMap<String, String> = mutableMapOf(),
-    val genderVisibility: String = "Public",
-    val dobVisibility: String = "Public",
-    val friendListVisibility: String = "Public"
+    val genderVisibility: String = VisibilityEnum.Public.name,
+    val dobVisibility: String = VisibilityEnum.Public.name,
+    val friendListVisibility: String = VisibilityEnum.Public.name
 ) {
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()

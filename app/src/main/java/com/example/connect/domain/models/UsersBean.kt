@@ -1,6 +1,7 @@
 package com.example.connect.domain.models
 
 import android.os.Parcelable
+import com.example.connect.common.VisibilityEnum
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.enums.StatusWithCurrentEnum
@@ -23,9 +24,9 @@ data class UsersBean(
     val requestedFriendRequestList: MutableList<String> = mutableListOf(),
     val receivedFriendRequestList: MutableList<String> = mutableListOf(),
     val blockedUsersList: MutableList<String> = mutableListOf(),
-    val genderVisibility: String = "Public",
-    val dobVisibility: String = "Public",
-    val friendListVisibility: String = "Public"
+    val genderVisibility: String = VisibilityEnum.Public.name,
+    val dobVisibility: String = VisibilityEnum.Public.name,
+    val friendListVisibility: String = VisibilityEnum.Public.name
 ) : Parcelable {
     fun toUserRemoteEntity(): UserRemoteEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()

@@ -140,4 +140,13 @@
     <string name="friend_list_privacy">Friend List Privacy</string>
     <string name="requested_users">Requested Users</string>
     <string name="blocked_users">Blocked Users</string>
+    <string name="your_date_of_birth_will_only_be_visible_to_you">Your date of birth will only be visible to you</string>
+    <string name="your_friend_list_will_be_visible_to_everyone">Your friend list will be visible to everyone</string>
+    <string name="your_friend_list_will_only_be_visible_to_your_friends">Your friend list will only be visible to your friends</string>
+    <string name="your_friend_list_will_only_be_visible_to_you">Your friend list will only be visible to you</string>
+    <string name="your_gender_will_be_visible_to_everyone">Your gender will be visible to everyone</string>
+    <string name="your_gender_will_only_be_visible_to_your_friends">Your gender will only be visible to your friends</string>
+    <string name="your_gender_will_only_be_visible_to_you">Your gender will only be visible to you</string>
+    <string name="your_date_of_birth_will_be_visible_to_everyone">Your date of birth will be visible to everyone</string>
+    <string name="your_date_of_birth_will_only_be_visible_to_your_friends">Your date of birth will only be visible to your friends</string>
 </resources>

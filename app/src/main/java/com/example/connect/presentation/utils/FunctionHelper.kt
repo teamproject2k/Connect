@@ -17,6 +17,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.common.VisibilityEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.models.VisibilityScope
@@ -148,17 +149,17 @@ object FunctionHelper {
         postVisibilityScopeList.add(
             VisibilityScope(
                 0,
-                context.getString(R.string.public_visibility),
+                VisibilityEnum.Public.name,
                 context.getString(R.string.this_post_will_be_visible_to_every_connect_user),
                 R.drawable.ic_lock_open
             )
         )
 
-        // Add the private visibility scope to the list.
+        // Add the friends only visibility scope to the list.
         postVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.private_visibility),
+                VisibilityEnum.FriendsOnly.name,
                 context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_close
             )
@@ -173,15 +174,25 @@ object FunctionHelper {
      * @return The list of gender visibility scopes.
      */
     fun getGenderVisibilityList(context: Context): List<VisibilityScope> {
-        // Create a list of post visibility scopes.
+        // Create a list of gender visibility scopes.
         val genderVisibilityScopeList = arrayListOf<VisibilityScope>()
 
         // Add the public visibility scope to the list.
         genderVisibilityScopeList.add(
             VisibilityScope(
                 0,
-                context.getString(R.string.public_visibility),
-                "Your gender will be visible to everyone",
+                VisibilityEnum.Public.name,
+                context.getString(R.string.your_gender_will_be_visible_to_everyone),
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                VisibilityEnum.FriendsOnly.name,
+                context.getString(R.string.your_gender_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_open
             )
         )
@@ -190,8 +201,8 @@ object FunctionHelper {
         genderVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.private_visibility),
-                "Your gender will only be visible to you",
+                VisibilityEnum.Private.name,
+                context.getString(R.string.your_gender_will_only_be_visible_to_you),
                 R.drawable.ic_lock_close
             )
         )
@@ -205,16 +216,26 @@ object FunctionHelper {
      * @return The list of dob visibility scopes.
      */
     fun getDobVisibilityList(context: Context): List<VisibilityScope> {
-        // Create a list of post visibility scopes.
+        // Create a list of dob visibility scopes.
         val dobVisibilityScopeList = arrayListOf<VisibilityScope>()
 
         // Add the public visibility scope to the list.
         dobVisibilityScopeList.add(
             VisibilityScope(
                 0,
-                context.getString(R.string.public_visibility),
-                "Your date of birth will be visible to everyone",
+                VisibilityEnum.Public.name,
+                context.getString(R.string.your_date_of_birth_will_be_visible_to_everyone),
                 R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                VisibilityEnum.FriendsOnly.name,
+                context.getString(R.string.your_date_of_birth_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_close
             )
         )
 
@@ -222,8 +243,8 @@ object FunctionHelper {
         dobVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.private_visibility),
-                "Your date of birth will only be visible to you",
+                VisibilityEnum.Private.name,
+                context.getString(R.string.your_date_of_birth_will_only_be_visible_to_you),
                 R.drawable.ic_lock_close
             )
         )
@@ -237,16 +258,26 @@ object FunctionHelper {
      * @return The list of friendList visibility scopes.
      */
     fun getFriendListVisibilityList(context: Context): List<VisibilityScope> {
-        // Create a list of post visibility scopes.
+        // Create a list of friend list visibility scopes.
         val friendListVisibilityScopeList = arrayListOf<VisibilityScope>()
 
         // Add the public visibility scope to the list.
         friendListVisibilityScopeList.add(
             VisibilityScope(
                 0,
-                context.getString(R.string.public_visibility),
-                "Your friend list will be visible to everyone",
+                VisibilityEnum.Public.name,
+                context.getString(R.string.your_friend_list_will_be_visible_to_everyone),
                 R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                VisibilityEnum.FriendsOnly.name,
+                context.getString(R.string.your_friend_list_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_close
             )
         )
 
@@ -254,8 +285,8 @@ object FunctionHelper {
         friendListVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.private_visibility),
-                "Your friend list will only be visible to you",
+                VisibilityEnum.Private.name,
+                context.getString(R.string.your_friend_list_will_only_be_visible_to_you),
                 R.drawable.ic_lock_close
             )
         )
