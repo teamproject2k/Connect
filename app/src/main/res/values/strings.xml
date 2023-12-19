@@ -71,6 +71,7 @@
     <string name="post">Post</string>
     <string name="create_post">Create Post</string>
     <string name="public_visibility">Public</string>
+    <string name="friends_only">Friends Only</string>
     <string name="private_visibility">Private</string>
     <string name="this_post_will_be_visible_to_every_connect_user">This post will be visible to every Connect user</string>
     <string name="this_post_will_only_be_visible_to_your_friends">This post will only be visible to your friends</string>
@@ -136,17 +137,21 @@
     <string name="profile_photo">profile photo</string>
     <string name="settings_and_privacy">Settings And Privacy</string>
     <string name="gender_privacy">Gender Privacy</string>
-    <string name="dob_privacy">DOB Privacy</string>
+    <string name="date_of_birth_privacy">Date Of Birth Privacy</string>
     <string name="friend_list_privacy">Friend List Privacy</string>
     <string name="requested_users">Requested Users</string>
     <string name="blocked_users">Blocked Users</string>
-    <string name="your_date_of_birth_will_only_be_visible_to_you">Your date of birth will only be visible to you</string>
-    <string name="your_friend_list_will_be_visible_to_everyone">Your friend list will be visible to everyone</string>
-    <string name="your_friend_list_will_only_be_visible_to_your_friends">Your friend list will only be visible to your friends</string>
-    <string name="your_friend_list_will_only_be_visible_to_you">Your friend list will only be visible to you</string>
+    <string name="your_friends_will_be_visible_to_everyone">Your friends will be visible to everyone</string>
+    <string name="your_friends_will_only_be_visible_to_your_friends">Your friends will only be visible to your friends</string>
+    <string name="your_friends_will_only_be_visible_to_you">Your friends will only be visible to you</string>
     <string name="your_gender_will_be_visible_to_everyone">Your gender will be visible to everyone</string>
     <string name="your_gender_will_only_be_visible_to_your_friends">Your gender will only be visible to your friends</string>
     <string name="your_gender_will_only_be_visible_to_you">Your gender will only be visible to you</string>
-    <string name="your_date_of_birth_will_be_visible_to_everyone">Your date of birth will be visible to everyone</string>
-    <string name="your_date_of_birth_will_only_be_visible_to_your_friends">Your date of birth will only be visible to your friends</string>
+    <string name="your_dob_will_be_visible_to_everyone">Your DOB will be visible to everyone</string>
+    <string name="your_dob_will_only_be_visible_to_your_friends">Your DOB will only be visible to your friends</string>
+    <string name="your_dob_will_only_be_visible_to_you">Your DOB will only be visible to you</string>
+    <string name="visibility_updated_successfully">Visibility Updated Successfully</string>
+    <string name="updating_gender_visibility">Updating Gender Visibility...</string>
+    <string name="updating_friend_list_visibility">Updating Friend List Visibility...</string>
+    <string name="updating_dob_visibility">Updating DOB Visibility...</string>
 </resources>

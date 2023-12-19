@@ -103,7 +103,7 @@ class AddPostViewModel @Inject constructor(
                         fileUrl,
                         captionTextState.value,
                         FunctionHelper.getCurrentTimeInMillis(),
-                        currentPostVisibilityState.value.scopeName,
+                        currentPostVisibilityState.value.scopeEnum.name,
                         postType
                     )
                     val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)

@@ -1,12 +1,12 @@
 package com.example.connect.presentation.ui.home.settings_and_privacy
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -14,10 +14,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,13 +30,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
+import com.example.connect.common.LoggingHelper
+import com.example.connect.common.LoggingLevelEnum
+import com.example.connect.common.RequestStatusEnum.EXCEPTION
+import com.example.connect.common.RequestStatusEnum.LOADING
+import com.example.connect.common.RequestStatusEnum.NONE
+import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.common.AppTopAppBar
-import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
+import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
@@ -83,15 +94,15 @@ fun SettingsScreen() {
             ) {
                 showGenderBottomSheet = true
             }
-            Divider(color = ColorsHelper.lightGray().copy(alpha = 0.5f))
+            DividerLightGrayAlpha50()
             SettingsAndPrivacyDropdownItem(
-                itemNameId = R.string.dob_privacy,
+                itemNameId = R.string.date_of_birth_privacy,
                 drawableId = dobVisibility.drawableId,
                 scopeName = dobVisibility.scopeName
             ) {
                 showDobBottomSheet = true
             }
-            Divider(color = ColorsHelper.lightGray().copy(alpha = 0.5f))
+            DividerLightGrayAlpha50()
             SettingsAndPrivacyDropdownItem(
                 itemNameId = R.string.friend_list_privacy,
                 drawableId = friendListVisibility.drawableId,
@@ -99,16 +110,15 @@ fun SettingsScreen() {
             ) {
                 showFriendListBottomSheet = true
             }
-            Divider(color = ColorsHelper.lightGray().copy(alpha = 0.5f))
+            DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.blocked_users) {
 
             }
-            Divider(color = ColorsHelper.lightGray().copy(alpha = 0.5f))
+            DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.requested_users) {
 
             }
-            Divider(color = ColorsHelper.lightGray().copy(alpha = 0.5f))
-
+            DividerLightGrayAlpha50()
             if (showGenderBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showGenderBottomSheet = false },
@@ -119,7 +129,8 @@ fun SettingsScreen() {
                 ) {
                     GenderVisibilityScopeBottomSheet(
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        homeSharedViewModel.usersDetails
                     ) {
                         showGenderBottomSheet = false
                     }
@@ -135,7 +146,8 @@ fun SettingsScreen() {
                 ) {
                     DobVisibilityScopeBottomSheet(
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        homeSharedViewModel.usersDetails,
                     ) {
                         showDobBottomSheet = false
                     }
@@ -151,7 +163,8 @@ fun SettingsScreen() {
                 ) {
                     FriendListVisibilityScopeBottomSheet(
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        homeSharedViewModel.usersDetails,
                     ) {
                         showFriendListBottomSheet = false
                     }
@@ -159,7 +172,6 @@ fun SettingsScreen() {
             }
         }
     }
-
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -168,6 +180,9 @@ fun SettingsScreen() {
             }
         }
     }
+    HandleUpdateGenderVisibilityStateFlow(viewModel, homeSharedViewModel, context)
+    HandleUpdateDobVisibilityStateFlow(viewModel, homeSharedViewModel, context)
+    HandleUpdateFriendListVisibilityStateFlow(viewModel, homeSharedViewModel, context)
 }
 
 @Composable
@@ -212,12 +227,16 @@ private fun SettingsAndPrivacyClickableItem(itemNameId: Int, onItemClick: () -> 
 private fun GenderVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
+    userDetails: UsersBean,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.genderVisibilityScopeList.forEach { genderScope ->
             VisibilityScopeBottomSheetItem(genderScope) {
                 viewModel.genderVisibilityState.value = genderScope
+                if (viewModel.genderVisibilityState.value.scopeEnum.name != userDetails.genderVisibility) {
+                    viewModel.updateGenderVisibility(userDetails.firebaseUserId)
+                }
                 onDismissRequest()
             }
         }
@@ -228,12 +247,16 @@ private fun GenderVisibilityScopeBottomSheet(
 private fun DobVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
+    userDetails: UsersBean,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
-        viewModel.dobVisibilityScopeList.forEach { genderScope ->
-            VisibilityScopeBottomSheetItem(genderScope) {
-                viewModel.dobVisibilityState.value = genderScope
+        viewModel.dobVisibilityScopeList.forEach { dobScope ->
+            VisibilityScopeBottomSheetItem(dobScope) {
+                viewModel.dobVisibilityState.value = dobScope
+                if (viewModel.dobVisibilityState.value.scopeEnum.name != userDetails.dobVisibility) {
+                    viewModel.updateDobVisibility(userDetails.firebaseUserId)
+                }
                 onDismissRequest()
             }
         }
@@ -244,14 +267,157 @@ private fun DobVisibilityScopeBottomSheet(
 private fun FriendListVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
+    userDetails: UsersBean,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
-        viewModel.friendListVisibilityScopeList.forEach { genderScope ->
-            VisibilityScopeBottomSheetItem(genderScope) {
-                viewModel.friendListVisibilityState.value = genderScope
+        viewModel.friendListVisibilityScopeList.forEach { friendListScope ->
+            VisibilityScopeBottomSheetItem(friendListScope) {
+                viewModel.friendListVisibilityState.value = friendListScope
+                if (viewModel.friendListVisibilityState.value.scopeEnum.name != userDetails.friendListVisibility) {
+                    viewModel.updateFriendListVisibility(userDetails.firebaseUserId)
+                }
                 onDismissRequest()
             }
+        }
+    }
+}
+
+@Composable
+fun HandleUpdateGenderVisibilityStateFlow(
+    viewModel: SettingsAndPrivacyViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
+    context: Context
+) {
+    var isResponseHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val updateUserGenderState = viewModel.updateGenderVisibilityStateFlow.collectAsState().value
+    when (updateUserGenderState.status) {
+        LOADING -> {
+            LoaderDialog(stringResource(R.string.updating_gender_visibility))
+            isResponseHandled = false
+        }
+
+        SUCCESS -> {
+            if (!isResponseHandled) {
+                context.showToast(stringResource(R.string.visibility_updated_successfully))
+                homeSharedViewModel.usersDetails.genderVisibility =
+                    viewModel.genderVisibilityState.value.scopeEnum.name
+                isResponseHandled = true
+            }
+        }
+
+        EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    updateUserGenderState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "SettingsAndPrivacyScreen",
+                    updateUserGenderState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleUpdateDobVisibilityStateFlow(
+    viewModel: SettingsAndPrivacyViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
+    context: Context
+) {
+    var isResponseHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val updateDobVisibilityState = viewModel.updateDobVisibilityStateFlow.collectAsState().value
+    when (updateDobVisibilityState.status) {
+        LOADING -> {
+            LoaderDialog(stringResource(R.string.updating_dob_visibility))
+            isResponseHandled = false
+        }
+
+        SUCCESS -> {
+            if (!isResponseHandled) {
+                homeSharedViewModel.usersDetails.dobVisibility =
+                    viewModel.dobVisibilityState.value.scopeEnum.name
+                context.showToast(stringResource(R.string.visibility_updated_successfully))
+                isResponseHandled = true
+            }
+        }
+
+        EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    updateDobVisibilityState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "SettingsAndPrivacyScreen",
+                    updateDobVisibilityState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        NONE -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleUpdateFriendListVisibilityStateFlow(
+    viewModel: SettingsAndPrivacyViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
+    context: Context
+) {
+    var isResponseHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val updateFriendListVisibilityState =
+        viewModel.updateFriendListVisibilityStateFlow.collectAsState().value
+    when (updateFriendListVisibilityState.status) {
+        LOADING -> {
+            LoaderDialog(stringResource(R.string.updating_friend_list_visibility))
+            isResponseHandled = false
+        }
+
+        SUCCESS -> {
+            if (!isResponseHandled) {
+                homeSharedViewModel.usersDetails.friendListVisibility =
+                    viewModel.friendListVisibilityState.value.scopeEnum.name
+                context.showToast(stringResource(R.string.visibility_updated_successfully))
+                isResponseHandled = true
+            }
+        }
+
+        EXCEPTION -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    updateFriendListVisibilityState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "SettingsAndPrivacyScreen",
+                    updateFriendListVisibilityState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        NONE -> {
+            // no need to handle this
         }
     }
 }

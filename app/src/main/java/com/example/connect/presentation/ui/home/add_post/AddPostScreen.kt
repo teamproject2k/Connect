@@ -191,23 +191,26 @@ private fun HandleAddPostSection(
     context: Context,
     navigator: DestinationsNavigator
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
         LOADING -> {
             LoaderDialog(stringResource(R.string.uploading_post))
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         SUCCESS -> {
-            context.showToast(stringResource(R.string.post_uploaded_successfully))
-            navigator.popBackStack()
+            if (!isResponseHandled) {
+                context.showToast(stringResource(R.string.post_uploaded_successfully))
+                navigator.popBackStack()
+                isResponseHandled = true
+            }
         }
 
         EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 if (addPostState.message == ErrorCodes.NoUserFound) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
@@ -221,7 +224,7 @@ private fun HandleAddPostSection(
                     "AddPostScreen",
                     addPostState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 

@@ -1,6 +1,6 @@
 package com.example.connect.common
 
-enum class VisibilityEnum {
+enum class VisibilityScopeEnum {
     Public,
     FriendsOnly,
     Private

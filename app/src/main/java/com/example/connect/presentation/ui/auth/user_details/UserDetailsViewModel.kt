@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.common.RequestStatusEnum
 import com.example.connect.common.ResponseState
+import com.example.connect.common.VisibilityScopeEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
@@ -62,6 +63,9 @@ class UserDetailsViewModel @Inject constructor(
                         createdDate,
                         sharedPreference.deviceId!!,
                         "Connect User",
+                        genderVisibility = VisibilityScopeEnum.Public.name,
+                        dobVisibility = VisibilityScopeEnum.Public.name,
+                        friendListVisibility = VisibilityScopeEnum.Public.name
                     )
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
