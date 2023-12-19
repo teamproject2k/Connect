@@ -92,6 +92,10 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     var showBottomSheet by remember {
         mutableStateOf(false)
     }
+    val currentActivity = LocalActivity.current as BaseActivity
+    var showLogoutDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -111,10 +115,21 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    navigator
+                    navigator,
+                    showLogoutDialog = { showDialog: Boolean -> showLogoutDialog = showDialog }
                 ) {
                     showBottomSheet = false
                 }
+            }
+        }
+        if (showLogoutDialog) {
+            TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
+                subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
+                imageVector = Icons.Default.Warning,
+                iconTint = warning(),
+                onCancel = { showLogoutDialog = false }) {
+                currentActivity.logout()
+                showLogoutDialog = false
             }
         }
     }
@@ -136,12 +151,9 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 private fun BottomSheetSection(
     modifier: Modifier,
     navigator: DestinationsNavigator,
+    showLogoutDialog: (Boolean) -> (Unit),
     onBottomSheetStateClick: () -> Unit
 ) {
-    val currentActivity = LocalActivity.current as BaseActivity
-    var showLogoutDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
     Column(modifier = modifier.fillMaxWidth()) {
         BottomSheetItem(
             imageVector = Icons.Default.Settings,
@@ -154,20 +166,11 @@ private fun BottomSheetSection(
             imageVector = Icons.Default.Logout,
             text = stringResource(id = R.string.logout)
         ) {
-            showLogoutDialog = true
+            showLogoutDialog(true)
             onBottomSheetStateClick()
         }
     }
-    if (showLogoutDialog) {
-        TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
-            subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
-            imageVector = Icons.Default.Warning,
-            iconTint = warning(),
-            onCancel = { showLogoutDialog = false }) {
-            currentActivity.logout()
-            showLogoutDialog = false
-        }
-    }
+
 }
 
 @Composable
