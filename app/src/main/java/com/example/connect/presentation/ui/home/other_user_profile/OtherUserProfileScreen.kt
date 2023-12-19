@@ -196,26 +196,33 @@ private fun ProfileScreen(
     navigator: DestinationsNavigator,
     onOptionsMenuClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ImageSection(
-            requestedUser,
-            viewModel,
-            onOptionsMenuClick
-        )
-        SpacerHeight12()
-        UserProfileUserInfoSection(requestedUser)
-        SpacerHeight24()
-        ActionButtonsSection(currentUser, requestedUser, viewModel)
-        SpacerHeight24()
-        HandleFriendListSection(viewModel = viewModel, navigator)
-        SpacerHeight24()
-        HandlePostSection(viewModel, navigator)
+    if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentEnum.Blocked.name) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = stringResource(R.string.users_details_not_found))
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ImageSection(
+                requestedUser,
+                viewModel,
+                onOptionsMenuClick
+            )
+            SpacerHeight12()
+            UserProfileUserInfoSection(requestedUser)
+            SpacerHeight24()
+            ActionButtonsSection(currentUser, requestedUser, viewModel)
+            SpacerHeight24()
+            HandleFriendListSection(viewModel = viewModel, navigator)
+            SpacerHeight24()
+            HandlePostSection(viewModel, navigator)
+        }
     }
+
 }
 
 @Composable

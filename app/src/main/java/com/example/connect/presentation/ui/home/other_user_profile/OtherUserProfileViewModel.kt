@@ -392,7 +392,6 @@ class OtherUserProfileViewModel @Inject constructor(
                 if (fireBaseId != null) {
                     val userDetailsFromServerResponseState =
                         getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
-
                     if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
                         addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                         currentUserState.value = userDetailsFromServerResponseState.data
