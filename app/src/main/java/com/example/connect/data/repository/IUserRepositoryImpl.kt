@@ -553,7 +553,7 @@ class IUserRepositoryImpl @Inject constructor(
                             StatusWithCurrentEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserStatus,
+                        currentUserFirebaseId,
                         StatusWithCurrentEnum.NotFriends.name
                     )
 
@@ -617,7 +617,7 @@ class IUserRepositoryImpl @Inject constructor(
 
                     // Get the requested user's status with the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserStatus,
+                        currentUserFirebaseId,
                         StatusWithCurrentEnum.NotFriends.name
                     )
 
