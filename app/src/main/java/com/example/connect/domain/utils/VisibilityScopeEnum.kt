@@ -1,4 +1,4 @@
-package com.example.connect.common
+package com.example.connect.domain.utils
 
 enum class VisibilityScopeEnum {
     Public,

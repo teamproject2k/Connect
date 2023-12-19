@@ -1,6 +1,6 @@
 package com.example.connect.data.models.user
 
-import com.example.connect.common.VisibilityScopeEnum
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper

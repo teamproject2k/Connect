@@ -10,14 +10,16 @@ import android.os.Vibrator
 import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.database.getLongOrNull
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
-import com.example.connect.common.VisibilityScopeEnum
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.models.VisibilityScope
@@ -311,6 +313,7 @@ object FunctionHelper {
      * @param uri The URI of the media to play.
      * @return The ExoPlayer instance.
      */
+    @OptIn(UnstableApi::class)
     fun getExoPlayer(context: Context, uri: String): ExoPlayer {
         // Create an ExoPlayer instance.
         val exoPlayer = ExoPlayer.Builder(context)

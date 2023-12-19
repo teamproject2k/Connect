@@ -1,7 +1,7 @@
 package com.example.connect.presentation.ui.models
 
 import androidx.annotation.DrawableRes
-import com.example.connect.common.VisibilityScopeEnum
+import com.example.connect.domain.utils.VisibilityScopeEnum
 
 data class VisibilityScope(
     val id: Int,

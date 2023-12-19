@@ -30,13 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum.EXCEPTION
-import com.example.connect.common.RequestStatusEnum.LOADING
-import com.example.connect.common.RequestStatusEnum.NONE
-import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.LoaderDialog
@@ -294,12 +291,12 @@ fun HandleUpdateGenderVisibilityStateFlow(
     }
     val updateUserGenderState = viewModel.updateGenderVisibilityStateFlow.collectAsState().value
     when (updateUserGenderState.status) {
-        LOADING -> {
+        RequestStatusEnum.LOADING -> {
             LoaderDialog(stringResource(R.string.updating_gender_visibility))
             isResponseHandled = false
         }
 
-        SUCCESS -> {
+        RequestStatusEnum.SUCCESS -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.visibility_updated_successfully))
                 homeSharedViewModel.usersDetails.genderVisibility =
@@ -308,7 +305,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
             }
         }
 
-        EXCEPTION -> {
+        RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateUserGenderState.message
@@ -323,7 +320,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
             }
         }
 
-        NONE -> {
+        RequestStatusEnum.NONE -> {
             // no need to handle this
         }
     }
@@ -340,12 +337,12 @@ fun HandleUpdateDobVisibilityStateFlow(
     }
     val updateDobVisibilityState = viewModel.updateDobVisibilityStateFlow.collectAsState().value
     when (updateDobVisibilityState.status) {
-        LOADING -> {
+        RequestStatusEnum.LOADING -> {
             LoaderDialog(stringResource(R.string.updating_dob_visibility))
             isResponseHandled = false
         }
 
-        SUCCESS -> {
+        RequestStatusEnum.SUCCESS -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails.dobVisibility =
                     viewModel.dobVisibilityState.value.scopeEnum.name
@@ -354,7 +351,7 @@ fun HandleUpdateDobVisibilityStateFlow(
             }
         }
 
-        EXCEPTION -> {
+        RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateDobVisibilityState.message
@@ -369,7 +366,7 @@ fun HandleUpdateDobVisibilityStateFlow(
             }
         }
 
-        NONE -> {
+        RequestStatusEnum.NONE -> {
             // no need to handle this
         }
     }
@@ -387,12 +384,12 @@ fun HandleUpdateFriendListVisibilityStateFlow(
     val updateFriendListVisibilityState =
         viewModel.updateFriendListVisibilityStateFlow.collectAsState().value
     when (updateFriendListVisibilityState.status) {
-        LOADING -> {
+        RequestStatusEnum.LOADING -> {
             LoaderDialog(stringResource(R.string.updating_friend_list_visibility))
             isResponseHandled = false
         }
 
-        SUCCESS -> {
+        RequestStatusEnum.SUCCESS -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails.friendListVisibility =
                     viewModel.friendListVisibilityState.value.scopeEnum.name
@@ -401,7 +398,7 @@ fun HandleUpdateFriendListVisibilityStateFlow(
             }
         }
 
-        EXCEPTION -> {
+        RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateFriendListVisibilityState.message
@@ -416,7 +413,7 @@ fun HandleUpdateFriendListVisibilityStateFlow(
             }
         }
 
-        NONE -> {
+        RequestStatusEnum.NONE -> {
             // no need to handle this
         }
     }
