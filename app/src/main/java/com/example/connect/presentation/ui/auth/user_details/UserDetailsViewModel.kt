@@ -62,6 +62,9 @@ class UserDetailsViewModel @Inject constructor(
                         createdDate,
                         sharedPreference.deviceId!!,
                         "Connect User",
+                        genderVisibility = VisibilityScopeEnum.Public.name,
+                        dobVisibility = VisibilityScopeEnum.Public.name,
+                        friendListVisibility = VisibilityScopeEnum.Public.name
                     )
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {

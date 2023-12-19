@@ -6,8 +6,6 @@ import android.view.ViewGroup
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +21,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.VideoCameraFront
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -48,13 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,14 +69,13 @@ import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.SpacerWidth12
-import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.VisibilityItem
+import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.PostMediaData
-import com.example.connect.presentation.ui.models.PostVisibilityScope
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -169,7 +161,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 shape = RoundedCornerShape(
                     topEnd = ConstantsHelper.BottomSheetRoundness,
                     topStart = ConstantsHelper.BottomSheetRoundness
-                ),
+                )
             ) {
                 PostVisibilityScopeBottomSheet(
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
@@ -199,23 +191,26 @@ private fun HandleAddPostSection(
     context: Context,
     navigator: DestinationsNavigator
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
         LOADING -> {
             LoaderDialog(stringResource(R.string.uploading_post))
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         SUCCESS -> {
-            context.showToast(stringResource(R.string.post_uploaded_successfully))
-            navigator.popBackStack()
+            if (!isResponseHandled) {
+                context.showToast(stringResource(R.string.post_uploaded_successfully))
+                navigator.popBackStack()
+                isResponseHandled = true
+            }
         }
 
         EXCEPTION -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 if (addPostState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
@@ -229,7 +224,7 @@ private fun HandleAddPostSection(
                     "AddPostScreen",
                     addPostState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -247,47 +242,11 @@ private fun PostVisibilityScopeBottomSheet(
 ) {
     Column(modifier = modifier) {
         viewModel.postVisibilityScopeList.forEach { postScope ->
-            PostVisibilityScopeBottomSheetItem(postScope) {
+            VisibilityScopeBottomSheetItem(postScope) {
                 viewModel.currentPostVisibilityState.value = postScope
                 onDismissRequest()
             }
         }
-    }
-}
-
-@Composable
-private fun PostVisibilityScopeBottomSheetItem(
-    postVisibilityScope: PostVisibilityScope,
-    onClick: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onClick()
-                }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                painter = painterResource(id = postVisibilityScope.drawableId),
-                contentDescription = postVisibilityScope.scopeName
-            )
-            SpacerWidth12()
-            Column {
-                Text(
-                    text = postVisibilityScope.scopeName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = postVisibilityScope.scopeDescription,
-                    fontSize = 13.sp
-                )
-            }
-        }
-        Divider()
     }
 }
 
@@ -377,6 +336,7 @@ private fun TopDetailsSection(
     sharedViewModel: HomeSharedViewModel,
     onVisibilityScopeClick: () -> Unit
 ) {
+    val currentSelectedPostVisibility = viewModel.currentPostVisibilityState.value
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -387,40 +347,14 @@ private fun TopDetailsSection(
             user = sharedViewModel.usersDetails,
             modifier = Modifier.weight(1f)
         )
-        PostVisibilityInTopSection(viewModel) {
+        VisibilityItem(
+            drawableId = currentSelectedPostVisibility.drawableId,
+            scopeName = currentSelectedPostVisibility.scopeName
+        ) {
             onVisibilityScopeClick()
         }
     }
 }
-
-@Composable
-private fun PostVisibilityInTopSection(
-    viewModel: AddPostViewModel,
-    onClick: () -> Unit
-) {
-    val currentSelectedPostVisibility = viewModel.currentPostVisibilityState.value
-    Row(
-        verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .border(
-                1.dp, Color(0x80000000),
-                RoundedCornerShape(12.dp),
-            )
-            .clickable {
-                onClick()
-            }
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Image(
-            painterResource(id = currentSelectedPostVisibility.drawableId),
-            contentDescription = currentSelectedPostVisibility.scopeName,
-            modifier = Modifier.size(14.dp)
-        )
-        SpacerWidth6()
-        Text(text = currentSelectedPostVisibility.scopeName, fontSize = 12.sp)
-    }
-}
-
 
 @Composable
 private fun PostCaptionField(viewModel: AddPostViewModel) {

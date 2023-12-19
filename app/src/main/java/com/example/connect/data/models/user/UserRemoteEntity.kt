@@ -1,9 +1,9 @@
 package com.example.connect.data.models.user
 
+import com.example.connect.common.VisibilityScopeEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
-
 
 data class UserRemoteEntity(
     val firebaseUserId: String,
@@ -17,7 +17,10 @@ data class UserRemoteEntity(
     val bio: String,
     val profilePhoto: String? = null,
     val coverPhoto: String? = null,
-    val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
+    val otherUsersStatus: MutableMap<String, String> = mutableMapOf(),
+    val genderVisibility: String = VisibilityScopeEnum.Public.name,
+    val dobVisibility: String = VisibilityScopeEnum.Public.name,
+    val friendListVisibility: String = VisibilityScopeEnum.Public.name
 ) {
     constructor() : this("1", "", "", "", -1, 0, 0, "", "")
 
@@ -60,7 +63,10 @@ data class UserRemoteEntity(
             friendList,
             requestedFriendRequestList,
             receivedFriendRequestList,
-            blockedUsersList
+            blockedUsersList,
+            genderVisibility,
+            dobVisibility,
+            friendListVisibility
         )
     }
 }

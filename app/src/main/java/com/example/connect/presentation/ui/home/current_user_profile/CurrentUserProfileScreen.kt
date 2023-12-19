@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,6 +92,10 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     var showBottomSheet by remember {
         mutableStateOf(false)
     }
+    val currentActivity = LocalActivity.current as BaseActivity
+    var showLogoutDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -110,10 +115,21 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    navigator
-                ) { showSheet ->
-                    showBottomSheet = !showSheet
+                    navigator,
+                    showLogoutDialog = { showDialog: Boolean -> showLogoutDialog = showDialog }
+                ) {
+                    showBottomSheet = false
                 }
+            }
+        }
+        if (showLogoutDialog) {
+            TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
+                subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
+                imageVector = Icons.Default.Warning,
+                iconTint = warning(),
+                onCancel = { showLogoutDialog = false }) {
+                currentActivity.logout()
+                showLogoutDialog = false
             }
         }
     }
@@ -135,36 +151,23 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 private fun BottomSheetSection(
     modifier: Modifier,
     navigator: DestinationsNavigator,
-    onBottomSheetStateChange: (showSheet: Boolean) -> Unit
+    showLogoutDialog: (Boolean) -> (Unit),
+    onBottomSheetStateClick: () -> Unit
 ) {
-    val currentActivity = LocalActivity.current as BaseActivity
-    var showLogoutDialog by remember {
-        mutableStateOf(false)
-    }
     Column(modifier = modifier.fillMaxWidth()) {
         BottomSheetItem(
             imageVector = Icons.Default.Settings,
             text = stringResource(R.string.settings)
         ) {
-            onBottomSheetStateChange(false)
+            onBottomSheetStateClick()
             navigator.navigate(SettingsScreenDestination)
         }
         BottomSheetItem(
             imageVector = Icons.Default.Logout,
             text = stringResource(id = R.string.logout)
         ) {
-            showLogoutDialog = true
-            onBottomSheetStateChange(false)
-        }
-    }
-    if (showLogoutDialog) {
-        TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
-            subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
-            imageVector = Icons.Default.Warning,
-            iconTint = warning(),
-            onCancel = { showLogoutDialog = false }) {
-            currentActivity.logout()
-            showLogoutDialog = false
+            showLogoutDialog(true)
+            onBottomSheetStateClick()
         }
     }
 }
@@ -195,7 +198,6 @@ private fun ProfileScreen(
 private fun ImageSection(
     userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
 ) {
-
     var isProfilePhotoExpanded by remember {
         mutableStateOf(false)
     }
@@ -274,7 +276,6 @@ private fun ImageSection(
         }
     }
 }
-
 
 @Composable
 private fun HandleFriendListSection(

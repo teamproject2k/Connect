@@ -10,17 +10,6 @@ import android.os.Vibrator
 import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RequestPage
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.RequestPage
-import androidx.compose.material.icons.outlined.Search
 import androidx.core.content.ContextCompat
 import androidx.core.database.getLongOrNull
 import androidx.media3.common.MediaItem
@@ -28,15 +17,10 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.common.VisibilityScopeEnum
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
-import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
-import com.example.connect.presentation.ui.destinations.HomeScreenDestination
-import com.example.connect.presentation.ui.destinations.SearchScreenDestination
-import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
-import com.example.connect.presentation.ui.models.BottomAppBarItemData
-import com.example.connect.presentation.ui.models.PostVisibilityScope
+import com.example.connect.presentation.ui.models.VisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,7 +59,6 @@ object FunctionHelper {
         return formatter.format(date)
     }
 
-
     /**
      * Gets the user ID for a given formatted name and current count.
      *
@@ -91,7 +74,6 @@ object FunctionHelper {
         return userId
     }
 
-
     /**
      * Shows a toast message.
      *
@@ -101,7 +83,6 @@ object FunctionHelper {
     fun Context.showToast(message: String, toastLength: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this, message, toastLength).show()
     }
-
 
     /**
      * Checks if the network is available.
@@ -127,7 +108,6 @@ object FunctionHelper {
         }
         return isNetworkAvailable
     }
-
 
     /**
      * Formats a name by capitalizing the first letter of each word.
@@ -155,39 +135,174 @@ object FunctionHelper {
         }
     }
 
-
     /**
      * Gets the list of post visibility scopes.
      *
      * @param context The context.
      * @return The list of post visibility scopes.
      */
-    fun getPostVisibilityList(context: Context): List<PostVisibilityScope> {
+    fun getPostVisibilityList(context: Context): List<VisibilityScope> {
         // Create a list of post visibility scopes.
-        val postVisibilityScopeList = arrayListOf<PostVisibilityScope>()
+        val postVisibilityScopeList = arrayListOf<VisibilityScope>()
 
         // Add the public visibility scope to the list.
         postVisibilityScopeList.add(
-            PostVisibilityScope(
+            VisibilityScope(
                 0,
                 context.getString(R.string.public_visibility),
+                VisibilityScopeEnum.Public,
                 context.getString(R.string.this_post_will_be_visible_to_every_connect_user),
                 R.drawable.ic_lock_open
             )
         )
 
-        // Add the private visibility scope to the list.
+        // Add the friends only visibility scope to the list.
         postVisibilityScopeList.add(
-            PostVisibilityScope(
+            VisibilityScope(
                 1,
-                context.getString(R.string.private_visibility),
+                context.getString(R.string.friends_only),
+                VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
-                R.drawable.ic_lock_close
+                R.drawable.ic_lock_friends_only
             )
         )
         return postVisibilityScopeList
     }
 
+    /**
+     * Gets the list of gender visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of gender visibility scopes.
+     */
+    fun getGenderVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of gender visibility scopes.
+        val genderVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                VisibilityScopeEnum.Public,
+                context.getString(R.string.your_gender_will_be_visible_to_everyone),
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.friends_only),
+                VisibilityScopeEnum.FriendsOnly,
+                context.getString(R.string.your_gender_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_friends_only
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                2,
+                context.getString(R.string.private_visibility),
+                VisibilityScopeEnum.Private,
+                context.getString(R.string.your_gender_will_only_be_visible_to_you),
+                R.drawable.ic_lock_close
+            )
+        )
+        return genderVisibilityScopeList
+    }
+
+    /**
+     * Gets the list of dob visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of dob visibility scopes.
+     */
+    fun getDobVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of dob visibility scopes.
+        val dobVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                VisibilityScopeEnum.Public,
+                context.getString(R.string.your_dob_will_be_visible_to_everyone),
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.friends_only),
+                VisibilityScopeEnum.FriendsOnly,
+                context.getString(R.string.your_dob_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_friends_only
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                2,
+                context.getString(R.string.private_visibility),
+                VisibilityScopeEnum.Private,
+                context.getString(R.string.your_dob_will_only_be_visible_to_you),
+                R.drawable.ic_lock_close
+            )
+        )
+        return dobVisibilityScopeList
+    }
+
+    /**
+     * Gets the list of friendList visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of friendList visibility scopes.
+     */
+    fun getFriendListVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of friend list visibility scopes.
+        val friendListVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                VisibilityScopeEnum.Public,
+                context.getString(R.string.your_friends_will_be_visible_to_everyone),
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the friends only visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.friends_only),
+                VisibilityScopeEnum.FriendsOnly,
+                context.getString(R.string.your_friends_will_only_be_visible_to_your_friends),
+                R.drawable.ic_lock_friends_only
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                2,
+                context.getString(R.string.private_visibility),
+                VisibilityScopeEnum.Private,
+                context.getString(R.string.your_friends_will_only_be_visible_to_you),
+                R.drawable.ic_lock_close
+            )
+        )
+        return friendListVisibilityScopeList
+    }
 
     /**
      * Gets an ExoPlayer instance.
@@ -258,58 +373,6 @@ object FunctionHelper {
         return formattedString.trimEnd().lowercase()
     }
 
-
-    /**
-     * Gets the list of items to be displayed in the bottom navigation bar of home activity.
-     *
-     * @param context The context of the application.
-     * @return The list of items to be displayed in the bottom navigation bar.
-     */
-    fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
-        val bottomNavList = arrayListOf<BottomAppBarItemData>()
-        bottomNavList.add(
-            BottomAppBarItemData(
-                context.getString(R.string.home),
-                Icons.Filled.Home,
-                Icons.Outlined.Home,
-                HomeScreenDestination.route
-            )
-        )
-        bottomNavList.add(
-            BottomAppBarItemData(
-                context.getString(R.string.search),
-                Icons.Filled.Search,
-                Icons.Outlined.Search,
-                SearchScreenDestination.route
-            )
-        )
-        bottomNavList.add(
-            BottomAppBarItemData(
-                context.getString(R.string.add_post),
-                Icons.Filled.AddCircle,
-                Icons.Outlined.AddCircleOutline,
-                AddPostScreenDestination.route
-            )
-        )
-        bottomNavList.add(
-            BottomAppBarItemData(
-                context.getString(R.string.requests),
-                Icons.Filled.RequestPage,
-                Icons.Outlined.RequestPage,
-                UserRequestScreenDestination.route
-            )
-        )
-        bottomNavList.add(
-            BottomAppBarItemData(
-                context.getString(R.string.profile),
-                Icons.Filled.Person,
-                Icons.Outlined.Person,
-                CurrentUserProfileScreenDestination.route
-            )
-        )
-        return bottomNavList
-    }
-
     fun getStatusWithCurrentUser(
         currentUsersBean: UsersBean,
         requiredUsersBean: UsersBean
@@ -336,7 +399,6 @@ object FunctionHelper {
             }
         }
     }
-
 
     fun getFileSize(contentResolver: ContentResolver, uri: Uri): Long {
         val cursor = contentResolver.query(uri, null, null, null, null)
