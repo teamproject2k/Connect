@@ -20,7 +20,10 @@ data class UsersDbEntity(
     val bio: String,
     val profilePhoto: String? = null,
     val coverPhoto: String? = null,
-    val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
+    val otherUsersStatus: MutableMap<String, String> = mutableMapOf(),
+    val genderVisibility: String = "Public",
+    val dobVisibility: String = "Public",
+    val friendListVisibility: String = "Public"
 ) {
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()

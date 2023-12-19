@@ -22,7 +22,10 @@ data class UsersBean(
     val friendList: MutableList<String> = mutableListOf(),
     val requestedFriendRequestList: MutableList<String> = mutableListOf(),
     val receivedFriendRequestList: MutableList<String> = mutableListOf(),
-    val blockedUsersList: MutableList<String> = mutableListOf()
+    val blockedUsersList: MutableList<String> = mutableListOf(),
+    val genderVisibility: String = "Public",
+    val dobVisibility: String = "Public",
+    val friendListVisibility: String = "Public"
 ) : Parcelable {
     fun toUserRemoteEntity(): UserRemoteEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
@@ -50,7 +53,10 @@ data class UsersBean(
             bio,
             profilePhoto,
             coverPhoto,
-            otherUsersStatus
+            otherUsersStatus,
+            genderVisibility,
+            dobVisibility,
+            friendListVisibility
         )
     }
 

@@ -170,7 +170,6 @@ private fun BottomSheetSection(
             onBottomSheetStateClick()
         }
     }
-
 }
 
 @Composable
@@ -277,7 +276,6 @@ private fun ImageSection(
         }
     }
 }
-
 
 @Composable
 private fun HandleFriendListSection(

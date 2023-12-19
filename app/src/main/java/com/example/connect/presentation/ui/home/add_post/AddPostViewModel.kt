@@ -16,7 +16,7 @@ import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.models.PostMediaData
-import com.example.connect.presentation.ui.models.PostVisibilityScope
+import com.example.connect.presentation.ui.models.VisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -36,8 +36,8 @@ class AddPostViewModel @Inject constructor(
 ) : BaseViewModel() {
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<PostMediaData?> = mutableStateOf(null)
-    lateinit var postVisibilityScopeList: List<PostVisibilityScope>
-    lateinit var currentPostVisibilityState: MutableState<PostVisibilityScope>
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
+    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
     var isFirstTimeSetup = true
     val snackBarMessageState = mutableStateOf("")
     private val _uploadPostStateFlow: MutableStateFlow<ResponseState<Nothing>> =

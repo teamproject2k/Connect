@@ -134,4 +134,10 @@
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
     <string name="error_while_getting_updated_data_please_reopen_app">Error while getting updated data, Please reopen app</string>
     <string name="profile_photo">profile photo</string>
+    <string name="settings_and_privacy">Settings And Privacy</string>
+    <string name="gender_privacy">Gender Privacy</string>
+    <string name="dob_privacy">DOB Privacy</string>
+    <string name="friend_list_privacy">Friend List Privacy</string>
+    <string name="requested_users">Requested Users</string>
+    <string name="blocked_users">Blocked Users</string>
 </resources>

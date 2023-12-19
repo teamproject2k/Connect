@@ -19,7 +19,7 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
 import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.presentation.ui.models.PostVisibilityScope
+import com.example.connect.presentation.ui.models.VisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,7 +58,6 @@ object FunctionHelper {
         return formatter.format(date)
     }
 
-
     /**
      * Gets the user ID for a given formatted name and current count.
      *
@@ -74,7 +73,6 @@ object FunctionHelper {
         return userId
     }
 
-
     /**
      * Shows a toast message.
      *
@@ -84,7 +82,6 @@ object FunctionHelper {
     fun Context.showToast(message: String, toastLength: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this, message, toastLength).show()
     }
-
 
     /**
      * Checks if the network is available.
@@ -110,7 +107,6 @@ object FunctionHelper {
         }
         return isNetworkAvailable
     }
-
 
     /**
      * Formats a name by capitalizing the first letter of each word.
@@ -138,20 +134,19 @@ object FunctionHelper {
         }
     }
 
-
     /**
      * Gets the list of post visibility scopes.
      *
      * @param context The context.
      * @return The list of post visibility scopes.
      */
-    fun getPostVisibilityList(context: Context): List<PostVisibilityScope> {
+    fun getPostVisibilityList(context: Context): List<VisibilityScope> {
         // Create a list of post visibility scopes.
-        val postVisibilityScopeList = arrayListOf<PostVisibilityScope>()
+        val postVisibilityScopeList = arrayListOf<VisibilityScope>()
 
         // Add the public visibility scope to the list.
         postVisibilityScopeList.add(
-            PostVisibilityScope(
+            VisibilityScope(
                 0,
                 context.getString(R.string.public_visibility),
                 context.getString(R.string.this_post_will_be_visible_to_every_connect_user),
@@ -161,7 +156,7 @@ object FunctionHelper {
 
         // Add the private visibility scope to the list.
         postVisibilityScopeList.add(
-            PostVisibilityScope(
+            VisibilityScope(
                 1,
                 context.getString(R.string.private_visibility),
                 context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
@@ -171,6 +166,101 @@ object FunctionHelper {
         return postVisibilityScopeList
     }
 
+    /**
+     * Gets the list of gender visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of gender visibility scopes.
+     */
+    fun getGenderVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of post visibility scopes.
+        val genderVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                "Your gender will be visible to everyone",
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        genderVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.private_visibility),
+                "Your gender will only be visible to you",
+                R.drawable.ic_lock_close
+            )
+        )
+        return genderVisibilityScopeList
+    }
+
+    /**
+     * Gets the list of dob visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of dob visibility scopes.
+     */
+    fun getDobVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of post visibility scopes.
+        val dobVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                "Your date of birth will be visible to everyone",
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        dobVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.private_visibility),
+                "Your date of birth will only be visible to you",
+                R.drawable.ic_lock_close
+            )
+        )
+        return dobVisibilityScopeList
+    }
+
+    /**
+     * Gets the list of friendList visibility scopes.
+     *
+     * @param context The context.
+     * @return The list of friendList visibility scopes.
+     */
+    fun getFriendListVisibilityList(context: Context): List<VisibilityScope> {
+        // Create a list of post visibility scopes.
+        val friendListVisibilityScopeList = arrayListOf<VisibilityScope>()
+
+        // Add the public visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                0,
+                context.getString(R.string.public_visibility),
+                "Your friend list will be visible to everyone",
+                R.drawable.ic_lock_open
+            )
+        )
+
+        // Add the private visibility scope to the list.
+        friendListVisibilityScopeList.add(
+            VisibilityScope(
+                1,
+                context.getString(R.string.private_visibility),
+                "Your friend list will only be visible to you",
+                R.drawable.ic_lock_close
+            )
+        )
+        return friendListVisibilityScopeList
+    }
 
     /**
      * Gets an ExoPlayer instance.
