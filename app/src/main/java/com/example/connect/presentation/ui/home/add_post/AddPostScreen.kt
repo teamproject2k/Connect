@@ -58,10 +58,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
@@ -165,9 +165,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     viewModel = viewModel
                 ) {
-                    coroutineScope.launch {
-                        showBottomSheet = false
-                    }
+                    showBottomSheet = false
                 }
             }
         }
