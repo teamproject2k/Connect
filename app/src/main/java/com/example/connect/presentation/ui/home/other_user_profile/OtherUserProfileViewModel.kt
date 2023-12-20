@@ -203,7 +203,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 val responseState =
                     acceptFriendRequestUseCase.invoke(
                         currentUserState.value.firebaseUserId,
-                        currentUserState.value.firebaseUserId
+                        requiredUserState.value.firebaseUserId
                     )
                 if (responseState.status == RequestStatusEnum.SUCCESS) {
                     currentUserState.value.receivedFriendRequestList.remove(requiredUserState.value.firebaseUserId)
