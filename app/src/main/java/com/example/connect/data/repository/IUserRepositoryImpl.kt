@@ -12,6 +12,7 @@ import com.example.connect.domain.repository.IUserRepository
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -679,7 +680,7 @@ class IUserRepositoryImpl @Inject constructor(
         userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration {
         return fireStore.collection(FirebaseConstants.USER_KEY).document(firebaseUserId)
-            .addSnapshotListener { document, error ->
+            .addSnapshotListener(MetadataChanges.EXCLUDE) { document, error ->
                 if (error == null && document != null && document.exists()) {
                     val requiredUser = document.toObject(UserRemoteEntity::class.java)
                     if (requiredUser != null) {
