@@ -56,8 +56,13 @@ object FunctionHelper {
      * @return The formatted date.
      */
     fun getFormattedDate(timeInMillis: Long): String {
+        // Create a Date object from the time in milliseconds.
         val date = Date(timeInMillis)
+
+        // Create a SimpleDateFormat object to format the date.
         val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+        // Format the date and return the result.
         return formatter.format(date)
     }
 
@@ -83,7 +88,11 @@ object FunctionHelper {
      * @param toastLength The length of the toast.
      */
     fun Context.showToast(message: String, toastLength: Int = Toast.LENGTH_SHORT) {
-        Toast.makeText(this, message, toastLength).show()
+        // Create a Toast object with the given message and toast length.
+        val toast = Toast.makeText(this, message, toastLength)
+
+        // Show the Toast.
+        toast.show()
     }
 
     /**
@@ -348,7 +357,6 @@ object FunctionHelper {
         // Convert the dp value to pixels using the device's display metrics.
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
-
 
     /**
      * Gets the current time in milliseconds.
