@@ -1,6 +1,6 @@
 package com.example.connect.domain.enums
 
-enum class StatusWithCurrentEnum {
+enum class StatusWithCurrentUserRemoteEnum {
     Friends,
     RequestedByCurrentUser,
     RequestedByOtherUser,

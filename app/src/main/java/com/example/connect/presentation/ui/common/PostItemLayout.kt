@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.Divider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +27,7 @@ import com.example.connect.domain.models.UsersBean
 fun PostItemLayout(usersDetails: UsersBean) {
     Column {
         PostTopSection(usersDetails)
-        Divider(color = ColorsHelper.lightGray().copy(0.4f))
+        DividerLightGrayAlpha40()
         PostBottomSection()
     }
 }
@@ -65,17 +64,17 @@ fun PostBottomSection() {
             }
         }
         Text(
-            text = stringResource(R.string.likeCount_likes, 594223),
+            text = stringResource(R.string.like_count_likes, 594223),
             modifier = Modifier.padding(horizontal = 16.dp),
             fontWeight = FontWeight.Medium,
             fontSize = 12.sp
         )
 
-        //   PostCaption()
+        PostCaption()
 
         SpacerHeight6()
         Text(
-            text = "View all 725 comments",
+            text = stringResource(R.string.view_all_comment_count_comments, 725),
             modifier = Modifier.padding(horizontal = 16.dp),
             fontWeight = FontWeight.Medium,
             fontSize = 13.sp,
@@ -87,7 +86,6 @@ fun PostBottomSection() {
 @Composable
 fun PostCaption() {
     SpacerHeight6()
-    PostCaption()
     val originalText =
         "aryanmishra@1 : Diwana kar raha hai tera roop sunehera, musalsal kar raha hai mujhko ab ye chehra"
 

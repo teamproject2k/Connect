@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -145,7 +145,7 @@ private fun HandleGetUserDetailsState(
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == ErrorCodes.NoUserFound) context.getString(
+                    if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
                     )
                     else userDetailsState.message.toString()
@@ -184,7 +184,7 @@ private fun HandleSendOTPState(
 
         RequestStatusEnum.SUCCESS -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
-            if (sendOtpState.data?.first == FirebaseConstants.AutoLogin) {
+            if (sendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(sendOtpState.data.second)
                 } else {
@@ -207,7 +207,7 @@ private fun HandleSendOTPState(
             if (!isExceptionHandled) {
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 viewModel.snackBarMessageState.value =
-                    if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == ErrorCodes.NoUserFound) context.getString(
+                    if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
                     )
                     else sendOtpState.message.toString()

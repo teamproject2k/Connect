@@ -71,7 +71,7 @@
     <string name="post">Post</string>
     <string name="create_post">Create Post</string>
     <string name="public_visibility">Public</string>
-    <string name="friends_only">Friends Only</string>
+    <string name="friends_only_visibility">Friends Only</string>
     <string name="private_visibility">Private</string>
     <string name="this_post_will_be_visible_to_every_connect_user">This post will be visible to every Connect user</string>
     <string name="this_post_will_only_be_visible_to_your_friends">This post will only be visible to your friends</string>
@@ -130,7 +130,7 @@
     <string name="like_post">Like post</string>
     <string name="comment_on_post">Comment on post</string>
     <string name="share_post">Share post</string>
-    <string name="likeCount_likes">%1$d likes</string>
+    <string name="like_count_likes">%1$d likes</string>
     <string name="video_thumbnail">video thumbnail</string>
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
     <string name="error_while_getting_updated_data_please_reopen_app">Error while getting updated data, Please reopen app</string>
@@ -154,4 +154,7 @@
     <string name="updating_gender_visibility">Updating Gender Visibility...</string>
     <string name="updating_friend_list_visibility">Updating Friend List Visibility...</string>
     <string name="updating_dob_visibility">Updating DOB Visibility...</string>
+    <string name="user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates">User details updated since last update, Please refresh the page to see the latest updates</string>
+    <string name="users_details_not_found">Users details not found</string>
+    <string name="view_all_comment_count_comments">View all %1$d comments</string>
 </resources>

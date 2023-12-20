@@ -10,16 +10,18 @@ import android.os.Vibrator
 import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.database.getLongOrNull
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
-import com.example.connect.common.VisibilityScopeEnum
-import com.example.connect.domain.enums.StatusWithCurrentEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.utils.VisibilityScopeEnum
+import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.models.VisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -160,7 +162,7 @@ object FunctionHelper {
         postVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -194,7 +196,7 @@ object FunctionHelper {
         genderVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_gender_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -239,7 +241,7 @@ object FunctionHelper {
         dobVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_dob_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -284,7 +286,7 @@ object FunctionHelper {
         friendListVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_friends_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -311,6 +313,7 @@ object FunctionHelper {
      * @param uri The URI of the media to play.
      * @return The ExoPlayer instance.
      */
+    @OptIn(UnstableApi::class)
     fun getExoPlayer(context: Context, uri: String): ExoPlayer {
         // Create an ExoPlayer instance.
         val exoPlayer = ExoPlayer.Builder(context)
@@ -373,49 +376,91 @@ object FunctionHelper {
         return formattedString.trimEnd().lowercase()
     }
 
+    /**
+     * Gets the status of the current user with the requested user.
+     *
+     * @param currentUsersBean The current user's bean.
+     * @param requiredUsersBean The required user's bean.
+     * @return The status of the current user with the requested user.
+     */
     fun getStatusWithCurrentUser(
         currentUsersBean: UsersBean,
         requiredUsersBean: UsersBean
     ): String {
-        return when {
-            currentUsersBean.friendList.contains(requiredUsersBean.firebaseUserId) -> {
-                StatusWithCurrentEnum.Friends.name
-            }
-
-            currentUsersBean.blockedUsersList.contains(requiredUsersBean.firebaseUserId) -> {
-                StatusWithCurrentEnum.Blocked.name
-            }
-
-            currentUsersBean.receivedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
-                StatusWithCurrentEnum.RequestedByOtherUser.name
-            }
-
-            currentUsersBean.requestedFriendRequestList.contains(requiredUsersBean.firebaseUserId) -> {
-                StatusWithCurrentEnum.RequestedByCurrentUser.name
-            }
-
-            else -> {
-                StatusWithCurrentEnum.NotFriends.name
-            }
+        // Check if the required user is a friend of the current user.
+        if (currentUsersBean.friendList.contains(requiredUsersBean.firebaseUserId)) {
+            return StatusWithCurrentUserUiEnum.Friends.name
         }
+
+        // Check if the required user has blocked the current user.
+        if (currentUsersBean.blockedUsersList.contains(requiredUsersBean.firebaseUserId)) {
+            return StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
+        }
+
+        if (requiredUsersBean.blockedUsersList.contains(currentUsersBean.firebaseUserId)) {
+            return StatusWithCurrentUserUiEnum.BlockedByOtherUser.name
+        }
+
+        // Check if the required user has sent a friend request to the current user.
+        if (currentUsersBean.receivedFriendRequestList.contains(requiredUsersBean.firebaseUserId)) {
+            return StatusWithCurrentUserUiEnum.RequestedByOtherUser.name
+        }
+
+        // Check if the current user has sent a friend request to the required user.
+        if (currentUsersBean.requestedFriendRequestList.contains(requiredUsersBean.firebaseUserId)) {
+            return StatusWithCurrentUserUiEnum.RequestedByCurrentUser.name
+        }
+
+        // If none of the above conditions are met, then the required user is not a friend of the current user.
+        return StatusWithCurrentUserUiEnum.NotFriends.name
     }
 
+    /**
+     * Gets the file size of a content URI.
+     *
+     * @param contentResolver The content resolver to use.
+     * @param uri The content URI to get the file size of.
+     * @return The file size in bytes.
+     */
     fun getFileSize(contentResolver: ContentResolver, uri: Uri): Long {
+        // Get a cursor for the content URI.
         val cursor = contentResolver.query(uri, null, null, null, null)
+
+        // Initialize the file size to 0.
         var fileSize: Long = 0
+
+        // If the cursor is not null, move to the first row and get the file size.
         cursor?.use {
             if (it.moveToFirst()) {
+                // Get the index of the SIZE column.
                 val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+
+                // Get the file size in bytes.
                 fileSize = it.getLongOrNull(sizeIndex) ?: 0
             }
         }
+
+        // Return the file size.
         return fileSize
     }
 
+    /**
+     * Formats a file size in bytes to a human-readable string.
+     *
+     * @param size The file size in bytes.
+     * @return A human-readable string representing the file size.
+     */
     fun formatFileSize(size: Long): String {
+        // If the file size is 0, return "0 B".
         if (size <= 0) return "0 B"
+
+        // Create an array of units (B, KB, MB, GB, TB).
         val units = arrayOf("B", "KB", "MB", "GB", "TB")
+
+        // Calculate the number of digit groups in the file size.
         val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
+
+        // Return a string formatted with the file size and unit.
         return String.format(
             "%.2f %s",
             size / 1024.0.pow(digitGroups.toDouble()),

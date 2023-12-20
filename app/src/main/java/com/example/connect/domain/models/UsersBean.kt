@@ -3,7 +3,7 @@ package com.example.connect.domain.models
 import android.os.Parcelable
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
-import com.example.connect.domain.enums.StatusWithCurrentEnum
+import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -30,16 +30,16 @@ data class UsersBean(
     fun toUserRemoteEntity(): UserRemoteEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
         friendList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.Friends.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Friends.name
         }
         requestedFriendRequestList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.RequestedByCurrentUser.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name
         }
         receivedFriendRequestList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.RequestedByOtherUser.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name
         }
         blockedUsersList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.Blocked.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Blocked.name
         }
         return UserRemoteEntity(
             firebaseUserId,
@@ -63,16 +63,16 @@ data class UsersBean(
     fun toUserDbEntity(): UsersDbEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
         friendList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.Friends.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Friends.name
         }
         requestedFriendRequestList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.RequestedByCurrentUser.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name
         }
         receivedFriendRequestList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.RequestedByOtherUser.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name
         }
         blockedUsersList.forEach { key ->
-            otherUsersStatus[key] = StatusWithCurrentEnum.Blocked.name
+            otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Blocked.name
         }
         return UsersDbEntity(
             firebaseUserId,

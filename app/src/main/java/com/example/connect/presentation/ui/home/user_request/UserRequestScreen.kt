@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,11 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
@@ -176,7 +175,7 @@ private fun HandleGetFriendsListStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (getFriendsListAsUsersState.message == ErrorCodes.NoUserFound) {
+                if (getFriendsListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {
@@ -217,7 +216,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
 
         RequestStatusEnum.EXCEPTION -> {
             if (!isExceptionHandled) {
-                if (getPendingFriendRequestListAsUsersState.message == ErrorCodes.NoUserFound) {
+                if (getPendingFriendRequestListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {
@@ -390,7 +389,7 @@ fun PosterDetails(
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
             )
-            Text(text = description, fontSize = 12.sp, color = Color.DarkGray)
+            Text(text = description, fontSize = 12.sp, color = ColorsHelper.gray())
             if (isCTAVisible) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -407,7 +406,7 @@ fun PosterDetails(
                             }
                             .weight(1f),
                         textAlign = TextAlign.Center,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         text = positiveButtonText,
                         fontSize = 14.sp)
                     SpacerWidth12()
@@ -415,14 +414,14 @@ fun PosterDetails(
                         modifier = Modifier
                             .padding(top = 6.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.LightGray)
+                            .background(ColorsHelper.lightGray())
                             .padding(vertical = 4.dp)
                             .clickable {
                                 onNegativeButtonClick()
                             }
                             .weight(1f),
                         textAlign = TextAlign.Center,
-                        color = Color.Black,
+                        color = ColorsHelper.black(),
                         text = negativeButtonText,
                         fontSize = 14.sp)
                 }

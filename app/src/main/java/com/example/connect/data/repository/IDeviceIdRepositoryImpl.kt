@@ -1,8 +1,8 @@
 package com.example.connect.data.repository
 
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.repository.IDeviceIdRepository
@@ -24,7 +24,7 @@ class IDeviceIdRepositoryImpl @Inject constructor(
         return try {
             // Get the user's FireStore document reference.
             val documentReference =
-                fireStore.collection(FirebaseConstants.UsersKey).document(fireBaseId)
+                fireStore.collection(FirebaseConstants.USER_KEY).document(fireBaseId)
 
             // Update the user's device ID in the document.
             documentReference.update(
@@ -54,7 +54,7 @@ class IDeviceIdRepositoryImpl @Inject constructor(
         // Get the user document from FireStore.
         return try {
             val result =
-                fireStore.collection(FirebaseConstants.UsersKey).document(firebaseUserId).get()
+                fireStore.collection(FirebaseConstants.USER_KEY).document(firebaseUserId).get()
                     .await()
             // If the user document exists, get the user model from it.
             if (result.exists()) {
@@ -64,11 +64,11 @@ class IDeviceIdRepositoryImpl @Inject constructor(
                     ResponseState.success(userModel.currentLoggedInDeviceId)
                 } else {
                     // If the user model is null, return an error code indicating that no user was found.
-                    ResponseState.error(ErrorCodes.NoUserFound)
+                    ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             } else {
                 // If the user document does not exist, return an error code indicating that no user was found.
-                ResponseState.error(ErrorCodes.NoUserFound)
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
         } catch (exception: Exception) {
             // If an exception occurs, return an error response with the exception message.

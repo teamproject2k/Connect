@@ -3,13 +3,13 @@ package com.example.connect.presentation.ui.auth.user_details
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
-import com.example.connect.common.VisibilityScopeEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.utils.FunctionHelper

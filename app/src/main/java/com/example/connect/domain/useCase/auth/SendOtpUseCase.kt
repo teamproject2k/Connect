@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.auth
 
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IAuthenticationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject

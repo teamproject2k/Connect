@@ -1,4 +1,4 @@
-package com.example.connect.common
+package com.example.connect.domain.network_request_response
 
 data class ResponseState<out T>(val status: RequestStatusEnum, val data: T?, val message: String?) {
     companion object {

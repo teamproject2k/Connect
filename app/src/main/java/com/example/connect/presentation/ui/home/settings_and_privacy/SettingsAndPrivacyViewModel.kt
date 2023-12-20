@@ -5,12 +5,12 @@ import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.common.RequestStatusEnum
-import com.example.connect.common.ResponseState
-import com.example.connect.common.VisibilityScopeEnum
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel

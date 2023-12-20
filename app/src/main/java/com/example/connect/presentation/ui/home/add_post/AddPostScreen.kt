@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.add_post
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.view.ViewGroup
@@ -57,13 +58,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.LoggingHelper
-import com.example.connect.common.LoggingLevelEnum
-import com.example.connect.common.RequestStatusEnum.EXCEPTION
-import com.example.connect.common.RequestStatusEnum.LOADING
-import com.example.connect.common.RequestStatusEnum.NONE
-import com.example.connect.common.RequestStatusEnum.SUCCESS
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
@@ -167,9 +165,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     viewModel = viewModel
                 ) {
-                    coroutineScope.launch {
-                        showBottomSheet = false
-                    }
+                    showBottomSheet = false
                 }
             }
         }
@@ -196,12 +192,12 @@ private fun HandleAddPostSection(
     }
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
-        LOADING -> {
+        RequestStatusEnum.LOADING -> {
             LoaderDialog(stringResource(R.string.uploading_post))
             isResponseHandled = false
         }
 
-        SUCCESS -> {
+        RequestStatusEnum.SUCCESS -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.post_uploaded_successfully))
                 navigator.popBackStack()
@@ -209,9 +205,9 @@ private fun HandleAddPostSection(
             }
         }
 
-        EXCEPTION -> {
+        RequestStatusEnum.EXCEPTION -> {
             if (!isResponseHandled) {
-                if (addPostState.message == ErrorCodes.NoUserFound) {
+                if (addPostState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
                     (LocalActivity.current as BaseActivity).logout()
                 } else {
@@ -228,7 +224,7 @@ private fun HandleAddPostSection(
             }
         }
 
-        NONE -> {
+        RequestStatusEnum.NONE -> {
             // no need to handle it
         }
     }
@@ -291,7 +287,6 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
                 }
             }
         }
-
     }
 }
 
@@ -308,6 +303,7 @@ private fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> U
     )
 }
 
+@SuppressLint("OpaqueUnitKey")
 @Composable
 private fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
     val exoPlayer = remember {

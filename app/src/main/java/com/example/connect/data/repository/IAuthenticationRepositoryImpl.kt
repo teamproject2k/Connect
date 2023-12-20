@@ -1,8 +1,8 @@
 package com.example.connect.data.repository
 
-import com.example.connect.common.ErrorCodes
-import com.example.connect.common.FirebaseConstants
-import com.example.connect.common.ResponseState
+import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -35,13 +35,13 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                     // If the user is already logged in, send a success response with the user's ID.
                     responseStateFlow.value = ResponseState.success(
                         Pair(
-                            FirebaseConstants.AutoLogin,
+                            FirebaseConstants.AUTO_LOGIN,
                             firebaseAuth.currentUser!!.uid
                         )
                     )
                 } else {
                     // If the user is not logged in, send an error response.
-                    responseStateFlow.value = ResponseState.error(ErrorCodes.NoUserFound)
+                    responseStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
 
@@ -90,7 +90,7 @@ class IAuthenticationRepositoryImpl @Inject constructor(
             } else {
                 // If the sign in fails, sign out the user and return an error response.
                 firebaseAuth.signOut()
-                ResponseState.error(ErrorCodes.NoUserFound)
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
         } catch (exception: Exception) {
             // If there is an exception, return an error response with the exception message.
