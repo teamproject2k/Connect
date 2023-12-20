@@ -345,6 +345,7 @@ object FunctionHelper {
      * @return The pixel value.
      */
     fun convertDpToPixel(dp: Float, context: Context): Float {
+        // Convert the dp value to pixels using the device's display metrics.
         return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
@@ -355,7 +356,12 @@ object FunctionHelper {
      * @return The current time in milliseconds.
      */
     fun getCurrentTimeInMillis(): Long {
-        return Date().time
+        // Get the current date and time.
+        val date = Date()
+
+        /* Get the time in milliseconds since January 1, 1970.
+        and return the time in milliseconds.*/
+        return date.time
     }
 
     /**
