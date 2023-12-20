@@ -2,7 +2,7 @@ package com.example.connect.data.models.user
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.connect.domain.enums.StatusWithCurrentEnum
+import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
@@ -32,19 +32,19 @@ data class UsersDbEntity(
         val blockedUsersList = mutableListOf<String>()
         otherUsersStatus.forEach { entry ->
             when (entry.value) {
-                StatusWithCurrentEnum.Friends.name -> {
+                StatusWithCurrentUserRemoteEnum.Friends.name -> {
                     friendList.add(entry.key)
                 }
 
-                StatusWithCurrentEnum.RequestedByCurrentUser.name -> {
+                StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name -> {
                     requestedFriendRequestList.add(entry.key)
                 }
 
-                StatusWithCurrentEnum.RequestedByOtherUser.name -> {
+                StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name -> {
                     receivedFriendRequestList.add(entry.key)
                 }
 
-                StatusWithCurrentEnum.Blocked.name -> {
+                StatusWithCurrentUserRemoteEnum.Blocked.name -> {
                     blockedUsersList.add(entry.key)
                 }
             }

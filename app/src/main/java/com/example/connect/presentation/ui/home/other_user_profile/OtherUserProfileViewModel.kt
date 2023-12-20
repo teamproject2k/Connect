@@ -4,19 +4,16 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
-import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.BlockUserUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
+import com.example.connect.domain.useCase.user.LiveUserObserverFromRemoteUseCase
 import com.example.connect.domain.useCase.user.RemoveFriendRequestUseCase
 import com.example.connect.domain.useCase.user.SendFriendRequestUseCase
 import com.example.connect.domain.useCase.user.UnBlockUserUseCase
@@ -24,8 +21,10 @@ import com.example.connect.domain.useCase.user.UnfriendAndBlockUserUseCase
 import com.example.connect.domain.useCase.user.UnfriendUserUseCase
 import com.example.connect.domain.useCase.user.UpdateOtherUserStatusOnDbUseCase
 import com.example.connect.domain.useCase.user.WithdrawFriendRequestUseCase
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.utils.FunctionHelper
+import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,9 +36,7 @@ import javax.inject.Inject
 @SuppressLint("StateNameRule")
 @HiltViewModel
 class OtherUserProfileViewModel @Inject constructor(
-    private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
-    private val addPostListToDbUseCase: AddPostListToDbUseCase,
     private val getUserDetailsFromIdsUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
     private val sendFriendRequestUseCase: SendFriendRequestUseCase,
     private val withdrawFriendRequestUseCase: WithdrawFriendRequestUseCase,
@@ -50,21 +47,20 @@ class OtherUserProfileViewModel @Inject constructor(
     private val updateOtherUserStatusOnDbUseCase: UpdateOtherUserStatusOnDbUseCase,
     private val unfriendAndBlockUserUseCase: UnfriendAndBlockUserUseCase,
     private val unfriendUserUseCase: UnfriendUserUseCase,
-    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase
+    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val liveUserObserverFromRemoteUseCase: LiveUserObserverFromRemoteUseCase
 ) : BaseViewModel() {
+
     var isDataInitialized = false
-    lateinit var currentUserState: MutableState<UsersBean>
+    val snackBarMessageState = mutableStateOf("")
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val friendsDetailsStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _friendsDetailsStateFlow
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
     val postDetailsStateFlow: StateFlow<ResponseState<List<PostBean>>> get() = _postDetailsStateFlow
 
-    val snackBarMessageState = mutableStateOf("")
 
     private val _sendFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
@@ -98,44 +94,39 @@ class OtherUserProfileViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val unfriendAndBlockUserStateFlow: StateFlow<ResponseState<List<Nothing>>> get() = _unfriendAndBlockUserStateFlow
 
-    private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+    private val _liveObserveRequiredUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
         MutableStateFlow(ResponseState.none())
-    val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
+    val liveObserveRequiredUserDetailsStateFlow: StateFlow<ResponseState<UsersBean>> get() = _liveObserveRequiredUserDetailsStateFlow
+
+    private val _liveObserveCurrentUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+        MutableStateFlow(ResponseState.none())
+    val liveObserveCurrentUserDetailsStateFlow: StateFlow<ResponseState<UsersBean>> get() = _liveObserveCurrentUserDetailsStateFlow
+
+    private val _userDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+        MutableStateFlow(ResponseState.none())
+    val userDetailsStateFlow: StateFlow<ResponseState<UsersBean>> get() = _userDetailsStateFlow
 
     val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
+    private lateinit var liveObserveRequiredUserListener: ListenerRegistration
+    private lateinit var liveObserveCurrentUserListener: ListenerRegistration
+
+    lateinit var requiredUserState: MutableState<UsersBean>
+    lateinit var currentUserState: MutableState<UsersBean>
+
     fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
         statusWithCurrentUserState.value =
             FunctionHelper.getStatusWithCurrentUser(currentUser, requestedUser)
         currentUserState = mutableStateOf(currentUser)
+        requiredUserState = mutableStateOf(requestedUser)
         isDataInitialized = true
     }
 
-    /**
-     * Gets the details of the post.
-     */
-    fun getPostDetails() {
+
+    fun getPostDetails(fireBaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
-                val fireBaseId = fireBaseAuth.currentUser?.uid
-                if (fireBaseId != null) {
-                    val postDetails = getPostDetailsFromDbUseCase.invoke(fireBaseId)
-                    if (postDetails.isNotEmpty()) {
-                        _postDetailsStateFlow.value = ResponseState.success(postDetails)
-                    } else {
-                        val postDetailsFromServerResponseState =
-                            getPostDetailsFromRemoteUseCase.invoke(fireBaseId)
-                        if (postDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
-                            addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data!!)
-                            _postDetailsStateFlow.value =
-                                ResponseState.success(postDetailsFromServerResponseState.data)
-                        } else {
-                            _postDetailsStateFlow.value = postDetailsFromServerResponseState
-                        }
-                    }
-                } else {
-                    _postDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
-                }
+                _postDetailsStateFlow.value = getPostDetailsFromRemoteUseCase.invoke(fireBaseId)
             }
         }
     }
@@ -386,26 +377,80 @@ class OtherUserProfileViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _userDetailsStateFlow.value = ResponseState.loading()
-
-                val fireBaseId = fireBaseAuth.currentUser?.uid
-
-                if (fireBaseId != null) {
-                    val userDetailsFromServerResponseState =
-                        getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
-                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
-                        addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
-                        currentUserState.value = userDetailsFromServerResponseState.data
-                        _userDetailsStateFlow.value = ResponseState.success(null)
+                val response = getUserDetailsFromIdsUseCase.invoke(
+                    listOf(
+                        currentUserState.value.firebaseUserId,
+                        requiredUserState.value.firebaseUserId
+                    )
+                )
+                if (response.status == RequestStatusEnum.SUCCESS) {
+                    val userDetailList = response.data ?: emptyList()
+                    if (userDetailList.size == 2) {
+                        val currentUser =
+                            userDetailList.find { it.firebaseUserId == currentUserState.value.firebaseUserId }
+                        val requiredUser =
+                            userDetailList.find { it.firebaseUserId == requiredUserState.value.firebaseUserId }
+                        if (currentUser == null || requiredUser == null) {
+                            _userDetailsStateFlow.value =
+                                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                        } else {
+                            addUserToDbUseCase.invoke(currentUser)
+                            getPostDetails(requiredUser.firebaseUserId)
+                            getFriendListFromIds(requiredUser.friendList)
+                            currentUserState.value=currentUser
+                            requiredUserState.value=requiredUser
+                            _userDetailsStateFlow.value = ResponseState.success(currentUser)
+                        }
                     } else {
-                        _userDetailsStateFlow.value = ResponseState.error(
-                            userDetailsFromServerResponseState.message ?: ""
-                        )
+                        _userDetailsStateFlow.value =
+                            ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                    _userDetailsStateFlow.value = ResponseState.error(response.message ?: "")
                 }
             }
         }
+    }
+
+    fun liveObserveRequiredUsers() {
+        viewModelScope.launch {
+            liveObserveRequiredUserListener = liveUserObserverFromRemoteUseCase.invoke(
+                requiredUserState.value.firebaseUserId,
+                _liveObserveRequiredUserDetailsStateFlow
+            )
+        }
+    }
+
+    fun liveObserveCurrentUsers() {
+        viewModelScope.launch {
+            liveObserveCurrentUserListener = liveUserObserverFromRemoteUseCase.invoke(
+                currentUserState.value.firebaseUserId,
+                _liveObserveCurrentUserDetailsStateFlow
+            )
+        }
+    }
+
+
+    fun updateRequiredUser(updatedDetails: UsersBean) {
+        _liveObserveRequiredUserDetailsStateFlow.value = ResponseState.none()
+        requiredUserState.value = updatedDetails
+        statusWithCurrentUserState.value =
+            FunctionHelper.getStatusWithCurrentUser(currentUserState.value, requiredUserState.value)
+    }
+
+
+    fun updateCurrentUser(updatedDetails: UsersBean) {
+        _liveObserveCurrentUserDetailsStateFlow.value = ResponseState.none()
+        currentUserState.value = updatedDetails
+        statusWithCurrentUserState.value =
+            FunctionHelper.getStatusWithCurrentUser(currentUserState.value, requiredUserState.value)
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        liveObserveRequiredUserListener.remove()
+        liveObserveCurrentUserListener.remove()
     }
 
 }

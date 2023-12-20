@@ -187,7 +187,7 @@ private fun ProfileScreen(
     ) {
         ImageSection(userDetails, navigator, onOptionsMenuClick)
         SpacerHeight12()
-        UserProfileUserInfoSection(userDetails)
+        UserProfileUserInfoSection(userDetails, userDetails.firebaseUserId)
         SpacerHeight24()
         HandleFriendListSection(viewModel = viewModel, navigator)
         HandlePostSection(viewModel, navigator)

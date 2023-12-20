@@ -6,11 +6,14 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
-import com.example.connect.domain.enums.StatusWithCurrentEnum
+import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IUserRepository
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -156,7 +159,7 @@ class IUserRepositoryImpl @Inject constructor(
                 val user = document.toObject(UserRemoteEntity::class.java)
                 if (user != null) {
                     val statusWithCurrentUser = user.otherUsersStatus[currentUserFirebaseId]
-                    if (statusWithCurrentUser != StatusWithCurrentEnum.Blocked.name) {
+                    if (statusWithCurrentUser != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                         usersList.add(user.toUserBean())
                     }
                 }
@@ -190,24 +193,24 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
                     // If both users are not friends, we update their status with each other.
-                    if (currentUserStatus == StatusWithCurrentEnum.NotFriends.name && requestUserStatus == StatusWithCurrentEnum.NotFriends.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.NotFriends.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.NotFriends.name) {
                         currentUser.otherUsersStatus[requestedUserFirebaseId] =
-                            StatusWithCurrentEnum.RequestedByCurrentUser.name
+                            StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name
                         transaction.update(
                             currentUserDocumentPath,
                             UserRemoteEntity::otherUsersStatus.name,
                             currentUser.otherUsersStatus
                         )
                         requestUser.otherUsersStatus[currentUserFirebaseId] =
-                            StatusWithCurrentEnum.RequestedByOtherUser.name
+                            StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name
                         transaction.update(
                             requestedUserDocumentPath,
                             UserRemoteEntity::otherUsersStatus.name,
@@ -249,15 +252,15 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     // Get the requested user's status with the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
                     // Check if the current user has requested the requested user and the requested user has requested the current user.
-                    if (currentUserStatus == StatusWithCurrentEnum.RequestedByCurrentUser.name && requestUserStatus == StatusWithCurrentEnum.RequestedByOtherUser.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name) {
                         // Remove the requested user from the current user's other users status map.
                         currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
                         // Update the current user's document with the updated other users status map.
@@ -314,25 +317,25 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
                     // Check if the current user and the requested user have both requested each other.
-                    if (currentUserStatus == StatusWithCurrentEnum.RequestedByOtherUser.name && requestUserStatus == StatusWithCurrentEnum.RequestedByCurrentUser.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name) {
                         // Update the status of the current user and the requested user to "Friends".
                         currentUser.otherUsersStatus[requestedUserFirebaseId] =
-                            StatusWithCurrentEnum.Friends.name
+                            StatusWithCurrentUserRemoteEnum.Friends.name
                         transaction.update(
                             currentUserDocumentPath,
                             UserRemoteEntity::otherUsersStatus.name,
                             currentUser.otherUsersStatus
                         )
                         requestUser.otherUsersStatus[currentUserFirebaseId] =
-                            StatusWithCurrentEnum.Friends.name
+                            StatusWithCurrentUserRemoteEnum.Friends.name
                         transaction.update(
                             requestedUserDocumentPath,
                             UserRemoteEntity::otherUsersStatus.name,
@@ -378,15 +381,15 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     // We get the status of the requested user for the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
                     // If the current user status is "RequestedByOtherUser" and the requested user status is "RequestedByCurrentUser", we continue.
-                    if (currentUserStatus == StatusWithCurrentEnum.RequestedByOtherUser.name && requestUserStatus == StatusWithCurrentEnum.RequestedByCurrentUser.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.RequestedByCurrentUser.name) {
                         // We remove the requested user from the current user's other users status map.
                         currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
                         // We update the current user document in the database.
@@ -441,7 +444,7 @@ class IUserRepositoryImpl @Inject constructor(
                 // If both users exist, we update their otherUsersStatus fields.
                 if (currentUser != null && requestUser != null) {
                     currentUser.otherUsersStatus[requestedUserFirebaseId] =
-                        StatusWithCurrentEnum.Blocked.name
+                        StatusWithCurrentUserRemoteEnum.Blocked.name
                     transaction.update(
                         currentUserDocumentPath,
                         UserRemoteEntity::otherUsersStatus.name,
@@ -491,17 +494,17 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
 
                     // Get the requested user's status for the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
                     // If the current user has blocked the requested user and the requested user is not friends with the current user, we can proceed with unblocking the user.
-                    if (currentUserStatus == StatusWithCurrentEnum.Blocked.name && requestUserStatus == StatusWithCurrentEnum.NotFriends.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.Blocked.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.NotFriends.name) {
                         // Remove the requested user from the current user's blocked list.
                         currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
 
@@ -550,15 +553,15 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
                     // If they are friends, we remove them from each other's friends lists.
-                    if (currentUserStatus == StatusWithCurrentEnum.Friends.name && requestUserStatus == StatusWithCurrentEnum.Friends.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.Friends.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.Friends.name) {
                         currentUser.otherUsersStatus.remove(requestedUserFirebaseId)
                         transaction.update(
                             currentUserDocumentPath,
@@ -612,20 +615,20 @@ class IUserRepositoryImpl @Inject constructor(
                     val currentUserStatus =
                         currentUser.otherUsersStatus.getOrDefault(
                             requestedUserFirebaseId,
-                            StatusWithCurrentEnum.NotFriends.name
+                            StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
 
                     // Get the requested user's status with the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
                         currentUserFirebaseId,
-                        StatusWithCurrentEnum.NotFriends.name
+                        StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
                     // If both users are friends, we can unfriend and block them.
-                    if (currentUserStatus == StatusWithCurrentEnum.Friends.name && requestUserStatus == StatusWithCurrentEnum.Friends.name) {
+                    if (currentUserStatus == StatusWithCurrentUserRemoteEnum.Friends.name && requestUserStatus == StatusWithCurrentUserRemoteEnum.Friends.name) {
                         // Set the current user's status with the requested user to Blocked.
                         currentUser.otherUsersStatus[requestedUserFirebaseId] =
-                            StatusWithCurrentEnum.Blocked.name
+                            StatusWithCurrentUserRemoteEnum.Blocked.name
 
                         // Update the current user document in the database.
                         transaction.update(
@@ -670,5 +673,21 @@ class IUserRepositoryImpl @Inject constructor(
 
         // Call the updateOtherUsersStatus() method on the UsersDao object.
         return usersDao.updateOtherUsersStatus(currentUserFirebaseId, otherUsersStatus)
+    }
+
+    override suspend fun liveObserveUserFromRemote(
+        firebaseUserId: String,
+        userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
+    ): ListenerRegistration {
+        return fireStore.collection(FirebaseConstants.USER_KEY).document(firebaseUserId)
+            .addSnapshotListener(MetadataChanges.EXCLUDE) { document, error ->
+                if (error == null && document != null && document.exists()) {
+                    val requiredUser = document.toObject(UserRemoteEntity::class.java)
+                    if (requiredUser != null) {
+                        userObserverStateFlow.value =
+                            ResponseState.success(requiredUser.toUserBean())
+                    }
+                }
+            }
     }
 }

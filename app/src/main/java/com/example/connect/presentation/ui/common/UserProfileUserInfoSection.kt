@@ -14,10 +14,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 
 @Composable
-fun UserProfileUserInfoSection(userDetails: UsersBean) {
+fun UserProfileUserInfoSection(userDetails: UsersBean, currentUserFirebaseId: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,12 +33,28 @@ fun UserProfileUserInfoSection(userDetails: UsersBean) {
             text = userDetails.connectUserId,
             FontWeight.Medium
         )
-        SpacerHeight8()
-        ImageTextItem(
-            Icons.Default.DateRange,
-            FunctionHelper.getFormattedDate(userDetails.dateOfBirth)
-        )
-        SpacerHeight8()
-        ImageTextItem(imageVector = Icons.Default.Face, text = userDetails.gender)
+        val showDobSection =
+            userDetails.firebaseUserId == currentUserFirebaseId ||
+                    userDetails.dobVisibility == VisibilityScopeEnum.Public.name ||
+                    (userDetails.dobVisibility == VisibilityScopeEnum.FriendsOnly.name && userDetails.friendList.contains(
+                        currentUserFirebaseId
+                    ))
+        if (showDobSection) {
+            SpacerHeight8()
+            ImageTextItem(
+                Icons.Default.DateRange,
+                FunctionHelper.getFormattedDate(userDetails.dateOfBirth)
+            )
+        }
+        val showGenderSection =
+            userDetails.firebaseUserId == currentUserFirebaseId ||
+                    userDetails.genderVisibility == VisibilityScopeEnum.Public.name ||
+                    (userDetails.genderVisibility == VisibilityScopeEnum.FriendsOnly.name && userDetails.friendList.contains(
+                        currentUserFirebaseId
+                    ))
+        if (showGenderSection) {
+            SpacerHeight8()
+            ImageTextItem(imageVector = Icons.Default.Face, text = userDetails.gender)
+        }
     }
 }
