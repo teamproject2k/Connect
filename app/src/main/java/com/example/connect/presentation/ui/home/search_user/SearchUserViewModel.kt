@@ -26,14 +26,17 @@ class SearchUserViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    fun getAllUsers(fetchDetailsNotForList: List<String>, currentUserFirebaseId: String) {
+    fun getAllUsers(currentUser: UsersBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                val fetchDetailsNotForList = arrayListOf<String>()
+                fetchDetailsNotForList.add(currentUser.firebaseUserId)
+                fetchDetailsNotForList.addAll(currentUser.blockedUsersList)
                 _searchUserStateFlow.value = ResponseState.loading()
                 _searchUserStateFlow.value =
                     getAllUsersNotInListFromRemoteUseCase.invoke(
                         fetchDetailsNotForList,
-                        currentUserFirebaseId
+                        currentUser.firebaseUserId
                     )
             }
         }

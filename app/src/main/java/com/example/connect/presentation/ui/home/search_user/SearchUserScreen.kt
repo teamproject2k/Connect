@@ -72,7 +72,7 @@ fun SearchScreen(navigator: DestinationsNavigator) {
         val fetchDetailsNotForList = arrayListOf<String>()
         fetchDetailsNotForList.add(sharedViewModel.usersDetails.firebaseUserId)
         fetchDetailsNotForList.addAll(sharedViewModel.usersDetails.blockedUsersList)
-        viewModel.getAllUsers(fetchDetailsNotForList, sharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getAllUsers(sharedViewModel.usersDetails)
     }
 }
 

@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,6 +72,7 @@ import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.ExpandedImage
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
@@ -267,6 +269,9 @@ private fun ImageSection(
 ) {
     val showOptionsMenu =
         viewModel.statusWithCurrentUserState.value != StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
+    var isProfilePhotoExpanded by remember {
+        mutableStateOf(false)
+    }
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, moreOptionsRef
@@ -297,10 +302,14 @@ private fun ImageSection(
                     start.linkTo(parent.start, 16.dp)
                     top.linkTo(coverImageRef.bottom)
                     bottom.linkTo(coverImageRef.bottom)
+                }
+                .clickable {
+                    isProfilePhotoExpanded = !isProfilePhotoExpanded
                 },
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
+
         )
         if (showOptionsMenu) {
             IconButton(onClick = {
@@ -316,6 +325,11 @@ private fun ImageSection(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more_options)
                 )
+            }
+        }
+        if (isProfilePhotoExpanded && viewModel.requiredUserState.value.profilePhoto != null) {
+            ExpandedImage(imageUrl = viewModel.requiredUserState.value.profilePhoto) {
+                isProfilePhotoExpanded = false
             }
         }
     }
