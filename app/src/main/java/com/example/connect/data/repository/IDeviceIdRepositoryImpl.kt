@@ -1,11 +1,11 @@
 package com.example.connect.data.repository
 
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.FirebaseConstants
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IDeviceIdRepository
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -14,7 +14,6 @@ class IDeviceIdRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore,
     private val appDatabase: AppDatabase
 ) : IDeviceIdRepository {
-
 
     override suspend fun updateDeviceIdOnRemote(
         fireBaseId: String,
@@ -30,8 +29,7 @@ class IDeviceIdRepositoryImpl @Inject constructor(
             documentReference.update(
                 UserRemoteEntity::currentLoggedInDeviceId.name,
                 updatedDeviceId
-            )
-                .await()
+            ).await()
 
             // Return a success response.
             ResponseState.success(null)
@@ -48,7 +46,6 @@ class IDeviceIdRepositoryImpl @Inject constructor(
         // Update the device ID for the user with the specified Firebase ID.
         return usersDao.updateDeviceId(fireBaseId, updatedDeviceId)
     }
-
 
     override suspend fun getDeviceIdFromRemote(firebaseUserId: String): ResponseState<String> {
         // Get the user document from FireStore.

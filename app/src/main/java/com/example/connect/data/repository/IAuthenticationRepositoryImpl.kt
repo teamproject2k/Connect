@@ -1,9 +1,9 @@
 package com.example.connect.data.repository
 
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IAuthenticationRepository
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.google.firebase.FirebaseException
@@ -26,7 +26,6 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         mobileNumber: String,
         responseStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>>
     ) {
-
         // Create a callback object to handle the verification process.
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
@@ -57,7 +56,6 @@ class IAuthenticationRepositoryImpl @Inject constructor(
                 // If the code is sent, send a success response with the verification ID.
                 responseStateFlow.value = ResponseState.success(Pair("", verificationId))
             }
-
         }
 
         // Create a PhoneAuthOptions object to configure the verification process.
@@ -97,6 +95,4 @@ class IAuthenticationRepositoryImpl @Inject constructor(
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
-
-
 }

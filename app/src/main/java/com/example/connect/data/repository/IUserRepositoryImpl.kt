@@ -1,14 +1,14 @@
 package com.example.connect.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.example.connect.domain.utils.FirebaseConstants
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
+import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration

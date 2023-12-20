@@ -1,11 +1,11 @@
 package com.example.connect.data.repository
 
-import com.example.connect.domain.utils.FirebaseConstants
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
+import com.example.connect.domain.utils.FirebaseConstants
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -64,5 +64,4 @@ class IPostRepositoryImpl @Inject constructor(
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
-
 }
