@@ -25,7 +25,6 @@ fun LoaderFullScreen(loadingText: String = stringResource(id = R.string.please_w
         SpacerWidth12()
         Text(text = loadingText)
     }
-
 }
 
 

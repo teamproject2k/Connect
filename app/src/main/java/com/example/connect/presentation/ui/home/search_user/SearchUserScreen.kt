@@ -1,14 +1,11 @@
 package com.example.connect.presentation.ui.home.search_user
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -26,17 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchUi
-import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWithOutExtraSpace
@@ -155,27 +151,11 @@ private fun CreateUi(
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             items(filteredUserList) { user ->
-                SearchUsersListItem(usersBean = user) {
+                UsersListItem(usersBean = user) {
                     navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun SearchUsersListItem(usersBean: UsersBean, onClick: () -> Unit) {
-    Column {
-        UserDetailsSection(
-            user = usersBean,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onClick()
-                }
-                .padding(16.dp)
-        )
-        Divider()
     }
 }
 

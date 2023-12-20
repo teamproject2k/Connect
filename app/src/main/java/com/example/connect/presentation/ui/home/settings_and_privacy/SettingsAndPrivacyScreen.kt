@@ -2,6 +2,7 @@ package com.example.connect.presentation.ui.home.settings_and_privacy
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,18 +41,21 @@ import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
+import com.example.connect.presentation.ui.destinations.BlockedListScreenDestination
+import com.example.connect.presentation.ui.destinations.RequestedListScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navigator: DestinationsNavigator) {
 
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: SettingsAndPrivacyViewModel = hiltViewModel()
@@ -109,11 +113,11 @@ fun SettingsScreen() {
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.blocked_users) {
-
+                navigator.navigate(BlockedListScreenDestination())
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.requested_users) {
-
+                navigator.navigate(RequestedListScreenDestination())
             }
             DividerLightGrayAlpha50()
             if (showGenderBottomSheet) {
@@ -189,7 +193,12 @@ private fun SettingsAndPrivacyDropdownItem(
     scopeName: String,
     onItemClick: () -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = stringResource(itemNameId),
             fontWeight = FontWeight.Medium,
@@ -210,14 +219,17 @@ private fun SettingsAndPrivacyDropdownItem(
 
 @Composable
 private fun SettingsAndPrivacyClickableItem(itemNameId: Int, onItemClick: () -> (Unit)) {
-    Text(
-        text = stringResource(itemNameId),
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .padding(vertical = 16.dp, horizontal = 24.dp)
-            .clickable { onItemClick() },
-        fontSize = 14.sp
-    )
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onItemClick() }) {
+        Text(
+            text = stringResource(itemNameId),
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .padding(vertical = 16.dp, horizontal = 24.dp),
+            fontSize = 14.sp
+        )
+    }
 }
 
 @Composable
