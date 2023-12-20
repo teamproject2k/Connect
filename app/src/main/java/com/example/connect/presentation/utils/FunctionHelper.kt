@@ -19,9 +19,9 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.models.VisibilityScope
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -162,7 +162,7 @@ object FunctionHelper {
         postVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.this_post_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -196,7 +196,7 @@ object FunctionHelper {
         genderVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_gender_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -241,7 +241,7 @@ object FunctionHelper {
         dobVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_dob_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only
@@ -286,7 +286,7 @@ object FunctionHelper {
         friendListVisibilityScopeList.add(
             VisibilityScope(
                 1,
-                context.getString(R.string.friends_only),
+                context.getString(R.string.friends_only_visibility),
                 VisibilityScopeEnum.FriendsOnly,
                 context.getString(R.string.your_friends_will_only_be_visible_to_your_friends),
                 R.drawable.ic_lock_friends_only

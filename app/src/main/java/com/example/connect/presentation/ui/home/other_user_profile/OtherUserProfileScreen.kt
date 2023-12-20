@@ -286,7 +286,7 @@ private fun ImageSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(ConstantsHelper.CoverImageHeight)
-                .background(Color.LightGray)
+                .background(ColorsHelper.lightGray())
                 .constrainAs(coverImageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -301,7 +301,7 @@ private fun ImageSection(
                 .size(ConstantsHelper.ProfileImageHeight)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
-                .border(4.dp, Color.White, CircleShape)
+                .border(4.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 .constrainAs(profileImageRef) {
                     start.linkTo(parent.start, 16.dp)
                     top.linkTo(coverImageRef.bottom)
