@@ -51,7 +51,7 @@ class UserDetailsViewModel @Inject constructor(
                 //get no of users with name to set user id
                 val currentUserByNameResponseState =
                     getUsersFromNameUseCase.invoke(formattedUserName)
-                if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
+                if (currentUserByNameResponseState.status != RequestStatusEnum.Exception && sharedPreference.deviceId != null) {
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
                     val user = UsersBean(
                         fireBaseAuth.currentUser!!.uid,
@@ -68,7 +68,7 @@ class UserDetailsViewModel @Inject constructor(
                         friendListVisibility = VisibilityScopeEnum.Public.name
                     )
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
-                    if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
+                    if (userDetailsResponseState.status == RequestStatusEnum.Success) {
                         addUserToDbUseCase.invoke(user)
                     }
                     _addUserStateFlow.value = userDetailsResponseState

@@ -288,12 +288,12 @@ private fun HandleFriendListSection(
         mutableStateOf(false)
     }
     when (friendsDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             UserProfileFriendsListLoadingSection()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             UserProfileFriendsListSection(
                 navigator,
                 friendsList = friendsDetailsState.data!!,
@@ -302,7 +302,7 @@ private fun HandleFriendListSection(
             )
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     friendsDetailsState.message
@@ -317,7 +317,7 @@ private fun HandleFriendListSection(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle it
         }
     }
@@ -334,12 +334,12 @@ private fun HandlePostSection(
     }
     val context = LocalContext.current
     when (postDetailState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             UserProfilePostLoadingSection()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             UserProfilePostSection(
                 navigator,
                 postDetailsList = postDetailState.data!!.reversed(),
@@ -347,7 +347,7 @@ private fun HandlePostSection(
             )
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.sharedPreference.isUserDetailsEntered = false
@@ -370,7 +370,7 @@ private fun HandlePostSection(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             //no need to handle it
         }
     }

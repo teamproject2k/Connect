@@ -63,7 +63,7 @@ class AddPostViewModel @Inject constructor(
                                 selectedMediaState.value!!.uri,
                                 "${FirebaseConstants.POST_KEY}/$firebaseId/${System.currentTimeMillis()}"
                             )
-                        if (uploadFileToRemoteResponse.status == RequestStatusEnum.EXCEPTION) {
+                        if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
                             _uploadPostStateFlow.value =
                                 ResponseState.error(uploadFileToRemoteResponse.message ?: "")
                             return@withContext
@@ -107,7 +107,7 @@ class AddPostViewModel @Inject constructor(
                         postType
                     )
                     val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
-                    if (serverResponse.status == RequestStatusEnum.SUCCESS) {
+                    if (serverResponse.status == RequestStatusEnum.Success) {
                         postDetails.id = serverResponse.data ?: ""
                         addPostToDbUseCase.invoke(postDetails)
                         _uploadPostStateFlow.value = ResponseState.success(null)

@@ -83,12 +83,12 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
     }
     val getDeviceIdState = viewModel.deviceIdStateFlow.collectAsState().value
     when (getDeviceIdState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 when (getDeviceIdState.message) {
                     FirebaseErrorCodes.NO_USER_FOUND -> {
@@ -121,11 +121,11 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             // no need to handle
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle
         }
     }
@@ -144,16 +144,16 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
     val getUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     when (getUserDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen(stringResource(R.string.getting_user_details))
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             CreateUi(context)
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (getUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     (LocalActivity.current as BaseActivity).logout()
@@ -174,7 +174,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }

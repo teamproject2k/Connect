@@ -54,7 +54,7 @@ class HomeSharedViewModel @Inject constructor(
                     // Get the device ID from the remote server using the Firebase ID.
                     val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
                     // If the response state is successful,
-                    if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    if (responseState.status == RequestStatusEnum.Success) {
                         // If the device ID from the remote server does not match the device ID in the shared preferences,
                         if (sharedPreference.deviceId != responseState.data) {
                             // Set the device ID state flow to error with the NewLogin error code.
@@ -92,7 +92,7 @@ class HomeSharedViewModel @Inject constructor(
                         val userDetailsFromServerResponseState =
                             getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
-                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
+                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                             addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                             usersDetails = userDetailsFromServerResponseState.data
                             _userDetailsStateFlow.value = ResponseState.success(null)

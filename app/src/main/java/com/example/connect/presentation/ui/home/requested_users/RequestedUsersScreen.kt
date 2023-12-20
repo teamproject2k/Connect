@@ -80,12 +80,12 @@ fun HandleGetRequestedUsersState(
         mutableStateOf(false)
     }
     when (requestedUsersState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     requestedUsersState.message
@@ -94,11 +94,11 @@ fun HandleGetRequestedUsersState(
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             requestedUsersState.data?.let { DisplayUsersList(navigator, it) }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }

@@ -98,7 +98,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     firebaseUserId
                 )
 
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     updateUserDetailsOnDbUseCase.invoke(
                         mutableMapOf(
                             UsersDbEntity::genderVisibility.name to genderVisibilityState.value.scopeEnum.name
@@ -120,7 +120,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     ),
                     firebaseUserId
                 )
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     updateUserDetailsOnDbUseCase.invoke(
                         mutableMapOf(
                             UsersDbEntity::dobVisibility.name to dobVisibilityState.value.scopeEnum.name
@@ -142,7 +142,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     ),
                     firebaseUserId
                 )
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     updateUserDetailsOnDbUseCase.invoke(
                         mutableMapOf(
                             UsersDbEntity::friendListVisibility.name to friendListVisibilityState.value.scopeEnum.name

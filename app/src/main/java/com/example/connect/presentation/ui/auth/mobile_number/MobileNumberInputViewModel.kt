@@ -69,7 +69,7 @@ class MobileNumberInputViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getUserDetailsStateFlow.value = ResponseState.loading()
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
-                if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS && userDetailsResponseState.data != null) {
+                if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     addUserToDbUseCase.invoke(userDetailsResponseState.data)
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
@@ -79,7 +79,7 @@ class MobileNumberInputViewModel @Inject constructor(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
-                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.SUCCESS) {
+                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!

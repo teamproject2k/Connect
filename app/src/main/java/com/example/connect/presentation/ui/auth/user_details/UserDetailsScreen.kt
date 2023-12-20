@@ -237,7 +237,7 @@ private fun DOBPickerSection(viewModel: UserDetailsViewModel) {
                     .padding(end = 16.dp, bottom = 16.dp)
                     .clickable {
                         if (dateSelectionState.selectedDateMillis != null) {
-                            viewModel.selectedDOBState.value =
+                            viewModel.selectedDOBState.longValue =
                                 dateSelectionState.selectedDateMillis!!
                         }
                         showDatePickerState = false
@@ -270,12 +270,12 @@ private fun HandleAddUserState(
     }
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             viewModel.sharedPreference.isUserDetailsEntered = true
             val intent = Intent(context, HomeActivity::class.java)
             context.startActivity(intent)
@@ -283,7 +283,7 @@ private fun HandleAddUserState(
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
@@ -362,7 +362,8 @@ private fun handleButtonClick(
             }
         }
     }
-    when (val dobValidationResponseCode = Validator.isValidDob(viewModel.selectedDOBState.value)) {
+    when (val dobValidationResponseCode =
+        Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
         1 -> {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.please_select_your_date_of_birth)
@@ -399,7 +400,7 @@ private fun handleButtonClick(
 
 private fun isButtonEnabled(viewModel: UserDetailsViewModel): Boolean {
     var result = true
-    if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.value == -1L) {
+    if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.longValue == -1L) {
         result = false
     }
     return result

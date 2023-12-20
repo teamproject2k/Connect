@@ -289,12 +289,12 @@ private fun HandleUserDetailsState(
     }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (userDetailsState.data == null) {
                 navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
                 navigator.navigate(UserDetailsScreenDestination())
@@ -307,7 +307,7 @@ private fun HandleUserDetailsState(
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
@@ -326,7 +326,7 @@ private fun HandleUserDetailsState(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }
@@ -343,12 +343,12 @@ private fun HandleVerifyOTPState(
     }
     val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
     when (verifyOtpState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (verifyOtpState.data != null) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(verifyOtpState.data.uid)
@@ -363,7 +363,7 @@ private fun HandleVerifyOTPState(
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
@@ -381,7 +381,7 @@ private fun HandleVerifyOTPState(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }
@@ -397,12 +397,12 @@ private fun HandleResendOTPState(
     }
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (resendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
                 if (context.isNetworkAvailable()) {
                     viewModel.getUserDetails(resendOtpState.data.second)
@@ -417,7 +417,7 @@ private fun HandleResendOTPState(
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
@@ -435,7 +435,7 @@ private fun HandleResendOTPState(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }

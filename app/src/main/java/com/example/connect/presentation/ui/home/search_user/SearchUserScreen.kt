@@ -87,12 +87,12 @@ private fun HandleSearchUserState(
         mutableStateOf(false)
     }
     when (searchUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (searchUserState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
@@ -105,11 +105,11 @@ private fun HandleSearchUserState(
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             CreateUi(searchUserState.data ?: emptyList(), navigator)
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             //no need to handle it
         }
     }

@@ -168,12 +168,12 @@ private fun HandleGetFriendsListStateFlow(
         mutableStateOf(false)
     }
     when (getFriendsListAsUsersState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (getFriendsListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
@@ -187,11 +187,11 @@ private fun HandleGetFriendsListStateFlow(
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             CreateUi(getFriendsListAsUsersState.data ?: emptyList(), navigator, viewModel)
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -209,12 +209,12 @@ private fun HandleGetPendingFriendRequestListStateFlow(
         mutableStateOf(false)
     }
     when (getPendingFriendRequestListAsUsersState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (getPendingFriendRequestListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
@@ -228,7 +228,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             CreateUi(
                 getPendingFriendRequestListAsUsersState.data ?: emptyList(),
                 navigator,
@@ -236,7 +236,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
             )
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -440,19 +440,19 @@ fun HandleGetCurrentUserDetailsStateFlow(
         mutableStateOf(false)
     }
     when (getCurrentUserDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(id = R.string.getting_user_details))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails = viewModel.currentUserState.value
                 isResponseHandled = true
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     getCurrentUserDetailsState.message
@@ -467,7 +467,7 @@ fun HandleGetCurrentUserDetailsStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }

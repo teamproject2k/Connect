@@ -107,7 +107,7 @@ class UserRequestViewModel @Inject constructor(
                     val userDetailsFromServerResponseState =
                         getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
-                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
+                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                         addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                         currentUserState.value = userDetailsFromServerResponseState.data
                         _userDetailsStateFlow.value = ResponseState.success(null)

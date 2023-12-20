@@ -124,12 +124,12 @@ private fun HandleGetUserDetailsState(
     }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (userDetailsState.data == null) {
                 navigator.navigate(UserDetailsScreenDestination())
                 navigator.popBackStack()
@@ -142,7 +142,7 @@ private fun HandleGetUserDetailsState(
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
@@ -160,7 +160,7 @@ private fun HandleGetUserDetailsState(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }
@@ -177,12 +177,12 @@ private fun HandleSendOTPState(
     }
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
     when (sendOtpState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             if (sendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
                 if (context.isNetworkAvailable()) {
@@ -203,7 +203,7 @@ private fun HandleSendOTPState(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 viewModel.snackBarMessageState.value =
@@ -221,7 +221,7 @@ private fun HandleSendOTPState(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }
