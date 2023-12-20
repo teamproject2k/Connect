@@ -58,7 +58,7 @@ class UserDetailsViewModel @Inject constructor(
                     getUsersFromNameUseCase.invoke(formattedUserName)
 
                 // Check if the response is not an exception and the device ID is not null.
-                if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
+                if (currentUserByNameResponseState.status != RequestStatusEnum.Exception && sharedPreference.deviceId != null) {
                     // Get the current time in milliseconds.
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
 
@@ -82,7 +82,7 @@ class UserDetailsViewModel @Inject constructor(
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
 
                     // Check if the response is successful.
-                    if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
+                    if (userDetailsResponseState.status == RequestStatusEnum.Success) {
                         // Add the user to the local database.
                         addUserToDbUseCase.invoke(user)
                     }

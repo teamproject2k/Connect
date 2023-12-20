@@ -54,7 +54,7 @@ class HomeSharedViewModel @Inject constructor(
                     // Get the device ID from the remote server using the Firebase ID.
                     val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
                     // If the response state is successful,
-                    if (responseState.status == RequestStatusEnum.SUCCESS) {
+                    if (responseState.status == RequestStatusEnum.Success) {
                         // If the device ID from the remote server does not match the device ID in the shared preferences,
                         if (sharedPreference.deviceId != responseState.data) {
                             // Set the device ID state flow to error with the NewLogin error code.
@@ -77,6 +77,9 @@ class HomeSharedViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Gets the user details from the database or the server.
+     */
     fun getUserDetails(context: Context) {
         // Launch a coroutine in the viewModelScope
         viewModelScope.launch {
@@ -97,7 +100,7 @@ class HomeSharedViewModel @Inject constructor(
                             getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
                         // Check if the response state is successful
-                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
+                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the database
                             addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
 

@@ -78,7 +78,7 @@ class MobileNumberInputViewModel @Inject constructor(
                 // Get the user details from the remote use case.
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
                 // Check if the response state is successful and the data is not null.
-                if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS && userDetailsResponseState.data != null) {
+                if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     // Add the user to the database using the addUserToDbUseCase.
                     addUserToDbUseCase.invoke(userDetailsResponseState.data)
                     // Check if the current logged in device id is different from the shared preference device id.
@@ -92,7 +92,7 @@ class MobileNumberInputViewModel @Inject constructor(
                                 sharedPreference.deviceId!!
                             )
                         // Check if the update device id on remote response state is successful.
-                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.SUCCESS) {
+                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             // Update the device id on the database using the updateDeviceIdOnDbUseCase.
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,

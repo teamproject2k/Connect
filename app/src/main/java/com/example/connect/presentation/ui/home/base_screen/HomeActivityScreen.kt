@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.home.base_screen
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,12 +84,12 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
     }
     val getDeviceIdState = viewModel.deviceIdStateFlow.collectAsState().value
     when (getDeviceIdState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 when (getDeviceIdState.message) {
                     FirebaseErrorCodes.NO_USER_FOUND -> {
@@ -121,11 +122,11 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             // no need to handle
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle
         }
     }
@@ -144,16 +145,16 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
     val getUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     when (getUserDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen(stringResource(R.string.getting_user_details))
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             CreateUi(context)
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (getUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     (LocalActivity.current as BaseActivity).logout()
@@ -174,7 +175,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
 
         }
     }
@@ -187,6 +188,23 @@ private fun CreateUi(context: Context) {
         mutableStateOf(HomeScreenDestination.route)
     }
     val navController = rememberNavController()
+
+    var doubleBackToExitPressedOnce by remember {
+        mutableStateOf(false)
+    }
+    val currentActivity = LocalActivity.current
+    BackHandler {
+        if (doubleBackToExitPressedOnce) {
+            currentActivity.finish()
+            return@BackHandler
+        }
+        doubleBackToExitPressedOnce = true
+        context.showToast(context.getString(R.string.please_click_back_again_to_exit))
+        Handler(Looper.getMainLooper()).postDelayed(
+            { doubleBackToExitPressedOnce = false },
+            ConstantsHelper.BACK_EXIT_RESET_TIME
+        )
+    }
 
     LaunchedEffect(Unit) {
         navController.currentBackStackEntryFlow.collect {
@@ -208,10 +226,19 @@ private fun CreateUi(context: Context) {
                     NavigationBarItem(
                         selected = selectedRouteState.value == data.routeName,
                         onClick = {
-                            navController.navigate(data.routeName) {
-                                launchSingleTop = true
+                            val isScreenPresentOnBackStack = try {
+                                navController.getBackStackEntry(data.routeName)
+                                true
+                            } catch (exception: Exception) {
+                                false
                             }
-                            selectedRouteState.value = data.routeName
+                            if (isScreenPresentOnBackStack) {
+                                navController.popBackStack(data.routeName, false)
+                            } else {
+                                navController.navigate(data.routeName) {
+                                    launchSingleTop = true
+                                }
+                            }
                         },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = MaterialTheme.colorScheme.primary

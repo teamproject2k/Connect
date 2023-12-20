@@ -67,7 +67,7 @@ class CurrentUserProfileViewModel @Inject constructor(
                         val postDetailsFromServerResponseState =
                             getPostDetailsFromRemoteUseCase.invoke(fireBaseId) // Get the post details from the server.
 
-                        if (postDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
+                        if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
 
                             addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data!!) // Add the post details to the database.
 

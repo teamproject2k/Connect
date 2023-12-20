@@ -550,12 +550,12 @@ private fun HandleUpdateUserState(
     }
 
     when (updateUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
             if (updateUserState.data != null) {
                 sharedViewModel.usersDetails = updateUserState.data
@@ -567,7 +567,7 @@ private fun HandleUpdateUserState(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (updateUserState.message.isNullOrBlank()) {
@@ -596,7 +596,7 @@ private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
         viewModel.userNameState.value.isBlank()
         || viewModel.selectedGenderState.value.isBlank()
         || viewModel.userBioState.value.isBlank()
-        || viewModel.selectedDOBState.value == -1L
+        || viewModel.selectedDOBState.longValue == -1L
     ) {
         result = false
     }
@@ -604,7 +604,7 @@ private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
         if (
             viewModel.userNameState.value == viewModel.userDetails.name
             && viewModel.selectedGenderState.value == viewModel.userDetails.gender
-            && viewModel.selectedDOBState.value == viewModel.userDetails.dateOfBirth
+            && viewModel.selectedDOBState.longValue == viewModel.userDetails.dateOfBirth
             && viewModel.userBioState.value == viewModel.userDetails.bio
         ) {
             result = false

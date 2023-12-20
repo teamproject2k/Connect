@@ -77,12 +77,12 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
         mutableStateOf(false)
     }
     when (blockedUsersState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderFullScreen()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     blockedUsersState.message
@@ -91,11 +91,11 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
             }
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             blockedUsersState.data?.let { DisplayUsersList(navigator, it) }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }

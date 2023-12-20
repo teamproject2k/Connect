@@ -303,12 +303,12 @@ fun HandleUpdateGenderVisibilityStateFlow(
     }
     val updateUserGenderState = viewModel.updateGenderVisibilityStateFlow.collectAsState().value
     when (updateUserGenderState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(R.string.updating_gender_visibility))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.visibility_updated_successfully))
                 homeSharedViewModel.usersDetails.genderVisibility =
@@ -317,7 +317,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateUserGenderState.message
@@ -332,7 +332,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -349,12 +349,12 @@ fun HandleUpdateDobVisibilityStateFlow(
     }
     val updateDobVisibilityState = viewModel.updateDobVisibilityStateFlow.collectAsState().value
     when (updateDobVisibilityState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(R.string.updating_dob_visibility))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails.dobVisibility =
                     viewModel.dobVisibilityState.value.scopeEnum.name
@@ -363,7 +363,7 @@ fun HandleUpdateDobVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateDobVisibilityState.message
@@ -378,7 +378,7 @@ fun HandleUpdateDobVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -396,12 +396,12 @@ fun HandleUpdateFriendListVisibilityStateFlow(
     val updateFriendListVisibilityState =
         viewModel.updateFriendListVisibilityStateFlow.collectAsState().value
     when (updateFriendListVisibilityState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(R.string.updating_friend_list_visibility))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails.friendListVisibility =
                     viewModel.friendListVisibilityState.value.scopeEnum.name
@@ -410,7 +410,7 @@ fun HandleUpdateFriendListVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateFriendListVisibilityState.message
@@ -425,7 +425,7 @@ fun HandleUpdateFriendListVisibilityStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }

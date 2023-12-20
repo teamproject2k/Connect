@@ -143,7 +143,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 )
 
                 // Check if the update was successful.
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     // Update the gender visibility on the local database.
                     updateUserDetailsOnDbUseCase.invoke(
                         // Create a map of the gender visibility field and its new value.
@@ -184,7 +184,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     firebaseUserId
                 )
                 // Check if the result is successful.
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     // Call the updateUserDetailsOnDbUseCase to update the user's details in the local database.
                     updateUserDetailsOnDbUseCase.invoke(
                         // Create a map of the user's details to be updated.
@@ -227,7 +227,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 )
 
                 // Check if the result is successful.
-                if (result.status == RequestStatusEnum.SUCCESS) {
+                if (result.status == RequestStatusEnum.Success) {
                     // Call the updateUserDetailsOnDbUseCase to update the user details in the local database.
                     updateUserDetailsOnDbUseCase.invoke(
                         // Create a map of the user details to be updated.

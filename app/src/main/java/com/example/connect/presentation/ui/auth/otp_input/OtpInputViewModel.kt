@@ -108,7 +108,7 @@ class OtpInputViewModel @Inject constructor(
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
 
                 // Check if the response is successful and the data is not null.
-                if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS && userDetailsResponseState.data != null) {
+                if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     // Add the user to the database.
                     addUserToDbUseCase.invoke(userDetailsResponseState.data)
 
@@ -124,7 +124,7 @@ class OtpInputViewModel @Inject constructor(
                             )
 
                         // Check if the response is successful.
-                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.SUCCESS) {
+                        if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             // Update the device ID on the database.
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,

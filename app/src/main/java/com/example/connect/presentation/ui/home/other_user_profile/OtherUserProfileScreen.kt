@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,6 +72,7 @@ import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.ExpandedImage
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
@@ -196,7 +198,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
 ) {
     val liveObserverState = viewModel.liveObserveCurrentUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data
             if (updatedDetails != null) {
                 viewModel.updateCurrentUser(updatedDetails)
@@ -214,7 +216,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
 fun HandleLiveObserveRequiredUsersStateFlow(viewModel: OtherUserProfileViewModel) {
     val liveObserverState = viewModel.liveObserveRequiredUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data
             if (updatedDetails != null) {
                 viewModel.updateRequiredUser(updatedDetails)
@@ -267,6 +269,9 @@ private fun ImageSection(
 ) {
     val showOptionsMenu =
         viewModel.statusWithCurrentUserState.value != StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
+    var isProfilePhotoExpanded by remember {
+        mutableStateOf(false)
+    }
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (
             coverImageRef, profileImageRef, moreOptionsRef
@@ -297,10 +302,14 @@ private fun ImageSection(
                     start.linkTo(parent.start, 16.dp)
                     top.linkTo(coverImageRef.bottom)
                     bottom.linkTo(coverImageRef.bottom)
+                }
+                .clickable {
+                    isProfilePhotoExpanded = !isProfilePhotoExpanded
                 },
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
+
         )
         if (showOptionsMenu) {
             IconButton(onClick = {
@@ -316,6 +325,11 @@ private fun ImageSection(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more_options)
                 )
+            }
+        }
+        if (isProfilePhotoExpanded && viewModel.requiredUserState.value.profilePhoto != null) {
+            ExpandedImage(imageUrl = viewModel.requiredUserState.value.profilePhoto) {
+                isProfilePhotoExpanded = false
             }
         }
     }
@@ -447,12 +461,12 @@ private fun HandleFriendListSection(
         mutableStateOf(false)
     }
     when (friendsDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             UserProfileFriendsListLoadingSection()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             val isFriendListVisible =
                 viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.Public.name
                         || (viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.FriendsOnly.name
@@ -466,7 +480,7 @@ private fun HandleFriendListSection(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     friendsDetailsState.message
@@ -481,7 +495,7 @@ private fun HandleFriendListSection(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -498,12 +512,12 @@ private fun HandlePostSection(
     }
     val context = LocalContext.current
     when (postDetailState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             UserProfilePostLoadingSection()
             isExceptionHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             val postDetailsList = postDetailState.data?.reversed() ?: emptyList()
             val updatedPostList = postDetailsList.filter { post ->
                 post.postScope == VisibilityScopeEnum.Public.name || (post.postScope == VisibilityScopeEnum.FriendsOnly.name && viewModel.requiredUserState.value.friendList.contains(
@@ -513,7 +527,7 @@ private fun HandlePostSection(
             UserProfilePostSection(navigator, postDetailsList = updatedPostList)
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.sharedPreference.isUserDetailsEntered = false
@@ -536,7 +550,7 @@ private fun HandlePostSection(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -586,12 +600,12 @@ private fun HandleSendFriendRequestStateFlow(
         mutableStateOf(false)
     }
     when (sendFriendRequestState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(id = R.string.sending_friend_request))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.RequestedByCurrentUser.name
@@ -601,7 +615,7 @@ private fun HandleSendFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (sendFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -621,7 +635,7 @@ private fun HandleSendFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -636,12 +650,12 @@ private fun HandleWithdrawFriendRequestStateFlow(
         mutableStateOf(false)
     }
     when (withDrawRequestState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.removing_friend_request))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.NotFriends.name
@@ -651,7 +665,7 @@ private fun HandleWithdrawFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (withDrawRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -671,7 +685,7 @@ private fun HandleWithdrawFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -686,12 +700,12 @@ private fun HandleAcceptFriendRequestStateFlow(
         mutableStateOf(false)
     }
     when (acceptFriendRequestState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.accepting_friend_request))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.Friends.name
@@ -701,7 +715,7 @@ private fun HandleAcceptFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (acceptFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -721,7 +735,7 @@ private fun HandleAcceptFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -736,12 +750,12 @@ private fun HandleRemoveFriendRequestStateFlow(
         mutableStateOf(false)
     }
     when (removeFriendRequestState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(id = R.string.removing_friend_request))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.NotFriends.name
@@ -751,7 +765,7 @@ private fun HandleRemoveFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (removeFriendRequestState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -771,7 +785,7 @@ private fun HandleRemoveFriendRequestStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -786,12 +800,12 @@ private fun HandleUnBlockUserStateFlow(
         mutableStateOf(false)
     }
     when (unblockUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.unblocking_user))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.NotFriends.name
@@ -802,7 +816,7 @@ private fun HandleUnBlockUserStateFlow(
 
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (unblockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -822,7 +836,7 @@ private fun HandleUnBlockUserStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -837,12 +851,12 @@ private fun HandleBlockUserStateFlow(
         mutableStateOf(false)
     }
     when (blockUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.blocking_user))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
@@ -852,7 +866,7 @@ private fun HandleBlockUserStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (blockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -872,7 +886,7 @@ private fun HandleBlockUserStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -887,12 +901,12 @@ private fun HandleUnfriendUserStateFlow(
         mutableStateOf(false)
     }
     when (unfriendUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.removing_friend))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.NotFriends.name
@@ -902,7 +916,7 @@ private fun HandleUnfriendUserStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (unfriendUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -922,7 +936,7 @@ private fun HandleUnfriendUserStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -937,12 +951,12 @@ private fun HandleUnfriendAndBlockUserStateFlow(
         mutableStateOf(false)
     }
     when (unfriendAndBlockUserState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(id = R.string.blocking_user))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
@@ -952,7 +966,7 @@ private fun HandleUnfriendAndBlockUserStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (unfriendAndBlockUserState.message == FirebaseErrorCodes.UPDATE_ACCOUNT) {
                     viewModel.snackBarMessageState.value =
@@ -972,7 +986,7 @@ private fun HandleUnfriendAndBlockUserStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }
@@ -988,12 +1002,12 @@ private fun HandleGetCurrentUserDetailsStateFlow(
         mutableStateOf(false)
     }
     when (getCurrentUserDetailsState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(id = R.string.getting_user_details))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails = viewModel.currentUserState.value
                 viewModel.statusWithCurrentUserState.value =
@@ -1005,7 +1019,7 @@ private fun HandleGetCurrentUserDetailsStateFlow(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (getCurrentUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.snackBarMessageState.value =
@@ -1025,7 +1039,7 @@ private fun HandleGetCurrentUserDetailsStateFlow(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle this
         }
     }

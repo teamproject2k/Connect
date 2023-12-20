@@ -195,7 +195,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         requiredUserState.value.firebaseUserId
                     )
                 // Check if the responseState is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Add the required user's firebaseUserId to the current user's requestedFriendRequestList.
                     currentUserState.value.requestedFriendRequestList.add(requiredUserState.value.firebaseUserId)
                     // Add the current user's firebaseUserId to the required user's receivedFriendRequestList.
@@ -238,7 +238,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     )
 
                 // Check if the responseState is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the required user's firebase user ID from the current user's requestedFriendRequestList.
                     currentUserState.value.requestedFriendRequestList.remove(requiredUserState.value.firebaseUserId)
 
@@ -282,7 +282,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     )
 
                 // Check if the responseState is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the required user's firebaseUserId from the currentUserState's receivedFriendRequestList.
                     currentUserState.value.receivedFriendRequestList.remove(requiredUserState.value.firebaseUserId)
 
@@ -330,7 +330,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     )
 
                 // Check if the responseState is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the requiredUserState.value.firebaseUserId from the currentUserState.value.receivedFriendRequestList.
                     currentUserState.value.receivedFriendRequestList.remove(requiredUserState.value.firebaseUserId)
 
@@ -372,7 +372,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         requiredUserState.value.firebaseUserId
                     )
                 // Check if the responseState status is SUCCESS.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the required user's firebase user id from the current user's blockedUsersList.
                     currentUserState.value.blockedUsersList.remove(requiredUserState.value.firebaseUserId)
                     // Call the updateOtherUserStatusOnDbUseCase.
@@ -409,7 +409,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         requiredUserState.value.firebaseUserId
                     )
                 // Check if the responseState is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Add the requiredUserState.value.firebaseUserId to the currentUserState.value.blockedUsersList.
                     currentUserState.value.blockedUsersList.add(requiredUserState.value.firebaseUserId)
                     // Remove the requiredUserState.value.firebaseUserId from the currentUserState.value.friendList.
@@ -452,7 +452,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         requiredUserState.value.firebaseUserId
                     )
                 // Check if the response state is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the required user's firebase user ID from the current user's friend list.
                     currentUserState.value.friendList.remove(requiredUserState.value.firebaseUserId)
                     // Remove the current user's firebase user ID from the required user's friend list.
@@ -493,7 +493,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         requiredUserState.value.firebaseUserId
                     )
                 // Check if the response state is successful.
-                if (responseState.status == RequestStatusEnum.SUCCESS) {
+                if (responseState.status == RequestStatusEnum.Success) {
                     // Remove the required user from the current user's friend list.
                     currentUserState.value.friendList.remove(requiredUserState.value.firebaseUserId)
                     // Add the required user to the current user's blocked users list.
@@ -537,7 +537,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 )
 
                 // Check if the response status is SUCCESS
-                if (response.status == RequestStatusEnum.SUCCESS) {
+                if (response.status == RequestStatusEnum.Success) {
                     // Get the list of user details from the response
                     val userDetailList = response.data ?: emptyList()
 

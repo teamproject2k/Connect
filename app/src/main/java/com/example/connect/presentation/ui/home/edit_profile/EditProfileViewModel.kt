@@ -125,7 +125,7 @@ class EditProfileViewModel @Inject constructor(
                                 profilePhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.PROFILE_PHOTO_KEY}"
                             )
-                        if (updateProfilePhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
+                        if (updateProfilePhotoResponseState.status == RequestStatusEnum.Exception) {
                             _updateUserStateFlow.value = ResponseState.error(
                                 msg = updateProfilePhotoResponseState.message ?: ""
                             )
@@ -140,7 +140,7 @@ class EditProfileViewModel @Inject constructor(
                                 coverPhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.COVER_PHOTO_KEY}"
                             )
-                        if (updateCoverPhotoResponseState.status == RequestStatusEnum.EXCEPTION) {
+                        if (updateCoverPhotoResponseState.status == RequestStatusEnum.Exception) {
                             _updateUserStateFlow.value = ResponseState.error(
                                 msg = updateCoverPhotoResponseState.message ?: ""
                             )
@@ -160,7 +160,7 @@ class EditProfileViewModel @Inject constructor(
                         val currentUserByNameResponseState = userName?.let {
                             getUsersFromNameUseCaseFromRemote.invoke(it.toString())
                         }
-                        if (userName == null || currentUserByNameResponseState?.status == RequestStatusEnum.EXCEPTION) {
+                        if (userName == null || currentUserByNameResponseState?.status == RequestStatusEnum.Exception) {
                             _updateUserStateFlow.value =
                                 ResponseState.error(currentUserByNameResponseState?.message ?: "")
                             return@withContext
@@ -178,14 +178,14 @@ class EditProfileViewModel @Inject constructor(
                             userDetails.firebaseUserId
                         )
 
-                    if (updatedUserResponseState.status != RequestStatusEnum.EXCEPTION) {
+                    if (updatedUserResponseState.status != RequestStatusEnum.Exception) {
                         updateUserDetailsOnDbUseCase.invoke(
                             fieldsToUpdate,
                             userDetails.firebaseUserId
                         )
                         val getUserDetailsFromRemoteResponse =
                             getUserDetailsFromRemoteUseCase.invoke(userDetails.firebaseUserId)
-                        if (getUserDetailsFromRemoteResponse.status == RequestStatusEnum.EXCEPTION) {
+                        if (getUserDetailsFromRemoteResponse.status == RequestStatusEnum.Exception) {
                             val getUserDetailsFromDbResponse =
                                 getUserDetailsFromDbUseCase.invoke(userDetails.firebaseUserId)
                             _updateUserStateFlow.value =

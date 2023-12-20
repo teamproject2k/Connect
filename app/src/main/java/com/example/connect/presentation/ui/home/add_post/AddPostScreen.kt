@@ -192,12 +192,12 @@ private fun HandleAddPostSection(
     }
     val addPostState = viewModel.uploadPostStateFlow.collectAsState().value
     when (addPostState.status) {
-        RequestStatusEnum.LOADING -> {
+        RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(R.string.uploading_post))
             isResponseHandled = false
         }
 
-        RequestStatusEnum.SUCCESS -> {
+        RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.post_uploaded_successfully))
                 navigator.popBackStack()
@@ -205,7 +205,7 @@ private fun HandleAddPostSection(
             }
         }
 
-        RequestStatusEnum.EXCEPTION -> {
+        RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 if (addPostState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
@@ -224,7 +224,7 @@ private fun HandleAddPostSection(
             }
         }
 
-        RequestStatusEnum.NONE -> {
+        RequestStatusEnum.None -> {
             // no need to handle it
         }
     }

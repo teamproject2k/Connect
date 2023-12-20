@@ -141,7 +141,7 @@ class UserRequestViewModel @Inject constructor(
                         getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
                     // If the request was successful, then add the user to the database and set the current user state.
-                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.SUCCESS) {
+                    if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                         addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
                         currentUserState.value = userDetailsFromServerResponseState.data
                         _userDetailsStateFlow.value = ResponseState.success(null)

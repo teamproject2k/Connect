@@ -86,7 +86,7 @@ class AddPostViewModel @Inject constructor(
                             )
 
                         // Check if the upload operation was successful.
-                        if (uploadFileToRemoteResponse.status == RequestStatusEnum.EXCEPTION) {
+                        if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
                             // Set the upload post state to error.
                             _uploadPostStateFlow.value =
                                 ResponseState.error(uploadFileToRemoteResponse.message ?: "")
@@ -144,7 +144,7 @@ class AddPostViewModel @Inject constructor(
                     val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
 
                     // Check if the upload operation was successful.
-                    if (serverResponse.status == RequestStatusEnum.SUCCESS) {
+                    if (serverResponse.status == RequestStatusEnum.Success) {
                         // Get the post ID from the response.
                         postDetails.id = serverResponse.data ?: ""
 
