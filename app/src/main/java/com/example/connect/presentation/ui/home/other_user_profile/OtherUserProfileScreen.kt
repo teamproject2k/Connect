@@ -131,8 +131,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             contentAlignment = Alignment.TopCenter
         ) {
             ProfileScreen(
-                currentUser = viewModel.currentUserState.value,
-                requestedUser = viewModel.requiredUserState.value,
                 viewModel = viewModel,
                 navigator
             ) {
@@ -152,8 +150,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             ) {
                 BottomSheetSection(
                     Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    currentUser = viewModel.currentUserState.value,
-                    requestedUser,
                     viewModel
                 ) {
                     showBottomSheet = false
@@ -190,7 +186,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     HandleGetCurrentUserDetailsStateFlow(
         viewModel = viewModel,
         homeSharedViewModel = homeSharedViewModel,
-        requestedUser
     )
 }
 
@@ -234,8 +229,6 @@ fun HandleLiveObserveRequiredUsersStateFlow(viewModel: OtherUserProfileViewModel
 
 @Composable
 private fun ProfileScreen(
-    currentUser: UsersBean,
-    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     onOptionsMenuClick: () -> Unit
@@ -251,18 +244,17 @@ private fun ProfileScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ImageSection(
-                requestedUser,
-                viewModel,
-                onOptionsMenuClick
-            )
+            ImageSection(viewModel, onOptionsMenuClick)
             SpacerHeight12()
-            UserProfileUserInfoSection(requestedUser, currentUser.firebaseUserId)
+            UserProfileUserInfoSection(
+                viewModel.requiredUserState.value,
+                viewModel.currentUserState.value.firebaseUserId
+            )
             SpacerHeight24()
-            ActionButtonsSection(currentUser, requestedUser, viewModel)
+            ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
-            HandlePostSection(viewModel, requestedUser, currentUser.firebaseUserId, navigator)
+            HandlePostSection(viewModel, navigator)
         }
     }
 }
@@ -270,7 +262,6 @@ private fun ProfileScreen(
 
 @Composable
 private fun ImageSection(
-    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
     onOptionsMenuClick: () -> Unit
 ) {
@@ -281,7 +272,7 @@ private fun ImageSection(
             coverImageRef, profileImageRef, moreOptionsRef
         ) = createRefs()
         AsyncImage(
-            model = requestedUser.coverPhoto,
+            model = viewModel.requiredUserState.value.coverPhoto,
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
@@ -295,7 +286,7 @@ private fun ImageSection(
             contentScale = ContentScale.Crop,
         )
         AsyncImage(
-            model = requestedUser.profilePhoto,
+            model = viewModel.requiredUserState.value.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
                 .size(ConstantsHelper.ProfileImageHeight)
@@ -332,8 +323,6 @@ private fun ImageSection(
 
 @Composable
 private fun ActionButtonsSection(
-    currentUser: UsersBean,
-    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel
 ) {
     Row(
@@ -363,10 +352,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.LockReset,
                     buttonText = stringResource(R.string.unblock_user),
                     onButtonClick = {
-                        viewModel.unBlockUser(
-                            currentUser,
-                            requestedUser
-                        )
+                        viewModel.unBlockUser()
                     }
                 )
             }
@@ -378,10 +364,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Outlined.ArrowCircleLeft,
                     buttonText = stringResource(R.string.withdraw_request),
                     onButtonClick = {
-                        viewModel.withdrawFriendRequest(
-                            currentUser,
-                            requestedUser
-                        )
+                        viewModel.withdrawFriendRequest()
                     }
                 )
             }
@@ -393,10 +376,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.CheckCircleOutline,
                     buttonText = stringResource(R.string.accept),
                     onButtonClick = {
-                        viewModel.acceptFriendRequest(
-                            currentUser,
-                            requestedUser
-                        )
+                        viewModel.acceptFriendRequest()
                     }
                 )
                 SpacerWidth16()
@@ -408,10 +388,7 @@ private fun ActionButtonsSection(
                     textColor = ColorsHelper.black(),
                     buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
                     onButtonClick = {
-                        viewModel.removeFriendRequest(
-                            currentUser,
-                            requestedUser
-                        )
+                        viewModel.removeFriendRequest()
                     }
                 )
             }
@@ -423,10 +400,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.PersonAddAlt1,
                     buttonText = stringResource(R.string.add_friend),
                     onButtonClick = {
-                        viewModel.sendFriendRequest(
-                            currentUser,
-                            requestedUser
-                        )
+                        viewModel.sendFriendRequest()
                     }
                 )
             }
@@ -516,8 +490,6 @@ private fun HandleFriendListSection(
 @Composable
 private fun HandlePostSection(
     viewModel: OtherUserProfileViewModel,
-    usersBean: UsersBean,
-    currentUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
@@ -534,8 +506,8 @@ private fun HandlePostSection(
         RequestStatusEnum.SUCCESS -> {
             val postDetailsList = postDetailState.data?.reversed() ?: emptyList()
             val updatedPostList = postDetailsList.filter { post ->
-                post.postScope == VisibilityScopeEnum.Public.name || (post.postScope == VisibilityScopeEnum.FriendsOnly.name && usersBean.friendList.contains(
-                    currentUserFirebaseId
+                post.postScope == VisibilityScopeEnum.Public.name || (post.postScope == VisibilityScopeEnum.FriendsOnly.name && viewModel.requiredUserState.value.friendList.contains(
+                    viewModel.currentUserState.value.firebaseUserId
                 ))
             }
             UserProfilePostSection(navigator, postDetailsList = updatedPostList)
@@ -574,8 +546,6 @@ private fun HandlePostSection(
 @Composable
 private fun BottomSheetSection(
     modifier: Modifier,
-    currentUser: UsersBean,
-    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
     onBottomSheetStateClick: () -> Unit
 ) {
@@ -585,14 +555,14 @@ private fun BottomSheetSection(
                 imageVector = Icons.Default.PersonRemove,
                 text = stringResource(R.string.unfriend_user)
             ) {
-                viewModel.unfriendUser(currentUser, requestedUser)
+                viewModel.unfriendUser()
                 onBottomSheetStateClick()
             }
             BottomSheetItem(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.unfriend_and_block_user)
             ) {
-                viewModel.unfriendAndBlockUser(currentUser, requestedUser)
+                viewModel.unfriendAndBlockUser()
                 onBottomSheetStateClick()
             }
         } else if (viewModel.statusWithCurrentUserState.value != StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name) {
@@ -600,7 +570,7 @@ private fun BottomSheetSection(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.block_user)
             ) {
-                viewModel.blockUser(currentUser, requestedUser)
+                viewModel.blockUser()
                 onBottomSheetStateClick()
             }
         }
@@ -1012,7 +982,6 @@ private fun HandleUnfriendAndBlockUserStateFlow(
 private fun HandleGetCurrentUserDetailsStateFlow(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel,
-    requestedUser: UsersBean
 ) {
     val getCurrentUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value
     var isResponseHandled by remember {
@@ -1030,7 +999,7 @@ private fun HandleGetCurrentUserDetailsStateFlow(
                 viewModel.statusWithCurrentUserState.value =
                     FunctionHelper.getStatusWithCurrentUser(
                         homeSharedViewModel.usersDetails,
-                        requestedUser
+                        viewModel.requiredUserState.value
                     )
                 isResponseHandled = true
             }
