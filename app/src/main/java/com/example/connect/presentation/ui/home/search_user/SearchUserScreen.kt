@@ -48,12 +48,7 @@ import kotlinx.coroutines.launch
 fun SearchScreen(navigator: DestinationsNavigator) {
     val viewModel: SearchUserViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-    if (!viewModel.isUserDetailsFetched) {
-        val fetchDetailsNotForList = arrayListOf<String>()
-        fetchDetailsNotForList.add(sharedViewModel.usersDetails.firebaseUserId)
-        fetchDetailsNotForList.addAll(sharedViewModel.usersDetails.blockedUsersList)
-        viewModel.getAllUsers(fetchDetailsNotForList, sharedViewModel.usersDetails.firebaseUserId)
-    }
+
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
@@ -72,6 +67,12 @@ fun SearchScreen(navigator: DestinationsNavigator) {
                 viewModel.snackBarMessageState.value = ""
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        val fetchDetailsNotForList = arrayListOf<String>()
+        fetchDetailsNotForList.add(sharedViewModel.usersDetails.firebaseUserId)
+        fetchDetailsNotForList.addAll(sharedViewModel.usersDetails.blockedUsersList)
+        viewModel.getAllUsers(fetchDetailsNotForList, sharedViewModel.usersDetails.firebaseUserId)
     }
 }
 

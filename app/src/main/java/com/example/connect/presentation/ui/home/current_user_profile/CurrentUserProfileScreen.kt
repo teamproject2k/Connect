@@ -50,11 +50,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
@@ -189,7 +189,7 @@ private fun ProfileScreen(
         SpacerHeight12()
         UserProfileUserInfoSection(userDetails, userDetails.firebaseUserId)
         SpacerHeight24()
-        HandleFriendListSection(viewModel = viewModel, navigator)
+        HandleFriendListSection(viewModel = viewModel, userDetails, navigator)
         HandlePostSection(viewModel, navigator)
     }
 }
@@ -280,6 +280,7 @@ private fun ImageSection(
 @Composable
 private fun HandleFriendListSection(
     viewModel: CurrentUserProfileViewModel,
+    userDetails: UsersBean,
     navigator: DestinationsNavigator
 ) {
     val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
@@ -293,7 +294,12 @@ private fun HandleFriendListSection(
         }
 
         RequestStatusEnum.SUCCESS -> {
-            UserProfileFriendsListSection(navigator, friendsList = friendsDetailsState.data!!, true)
+            UserProfileFriendsListSection(
+                navigator,
+                friendsList = friendsDetailsState.data!!,
+                loggedInUserFirebaseId = userDetails.firebaseUserId,
+                isLoggedInUser = true
+            )
         }
 
         RequestStatusEnum.EXCEPTION -> {

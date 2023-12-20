@@ -26,10 +26,7 @@ class SearchUserViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isUserDetailsFetched: Boolean = false
-
     fun getAllUsers(fetchDetailsNotForList: List<String>, currentUserFirebaseId: String) {
-        isUserDetailsFetched = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _searchUserStateFlow.value = ResponseState.loading()

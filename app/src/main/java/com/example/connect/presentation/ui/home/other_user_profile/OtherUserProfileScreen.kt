@@ -62,12 +62,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
@@ -82,6 +81,7 @@ import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
 import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
+import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
 import com.example.connect.presentation.ui.pull_refresh.pullRefresh
@@ -261,7 +261,7 @@ private fun ProfileScreen(
             SpacerHeight24()
             ActionButtonsSection(currentUser, requestedUser, viewModel)
             SpacerHeight24()
-            HandleFriendListSection(requestedUser, viewModel = viewModel, navigator)
+            HandleFriendListSection(viewModel = viewModel, navigator)
             HandlePostSection(viewModel, requestedUser, currentUser.firebaseUserId, navigator)
         }
     }
@@ -465,7 +465,6 @@ private fun IconTextButton(
 
 @Composable
 private fun HandleFriendListSection(
-    requestedUser: UsersBean,
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -481,14 +480,16 @@ private fun HandleFriendListSection(
 
         RequestStatusEnum.SUCCESS -> {
             val isFriendListVisible =
-                requestedUser.friendListVisibility == VisibilityScopeEnum.Public.name || (requestedUser.friendListVisibility == VisibilityScopeEnum.FriendsOnly.name && requestedUser.friendList.contains(
-                    viewModel.currentUserState.value.firebaseUserId
-                ))
-            if (isFriendListVisible)
+                viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.Public.name
+                        || (viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.FriendsOnly.name
+                        && viewModel.requiredUserState.value.friendList.contains(viewModel.currentUserState.value.firebaseUserId))
+            if (isFriendListVisible) {
                 UserProfileFriendsListSection(
                     navigator = navigator,
-                    friendsList = friendsDetailsState.data!!
+                    friendsList = friendsDetailsState.data!!,
+                    loggedInUserFirebaseId = viewModel.currentUserState.value.firebaseUserId
                 )
+            }
         }
 
         RequestStatusEnum.EXCEPTION -> {
@@ -507,7 +508,7 @@ private fun HandleFriendListSection(
         }
 
         RequestStatusEnum.NONE -> {
-            // no need to handle it
+            // no need to handle this
         }
     }
 }
@@ -564,7 +565,7 @@ private fun HandlePostSection(
         }
 
         RequestStatusEnum.NONE -> {
-            //no need to handle it
+            // no need to handle this
         }
     }
 }
@@ -1040,7 +1041,7 @@ private fun HandleGetCurrentUserDetailsStateFlow(
                 if (getCurrentUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
                     viewModel.snackBarMessageState.value =
                         stringResource(id = R.string.something_went_wrong)
-                }else{
+                } else {
                     viewModel.snackBarMessageState.value =
                         getCurrentUserDetailsState.message
                             ?: stringResource(id = R.string.something_went_wrong)

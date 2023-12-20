@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
@@ -60,7 +60,6 @@ class OtherUserProfileViewModel @Inject constructor(
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
     val postDetailsStateFlow: StateFlow<ResponseState<List<PostBean>>> get() = _postDetailsStateFlow
-
 
     private val _sendFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
@@ -120,7 +119,6 @@ class OtherUserProfileViewModel @Inject constructor(
         requiredUserState = mutableStateOf(requestedUser)
         isDataInitialized = true
     }
-
 
     fun getPostDetails(fireBaseId: String) {
         viewModelScope.launch {
@@ -430,14 +428,12 @@ class OtherUserProfileViewModel @Inject constructor(
         }
     }
 
-
     fun updateRequiredUser(updatedDetails: UsersBean) {
         _liveObserveRequiredUserDetailsStateFlow.value = ResponseState.none()
         requiredUserState.value = updatedDetails
         statusWithCurrentUserState.value =
             FunctionHelper.getStatusWithCurrentUser(currentUserState.value, requiredUserState.value)
     }
-
 
     fun updateCurrentUser(updatedDetails: UsersBean) {
         _liveObserveCurrentUserDetailsStateFlow.value = ResponseState.none()
@@ -446,11 +442,9 @@ class OtherUserProfileViewModel @Inject constructor(
             FunctionHelper.getStatusWithCurrentUser(currentUserState.value, requiredUserState.value)
     }
 
-
     override fun onCleared() {
         super.onCleared()
         liveObserveRequiredUserListener.remove()
         liveObserveCurrentUserListener.remove()
     }
-
 }

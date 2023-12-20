@@ -25,10 +25,7 @@ class RequestedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isRequestedListFetched: Boolean = false
-
     fun getRequestedUsers(requestedUsersList: List<String>) {
-        isRequestedListFetched = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getRequestedUsersStateFlow.value = ResponseState.loading()

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
 import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
@@ -28,6 +29,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun UserProfileFriendsListSection(
     navigator: DestinationsNavigator,
     friendsList: List<UsersBean>,
+    loggedInUserFirebaseId: String,
     isLoggedInUser: Boolean = false
 ) {
     Column(
@@ -84,7 +86,11 @@ fun UserProfileFriendsListSection(
                         friendDetails = friendsList[index],
                         modifier = Modifier.weight(1f)
                     ) {
-                        navigator.navigate(OtherUserProfileScreenDestination(friendsList[index]))
+                        if (friendsList[index].firebaseUserId == loggedInUserFirebaseId) {
+                            navigator.navigate(CurrentUserProfileScreenDestination())
+                        } else {
+                            navigator.navigate(OtherUserProfileScreenDestination(friendsList[index]))
+                        }
                     }
                     SpacerWidth8()
                 }

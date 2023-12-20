@@ -1,12 +1,15 @@
 package com.example.connect.presentation.ui.home.requested_users
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,18 +44,12 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.requested_users))
     }) {
-
         val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-
-        val requestedUsers = homeSharedViewModel.usersDetails.requestedFriendRequestList
         val viewModel: RequestedUsersViewModel = hiltViewModel()
-
         val snackBarHostState = SnackbarHostState()
         val coroutineScope = rememberCoroutineScope()
 
-        if (!viewModel.isRequestedListFetched) {
-            viewModel.getRequestedUsers(requestedUsers)
-        }
+        viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
 
         Column(
             modifier = Modifier
@@ -108,12 +106,18 @@ fun HandleGetRequestedUsersState(
 
 @Composable
 fun DisplayUsersList(navigator: DestinationsNavigator, requestedUsersList: List<UsersBean>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(requestedUsersList.size) {
-            UsersListItem(requestedUsersList[it]) {
-                navigator.navigate(OtherUserProfileScreenDestination(requestedUsersList[it]))
+    if (requestedUsersList.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = stringResource(id = R.string.no_user_found))
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(requestedUsersList) { requestedUser ->
+                UsersListItem(requestedUser) {
+                    navigator.navigate(OtherUserProfileScreenDestination(requestedUser))
+                }
             }
         }
     }

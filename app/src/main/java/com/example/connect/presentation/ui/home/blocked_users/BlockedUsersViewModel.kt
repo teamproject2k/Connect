@@ -25,10 +25,7 @@ class BlockedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isBlockedListFetched: Boolean = false
-
     fun getBlockedUsers(blockedUsersList: List<String>) {
-        isBlockedListFetched = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getBlockedUsersStateFlow.value = ResponseState.loading()

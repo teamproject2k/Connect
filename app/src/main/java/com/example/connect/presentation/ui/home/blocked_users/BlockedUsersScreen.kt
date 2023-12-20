@@ -1,12 +1,15 @@
 package com.example.connect.presentation.ui.home.blocked_users
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,18 +44,12 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.blocked_users))
     }) {
-
         val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-
-        val blockedUsers = homeSharedViewModel.usersDetails.blockedUsersList
         val viewModel: BlockedUsersViewModel = hiltViewModel()
-
         val snackBarHostState = SnackbarHostState()
         val coroutineScope = rememberCoroutineScope()
 
-        if (!viewModel.isBlockedListFetched) {
-            viewModel.getBlockedUsers(blockedUsers)
-        }
+        viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
 
         Column(
             modifier = Modifier
@@ -105,12 +103,18 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
 
 @Composable
 fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList: List<UsersBean>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(blockedUsersList.size) {
-            UsersListItem(blockedUsersList[it]) {
-                navigator.navigate(OtherUserProfileScreenDestination(blockedUsersList[it]))
+    if (blockedUsersList.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = stringResource(id = R.string.no_user_found))
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(blockedUsersList) { blockedUser ->
+                UsersListItem(blockedUser) {
+                    navigator.navigate(OtherUserProfileScreenDestination(blockedUser))
+                }
             }
         }
     }
