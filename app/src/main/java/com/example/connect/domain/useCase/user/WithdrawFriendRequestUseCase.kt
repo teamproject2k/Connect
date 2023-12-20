@@ -5,7 +5,13 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class WithdrawFriendRequestUseCase @Inject constructor(private val repository: IUserRepository) {
-
+    /**
+     * Invokes the withdrawFriendRequest method in the repository.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the requested user.
+     * @return A ResponseState object containing the result of the operation.
+     */
     suspend fun invoke(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String

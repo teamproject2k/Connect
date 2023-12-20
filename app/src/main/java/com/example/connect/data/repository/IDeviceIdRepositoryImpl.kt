@@ -14,7 +14,6 @@ class IDeviceIdRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore,
     private val appDatabase: AppDatabase
 ) : IDeviceIdRepository {
-
     override suspend fun updateDeviceIdOnRemote(
         fireBaseId: String,
         updatedDeviceId: String

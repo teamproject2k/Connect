@@ -38,14 +38,19 @@ object FunctionHelper {
      * @param vibrationDuration The duration of the vibration in milliseconds.
      */
     fun vibrateDevice(context: Context, vibrationDuration: Long = 200) {
+        // Get the vibrator service from the context.
         val vibrator = ContextCompat.getSystemService(context, Vibrator::class.java)
+
+        // Check if the device has a vibrator.
         if (vibrator?.hasVibrator() == true) {
-            vibrator.vibrate(
-                VibrationEffect.createOneShot(
-                    vibrationDuration,
-                    VibrationEffect.DEFAULT_AMPLITUDE
-                )
+            // Create a vibration effect.
+            val vibrationEffect = VibrationEffect.createOneShot(
+                vibrationDuration,
+                VibrationEffect.DEFAULT_AMPLITUDE
             )
+
+            // Vibrate the device.
+            vibrator.vibrate(vibrationEffect)
         }
     }
 

@@ -1,12 +1,11 @@
 package com.example.connect.domain.repository
 
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IUserRepository {
-
     /**
      * Gets the user details from the remote database.
      *
@@ -79,7 +78,6 @@ interface IUserRepository {
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long
-
 
     /**
      * Get all users not in the given list.
@@ -201,7 +199,13 @@ interface IUserRepository {
         otherUsersStatus: MutableMap<String, String>
     ): Int
 
-
+    /**
+     * Live observe user from remote.
+     *
+     * @param firebaseUserId The firebase user id.
+     * @param userObserverStateFlow The user observer state flow.
+     * @return The listener registration.
+     */
     suspend fun liveObserveUserFromRemote(
         firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration

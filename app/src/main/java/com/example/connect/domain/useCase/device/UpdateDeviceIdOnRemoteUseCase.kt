@@ -18,5 +18,4 @@ class UpdateDeviceIdOnRemoteUseCase @Inject constructor(private val repository: 
     ): ResponseState<Nothing> {
         return repository.updateDeviceIdOnRemote(fireBaseId, updatedDeviceId)
     }
-
 }

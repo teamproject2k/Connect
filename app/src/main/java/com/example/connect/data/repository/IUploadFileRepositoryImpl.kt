@@ -10,7 +10,6 @@ import javax.inject.Inject
 class IUploadRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage
 ) : IUploadFileRepository {
-
     override suspend fun uploadFileToRemote(url: Uri, path: String): ResponseState<String> {
         // Upload the file to the specified path in Firebase Storage.
         return try {

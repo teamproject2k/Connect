@@ -41,10 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
@@ -188,7 +188,6 @@ private fun CreateUi(context: Context) {
     }
     val navController = rememberNavController()
 
-
     LaunchedEffect(Unit) {
         navController.currentBackStackEntryFlow.collect {
             selectedRouteState.value = it.route().route
@@ -225,7 +224,7 @@ private fun CreateUi(context: Context) {
                                     ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                                 } else null
                             )
-                        },
+                        }
                     )
                 }
             }
@@ -252,7 +251,7 @@ private fun CreateUi(context: Context) {
  * @param context The context of the application.
  * @return The list of items to be displayed in the bottom navigation bar.
  */
-fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
+private fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
     val bottomNavList = arrayListOf<BottomAppBarItemData>()
     bottomNavList.add(
         BottomAppBarItemData(

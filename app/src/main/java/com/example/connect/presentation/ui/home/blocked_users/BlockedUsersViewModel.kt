@@ -25,13 +25,23 @@ class BlockedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    /**
+     * Gets the blocked users.
+     *
+     * @param blockedUsersList The list of blocked user ids.
+     */
     fun getBlockedUsers(blockedUsersList: List<String>) {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Perform the operation in the IO dispatcher.
             withContext(Dispatchers.IO) {
+                // Set the state to loading.
                 _getBlockedUsersStateFlow.value = ResponseState.loading()
+                // If the blocked user list is empty, set the state to success with an empty list.
                 if (blockedUsersList.isEmpty()) {
                     _getBlockedUsersStateFlow.value = ResponseState.success(emptyList())
                 } else {
+                    // Otherwise, get the user details from the remote use case and set the state to success with the result.
                     _getBlockedUsersStateFlow.value =
                         getUserDetailsFromIdsFromRemoteUseCase.invoke(blockedUsersList)
                 }

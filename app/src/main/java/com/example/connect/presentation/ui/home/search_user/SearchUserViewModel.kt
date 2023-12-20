@@ -26,10 +26,21 @@ class SearchUserViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    /**
+     * Gets all users not in the list from the remote use case.
+     *
+     * @param fetchDetailsNotForList The list of user IDs to not fetch details for.
+     * @param currentUserFirebaseId The current user's Firebase ID.
+     */
     fun getAllUsers(fetchDetailsNotForList: List<String>, currentUserFirebaseId: String) {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher to perform network operations.
             withContext(Dispatchers.IO) {
+                // Set the search user state to loading.
                 _searchUserStateFlow.value = ResponseState.loading()
+
+                // Get all users not in the list from the remote use case.
                 _searchUserStateFlow.value =
                     getAllUsersNotInListFromRemoteUseCase.invoke(
                         fetchDetailsNotForList,

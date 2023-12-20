@@ -25,13 +25,24 @@ class RequestedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    /**
+     * Gets the details of the requested users.
+     *
+     * @param requestedUsersList The list of requested users.
+     */
     fun getRequestedUsers(requestedUsersList: List<String>) {
+        // Launch a coroutine in the viewModelScope
         viewModelScope.launch {
+            // Switch to the IO dispatcher for network operations
             withContext(Dispatchers.IO) {
+                // Set the state to loading
                 _getRequestedUsersStateFlow.value = ResponseState.loading()
+                // Check if the list of requested users is empty
                 if (requestedUsersList.isEmpty()) {
+                    // If the list is empty, set the state to success with an empty list
                     _getRequestedUsersStateFlow.value = ResponseState.success(emptyList())
                 } else {
+                    // If the list is not empty, get the user details from the remote use case
                     _getRequestedUsersStateFlow.value =
                         getUserDetailsFromIdsFromRemoteUseCase.invoke(requestedUsersList)
                 }

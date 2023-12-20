@@ -22,7 +22,6 @@ class IUserRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase
 ) :
     IUserRepository {
-
     override suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?> {
         // Try to get the user details from the FireStore database.
         return try {
@@ -679,15 +678,22 @@ class IUserRepositoryImpl @Inject constructor(
         firebaseUserId: String,
         userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration {
-        return fireStore.collection(FirebaseConstants.USER_KEY).document(firebaseUserId)
-            .addSnapshotListener(MetadataChanges.EXCLUDE) { document, error ->
-                if (error == null && document != null && document.exists()) {
-                    val requiredUser = document.toObject(UserRemoteEntity::class.java)
-                    if (requiredUser != null) {
-                        userObserverStateFlow.value =
-                            ResponseState.success(requiredUser.toUserBean())
-                    }
+        // Get a reference to the user document in the Firestore database.
+        val userDocumentReference = fireStore.collection(FirebaseConstants.USER_KEY)
+            .document(firebaseUserId)
+
+        // Add a snapshot listener to the user document.
+        return userDocumentReference.addSnapshotListener(MetadataChanges.EXCLUDE) { document, error ->
+            // If there is no error and the document exists, get the user data from the document.
+            if (error == null && document != null && document.exists()) {
+                val requiredUser = document.toObject(UserRemoteEntity::class.java)
+
+                // If the user data is not null, convert it to a UsersBean object and emit it to the user observer state flow.
+                if (requiredUser != null) {
+                    userObserverStateFlow.value =
+                        ResponseState.success(requiredUser.toUserBean())
                 }
             }
+        }
     }
 }

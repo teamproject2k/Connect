@@ -5,6 +5,13 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UnfriendAndBlockUserUseCase @Inject constructor(private val repository: IUserRepository) {
+    /**
+     * Unfriends and blocks a user.
+     *
+     * @param currentUserFirebaseId The ID of the current user.
+     * @param requestedUserFirebaseId The ID of the user to unfriend and block.
+     * @return A response state indicating the success or failure of the operation.
+     */
     suspend fun invoke(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String

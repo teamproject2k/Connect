@@ -3,9 +3,9 @@ package com.example.connect.presentation.ui.auth.user_details
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
@@ -38,21 +38,31 @@ class UserDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
 
-
     /**
-     * Creates a user profile in the database.
+     * Creates a user profile.
      */
     fun createUserProfile() {
+        // Create a coroutine scope to run the asynchronous tasks.
         viewModelScope.launch {
+            // Run the tasks in the IO dispatcher to avoid blocking the main thread.
             withContext(Dispatchers.IO) {
+                // Set the loading state of the user profile creation process.
                 _addUserStateFlow.value = ResponseState.loading()
+
+                // Get the formatted user name.
                 val formattedUserName =
                     FunctionHelper.getLowerCaseTextWithOutExtraSpace(userNameState.value)
-                //get no of users with name to set user id
+
+                // Get the number of users with the same name to set the user ID.
                 val currentUserByNameResponseState =
                     getUsersFromNameUseCase.invoke(formattedUserName)
+
+                // Check if the response is not an exception and the device ID is not null.
                 if (currentUserByNameResponseState.status != RequestStatusEnum.EXCEPTION && sharedPreference.deviceId != null) {
+                    // Get the current time in milliseconds.
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
+
+                    // Create a user object with the user's information.
                     val user = UsersBean(
                         fireBaseAuth.currentUser!!.uid,
                         getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
@@ -67,17 +77,24 @@ class UserDetailsViewModel @Inject constructor(
                         dobVisibility = VisibilityScopeEnum.Public.name,
                         friendListVisibility = VisibilityScopeEnum.Public.name
                     )
+
+                    // Add the user to the remote database.
                     val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
+
+                    // Check if the response is successful.
                     if (userDetailsResponseState.status == RequestStatusEnum.SUCCESS) {
+                        // Add the user to the local database.
                         addUserToDbUseCase.invoke(user)
                     }
+
+                    // Set the response state of the user profile creation process.
                     _addUserStateFlow.value = userDetailsResponseState
                 } else {
+                    // Set the error state of the user profile creation process.
                     _addUserStateFlow.value =
                         ResponseState.error(currentUserByNameResponseState.message ?: "")
                 }
             }
         }
     }
-
 }

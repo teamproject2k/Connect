@@ -4,7 +4,13 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UpdateOtherUserStatusOnDbUseCase @Inject constructor(private val repository: IUserRepository) {
-
+    /**
+     * Invokes the repository to update the other users' status on the database.
+     *
+     * @param currentUserFirebaseId The current user's Firebase ID.
+     * @param otherUsersStatus A mutable map of other users' Firebase IDs to their status.
+     * @return The number of users whose status was successfully updated.
+     */
     suspend fun invoke(
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
