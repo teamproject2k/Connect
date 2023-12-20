@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.home.base_screen
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,10 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
@@ -62,6 +63,7 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
+
 
 @Composable
 fun HomeActivityScreen() {
@@ -187,7 +189,22 @@ private fun CreateUi(context: Context) {
         mutableStateOf(HomeScreenDestination.route)
     }
     val navController = rememberNavController()
-
+    var doubleBackToExitPressedOnce by remember {
+        mutableStateOf(false)
+    }
+    val currentActivity = LocalActivity.current
+    BackHandler {
+        if (doubleBackToExitPressedOnce) {
+            currentActivity.finish()
+            return@BackHandler
+        }
+        doubleBackToExitPressedOnce = true
+        context.showToast(context.getString(R.string.please_click_back_again_to_exit))
+        Handler(Looper.getMainLooper()).postDelayed(
+            { doubleBackToExitPressedOnce = false },
+            ConstantsHelper.BACK_EXIT_RESET_TIME
+        )
+    }
 
     LaunchedEffect(Unit) {
         navController.currentBackStackEntryFlow.collect {
@@ -209,10 +226,19 @@ private fun CreateUi(context: Context) {
                     NavigationBarItem(
                         selected = selectedRouteState.value == data.routeName,
                         onClick = {
-                            navController.navigate(data.routeName) {
-                                launchSingleTop = true
+                            val isScreenPresentOnBackStack = try {
+                                navController.getBackStackEntry(data.routeName)
+                                true
+                            } catch (exception: Exception) {
+                                false
                             }
-                            selectedRouteState.value = data.routeName
+                            if (isScreenPresentOnBackStack) {
+                                navController.popBackStack(data.routeName, false)
+                            } else {
+                                navController.navigate(data.routeName) {
+                                    launchSingleTop = true
+                                }
+                            }
                         },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = MaterialTheme.colorScheme.primary

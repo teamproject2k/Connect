@@ -157,4 +157,5 @@
     <string name="user_details_updated_since_last_update_please_refresh_the_page_to_see_the_latest_updates">User details updated since last update, Please refresh the page to see the latest updates</string>
     <string name="users_details_not_found">Users details not found</string>
     <string name="view_all_comment_count_comments">View all %1$d comments</string>
+    <string name="please_click_back_again_to_exit">Please click BACK again to exit</string>
 </resources>
