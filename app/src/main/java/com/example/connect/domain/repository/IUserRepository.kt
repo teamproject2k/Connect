@@ -2,6 +2,8 @@ package com.example.connect.domain.repository
 
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IUserRepository {
 
@@ -199,4 +201,8 @@ interface IUserRepository {
         otherUsersStatus: MutableMap<String, String>
     ): Int
 
+
+    suspend fun liveObserveUserFromRemote(
+        firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
+    ): ListenerRegistration
 }
