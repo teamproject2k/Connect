@@ -45,7 +45,6 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
     val viewModel: RequestedUsersViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
-    viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.requested_users))
     }) {
@@ -64,6 +63,9 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
                 viewModel.snackBarMessageState.value = ""
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
     }
 }
 

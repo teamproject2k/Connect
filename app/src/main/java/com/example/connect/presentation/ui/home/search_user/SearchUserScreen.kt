@@ -23,8 +23,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -34,6 +36,7 @@ import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
+import com.example.connect.presentation.ui.common.observeAsState
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
@@ -52,16 +55,28 @@ import kotlinx.coroutines.launch
 fun SearchScreen(navigator: DestinationsNavigator) {
     val viewModel: SearchUserViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    var refreshing by rememberSaveable { mutableStateOf(false) }
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            viewModel.getAllUsers(sharedViewModel.usersDetails)
+            refreshing = false
+        })
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
-        Column(
+        Box(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
             HandleSearchUserState(viewModel, navigator)
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                refreshState = pullRefreshState
+            )
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -73,9 +88,6 @@ fun SearchScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        val fetchDetailsNotForList = arrayListOf<String>()
-        fetchDetailsNotForList.add(sharedViewModel.usersDetails.firebaseUserId)
-        fetchDetailsNotForList.addAll(sharedViewModel.usersDetails.blockedUsersList)
         viewModel.getAllUsers(sharedViewModel.usersDetails)
     }
 }
@@ -92,7 +104,7 @@ private fun HandleSearchUserState(
     }
     when (searchUserState.status) {
         RequestStatusEnum.Loading -> {
-            LoaderFullScreen()
+            LoaderFullScreen(stringResource(id = R.string.getting_user_details))
             isExceptionHandled = false
         }
 
@@ -124,12 +136,7 @@ private fun CreateUi(
     usersList: List<UsersBean>,
     navigator: DestinationsNavigator
 ) {
-    var refreshing by rememberSaveable { mutableStateOf(false) }
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
-            refreshing = true
-            refreshing = false
-        })
+
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
@@ -146,25 +153,20 @@ private fun CreateUi(
             }
         }
     }
-    SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
-        searchQuery = it
-    }
-    if (filteredUserList.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = stringResource(R.string.no_user_found))
+    Column(modifier = Modifier.fillMaxSize()) {
+        SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
+            searchQuery = it
         }
-        return
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pullRefresh(pullRefreshState),
-        contentAlignment = Alignment.TopCenter
-    ) {
+        if (filteredUserList.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = stringResource(R.string.no_user_found))
+            }
+            return
+        }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(filteredUserList) { user ->
                 UsersListItem(usersBean = user) {
@@ -172,10 +174,6 @@ private fun CreateUi(
                 }
             }
         }
-        PullRefreshIndicator(
-            refreshing = refreshing,
-            refreshState = pullRefreshState
-        )
     }
 }
 

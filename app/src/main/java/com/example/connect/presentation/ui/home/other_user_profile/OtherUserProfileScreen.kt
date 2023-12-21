@@ -106,7 +106,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     val coroutineScope = rememberCoroutineScope()
 
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(homeSharedViewModel.usersDetails, requestedUser)
     }

@@ -45,7 +45,6 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     val viewModel: BlockedUsersViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
-    viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.blocked_users))
     }) {
@@ -65,6 +64,9 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 viewModel.snackBarMessageState.value = ""
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
     }
 }
 
