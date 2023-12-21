@@ -41,16 +41,14 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun RequestedListScreen(navigator: DestinationsNavigator) {
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+    val viewModel: RequestedUsersViewModel = hiltViewModel()
+    val snackBarHostState = SnackbarHostState()
+    val coroutineScope = rememberCoroutineScope()
+    viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.requested_users))
     }) {
-        val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-        val viewModel: RequestedUsersViewModel = hiltViewModel()
-        val snackBarHostState = SnackbarHostState()
-        val coroutineScope = rememberCoroutineScope()
-
-        viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
-
         Column(
             modifier = Modifier
                 .padding(it)
@@ -58,17 +56,17 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
         ) {
             HandleGetRequestedUsersState(viewModel, navigator)
         }
-
-        LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
-            if (viewModel.snackBarMessageState.value.isNotBlank()) {
-                coroutineScope.launch {
-                    snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
-                    viewModel.snackBarMessageState.value = ""
-                }
+    }
+    LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
+        if (viewModel.snackBarMessageState.value.isNotBlank()) {
+            coroutineScope.launch {
+                snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
+                viewModel.snackBarMessageState.value = ""
             }
         }
     }
 }
+
 
 @Composable
 fun HandleGetRequestedUsersState(
@@ -95,7 +93,7 @@ fun HandleGetRequestedUsersState(
         }
 
         RequestStatusEnum.Success -> {
-            requestedUsersState.data?.let { DisplayUsersList(navigator, it) }
+            DisplayUsersList(navigator, requestedUsersState.data ?: emptyList())
         }
 
         RequestStatusEnum.None -> {

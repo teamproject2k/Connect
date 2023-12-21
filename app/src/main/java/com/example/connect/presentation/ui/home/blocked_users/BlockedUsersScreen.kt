@@ -41,16 +41,14 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun BlockedListScreen(navigator: DestinationsNavigator) {
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+    val viewModel: BlockedUsersViewModel = hiltViewModel()
+    val snackBarHostState = SnackbarHostState()
+    val coroutineScope = rememberCoroutineScope()
+    viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(R.string.blocked_users))
     }) {
-        val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-        val viewModel: BlockedUsersViewModel = hiltViewModel()
-        val snackBarHostState = SnackbarHostState()
-        val coroutineScope = rememberCoroutineScope()
-
-        viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
-
         Column(
             modifier = Modifier
                 .padding(it)
@@ -58,13 +56,13 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
         ) {
             HandleGetBlockedUsersState(viewModel, navigator)
         }
+    }
 
-        LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
-            if (viewModel.snackBarMessageState.value.isNotBlank()) {
-                coroutineScope.launch {
-                    snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
-                    viewModel.snackBarMessageState.value = ""
-                }
+    LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
+        if (viewModel.snackBarMessageState.value.isNotBlank()) {
+            coroutineScope.launch {
+                snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
+                viewModel.snackBarMessageState.value = ""
             }
         }
     }
@@ -92,7 +90,7 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
         }
 
         RequestStatusEnum.Success -> {
-            blockedUsersState.data?.let { DisplayUsersList(navigator, it) }
+            DisplayUsersList(navigator, blockedUsersState.data ?: emptyList())
         }
 
         RequestStatusEnum.None -> {

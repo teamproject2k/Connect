@@ -1,6 +1,7 @@
-package com.example.connect.presentation.ui.home.user_request
+package com.example.connect.presentation.ui.home.friends_and_pending
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 @SuppressLint("StateNameRule")
 @HiltViewModel
-class UserRequestViewModel @Inject constructor(
+class FriendsAndPendingViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase
@@ -33,7 +34,7 @@ class UserRequestViewModel @Inject constructor(
     BaseViewModel() {
 
     lateinit var currentUserState: MutableState<UsersBean>
-    var selectedTabIndexState by mutableIntStateOf(0)
+    lateinit var selectedTabIndexState: MutableIntState
 
     private val _getFriendsListStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
@@ -58,7 +59,7 @@ class UserRequestViewModel @Inject constructor(
     val filteredList: ArrayList<UsersBean> = arrayListOf()
 
     fun initializeData(defaultSelectedTab: Int) {
-        selectedTabIndexState = defaultSelectedTab
+        selectedTabIndexState = mutableIntStateOf(defaultSelectedTab)
         isDataInitialized = true
     }
 
@@ -117,7 +118,8 @@ class UserRequestViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                    _userDetailsStateFlow.value =
+                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }

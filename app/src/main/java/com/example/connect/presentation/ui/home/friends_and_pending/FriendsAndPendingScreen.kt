@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.user_request
+package com.example.connect.presentation.ui.home.friends_and_pending
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -59,6 +61,7 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
@@ -84,15 +87,19 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
             "Tab Index $defaultSelectedTab not in range 0..1"
         )
     }
-    val viewModel: UserRequestViewModel = hiltViewModel()
+    val viewModel: FriendsAndPendingViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-
-    val snackBarHostState = SnackbarHostState()
-    val coroutineScope = rememberCoroutineScope()
-
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(defaultSelectedTab)
     }
+    if (viewModel.selectedTabIndexState.intValue == 0) {
+        viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
+    } else {
+        viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+    }
+    val snackBarHostState = SnackbarHostState()
+    val coroutineScope = rememberCoroutineScope()
+
 
     var refreshing by rememberSaveable { mutableStateOf(false) }
 
@@ -102,25 +109,14 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
             viewModel.getUserDetails()
             refreshing = false
         })
-    if (viewModel.selectedTabIndexState == 0) {
-        if (!viewModel.isFriendListFetched) {
-            viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
-        }
-    } else {
-        if (!viewModel.isPendingFriendRequestListFetched) {
-            viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
-        }
-    }
+
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
-            SearchUi(searchHint = stringResource(id = R.string.search_user_by_name_or_user_id)) {
-
-            }
-            RequestTabs(viewModel = viewModel, navigator)
+            FriendsAndPendingTabs(viewModel = viewModel, navigator = navigator)
         }
 //        Box(
 //            modifier = Modifier
@@ -157,8 +153,27 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
 }
 
 @Composable
+fun FriendsAndPendingTabs(viewModel: FriendsAndPendingViewModel, navigator: DestinationsNavigator) {
+    val itemList = stringArrayResource(id = R.array.friends_tab_list)
+    TabRow(selectedTabIndex = viewModel.selectedTabIndexState.intValue) {
+        itemList.forEachIndexed { index, title ->
+            Tab(
+                text = { Text(title) },
+                selected = viewModel.selectedTabIndexState.intValue == index,
+                onClick = { viewModel.selectedTabIndexState.intValue = index },
+                unselectedContentColor = ColorsHelper.gray()
+            )
+        }
+    }
+    when (viewModel.selectedTabIndexState.intValue) {
+        0 -> HandleGetFriendsListStateFlow(viewModel = viewModel, navigator = navigator)
+        1 -> HandleGetPendingFriendRequestListStateFlow(viewModel, navigator)
+    }
+}
+
+@Composable
 private fun HandleGetFriendsListStateFlow(
-    viewModel: UserRequestViewModel,
+    viewModel: FriendsAndPendingViewModel,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -188,7 +203,7 @@ private fun HandleGetFriendsListStateFlow(
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(getFriendsListAsUsersState.data ?: emptyList(), navigator, viewModel)
+            FriendsListUI(getFriendsListAsUsersState.data ?: emptyList(), navigator)
         }
 
         RequestStatusEnum.None -> {
@@ -197,9 +212,63 @@ private fun HandleGetFriendsListStateFlow(
     }
 }
 
+
+@Composable
+private fun FriendsListUI(
+    usersList: List<UsersBean>,
+    navigator: DestinationsNavigator,
+) {
+    var searchQuery by rememberSaveable {
+        mutableStateOf("")
+    }
+    val filteredUserList = arrayListOf<UsersBean>()
+    if (searchQuery.isBlank()) {
+        filteredUserList.addAll(usersList)
+    } else {
+        val modifiedQuery = FunctionHelper.getLowerCaseTextWithOutExtraSpace(searchQuery)
+        usersList.forEach {
+            val lowerCaseName = FunctionHelper.getLowerCaseTextWithOutExtraSpace(it.name)
+            if (lowerCaseName.contains(modifiedQuery) || it.connectUserId.contains(modifiedQuery)
+            ) {
+                filteredUserList.add(it)
+            }
+        }
+    }
+    Column {
+        SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
+            searchQuery = it
+        }
+    }
+    FriendsList(friendList = filteredUserList, navigator = navigator)
+}
+
+
+@Composable
+fun FriendsList(friendList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
+    if (friendList.isEmpty()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = stringResource(R.string.no_friends_added))
+        }
+        return
+    }
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyColumn {
+            items(friendList) { user ->
+                UsersListItem(user) {
+                    navigator.navigate(OtherUserProfileScreenDestination(user))
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun HandleGetPendingFriendRequestListStateFlow(
-    viewModel: UserRequestViewModel,
+    viewModel: FriendsAndPendingViewModel,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -229,10 +298,9 @@ private fun HandleGetPendingFriendRequestListStateFlow(
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(
+            PendingListUI(
                 getPendingFriendRequestListAsUsersState.data ?: emptyList(),
                 navigator,
-                viewModel
             )
         }
 
@@ -243,15 +311,14 @@ private fun HandleGetPendingFriendRequestListStateFlow(
 }
 
 @Composable
-private fun CreateUi(
+private fun PendingListUI(
     usersList: List<UsersBean>,
     navigator: DestinationsNavigator,
-    viewModel: UserRequestViewModel
 ) {
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
-    val filteredUserList = mutableListOf<UsersBean>()
+    val filteredUserList = arrayListOf<UsersBean>()
     if (searchQuery.isBlank()) {
         filteredUserList.addAll(usersList)
     } else {
@@ -264,58 +331,17 @@ private fun CreateUi(
             }
         }
     }
-    SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
-        searchQuery = it
+    Column {
+        SearchUi(searchHint = stringResource(R.string.search_user_by_name_or_user_id)) {
+            searchQuery = it
+        }
     }
+    PendingList(friendRequestList = filteredUserList, navigator = navigator)
 }
 
 
 @Composable
-fun RequestTabs(viewModel: UserRequestViewModel, navigator: DestinationsNavigator) {
-    val itemList = stringArrayResource(id = R.array.friends_tab_list)
-    TabRow(selectedTabIndex = viewModel.selectedTabIndexState) {
-        itemList.forEachIndexed { index, title ->
-            Tab(
-                text = { Text(title) },
-                selected = viewModel.selectedTabIndexState == index,
-                onClick = { viewModel.selectedTabIndexState = index },
-                unselectedContentColor = ColorsHelper.gray()
-            )
-        }
-    }
-    when (viewModel.selectedTabIndexState) {
-        0 -> FriendsList(viewModel.filteredList, navigator)
-        1 -> FriendRequestsList(viewModel.filteredList, navigator)
-    }
-}
-
-@Composable
-fun FriendsList(friendList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
-    if (friendList.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = stringResource(R.string.no_friends_added))
-        }
-        return
-    }
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            items(friendList) { user ->
-                UserRequestListItem(usersBean = user) {
-                    navigator.navigate(
-                        OtherUserProfileScreenDestination(user)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FriendRequestsList(friendRequestList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
+fun PendingList(friendRequestList: ArrayList<UsersBean>, navigator: DestinationsNavigator) {
     if (friendRequestList.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -329,7 +355,7 @@ fun FriendRequestsList(friendRequestList: ArrayList<UsersBean>, navigator: Desti
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             items(friendRequestList) { user ->
-                UserRequestListItem(usersBean = user) {
+                UsersListItem(usersBean = user) {
                     navigator.navigate(
                         OtherUserProfileScreenDestination(user)
                     )
@@ -340,99 +366,8 @@ fun FriendRequestsList(friendRequestList: ArrayList<UsersBean>, navigator: Desti
 }
 
 @Composable
-private fun UserRequestListItem(usersBean: UsersBean, onClick: () -> Unit) {
-    Column {
-        UserDetailsSection(
-            user = usersBean,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onClick()
-                }
-                .padding(16.dp)
-        )
-        Divider()
-    }
-}
-
-@Composable
-fun PosterDetails(
-    modifier: Modifier = Modifier,
-    userName: String,
-    description: String,
-    onClick: () -> Unit,
-    isCTAVisible: Boolean = false,
-    positiveButtonText: String = stringResource(id = R.string.ok),
-    negativeButtonText: String = stringResource(id = R.string.cancel),
-    onPositiveButtonClick: () -> Unit = {},
-    onNegativeButtonClick: () -> Unit = {}
-) {
-    Row(modifier = modifier.clickable { onClick() }) {
-
-        Image(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(shape = CircleShape),
-            painter = painterResource(id = R.drawable.ic_launcher_background),
-            contentDescription = description,
-            contentScale = ContentScale.Crop,
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .wrapContentSize(),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = userName,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-            )
-            Text(text = description, fontSize = 12.sp, color = ColorsHelper.gray())
-            if (isCTAVisible) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                onPositiveButtonClick()
-                            }
-                            .weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        text = positiveButtonText,
-                        fontSize = 14.sp)
-                    SpacerWidth12()
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(ColorsHelper.lightGray())
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                onNegativeButtonClick()
-                            }
-                            .weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = ColorsHelper.black(),
-                        text = negativeButtonText,
-                        fontSize = 14.sp)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun HandleGetCurrentUserDetailsStateFlow(
-    viewModel: UserRequestViewModel,
+    viewModel: FriendsAndPendingViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {
     val getCurrentUserDetailsState = viewModel.userDetailsStateFlow.collectAsState().value

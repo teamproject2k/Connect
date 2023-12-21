@@ -17,8 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RequestedUsersViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
     private val _getRequestedUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
     val getRequestedUsersStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _getRequestedUsersStateFlow

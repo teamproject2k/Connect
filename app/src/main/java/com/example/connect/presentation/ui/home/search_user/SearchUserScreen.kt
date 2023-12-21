@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.search_user
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,9 @@ import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
+import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
+import com.example.connect.presentation.ui.pull_refresh.pullRefresh
+import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWithOutExtraSpace
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
@@ -120,6 +124,12 @@ private fun CreateUi(
     usersList: List<UsersBean>,
     navigator: DestinationsNavigator
 ) {
+    var refreshing by rememberSaveable { mutableStateOf(false) }
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            refreshing = false
+        })
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
@@ -149,14 +159,23 @@ private fun CreateUi(
         }
         return
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(filteredUserList) { user ->
                 UsersListItem(usersBean = user) {
                     navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
             }
         }
+        PullRefreshIndicator(
+            refreshing = refreshing,
+            refreshState = pullRefreshState
+        )
     }
 }
 
