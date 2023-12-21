@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.presentation.ui.chat.ChatActivity
+import com.example.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostItemLayout
@@ -32,10 +32,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun HomeScreen(navigator: DestinationsNavigator) {
     val activity = LocalActivity.current
     val context = LocalContext.current
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+
     Scaffold(topBar = {
         AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
             IconButton(onClick = {
                 val intent = Intent(context, ChatActivity::class.java)
+                intent.putExtra("userDetails", homeSharedViewModel.usersDetails)
                 activity.startActivity(intent)
             }) {
                 Icon(
@@ -46,7 +49,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         })
     }) {
         Column(modifier = Modifier.padding(it)) {
-            val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
             PostItemLayout(usersDetails = homeSharedViewModel.usersDetails)
         }
     }

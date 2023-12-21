@@ -88,7 +88,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddPostScreen(navigator: DestinationsNavigator) {
     val viewModel: AddPostViewModel = hiltViewModel()
-    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -136,7 +136,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 .padding(it)
         ) {
             HandleAddPostSection(viewModel, context, navigator)
-            TopDetailsSection(viewModel = viewModel, sharedViewModel) {
+            TopDetailsSection(viewModel = viewModel, homeSharedViewModel) {
                 coroutineScope.launch {
                     keyboardController?.hide()
                     showBottomSheet = true

@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".presentation.ui.home.base_screen.HomeActivity" />
-        <activity android:name=".presentation.ui.chat.ChatActivity" />
+        <activity android:name=".presentation.ui.chat.base_screen.ChatActivity" />
     </application>
 
 </manifest>
