@@ -35,7 +35,6 @@ import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.chat.base_screen.ChatSharedViewModel
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.utils.ChatNavGraph
@@ -151,6 +150,5 @@ fun ChatListItem(modifier: Modifier = Modifier, userDetails: UsersBean, onItemCl
                 Text(text = "3", fontSize = 14.sp, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
-        DividerLightGrayAlpha50()
     }
 }
