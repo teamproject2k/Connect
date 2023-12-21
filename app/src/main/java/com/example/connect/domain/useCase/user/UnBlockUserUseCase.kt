@@ -5,6 +5,13 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UnBlockUserUseCase @Inject constructor(private val repository: IUserRepository) {
+    /**
+     * Unblocks a user.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user to unblock.
+     * @return A [ResponseState] containing either [Nothing] if the user was successfully unblocked or an error message if the unblocking failed.
+     */
     suspend fun invoke(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String

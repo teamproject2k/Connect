@@ -2,14 +2,14 @@ package com.example.connect.presentation.ui.home.base_screen
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -81,42 +81,63 @@ class HomeSharedViewModel @Inject constructor(
      * Gets the user details from the database or the server.
      */
     fun getUserDetails(context: Context) {
+        // Launch a coroutine in the viewModelScope
         viewModelScope.launch {
+            // Perform operations on the IO dispatcher
             withContext(Dispatchers.IO) {
+                // Set the user details state flow to loading
                 _userDetailsStateFlow.value = ResponseState.loading()
 
+                // Get the current user's Firebase ID
                 val fireBaseId = fireBaseAuth.currentUser?.uid
 
+                // Check if the Firebase ID is not null
                 if (fireBaseId != null) {
+                    // Check if the device is connected to the internet
                     if (context.isNetworkAvailable()) {
+                        // Get the user details from the server
                         val userDetailsFromServerResponseState =
                             getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
 
+                        // Check if the response state is successful
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
+                            // Add the user to the database
                             addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
+
+                            // Update the usersDetails variable
                             usersDetails = userDetailsFromServerResponseState.data
+
+                            // Set the user details state flow to success
                             _userDetailsStateFlow.value = ResponseState.success(null)
                         } else {
+                            // Set the user details state flow to error
                             _userDetailsStateFlow.value = ResponseState.error(
                                 userDetailsFromServerResponseState.message ?: ""
                             )
                         }
                     } else {
+                        // Get the user details from the database
                         val userDetails = getUserDetailsFromDbUseCase.invoke(fireBaseId)
 
+                        // Check if the user details are not null
                         if (userDetails != null) {
+                            // Update the usersDetails variable
                             usersDetails = userDetails
+
+                            // Set the user details state flow to success
                             _userDetailsStateFlow.value = ResponseState.success(null)
                         } else {
+                            // Set the user details state flow to error
                             _userDetailsStateFlow.value =
                                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                         }
                     }
                 } else {
-                    _userDetailsStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                    // Set the user details state flow to error
+                    _userDetailsStateFlow.value =
+                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }
     }
-
 }

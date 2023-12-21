@@ -64,7 +64,6 @@ import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
 
-
 @Composable
 fun HomeActivityScreen() {
     val viewModel = hiltViewModel<HomeSharedViewModel>()
@@ -189,6 +188,7 @@ private fun CreateUi(context: Context) {
         mutableStateOf(HomeScreenDestination.route)
     }
     val navController = rememberNavController()
+
     var doubleBackToExitPressedOnce by remember {
         mutableStateOf(false)
     }
@@ -251,7 +251,7 @@ private fun CreateUi(context: Context) {
                                     ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                                 } else null
                             )
-                        },
+                        }
                     )
                 }
             }
@@ -278,7 +278,7 @@ private fun CreateUi(context: Context) {
  * @param context The context of the application.
  * @return The list of items to be displayed in the bottom navigation bar.
  */
-fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
+private fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBarItemData> {
     val bottomNavList = arrayListOf<BottomAppBarItemData>()
     bottomNavList.add(
         BottomAppBarItemData(

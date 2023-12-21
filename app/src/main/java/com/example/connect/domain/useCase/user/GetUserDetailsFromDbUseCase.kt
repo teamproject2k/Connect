@@ -5,7 +5,6 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class GetUserDetailsFromDbUseCase @Inject constructor(private val repository: IUserRepository) {
-
     /**
      * Gets the user details from the database.
      *

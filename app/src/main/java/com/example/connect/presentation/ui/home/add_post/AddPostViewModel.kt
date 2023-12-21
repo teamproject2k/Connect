@@ -5,14 +5,14 @@ import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.useCase.posts.AddPostToDbUseCase
 import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.models.PostMediaData
@@ -44,39 +44,68 @@ class AddPostViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val uploadPostStateFlow: StateFlow<ResponseState<Nothing>> get() = _uploadPostStateFlow
 
+    /**
+     * Sets up the data for the app.
+     *
+     * @param context The context of the app.
+     */
     fun setUpData(context: Context) {
+        // Get the list of post visibility scopes from the context.
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
+
+        // Set the current post visibility state to the first item in the list.
         currentPostVisibilityState = mutableStateOf(postVisibilityScopeList[0])
+
+        // Set the isFirstTimeSetup flag to false.
         isFirstTimeSetup = false
     }
 
     fun uploadUserPost() {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Perform the upload operation in the IO dispatcher.
             withContext(Dispatchers.IO) {
+                // Set the upload post state to loading.
                 _uploadPostStateFlow.value = ResponseState.loading()
+
+                // Get the current user's Firebase ID.
                 val firebaseId = fireBaseAuth.currentUser?.uid
+
+                // Check if the user is logged in.
                 if (firebaseId != null) {
+                    // Initialize the file URL to an empty string.
                     var fileUrl = ""
+
+                    // Check if the user has selected any media.
                     if (selectedMediaState.value != null) {
+                        // Upload the selected media to the remote server.
                         val uploadFileToRemoteResponse =
                             uploadFileToRemoteUseCase.invoke(
                                 selectedMediaState.value!!.uri,
                                 "${FirebaseConstants.POST_KEY}/$firebaseId/${System.currentTimeMillis()}"
                             )
+
+                        // Check if the upload operation was successful.
                         if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
+                            // Set the upload post state to error.
                             _uploadPostStateFlow.value =
                                 ResponseState.error(uploadFileToRemoteResponse.message ?: "")
                             return@withContext
                         } else {
+                            // Get the file URL from the response.
                             fileUrl = uploadFileToRemoteResponse.data ?: ""
                         }
                     }
+
+                    // Determine the post type based on the selected media and caption text.
                     val postType =
                         when {
+                            // If no media is selected, the post type is Text.
                             selectedMediaState.value == null -> {
                                 PostTypeEnum.Text.name
                             }
 
+                            // If the selected media is an image, the post type is Image or TextImage.
                             selectedMediaState.value!!.mediaType.contains("image") -> {
                                 if (captionTextState.value.isNotBlank()) {
                                     PostTypeEnum.TextImage.name
@@ -85,6 +114,7 @@ class AddPostViewModel @Inject constructor(
                                 }
                             }
 
+                            // If the selected media is a video, the post type is Video or TextVideo.
                             selectedMediaState.value!!.mediaType.contains("video") -> {
                                 if (captionTextState.value.isNotBlank()) {
                                     PostTypeEnum.TextVideo.name
@@ -93,10 +123,13 @@ class AddPostViewModel @Inject constructor(
                                 }
                             }
 
+                            // Otherwise, the post type is invalid.
                             else -> {
                                 ""
                             }
                         }
+
+                    // Create a PostBean object with the post details.
                     val postDetails = PostBean(
                         "",
                         firebaseId,
@@ -106,20 +139,30 @@ class AddPostViewModel @Inject constructor(
                         currentPostVisibilityState.value.scopeEnum.name,
                         postType
                     )
+
+                    // Upload the post details to the remote server.
                     val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
+
+                    // Check if the upload operation was successful.
                     if (serverResponse.status == RequestStatusEnum.Success) {
+                        // Get the post ID from the response.
                         postDetails.id = serverResponse.data ?: ""
+
+                        // Add the post to the local database.
                         addPostToDbUseCase.invoke(postDetails)
+
+                        // Set the upload post state to success.
                         _uploadPostStateFlow.value = ResponseState.success(null)
                     } else {
+                        // Set the upload post state to error.
                         _uploadPostStateFlow.value =
                             ResponseState.error(serverResponse.message ?: "")
                     }
                 } else {
+                    // Set the upload post state to error.
                     _uploadPostStateFlow.value =
                         ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
-
             }
         }
     }

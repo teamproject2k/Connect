@@ -1,12 +1,11 @@
 package com.example.connect.domain.useCase.posts
 
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class GetPostDetailsFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-
     /**
      * Gets the post details from the server.
      *
@@ -16,5 +15,4 @@ class GetPostDetailsFromRemoteUseCase @Inject constructor(private val repository
     suspend fun invoke(fireBaseId: String): ResponseState<List<PostBean>> {
         return repository.getPostDetailsFromRemote(fireBaseId)
     }
-
 }

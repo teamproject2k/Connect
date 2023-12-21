@@ -5,7 +5,6 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class GetPostDetailsFromDbUseCase @Inject constructor(private val repository: IPostRepository) {
-
     /**
      * Gets the post details from the database.
      *
@@ -15,5 +14,4 @@ class GetPostDetailsFromDbUseCase @Inject constructor(private val repository: IP
     suspend fun invoke(fireBaseId: String): List<PostBean> {
         return repository.getPostDetailsFromDb(fireBaseId)
     }
-
 }

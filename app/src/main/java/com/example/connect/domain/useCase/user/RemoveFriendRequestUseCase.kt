@@ -5,6 +5,13 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class RemoveFriendRequestUseCase @Inject constructor(private val repository: IUserRepository) {
+    /**
+     * Removes a friend request from the database.
+     *
+     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
+     * @return A [ResponseState] object that indicates the success or failure of the operation.
+     */
     suspend fun invoke(
         currentUserFirebaseId: String,
         requestedUserFirebaseId: String

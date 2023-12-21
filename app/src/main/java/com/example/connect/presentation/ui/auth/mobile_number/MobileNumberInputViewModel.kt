@@ -2,9 +2,9 @@ package com.example.connect.presentation.ui.auth.mobile_number
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
@@ -43,12 +43,17 @@ class MobileNumberInputViewModel @Inject constructor(
     val getUserDetailsStateFlow: StateFlow<ResponseState<UsersBean?>> get() = _getUserDetailsStateFlow
 
     /**
-     * Sends OTP to the user's mobile number.
+     * Sends an OTP to the user's mobile number.
      */
     fun sendOTP() {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher to perform network operations.
             withContext(Dispatchers.IO) {
+                // Update the UI state to loading.
                 _sendOtpUIStateFlow.value = ResponseState.loading()
+
+                // Call the sendOtpUseCase with the selected country code, user mobile number, and the UI state flow.
                 sendOtpUseCase.invoke(
                     selectedCountryCodeState.value,
                     userMobileNumberState.value,
@@ -58,28 +63,37 @@ class MobileNumberInputViewModel @Inject constructor(
         }
     }
 
-
     /**
-     * Gets user details from remote and updates the user in the database.
+     * Gets the user details from the remote use case and adds the user to the database.
      *
-     * @param userId The user ID.
+     * @param userId The user id.
      */
     fun getUserDetails(userId: String) {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher.
             withContext(Dispatchers.IO) {
+                // Set the state of the _getUserDetailsStateFlow to loading.
                 _getUserDetailsStateFlow.value = ResponseState.loading()
+                // Get the user details from the remote use case.
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
+                // Check if the response state is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
+                    // Add the user to the database using the addUserToDbUseCase.
                     addUserToDbUseCase.invoke(userDetailsResponseState.data)
+                    // Check if the current logged in device id is different from the shared preference device id.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
                     ) {
+                        // Update the device id on the remote using the updateDeviceIdOnRemoteUseCase.
                         val updateDeviceIdOnRemoteResponseState =
                             updateDeviceIdOnRemoteUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
+                        // Check if the update device id on remote response state is successful.
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
+                            // Update the device id on the database using the updateDeviceIdOnDbUseCase.
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
@@ -87,17 +101,20 @@ class MobileNumberInputViewModel @Inject constructor(
                         }
                     }
                 }
+                // Set the state of the _getUserDetailsStateFlow to the userDetailsResponseState.
                 _getUserDetailsStateFlow.value = userDetailsResponseState
             }
         }
     }
 
     /**
-     * Resets the state of the UI state flows.
+     * Resets the send OTP UI state flow and the get user details state flow to their initial values.
      */
     fun resetStateFlow() {
+        // Reset the send OTP UI state flow to its initial value.
         _sendOtpUIStateFlow.value = ResponseState.none()
+
+        // Reset the get user details state flow to its initial value.
         _getUserDetailsStateFlow.value = ResponseState.none()
     }
-
 }

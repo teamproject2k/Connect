@@ -3,7 +3,6 @@ package com.example.connect.domain.repository
 import com.example.connect.domain.network_request_response.ResponseState
 
 interface IDeviceIdRepository {
-
     /**
      * Updates the device ID on the remote database.
      *
@@ -16,7 +15,6 @@ interface IDeviceIdRepository {
         updatedDeviceId: String
     ): ResponseState<Nothing>
 
-
     /**
      * Updates the device ID on the local database.
      *
@@ -26,7 +24,6 @@ interface IDeviceIdRepository {
      */
     suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int
 
-
     /**
      * Gets the device ID from the remote server.
      *
@@ -34,5 +31,4 @@ interface IDeviceIdRepository {
      * @return A [ResponseState] containing the device ID or an error.
      */
     suspend fun getDeviceIdFromRemote(firebaseUserId: String): ResponseState<String>
-
 }

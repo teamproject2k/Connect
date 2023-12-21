@@ -13,7 +13,7 @@ object ConstantsHelper {
     const val BIO_MAX_CHAR_LIMIT = 100
     const val NEW_DEVICE_DIALOG_DISMISS_TIME: Long = 3000
     const val MAX_ALLOWED_FILE_SIZE: Long = 10485760
-    const val BACK_EXIT_RESET_TIME: Long = 2000
+    const val BACK_EXIT_RESET_TIME: Long = 3000
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp
     val CoverImageHeight = 200.dp

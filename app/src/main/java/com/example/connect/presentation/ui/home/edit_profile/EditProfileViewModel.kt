@@ -8,17 +8,17 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.utils.FirebaseConstants
-import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
+import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.models.PostMediaData
@@ -43,7 +43,6 @@ class EditProfileViewModel @Inject constructor(
     private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase
 ) :
     BaseViewModel() {
-
     private val _updateUserStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
     val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
@@ -67,11 +66,22 @@ class EditProfileViewModel @Inject constructor(
      * @param userDetails The user details to initialize the states with.
      */
     fun initializeStates(userDetails: UsersBean) {
+        // Initialize the user details.
         this.userDetails = userDetails
+
+        // Initialize the user name state.
         userNameState = mutableStateOf(userDetails.name)
+
+        // Initialize the user bio state.
         userBioState = mutableStateOf(userDetails.bio)
+
+        // Initialize the selected gender state.
         selectedGenderState = mutableStateOf(userDetails.gender)
+
+        // Initialize the selected date of birth state.
         selectedDOBState = mutableLongStateOf(userDetails.dateOfBirth)
+
+        // Initialize the profile photo state.
         profilePhotoState =
             mutableStateOf(
                 PostMediaData(
@@ -79,13 +89,19 @@ class EditProfileViewModel @Inject constructor(
                     ConstantsHelper.MEDIA_TYPE_IMAGE
                 )
             )
+
+        // Initialize the cover photo state.
         coverPhotoState = mutableStateOf(
             PostMediaData(
                 userDetails.coverPhoto?.toUri() ?: Uri.EMPTY,
                 ConstantsHelper.MEDIA_TYPE_IMAGE
             )
         )
+
+        // Initialize the connect user id state.
         connectUserIdState = mutableStateOf(userDetails.connectUserId)
+
+        // Set the data initialized flag to true.
         isDataInitialized = true
     }
 

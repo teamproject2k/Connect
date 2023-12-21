@@ -4,7 +4,6 @@ import com.example.connect.domain.repository.IDeviceIdRepository
 import javax.inject.Inject
 
 class UpdateDeviceIdOnDbUseCase @Inject constructor(private val repository: IDeviceIdRepository) {
-
     /**
      * Updates the device ID on the local database.
      *

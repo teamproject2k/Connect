@@ -1,10 +1,9 @@
 package com.example.connect.domain.repository
 
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.network_request_response.ResponseState
 
 interface IPostRepository {
-
     /**
      * Gets post details from local database.
      *
@@ -48,5 +47,4 @@ interface IPostRepository {
         postDetails: PostBean,
         fireBaseId: String
     ): ResponseState<String>
-
 }

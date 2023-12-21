@@ -5,7 +5,6 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class AddPostListToDbUseCase @Inject constructor(private val repository: IPostRepository) {
-
     /**
      * Invokes the repository to add a list of posts to local storage.
      *
@@ -15,5 +14,4 @@ class AddPostListToDbUseCase @Inject constructor(private val repository: IPostRe
     suspend fun invoke(postDetails: List<PostBean>): LongArray {
         return repository.addPostListToDb(postDetails)
     }
-
 }

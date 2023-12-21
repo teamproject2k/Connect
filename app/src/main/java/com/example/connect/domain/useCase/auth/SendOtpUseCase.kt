@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 class SendOtpUseCase @Inject constructor(private val repository: IAuthenticationRepository) {
-
     /**
      * Invokes the sendOtp method in the repository and updates the responseStateFlow.
      *

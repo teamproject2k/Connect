@@ -5,7 +5,6 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UpdateUserDetailsOnRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
-
     /**
      * Updates the user details on the server.
      *

@@ -5,7 +5,6 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class AddPostToDbUseCase @Inject constructor(private val repository: IPostRepository) {
-
     /**
      * Adds a list of posts to the local database.
      *

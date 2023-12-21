@@ -2,9 +2,9 @@ package com.example.connect.presentation.ui.auth.otp_input
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.auth.VerifyOtpUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
@@ -57,12 +57,17 @@ class OtpInputViewModel @Inject constructor(
      * A flow that emits the remaining time in seconds until the OTP expires.
      */
     val timeLeftFlow = flow {
+        // Initialize the countdown time with the OTP timeout time.
         var countDownTime = ConstantsHelper.OTP_TIMEOUT_TIME
+
+        // Emit the countdown time every second.
         while (countDownTime >= 0) {
             emit(countDownTime)
             delay(1000)
             countDownTime--
         }
+
+        // When the countdown time reaches 0, set the showTimerState to false.
         showTimerState.value = false
     }
 
@@ -70,9 +75,13 @@ class OtpInputViewModel @Inject constructor(
      * Resends the OTP to the user.
      */
     fun resendOtp() {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher to perform network operations.
             withContext(Dispatchers.IO) {
+                // Set the resendOtpStateFlow to loading state.
                 _resendOtpStateFlow.value = ResponseState.loading()
+                // Call the sendOtpUseCase with the country code, mobile number, and resendOtpStateFlow.
                 sendOtpUseCase.invoke(
                     countryCode,
                     mobileNumber,
@@ -83,26 +92,40 @@ class OtpInputViewModel @Inject constructor(
     }
 
     /**
-     * Gets the user details from the remote server.
+     * Gets the user details from the remote server and adds the user to the database.
      *
-     * @param userId The user's ID.
+     * @param userId The user ID.
      */
     fun getUserDetails(userId: String) {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher to perform network operations.
             withContext(Dispatchers.IO) {
+                // Set the state of the _getUserDetailsStateFlow to loading.
                 _getUserDetailsStateFlow.value = ResponseState.loading()
+
+                // Get the user details from the remote server.
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
+
+                // Check if the response is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
+                    // Add the user to the database.
                     addUserToDbUseCase.invoke(userDetailsResponseState.data)
+
+                    // Check if the current logged in device ID is different from the shared preference device ID.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
                     ) {
+                        // Update the device ID on the remote server.
                         val updateDeviceIdOnRemoteResponseState =
                             updateDeviceIdOnRemoteUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
+
+                        // Check if the response is successful.
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
+                            // Update the device ID on the database.
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
@@ -110,20 +133,27 @@ class OtpInputViewModel @Inject constructor(
                         }
                     }
                 }
+
+                // Set the state of the _getUserDetailsStateFlow to the response state.
                 _getUserDetailsStateFlow.value = userDetailsResponseState
             }
         }
     }
 
     /**
-     * Verifies the OTP entered by the user.
+     * Verifies the OTP.
      *
      * @param verificationId The verification ID.
      */
     fun verifyOTP(verificationId: String) {
+        // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
+            // Switch to the IO dispatcher.
             withContext(Dispatchers.IO) {
+                // Set the verifyOtpStateFlow to a loading state.
                 _verifyOtpStateFlow.value = ResponseState.loading()
+
+                // Call the verifyOtpUseCase and update the verifyOtpStateFlow with the result.
                 _verifyOtpStateFlow.value =
                     verifyOtpUseCase.invoke(verificationId, otpState.value)
             }
