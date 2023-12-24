@@ -1,6 +1,7 @@
 package com.example.connect.domain.repository
 
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 
 interface IPostRepository {
@@ -18,7 +19,10 @@ interface IPostRepository {
      * @param fireBaseId The post's Firebase ID.
      * @return A response state containing the post details, or an error if the request failed.
      */
-    suspend fun getPostDetailsFromRemote(fireBaseId: String): ResponseState<List<PostBean>>
+    suspend fun getPostDetailsFromRemote(
+        fireBaseId: String,
+        currentUserFirebaseId: String
+    ): ResponseState<List<PostBean>>
 
     /**
      * Adds a post to the local database.
@@ -47,4 +51,22 @@ interface IPostRepository {
         postDetails: PostBean,
         fireBaseId: String
     ): ResponseState<String>
+
+
+    suspend fun getAllPostsWithUserDetailsFromRemote(
+        currentUserFirebaseId: String
+    ): ResponseState<Pair<List<PostBean>, List<UsersBean>>>
+
+
+    suspend fun addLikeOf(
+        userFirebaseId: String,
+        postFirebaseId: String
+    ): ResponseState<Nothing>
+
+    suspend fun removeLikeOf(
+        userFirebaseId: String,
+        postFirebaseId: String
+    ): ResponseState<Nothing>
+
+
 }

@@ -146,7 +146,10 @@ class OtherUserProfileViewModel @Inject constructor(
                 _postDetailsStateFlow.value = ResponseState.loading()
 
                 // Get the post details from the remote use case
-                _postDetailsStateFlow.value = getPostDetailsFromRemoteUseCase.invoke(fireBaseId)
+                _postDetailsStateFlow.value = getPostDetailsFromRemoteUseCase.invoke(
+                    fireBaseId,
+                    currentUserState.value.firebaseUserId
+                )
             }
         }
     }

@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -122,7 +123,11 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 Button(
                     enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
                     onClick = {
-                        handleButtonClick(viewModel, context)
+                        handleButtonClick(
+                            viewModel,
+                            context,
+                            sharedViewModel.usersDetails.firebaseUserId
+                        )
                     }
                 ) {
                     Text(text = stringResource(R.string.post))
@@ -319,6 +324,8 @@ private fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context
                 height.toInt()
             )
         }
+    }, update = {
+        exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
     })) {
         onDispose {
             exoPlayer.release()
@@ -399,11 +406,15 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
     }
 }
 
-private fun handleButtonClick(viewModel: AddPostViewModel, context: Context) {
+private fun handleButtonClick(
+    viewModel: AddPostViewModel,
+    context: Context,
+    currentUserFirebaseId: String
+) {
     if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
-        viewModel.uploadUserPost()
+        viewModel.uploadUserPost(currentUserFirebaseId)
     }
 }

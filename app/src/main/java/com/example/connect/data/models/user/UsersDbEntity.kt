@@ -23,7 +23,8 @@ data class UsersDbEntity(
     val otherUsersStatus: MutableMap<String, String> = mutableMapOf(),
     val genderVisibility: String,
     val dobVisibility: String,
-    val friendListVisibility: String
+    val friendListVisibility: String,
+    val savedPosts: ArrayList<String> = arrayListOf()
 ) {
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()
@@ -67,7 +68,8 @@ data class UsersDbEntity(
             blockedUsersList,
             genderVisibility,
             dobVisibility,
-            friendListVisibility
+            friendListVisibility,
+            savedPosts
         )
     }
 }

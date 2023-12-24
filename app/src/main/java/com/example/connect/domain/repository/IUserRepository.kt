@@ -209,4 +209,9 @@ interface IUserRepository {
     suspend fun liveObserveUserFromRemote(
         firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration
+
+
+    suspend fun savePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
+
+    suspend fun unSavePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
 }

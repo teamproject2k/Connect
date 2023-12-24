@@ -36,4 +36,10 @@ object ColorsHelper {
     fun onBlack(): Color {
         return if (isSystemInDarkTheme()) Color(0xE61A1A1A) else Color(0xE61A1A1A)
     }
+
+
+    @Composable
+    fun red(): Color {
+        return if (isSystemInDarkTheme()) Color(0xFFD32F2F) else Color(0xFFD32F2F)
+    }
 }

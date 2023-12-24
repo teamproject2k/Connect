@@ -8,9 +8,13 @@ data class PostRemoteEntity(
     val caption: String,
     val createdAt: Long,
     val postScope: String,
-    val postType: String
+    val postType: String,
+    val commentCount: Long,
+    val likedBy: ArrayList<String>,
 ) {
-    fun toPostBean(id: String): PostBean {
+    constructor() : this("", "", "", 0, "", "", 0, arrayListOf())
+
+    fun toPostBean(id: String, isSavedByCurrentUser: Boolean): PostBean {
         return PostBean(
             id,
             fireBaseUserId,
@@ -18,7 +22,10 @@ data class PostRemoteEntity(
             caption,
             createdAt,
             postScope,
-            postType
+            postType,
+            commentCount,
+            isSavedByCurrentUser,
+            likedBy
         )
     }
 }

@@ -10,6 +10,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.MetadataChanges
@@ -152,7 +153,8 @@ class IUserRepositoryImpl @Inject constructor(
         return try {
             val usersList = arrayListOf<UsersBean>()
             val result = fireStore.collection(FirebaseConstants.USER_KEY)
-                .whereNotIn(UserRemoteEntity::firebaseUserId.name, excludeUserIdList).get()
+                .whereNotIn(UserRemoteEntity::firebaseUserId.name, excludeUserIdList)
+                .get()
                 .await()
             result.documents.forEach { document ->
                 val user = document.toObject(UserRemoteEntity::class.java)
@@ -163,6 +165,7 @@ class IUserRepositoryImpl @Inject constructor(
                     }
                 }
             }
+            usersList.sortByDescending { it.createdAt }
             // Return a success response with the list of users found.
             ResponseState.success(usersList)
         } catch (exception: Exception) {
@@ -694,6 +697,40 @@ class IUserRepositoryImpl @Inject constructor(
                         ResponseState.success(requiredUser.toUserBean())
                 }
             }
+        }
+    }
+
+    override suspend fun savePost(
+        currentUserFirebaseId: String,
+        postId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                .update(
+                    UserRemoteEntity::savedPosts.name,
+                    FieldValue.arrayUnion(postId)
+                )
+                .await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun unSavePost(
+        currentUserFirebaseId: String,
+        postId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                .update(
+                    UserRemoteEntity::savedPosts.name,
+                    FieldValue.arrayRemove(postId)
+                )
+                .await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 }

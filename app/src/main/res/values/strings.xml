@@ -129,8 +129,8 @@
     <string name="no_pending_requests">No Pending Requests</string>
     <string name="like_post">Like post</string>
     <string name="comment_on_post">Comment on post</string>
-    <string name="share_post">Share post</string>
     <string name="like_count_likes">%1$d likes</string>
+    <string name="comment_count_comments">%1$d comments</string>
     <string name="video_thumbnail">video thumbnail</string>
     <string name="file_size_can_t_be_greater_than_max_allowed">File size can\'t be greater than %1$s</string>
     <string name="error_while_getting_updated_data_please_reopen_app">Error while getting updated data, Please reopen app</string>
@@ -158,4 +158,22 @@
     <string name="users_details_not_found">Users details not found</string>
     <string name="view_all_comment_count_comments">View all %1$d comments</string>
     <string name="please_click_back_again_to_exit">Please click BACK again to exit</string>
+    <string name="unable_to_load_media">Unable to load media</string>
+    <string name="no_posts_found">No Posts found</string>
+    <string name="secs_ago">%1$d secs ago</string>
+    <string name="_1_sec_ago">1 sec ago</string>
+    <string name="_1_min_ago">1 min ago</string>
+    <string name="mins_ago">%1$d mins ago</string>
+    <string name="hours_ago">%1$d hours ago</string>
+    <string name="_1_hour_ago">1 hour ago</string>
+    <string name="days_ago">%1$d days ago</string>
+    <string name="_1_day_ago">1 day ago</string>
+    <string name="_1_month_ago">1 month ago</string>
+    <string name="months_ago">%1$d months ago</string>
+    <string name="_1_year_ago">1 year ago</string>
+    <string name="years_ago">%1$d years ago</string>
+    <string name="_1_like">1 like</string>
+    <string name="_1_comment">1 comment</string>
+    <string name="show_more">... Show More</string>
+    <string name="show_less">Show Less</string>
 </resources>

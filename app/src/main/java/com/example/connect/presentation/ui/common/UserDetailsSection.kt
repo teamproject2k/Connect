@@ -1,7 +1,10 @@
 package com.example.connect.presentation.ui.common
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +51,43 @@ fun UserDetailsSection(
                 fontSize = 13.sp,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun UserDetailsSectionLoading(
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .shimmer(),
+            model = null,
+            contentDescription = null,
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(15.dp)
+                    .fillMaxWidth()
+                    .shimmer()
+            )
+            SpacerHeight2()
+            Box(
+                modifier = Modifier
+                    .height(12.dp)
+                    .fillMaxWidth()
+                    .shimmer()
             )
         }
     }

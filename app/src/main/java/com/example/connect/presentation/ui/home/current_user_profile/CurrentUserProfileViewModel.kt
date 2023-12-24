@@ -65,7 +65,10 @@ class CurrentUserProfileViewModel @Inject constructor(
                     } else { // If the post details are empty, then we can get the post details from the server.
 
                         val postDetailsFromServerResponseState =
-                            getPostDetailsFromRemoteUseCase.invoke(fireBaseId) // Get the post details from the server.
+                            getPostDetailsFromRemoteUseCase.invoke(
+                                fireBaseId,
+                                fireBaseId
+                            ) // Get the post details from the server.
 
                         if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
 

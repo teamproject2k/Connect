@@ -1,9 +1,12 @@
 package com.example.connect.domain.models
 
+import android.os.Parcelable
 import com.example.connect.data.models.post.PostDbEntity
 import com.example.connect.data.models.post.PostRemoteEntity
+import kotlinx.parcelize.Parcelize
 
 
+@Parcelize
 data class PostBean(
     var id: String,
     val fireBaseUserId: String,
@@ -11,8 +14,11 @@ data class PostBean(
     val caption: String,
     val createdAt: Long,
     val postScope: String,
-    val postType: String
-) {
+    val postType: String,
+    val commentCount: Long,
+    var isSavedByCurrentUser: Boolean,
+    val likedBy: ArrayList<String>,
+) : Parcelable {
     fun toPostRemoteEntity(): PostRemoteEntity {
         return PostRemoteEntity(
             fireBaseUserId,
@@ -20,7 +26,9 @@ data class PostBean(
             caption,
             createdAt,
             postScope,
-            postType
+            postType,
+            commentCount,
+            likedBy
         )
     }
 
@@ -32,7 +40,10 @@ data class PostBean(
             caption,
             createdAt,
             postScope,
-            postType
+            postType,
+            commentCount,
+            isSavedByCurrentUser,
+            likedBy
         )
     }
 }

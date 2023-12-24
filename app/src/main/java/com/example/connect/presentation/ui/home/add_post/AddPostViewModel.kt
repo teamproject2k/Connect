@@ -12,7 +12,6 @@ import com.example.connect.domain.useCase.posts.AddPostToDbUseCase
 import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.PostTypeEnum
 import com.example.connect.presentation.ui.models.PostMediaData
@@ -60,108 +59,101 @@ class AddPostViewModel @Inject constructor(
         isFirstTimeSetup = false
     }
 
-    fun uploadUserPost() {
+    fun uploadUserPost(currentUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Perform the upload operation in the IO dispatcher.
             withContext(Dispatchers.IO) {
                 // Set the upload post state to loading.
                 _uploadPostStateFlow.value = ResponseState.loading()
+                // Initialize the file URL to an empty string.
+                var fileUrl = ""
 
-                // Get the current user's Firebase ID.
-                val firebaseId = fireBaseAuth.currentUser?.uid
-
-                // Check if the user is logged in.
-                if (firebaseId != null) {
-                    // Initialize the file URL to an empty string.
-                    var fileUrl = ""
-
-                    // Check if the user has selected any media.
-                    if (selectedMediaState.value != null) {
-                        // Upload the selected media to the remote server.
-                        val uploadFileToRemoteResponse =
-                            uploadFileToRemoteUseCase.invoke(
-                                selectedMediaState.value!!.uri,
-                                "${FirebaseConstants.POST_KEY}/$firebaseId/${System.currentTimeMillis()}"
-                            )
-
-                        // Check if the upload operation was successful.
-                        if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
-                            // Set the upload post state to error.
-                            _uploadPostStateFlow.value =
-                                ResponseState.error(uploadFileToRemoteResponse.message ?: "")
-                            return@withContext
-                        } else {
-                            // Get the file URL from the response.
-                            fileUrl = uploadFileToRemoteResponse.data ?: ""
-                        }
-                    }
-
-                    // Determine the post type based on the selected media and caption text.
-                    val postType =
-                        when {
-                            // If no media is selected, the post type is Text.
-                            selectedMediaState.value == null -> {
-                                PostTypeEnum.Text.name
-                            }
-
-                            // If the selected media is an image, the post type is Image or TextImage.
-                            selectedMediaState.value!!.mediaType.contains("image") -> {
-                                if (captionTextState.value.isNotBlank()) {
-                                    PostTypeEnum.TextImage.name
-                                } else {
-                                    PostTypeEnum.Image.name
-                                }
-                            }
-
-                            // If the selected media is a video, the post type is Video or TextVideo.
-                            selectedMediaState.value!!.mediaType.contains("video") -> {
-                                if (captionTextState.value.isNotBlank()) {
-                                    PostTypeEnum.TextVideo.name
-                                } else {
-                                    PostTypeEnum.Video.name
-                                }
-                            }
-
-                            // Otherwise, the post type is invalid.
-                            else -> {
-                                ""
-                            }
-                        }
-
-                    // Create a PostBean object with the post details.
-                    val postDetails = PostBean(
-                        "",
-                        firebaseId,
-                        fileUrl,
-                        captionTextState.value,
-                        FunctionHelper.getCurrentTimeInMillis(),
-                        currentPostVisibilityState.value.scopeEnum.name,
-                        postType
-                    )
-
-                    // Upload the post details to the remote server.
-                    val serverResponse = uploadPostToRemoteUseCase.invoke(postDetails, firebaseId)
+                // Check if the user has selected any media.
+                if (selectedMediaState.value != null) {
+                    // Upload the selected media to the remote server.
+                    val uploadFileToRemoteResponse =
+                        uploadFileToRemoteUseCase.invoke(
+                            selectedMediaState.value!!.uri,
+                            "${FirebaseConstants.POST_KEY}/$currentUserFirebaseId/${System.currentTimeMillis()}"
+                        )
 
                     // Check if the upload operation was successful.
-                    if (serverResponse.status == RequestStatusEnum.Success) {
-                        // Get the post ID from the response.
-                        postDetails.id = serverResponse.data ?: ""
-
-                        // Add the post to the local database.
-                        addPostToDbUseCase.invoke(postDetails)
-
-                        // Set the upload post state to success.
-                        _uploadPostStateFlow.value = ResponseState.success(null)
-                    } else {
+                    if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
                         // Set the upload post state to error.
                         _uploadPostStateFlow.value =
-                            ResponseState.error(serverResponse.message ?: "")
+                            ResponseState.error(uploadFileToRemoteResponse.message ?: "")
+                        return@withContext
+                    } else {
+                        // Get the file URL from the response.
+                        fileUrl = uploadFileToRemoteResponse.data ?: ""
                     }
+                }
+
+                // Determine the post type based on the selected media and caption text.
+                val postType =
+                    when {
+                        // If no media is selected, the post type is Text.
+                        selectedMediaState.value == null -> {
+                            PostTypeEnum.Text.name
+                        }
+
+                        // If the selected media is an image, the post type is Image or TextImage.
+                        selectedMediaState.value!!.mediaType.contains("image") -> {
+                            if (captionTextState.value.isNotBlank()) {
+                                PostTypeEnum.TextImage.name
+                            } else {
+                                PostTypeEnum.Image.name
+                            }
+                        }
+
+                        // If the selected media is a video, the post type is Video or TextVideo.
+                        selectedMediaState.value!!.mediaType.contains("video") -> {
+                            if (captionTextState.value.isNotBlank()) {
+                                PostTypeEnum.TextVideo.name
+                            } else {
+                                PostTypeEnum.Video.name
+                            }
+                        }
+
+                        // Otherwise, the post type is invalid.
+                        else -> {
+                            ""
+                        }
+                    }
+
+                // Create a PostBean object with the post details.
+                val postDetails = PostBean(
+                    "",
+                    currentUserFirebaseId,
+                    fileUrl,
+                    captionTextState.value,
+                    FunctionHelper.getCurrentTimeInMillis(),
+                    currentPostVisibilityState.value.scopeEnum.name,
+                    postType,
+                    0,
+                    false,
+                    arrayListOf()
+                )
+
+                // Upload the post details to the remote server.
+                val serverResponse =
+                    uploadPostToRemoteUseCase.invoke(postDetails, currentUserFirebaseId)
+
+                // Check if the upload operation was successful.
+                if (serverResponse.status == RequestStatusEnum.Success) {
+                    // Get the post ID from the response.
+                    postDetails.id = serverResponse.data ?: ""
+
+                    // Add the post to the local database.
+                    addPostToDbUseCase.invoke(postDetails)
+
+                    // Set the upload post state to success.
+                    _uploadPostStateFlow.value = ResponseState.success(null)
                 } else {
                     // Set the upload post state to error.
                     _uploadPostStateFlow.value =
-                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                        ResponseState.error(serverResponse.message ?: "")
                 }
             }
         }

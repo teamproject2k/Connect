@@ -18,4 +18,18 @@ class AppTypeConverters {
             object : TypeToken<MutableMap<String, String>>() {}.type
         )
     }
+
+    @TypeConverter
+    fun fromListOfStringToString(listOfString: ArrayList<String>): String {
+        return Gson().toJson(listOfString)
+    }
+
+
+    @TypeConverter
+    fun toListOfStringFromString(stringOfList: String): ArrayList<String> {
+        return Gson().fromJson(
+            stringOfList,
+            object : TypeToken<ArrayList<String>>() {}.type
+        )
+    }
 }
