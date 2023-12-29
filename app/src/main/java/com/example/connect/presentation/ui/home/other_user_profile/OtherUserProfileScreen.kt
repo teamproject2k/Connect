@@ -133,7 +133,9 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
         ) {
             ProfileScreen(
                 viewModel = viewModel,
-                navigator
+                navigator,
+                requestedUser,
+                homeSharedViewModel.usersDetails.firebaseUserId
             ) {
                 showBottomSheet = true
             }
@@ -232,6 +234,8 @@ fun HandleLiveObserveRequiredUsersStateFlow(viewModel: OtherUserProfileViewModel
 private fun ProfileScreen(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
+    userDetails: UsersBean,
+    currentUserFirebaseId: String,
     onOptionsMenuClick: () -> Unit
 ) {
     if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentUserUiEnum.BlockedByOtherUser.name) {
@@ -255,7 +259,7 @@ private fun ProfileScreen(
             ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
-            HandlePostSection(viewModel, navigator)
+            HandlePostSection(viewModel, navigator, userDetails, currentUserFirebaseId)
         }
     }
 }
@@ -503,7 +507,9 @@ private fun HandleFriendListSection(
 @Composable
 private fun HandlePostSection(
     viewModel: OtherUserProfileViewModel,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    usersBean: UsersBean,
+    currentUserFirebaseId: String
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -523,7 +529,13 @@ private fun HandlePostSection(
                     viewModel.currentUserState.value.firebaseUserId
                 ))
             }
-            UserProfilePostSection(navigator, postDetailsList = updatedPostList)
+            UserProfilePostSection(
+                navigator,
+                postDetailsList = updatedPostList,
+                false,
+                currentUserFirebaseId,
+                usersBean
+            )
         }
 
         RequestStatusEnum.Exception -> {

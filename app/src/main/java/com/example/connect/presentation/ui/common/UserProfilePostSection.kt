@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
+import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlin.math.ceil
 
@@ -30,7 +32,9 @@ import kotlin.math.ceil
 fun UserProfilePostSection(
     navigator: DestinationsNavigator,
     postDetailsList: List<PostBean>?,
-    isLoggedInUser: Boolean = false
+    isLoggedInUser: Boolean = false,
+    currentUserFirebaseId: String,
+    userDetails: UsersBean
 ) {
     Column(
         modifier = Modifier
@@ -103,6 +107,13 @@ fun UserProfilePostSection(
                             )
                         ),
                     ) {
+                        navigator.navigate(
+                            PostDetailsScreenDestination(
+                                details,
+                                userDetails,
+                                currentUserFirebaseId
+                            )
+                        )
                     }
                 }
             }

@@ -15,10 +15,10 @@ object ConstantsHelper {
     const val MAX_ALLOWED_FILE_SIZE: Long = 10485760
     const val BACK_EXIT_RESET_TIME: Long = 3000
     const val MINIMIZED_MAX_LINES = 2
+    val POST_DISPLAY_MEDIA_HEIGHT = 300.dp
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp
     val CoverImageHeight = 200.dp
     val ProfileImageHeight = 150.dp
     val StoryItemHeight = 60.dp
-
 }
