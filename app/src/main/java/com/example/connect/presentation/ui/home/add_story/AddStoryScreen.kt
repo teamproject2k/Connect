@@ -189,12 +189,13 @@ private fun MainContentSection(
     val context = LocalContext.current
     Box(
         modifier = modifier
+            .fillMaxSize()
             .background(brush = Brush.linearGradient(viewModel.defaultStoryBackgroundColorState.value))
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = if (viewModel.selectedMediaState.value == null) Alignment.Center else Alignment.BottomCenter
         ) {
             MediaSection(viewModel, context)
             StoryCaptionField(viewModel)
