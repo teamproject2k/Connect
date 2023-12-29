@@ -190,7 +190,7 @@ private fun ProfileScreen(
         UserProfileUserInfoSection(userDetails, userDetails.firebaseUserId)
         SpacerHeight24()
         HandleFriendListSection(viewModel = viewModel, userDetails, navigator)
-        HandlePostSection(viewModel, navigator)
+        HandlePostSection(viewModel, navigator, userDetails)
     }
 }
 
@@ -326,7 +326,8 @@ private fun HandleFriendListSection(
 @Composable
 private fun HandlePostSection(
     viewModel: CurrentUserProfileViewModel,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    userDetails: UsersBean,
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -343,7 +344,9 @@ private fun HandlePostSection(
             UserProfilePostSection(
                 navigator,
                 postDetailsList = postDetailState.data,
-                true
+                true,
+                userDetails.firebaseUserId,
+                userDetails
             )
         }
 

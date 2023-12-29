@@ -190,7 +190,7 @@ private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
     val selectedRouteState = rememberSaveable {
         mutableStateOf(HomeScreenDestination.route)
     }
-    val bottomBarItems = rememberSaveable {
+    val bottomBarItems = remember {
         getHomeBottomNavBarItemList(context)
     }
     val navController = rememberNavController()
