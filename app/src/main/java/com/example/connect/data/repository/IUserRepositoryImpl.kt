@@ -94,6 +94,7 @@ class IUserRepositoryImpl @Inject constructor(
                 document.toObject(UserRemoteEntity::class.java)
                     ?.let { usersList.add(it.toUserBean()) }
             }
+            usersList.sortByDescending { it.createdAt }
             ResponseState.success(usersList)
         } catch (exception: Exception) {
             // An error occurred while getting the user details from the server.

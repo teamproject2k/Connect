@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,7 +69,9 @@ import com.ramcosta.composedestinations.utils.route
 fun HomeActivityScreen() {
     val viewModel = hiltViewModel<HomeSharedViewModel>()
     val context = LocalContext.current
-    viewModel.getDeviceIdFromRemote(context)
+    LaunchedEffect(Unit) {
+        viewModel.getDeviceIdFromRemote(context)
+    }
     HandleGetDeviceIdFlow(viewModel, context)
     HandleUserDetailsFlow(viewModel, context)
 }
@@ -151,7 +154,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(context)
+            CreateUi(context, viewModel)
         }
 
         RequestStatusEnum.Exception -> {
@@ -183,9 +186,12 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
 
 @Composable
-private fun CreateUi(context: Context) {
+private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
     val selectedRouteState = rememberSaveable {
         mutableStateOf(HomeScreenDestination.route)
+    }
+    val bottomBarItems = rememberSaveable {
+        getHomeBottomNavBarItemList(context)
     }
     val navController = rememberNavController()
 
@@ -207,52 +213,56 @@ private fun CreateUi(context: Context) {
     }
 
     LaunchedEffect(Unit) {
-        navController.currentBackStackEntryFlow.collect {
-            selectedRouteState.value = it.route().route
+        navController.currentBackStackEntryFlow.collect { navEntry ->
+            selectedRouteState.value = navEntry.route().route
+            viewModel.isBottomBarHiddenState.value =
+                selectedRouteState.value !in bottomBarItems.map { it.routeName }
         }
     }
 
     Scaffold(bottomBar = {
-        Surface(tonalElevation = 4.dp) {
-            NavigationBar(
-                modifier = Modifier
-                    .height(
-                        getHeightToMaintainAspectRatio(
-                            noOfRows = 1, itemsRequiredPerRow = 6
-                        )
-                    )
-            ) {
-                getHomeBottomNavBarItemList(context).forEach { data ->
-                    NavigationBarItem(
-                        selected = selectedRouteState.value == data.routeName,
-                        onClick = {
-                            val isScreenPresentOnBackStack = try {
-                                navController.getBackStackEntry(data.routeName)
-                                true
-                            } catch (exception: Exception) {
-                                false
-                            }
-                            if (isScreenPresentOnBackStack) {
-                                navController.popBackStack(data.routeName, false)
-                            } else {
-                                navController.navigate(data.routeName) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.primary
-                        ),
-                        icon = {
-                            Image(
-                                imageVector = if (selectedRouteState.value == data.routeName) data.selectedIcon else data.unSelectedIcon,
-                                contentDescription = data.text,
-                                colorFilter = if (selectedRouteState.value == data.routeName) {
-                                    ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-                                } else null
+        Surface(tonalElevation = 4.dp, modifier = Modifier.animateContentSize()) {
+            if (!viewModel.isBottomBarHiddenState.value) {
+                NavigationBar(
+                    modifier = Modifier
+                        .height(
+                            getHeightToMaintainAspectRatio(
+                                noOfRows = 1, itemsRequiredPerRow = 6
                             )
-                        }
-                    )
+                        )
+                ) {
+                    bottomBarItems.forEach { data ->
+                        NavigationBarItem(
+                            selected = selectedRouteState.value == data.routeName,
+                            onClick = {
+                                val isScreenPresentOnBackStack = try {
+                                    navController.getBackStackEntry(data.routeName)
+                                    true
+                                } catch (exception: Exception) {
+                                    false
+                                }
+                                if (isScreenPresentOnBackStack) {
+                                    navController.popBackStack(data.routeName, false)
+                                } else {
+                                    navController.navigate(data.routeName) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primary
+                            ),
+                            icon = {
+                                Image(
+                                    imageVector = if (selectedRouteState.value == data.routeName) data.selectedIcon else data.unSelectedIcon,
+                                    contentDescription = data.text,
+                                    colorFilter = if (selectedRouteState.value == data.routeName) {
+                                        ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+                                    } else null
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

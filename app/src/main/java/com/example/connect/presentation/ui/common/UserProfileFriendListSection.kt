@@ -28,7 +28,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun UserProfileFriendsListSection(
     navigator: DestinationsNavigator,
-    friendsList: List<UsersBean>,
+    friendsList: List<UsersBean>?,
     loggedInUserFirebaseId: String,
     isLoggedInUser: Boolean = false
 ) {
@@ -39,13 +39,13 @@ fun UserProfileFriendsListSection(
     ) {
         TextCountSeeAll(
             text = stringResource(id = R.string.friends),
-            count = friendsList.size,
-            showSeeAll = friendsList.size > ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT
+            count = friendsList?.size ?: 0,
+            showSeeAll = (friendsList?.size ?: 0) > ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT
         ) {
             navigator.navigate(UserRequestScreenDestination())
         }
         SpacerHeight12()
-        if (friendsList.isEmpty()) {
+        if (friendsList.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

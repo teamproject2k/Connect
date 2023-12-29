@@ -87,7 +87,6 @@
     <string name="chat">Chat</string>
     <string name="profile">Profile</string>
     <string name="getting_user_details">Getting user details...</string>
-    <string name="settings">Settings</string>
     <string name="post_uploaded_successfully">Post Uploaded Successfully</string>
     <string name="loading">Loading...</string>
     <string name="uploading_post">Uploading Post...</string>
@@ -177,6 +176,8 @@
     <string name="show_more">... Show More</string>
     <string name="show_less">Show Less</string>
     <string name="add_story">Add Story</string>
+    <string name="saved_posts">Saved Posts</string>
+    <string name="comments">Comments</string>
     <string name="story_uploaded_successfully">Story Uploaded Successfully</string>
     <string name="uploading_story">Uploading Story...</string>
 </resources>

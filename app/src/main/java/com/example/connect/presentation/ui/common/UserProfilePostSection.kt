@@ -29,7 +29,7 @@ import kotlin.math.ceil
 @Composable
 fun UserProfilePostSection(
     navigator: DestinationsNavigator,
-    postDetailsList: List<PostBean>,
+    postDetailsList: List<PostBean>?,
     isLoggedInUser: Boolean = false
 ) {
     Column(
@@ -39,11 +39,11 @@ fun UserProfilePostSection(
     ) {
         TextCountSeeAll(
             text = stringResource(id = R.string.posts),
-            count = postDetailsList.size,
+            count = postDetailsList?.size ?: 0,
             showSeeAll = false
         )
         SpacerHeight12()
-        if (postDetailsList.isEmpty()) {
+        if (postDetailsList.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,7 +92,7 @@ fun UserProfilePostSection(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(postDetailsList) { details ->
+                items(postDetailsList, key = { it.id }) { details ->
                     UserProfilePostItem(
                         postDetails = details,
                         modifier = Modifier.size(

@@ -26,8 +26,8 @@ import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppTopAppBar
-import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.UserListLoading
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -81,7 +81,7 @@ fun HandleGetRequestedUsersState(
     }
     when (requestedUsersState.status) {
         RequestStatusEnum.Loading -> {
-            LoaderFullScreen()
+            UserListLoading()
             isExceptionHandled = false
         }
 
@@ -114,7 +114,9 @@ fun DisplayUsersList(navigator: DestinationsNavigator, requestedUsersList: List<
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(requestedUsersList) { requestedUser ->
+            items(requestedUsersList, key = {
+                it.firebaseUserId
+            }) { requestedUser ->
                 UsersListItem(requestedUser) {
                     navigator.navigate(OtherUserProfileScreenDestination(requestedUser))
                 }

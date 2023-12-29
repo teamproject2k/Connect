@@ -143,7 +143,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(key1 = true) {
         viewModel.getFriendListFromIds(sharedViewModel.usersDetails.friendList)
-        viewModel.getPostDetails()
+        viewModel.getPostDetails(sharedViewModel.usersDetails.firebaseUserId)
     }
 }
 
@@ -157,7 +157,7 @@ private fun BottomSheetSection(
     Column(modifier = modifier.fillMaxWidth()) {
         BottomSheetItem(
             imageVector = Icons.Default.Settings,
-            text = stringResource(R.string.settings)
+            text = stringResource(R.string.settings_and_privacy)
         ) {
             onBottomSheetStateClick()
             navigator.navigate(SettingsScreenDestination)
@@ -296,7 +296,7 @@ private fun HandleFriendListSection(
         RequestStatusEnum.Success -> {
             UserProfileFriendsListSection(
                 navigator,
-                friendsList = friendsDetailsState.data!!,
+                friendsList = friendsDetailsState.data,
                 loggedInUserFirebaseId = userDetails.firebaseUserId,
                 isLoggedInUser = true
             )
@@ -342,7 +342,7 @@ private fun HandlePostSection(
         RequestStatusEnum.Success -> {
             UserProfilePostSection(
                 navigator,
-                postDetailsList = postDetailState.data!!.reversed(),
+                postDetailsList = postDetailState.data,
                 true
             )
         }

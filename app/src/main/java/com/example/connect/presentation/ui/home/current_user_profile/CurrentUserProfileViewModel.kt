@@ -10,7 +10,6 @@ import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
-import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,54 +42,34 @@ class CurrentUserProfileViewModel @Inject constructor(
     /**
      * Gets the details of the post.
      */
-    fun getPostDetails() {
+    fun getPostDetails(currentUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value =
                     ResponseState.loading() // Set the state of the post details state flow to loading.
-
-                val fireBaseId =
-                    fireBaseAuth.currentUser?.uid // Get the current user's Firebase ID.
-
-                if (fireBaseId != null) { // If the current user is not null, then we can get the post details from the database.
-
-                    val postDetails =
-                        getPostDetailsFromDbUseCase.invoke(fireBaseId) // Get the post details from the database.
-
-                    if (postDetails.isNotEmpty()) { // If the post details are not empty, then we can set the state of the post details state flow to success and emit the post details.
-
-                        _postDetailsStateFlow.value =
-                            ResponseState.success(postDetails) // Set the state of the post details state flow to success and emit the post details.
-
-                    } else { // If the post details are empty, then we can get the post details from the server.
-
-                        val postDetailsFromServerResponseState =
-                            getPostDetailsFromRemoteUseCase.invoke(
-                                fireBaseId,
-                                fireBaseId
-                            ) // Get the post details from the server.
-
-                        if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
-
-                            addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data!!) // Add the post details to the database.
-
-                            _postDetailsStateFlow.value =
-                                ResponseState.success(postDetailsFromServerResponseState.data) // Set the state of the post details state flow to success and emit the post details.
-
-                        } else { // If the status of the post details from server response state is not success, then we can set the state of the post details state flow to error and emit the error code.
-
-                            _postDetailsStateFlow.value =
-                                postDetailsFromServerResponseState // Set the state of the post details state flow to error and emit the error code.
-
-                        }
-
-                    }
-
-                } else { // If the current user is null, then we can set the state of the post details state flow to error and emit the error code.
-
+                val postDetails =
+                    getPostDetailsFromDbUseCase.invoke(currentUserFirebaseId) // Get the post details from the database.
+                if (postDetails.isNotEmpty()) { // If the post details are not empty, then we can set the state of the post details state flow to success and emit the post details.
                     _postDetailsStateFlow.value =
-                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND) // Set the state of the post details state flow to error and emit the error code.
+                        ResponseState.success(postDetails) // Set the state of the post details state flow to success and emit the post details.
+                } else { // If the post details are empty, then we can get the post details from the server.
+                    val postDetailsFromServerResponseState =
+                        getPostDetailsFromRemoteUseCase.invoke(
+                            currentUserFirebaseId,
+                            currentUserFirebaseId
+                        ) // Get the post details from the server.
 
+                    if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
+                        if (postDetailsFromServerResponseState.data != null) {
+                            addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data) // Add the post details to the database.
+                        }
+                        _postDetailsStateFlow.value =
+                            ResponseState.success(postDetailsFromServerResponseState.data) // Set the state of the post details state flow to success and emit the post details.
+
+                    } else { // If the status of the post details from server response state is not success, then we can set the state of the post details state flow to error and emit the error code.
+                        _postDetailsStateFlow.value =
+                            postDetailsFromServerResponseState // Set the state of the post details state flow to error and emit the error code.
+                    }
                 }
             }
         }

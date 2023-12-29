@@ -35,13 +35,26 @@ class IPostRepositoryImpl @Inject constructor(
             val response = fireStore.collection(FirebaseConstants.POST_KEY)
                 .whereEqualTo(PostRemoteEntity::fireBaseUserId.name, fireBaseId).get().await()
             val postList = arrayListOf<PostBean>()
+            val currentUserDocument =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    .get().await()
+            val currentUser = if (currentUserDocument != null && currentUserDocument.exists()) {
+                currentUserDocument.toObject(UserRemoteEntity::class.java)
+            } else {
+                null
+            }
             response.documents.forEach { document ->
                 val post = document.toObject(PostRemoteEntity::class.java)
                 if (post != null) {
-                    // TODO: 23/12/23 cd-user  change the logic here
-                    postList.add(post.toPostBean(document.id, true))
+                    postList.add(
+                        post.toPostBean(
+                            document.id,
+                            currentUser?.savedPosts?.contains(document.id) ?: false
+                        )
+                    )
                 }
             }
+            postList.sortByDescending { it.createdAt }
             ResponseState.success(postList)
         } catch (exception: Exception) {
             // An error occurred while getting the post details from the server.
