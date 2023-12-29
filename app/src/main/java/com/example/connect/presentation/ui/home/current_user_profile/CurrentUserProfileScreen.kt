@@ -342,7 +342,7 @@ private fun HandlePostSection(
         RequestStatusEnum.Success -> {
             UserProfilePostSection(
                 navigator,
-                postDetailsList = postDetailState.data!!.reversed(),
+                postDetailsList = postDetailState.data,
                 true
             )
         }

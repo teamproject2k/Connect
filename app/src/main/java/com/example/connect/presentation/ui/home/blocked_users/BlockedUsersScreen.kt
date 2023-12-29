@@ -26,8 +26,8 @@ import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppTopAppBar
-import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.UserListLoading
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -78,7 +78,7 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
     }
     when (blockedUsersState.status) {
         RequestStatusEnum.Loading -> {
-            LoaderFullScreen()
+            UserListLoading()
             isExceptionHandled = false
         }
 
@@ -100,6 +100,7 @@ fun HandleGetBlockedUsersState(viewModel: BlockedUsersViewModel, navigator: Dest
         }
     }
 }
+
 
 @Composable
 fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList: List<UsersBean>) {
