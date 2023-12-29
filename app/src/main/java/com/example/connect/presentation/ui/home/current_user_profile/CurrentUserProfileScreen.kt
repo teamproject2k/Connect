@@ -143,7 +143,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(key1 = true) {
         viewModel.getFriendListFromIds(sharedViewModel.usersDetails.friendList)
-        viewModel.getPostDetails()
+        viewModel.getPostDetails(sharedViewModel.usersDetails.firebaseUserId)
     }
 }
 
@@ -296,7 +296,7 @@ private fun HandleFriendListSection(
         RequestStatusEnum.Success -> {
             UserProfileFriendsListSection(
                 navigator,
-                friendsList = friendsDetailsState.data!!,
+                friendsList = friendsDetailsState.data,
                 loggedInUserFirebaseId = userDetails.firebaseUserId,
                 isLoggedInUser = true
             )

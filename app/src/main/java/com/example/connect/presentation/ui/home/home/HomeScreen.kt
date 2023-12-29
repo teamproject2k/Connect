@@ -236,7 +236,9 @@ private fun PostListUiSection(
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(postWithUser.first) { post ->
+            items(postWithUser.first, key = {
+                it.id
+            }) { post ->
                 val userDetails =
                     postWithUser.second.find { it.firebaseUserId == post.fireBaseUserId }
                 if (userDetails != null) {
