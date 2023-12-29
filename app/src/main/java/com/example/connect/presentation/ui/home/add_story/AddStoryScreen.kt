@@ -120,7 +120,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
 //                        )
                     }
                 ) {
-                    Text(text = stringResource(R.string.post))
+                    Text(text = stringResource(R.string.upload))
                 }
             })
         }
@@ -130,21 +130,18 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleAddStorySection(viewModel, context, navigator)
-            Column(
-                modifier = Modifier
+            CaptionMediaSection(
+                viewModel, Modifier
                     .weight(1f)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .background(viewModel.defaultStoryBackgroundColorState.value)
-            ) {
-                CaptionMediaSection(viewModel)
-            }
+            )
             BottomButtons { mediaType ->
                 imageResultLauncher.launch(PickVisualMediaRequest(mediaType))
             }
         }
     }
+    HandleAddStorySection(viewModel, context, navigator)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -205,11 +202,11 @@ private fun HandleAddStorySection(
 }
 
 @Composable
-private fun CaptionMediaSection(viewModel: AddStoryViewModel) {
+private fun CaptionMediaSection(viewModel: AddStoryViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.background(viewModel.defaultStoryBackgroundColorState.value)) {
         StoryCaptionField(viewModel)
-        MediaSection(viewModel, context)
+        MediaSection(viewModel, context, modifier = Modifier.weight(1f))
     }
 }
 
@@ -232,7 +229,7 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
 }
 
 @Composable
-private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
+private fun MediaSection(viewModel: AddStoryViewModel, context: Context, modifier: Modifier) {
     val selectedMedia = viewModel.selectedMediaState.value
     if (selectedMedia != null) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -264,7 +261,7 @@ private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
             }
         }
     } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
             IconButton(onClick = {
                 val colorList = FunctionHelper.getStoryBackgroundColorList()
                 val currentColorIndex =
