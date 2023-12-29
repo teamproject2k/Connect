@@ -20,13 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
 import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 
 @SuppressLint("OpaqueUnitKey")
@@ -35,7 +35,7 @@ fun PostCaptionMediaSection(postDetails: PostBean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp)
+            .height(ConstantsHelper.POST_DISPLAY_MEDIA_HEIGHT)
     ) {
         if (postDetails.postType == PostTypeEnum.Image.name || postDetails.postType == PostTypeEnum.TextImage.name) {
             var isImageLoadingFailed by remember {

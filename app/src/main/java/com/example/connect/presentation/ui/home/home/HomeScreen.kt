@@ -192,7 +192,7 @@ fun PostListLoadingSection() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .height(ConstantsHelper.POST_DISPLAY_MEDIA_HEIGHT)
                     .shimmer()
             )
             Box(
