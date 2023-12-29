@@ -157,7 +157,7 @@ private fun BottomSheetSection(
     Column(modifier = modifier.fillMaxWidth()) {
         BottomSheetItem(
             imageVector = Icons.Default.Settings,
-            text = stringResource(R.string.settings)
+            text = stringResource(R.string.settings_and_privacy)
         ) {
             onBottomSheetStateClick()
             navigator.navigate(SettingsScreenDestination)

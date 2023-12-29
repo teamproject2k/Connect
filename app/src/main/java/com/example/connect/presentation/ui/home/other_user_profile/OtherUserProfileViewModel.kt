@@ -165,12 +165,12 @@ class OtherUserProfileViewModel @Inject constructor(
             // Perform the network request in the IO dispatcher.
             withContext(Dispatchers.IO) {
                 // Check if the friendIdList is empty.
+                _friendsDetailsStateFlow.value = ResponseState.loading()
                 if (friendIdList.isEmpty()) {
                     // If the friendIdList is empty, emit an empty list as the response.
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     // If the friendIdList is not empty, emit a loading state.
-                    _friendsDetailsStateFlow.value = ResponseState.loading()
                     // Get the user details from the userIds.
                     _friendsDetailsStateFlow.value =
                         getUserDetailsFromIdsUseCase.invoke(friendIdList)

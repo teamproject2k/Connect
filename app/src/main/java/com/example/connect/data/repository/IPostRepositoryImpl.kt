@@ -54,6 +54,7 @@ class IPostRepositoryImpl @Inject constructor(
                     )
                 }
             }
+            postList.sortByDescending { it.createdAt }
             ResponseState.success(postList)
         } catch (exception: Exception) {
             // An error occurred while getting the post details from the server.

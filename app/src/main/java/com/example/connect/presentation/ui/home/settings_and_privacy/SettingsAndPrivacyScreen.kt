@@ -112,6 +112,10 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 showFriendListBottomSheet = true
             }
             DividerLightGrayAlpha50()
+            SettingsAndPrivacyClickableItem(itemNameId = R.string.saved_posts) {
+                // TODO: 29/12/23 cd-user  navigate to saved post screen
+            }
+            DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.blocked_users) {
                 navigator.navigate(BlockedListScreenDestination())
             }

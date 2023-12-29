@@ -14,6 +14,6 @@ interface IPostDao {
     @Insert
     fun insertPostList(postDetailsList: List<PostDbEntity>): LongArray
 
-    @Query("SELECT * FROM PostDbEntity WHERE fireBaseUserId = :fireBaseId")
+    @Query("SELECT * FROM PostDbEntity WHERE fireBaseUserId = :fireBaseId ORDER BY createdAt DESC")
     fun getPostList(fireBaseId: String): List<PostDbEntity>
 }
