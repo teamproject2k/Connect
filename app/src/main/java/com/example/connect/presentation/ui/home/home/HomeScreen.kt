@@ -1,9 +1,6 @@
 package com.example.connect.presentation.ui.home.home
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.view.ViewGroup
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +26,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,17 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.ui.PlayerView
-import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
@@ -62,6 +54,7 @@ import com.example.connect.presentation.ui.common.Dot
 import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.UserDetailsSection
@@ -296,81 +289,18 @@ private fun PostListItem(
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
-        PostBottomSection(postDetails, viewModel, currentUserFirebaseId, navigator)
+        PostBottomSection(postDetails, viewModel, usersDetails, currentUserFirebaseId, navigator)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
 }
 
-@SuppressLint("OpaqueUnitKey")
-@Composable
-private fun PostCaptionMediaSection(postDetails: PostBean) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-    ) {
-        if (postDetails.postType == PostTypeEnum.Image.name || postDetails.postType == PostTypeEnum.TextImage.name) {
-            var isImageLoadingFailed by remember {
-                mutableStateOf(false)
-            }
-            var isPostLoading by remember {
-                mutableStateOf(false)
-            }
-            if (!isImageLoadingFailed) {
-                val modifier = Modifier.fillMaxSize()
-                AsyncImage(
-                    model = postDetails.mediaUrl,
-                    contentDescription = postDetails.caption,
-                    contentScale = ContentScale.Crop,
-                    modifier = if (isPostLoading) modifier.shimmer() else modifier,
-                    onError = {
-                        isImageLoadingFailed = true
-                        isPostLoading = false
-                    },
-                    onLoading = {
-                        isPostLoading = true
-                    },
-                    onSuccess = {
-                        isPostLoading = false
-                    }
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(ColorsHelper.lightGray()),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = stringResource(R.string.unable_to_load_media))
-                }
-            }
-        } else if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
-            val context = LocalContext.current
-            val exoPlayer = remember {
-                FunctionHelper.getExoPlayer(context, postDetails.mediaUrl)
-            }
-            DisposableEffect(AndroidView(factory = {
-                PlayerView(context).apply {
-                    player = exoPlayer
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                }
-            })) {
-                onDispose {
-                    exoPlayer.release()
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun PostBottomSection(
     postDetails: PostBean,
     viewModel: HomeViewModel,
+    userDetails: UsersBean,
     currentUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
@@ -408,7 +338,13 @@ private fun PostBottomSection(
                     )
                 }
                 IconButton(onClick = {
-                    navigator.navigate(PostDetailsScreenDestination(postDetails))
+                    navigator.navigate(
+                        PostDetailsScreenDestination(
+                            postDetails,
+                            userDetails,
+                            currentUserFirebaseId
+                        )
+                    )
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_comment),
