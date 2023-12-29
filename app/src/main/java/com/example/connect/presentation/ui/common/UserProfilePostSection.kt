@@ -92,7 +92,7 @@ fun UserProfilePostSection(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(postDetailsList) { details ->
+                items(postDetailsList, key = { it.id }) { details ->
                     UserProfilePostItem(
                         postDetails = details,
                         modifier = Modifier.size(

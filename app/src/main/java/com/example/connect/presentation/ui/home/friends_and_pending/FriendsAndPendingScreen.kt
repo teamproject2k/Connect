@@ -216,7 +216,9 @@ private fun FriendsListUI(
             return
         }
         LazyColumn {
-            items(filteredUserList) { user ->
+            items(filteredUserList, key = {
+                it.firebaseUserId
+            }) { user ->
                 UsersListItem(user) {
                     navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
@@ -306,7 +308,9 @@ private fun PendingListUI(
             return
         }
         LazyColumn {
-            items(filteredUserList) { user ->
+            items(filteredUserList, key = {
+                it.firebaseUserId
+            }) { user ->
                 UsersListItem(usersBean = user) {
                     navigator.navigate(
                         OtherUserProfileScreenDestination(user)

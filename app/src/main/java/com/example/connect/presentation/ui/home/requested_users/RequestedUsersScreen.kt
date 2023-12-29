@@ -114,7 +114,9 @@ fun DisplayUsersList(navigator: DestinationsNavigator, requestedUsersList: List<
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(requestedUsersList) { requestedUser ->
+            items(requestedUsersList, key = {
+                it.firebaseUserId
+            }) { requestedUser ->
                 UsersListItem(requestedUser) {
                     navigator.navigate(OtherUserProfileScreenDestination(requestedUser))
                 }

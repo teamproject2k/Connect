@@ -175,7 +175,9 @@ private fun CreateUi(
             return
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(filteredUserList) { user ->
+            items(filteredUserList, key = {
+                it.firebaseUserId
+            }) { user ->
                 UsersListItem(usersBean = user) {
                     navigator.navigate(OtherUserProfileScreenDestination(user))
                 }
