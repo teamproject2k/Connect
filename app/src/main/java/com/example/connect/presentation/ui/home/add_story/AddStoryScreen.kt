@@ -9,32 +9,29 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Circle
-import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.VideoCameraFront
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,11 +44,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -66,9 +69,9 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -80,8 +83,8 @@ import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
@@ -92,7 +95,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val snackBarHostState = SnackbarHostState()
 
-    val imageResultLauncher = mediaPicker { uri: Uri ->
+    val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
         val mediaType = contentResolver.getType(uri)?.substringBefore("/")
         if (mediaType != null) {
@@ -100,44 +103,20 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                 MediaData(uri, mediaType)
         }
     }
-
-    Scaffold(topBar = {
-        Surface(shadowElevation = 3.dp) {
-            TopAppBar(title = {
-                Text(
-                    text = stringResource(id = R.string.add_story),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            }, actions = {
-                Button(
-                    // enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
-                    onClick = {
-//                        handleButtonClick(
-//                            viewModel,
-//                            context,
-//                            sharedViewModel.usersDetails.firebaseUserId
-//                        )
-                    }
-                ) {
-                    Text(text = stringResource(R.string.upload))
-                }
-            })
-        }
-    }) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            CaptionMediaSection(
+            MainContentSection(
                 viewModel, Modifier
                     .weight(1f)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize(),
+                navigator
             )
-            BottomButtons { mediaType ->
-                imageResultLauncher.launch(PickVisualMediaRequest(mediaType))
+            BottomSection(viewModel) {
+                mediaResultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
             }
         }
     }
@@ -202,34 +181,72 @@ private fun HandleAddStorySection(
 }
 
 @Composable
-private fun CaptionMediaSection(viewModel: AddStoryViewModel, modifier: Modifier = Modifier) {
+private fun MainContentSection(
+    viewModel: AddStoryViewModel,
+    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator
+) {
     val context = LocalContext.current
-    Column(modifier = modifier.background(viewModel.defaultStoryBackgroundColorState.value)) {
-        StoryCaptionField(viewModel)
-        MediaSection(viewModel, context, modifier = Modifier.weight(1f))
+    Box(
+        modifier = modifier
+            .background(brush = Brush.linearGradient(viewModel.defaultStoryBackgroundColorState.value))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            MediaSection(viewModel, context)
+            StoryCaptionField(viewModel)
+        }
+        Icon(
+            modifier = Modifier
+                .padding(16.dp)
+                .size(18.dp)
+                .clickable { navigator.popBackStack() },
+            painter = painterResource(id = R.drawable.ic_cancel),
+            contentDescription = stringResource(id = R.string.clear),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
     }
 }
 
 @Composable
 private fun StoryCaptionField(viewModel: AddStoryViewModel) {
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
     TransparentTextField(
+        modifier = Modifier
+            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+                    offsetX += dragAmount.x
+                    offsetY += dragAmount.y
+                }
+            },
         value = viewModel.captionTextState.value,
         placeholder = {
             Text(
                 text = stringResource(R.string.type_something),
-                fontSize = 14.sp,
-                color = ColorsHelper.gray()
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center
             )
         },
         onValueChange = { updatedValue ->
             viewModel.captionTextState.value = updatedValue
         },
-        modifier = Modifier.fillMaxSize()
+        textStyle = TextStyle.Default.copy(
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 18.sp
+        )
     )
 }
 
 @Composable
-private fun MediaSection(viewModel: AddStoryViewModel, context: Context, modifier: Modifier) {
+private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
     val selectedMedia = viewModel.selectedMediaState.value
     if (selectedMedia != null) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -260,25 +277,6 @@ private fun MediaSection(viewModel: AddStoryViewModel, context: Context, modifie
                 }
             }
         }
-    } else {
-        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-            IconButton(onClick = {
-                val colorList = FunctionHelper.getStoryBackgroundColorList()
-                val currentColorIndex =
-                    colorList.indexOf(viewModel.defaultStoryBackgroundColorState.value)
-                val nextColorIndex = (currentColorIndex + 1) % colorList.size
-                viewModel.defaultStoryBackgroundColorState.value = colorList[nextColorIndex]
-            }) {
-                Image(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(viewModel.defaultStoryBackgroundColorState.value)
-                        .border(1.dp, ColorsHelper.lightGray(), CircleShape),
-                    imageVector = Icons.Outlined.Circle,
-                    contentDescription = stringResource(R.string.change_story_background_color)
-                )
-            }
-        }
     }
 }
 
@@ -301,14 +299,12 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
     val exoPlayer = remember {
         FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
     }
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val height = FunctionHelper.convertDpToPixel(screenHeight * .50f, context)
     DisposableEffect(AndroidView(factory = {
         PlayerView(context).apply {
             player = exoPlayer
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                height.toInt()
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
     }, update = {
@@ -321,27 +317,61 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
 }
 
 @Composable
-private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.PickVisualMedia.VisualMediaType) -> Unit) {
-    Surface(tonalElevation = 2.dp) {
-        Row(
+fun BottomSection(viewModel: AddStoryViewModel, onMediaSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ColorsHelper.black())
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconTextSection(
-                icon = Icons.Rounded.Image,
-                text = stringResource(R.string.add_image),
-                modifier = Modifier.weight(1f)
+                .size(34.dp)
+                .border(1.5.dp, MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(8.dp))
+                .clickable { onMediaSelect() },
+            painter = painterResource(id = R.drawable.ic_gallery),
+            contentDescription = stringResource(R.string.add_media),
+            contentScale = ContentScale.Crop
+        )
+        Text(
+            text = stringResource(R.string.story),
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+        if (viewModel.selectedMediaState.value == null) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
+                    .background(brush = Brush.linearGradient(viewModel.defaultStoryBackgroundColorState.value))
+                    .clickable {
+                        val currentColorIndex =
+                            viewModel.gradientColorList.indexOf(viewModel.defaultStoryBackgroundColorState.value)
+                        val nextColorIndex =
+                            (currentColorIndex + 1) % viewModel.gradientColorList.size
+                        viewModel.defaultStoryBackgroundColorState.value =
+                            viewModel.gradientColorList[nextColorIndex]
+                    }
+            )
+        }
+        if (viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null) {
+            SpacerWidth16()
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
+                    .clickable {},
+                contentAlignment = Alignment.Center
             ) {
-                selectFileClick(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            }
-            IconTextSection(
-                icon = Icons.Rounded.VideoCameraFront,
-                text = stringResource(R.string.add_video),
-                modifier = Modifier.weight(1f),
-                contentArrangement = Arrangement.End
-            ) {
-                selectFileClick(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                Icon(
+                    imageVector = Icons.Default.Upload,
+                    contentDescription = stringResource(id = R.string.upload)
+                )
             }
         }
     }

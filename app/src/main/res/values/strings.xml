@@ -184,4 +184,6 @@
     <string name="story_image">Story Image</string>
     <string name="change_story_background_color">Change Story Background Color</string>
     <string name="upload">Upload</string>
+    <string name="story">STORY</string>
+    <string name="add_media">Add Media</string>
 </resources>

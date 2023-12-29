@@ -9,7 +9,9 @@ data class StoryBean(
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val mediaType: String
+    val mediaType: String,
+    val textOffset: String,
+    val backgroundGradientColor: String
 ) {
     fun toStoryDbEntity(): StoryDbEntity {
         return StoryDbEntity(
@@ -18,7 +20,9 @@ data class StoryBean(
             mediaUrl,
             caption,
             createdAt,
-            mediaType
+            mediaType,
+            textOffset,
+            backgroundGradientColor
         )
     }
 
@@ -29,7 +33,9 @@ data class StoryBean(
             mediaUrl,
             caption,
             createdAt,
-            mediaType
+            mediaType,
+            textOffset,
+            backgroundGradientColor
         )
     }
 }

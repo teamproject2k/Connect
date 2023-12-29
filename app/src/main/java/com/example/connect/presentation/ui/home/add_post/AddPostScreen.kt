@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -101,7 +102,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
     }
 
     val snackBarHostState = SnackbarHostState()
-    val imageResultLauncher = mediaPicker { uri: Uri ->
+    val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
         val mediaType = contentResolver.getType(uri)?.substringBefore("/")
         if (mediaType != null) {
@@ -110,22 +111,24 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
         }
     }
 
-    Scaffold(topBar = {
-        AppTopAppBar(title = stringResource(R.string.create_post), actions = {
-            Button(
-                enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
-                onClick = {
-                    handleButtonClick(
-                        viewModel,
-                        context,
-                        homeSharedViewModel.usersDetails.firebaseUserId
-                    )
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        topBar = {
+            AppTopAppBar(title = stringResource(R.string.create_post), actions = {
+                Button(
+                    enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
+                    onClick = {
+                        handleButtonClick(
+                            viewModel,
+                            context,
+                            homeSharedViewModel.usersDetails.firebaseUserId
+                        )
+                    }
+                ) {
+                    Text(text = stringResource(R.string.post))
                 }
-            ) {
-                Text(text = stringResource(R.string.post))
-            }
-        })
-    }) {
+            })
+        }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -146,7 +149,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 CaptionMediaSection(viewModel)
             }
             BottomButtons { mediaType ->
-                imageResultLauncher.launch(PickVisualMediaRequest(mediaType))
+                mediaResultLauncher.launch(PickVisualMediaRequest(mediaType))
             }
         }
         if (showBottomSheet) {

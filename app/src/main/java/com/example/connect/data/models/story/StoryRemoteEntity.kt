@@ -8,7 +8,9 @@ data class StoryRemoteEntity(
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val mediaType: String
+    val mediaType: String,
+    val textOffset: String,
+    val backgroundGradientColor: String
 ) {
     fun toStoryBean(): StoryBean {
         return StoryBean(
@@ -17,7 +19,9 @@ data class StoryRemoteEntity(
             mediaUrl,
             caption,
             createdAt,
-            mediaType
+            mediaType,
+            textOffset,
+            backgroundGradientColor
         )
     }
 }

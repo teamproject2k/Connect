@@ -549,7 +549,14 @@ object FunctionHelper {
         }
     }
 
-    fun getStoryBackgroundColorList(): List<Color> {
-        return listOf(Color.Red, Color.Green, Color.Yellow, Color.Black)
+    fun getStoryBackgroundColorList(): MutableList<MutableList<Color>> {
+        val gradientColorList = mutableListOf<MutableList<Color>>()
+        gradientColorList.add(mutableListOf(Color.Black, Color(0xFF262626)))
+        gradientColorList.add(mutableListOf(Color(0xFF0000cc), Color(0xFF9999ff)))
+        gradientColorList.add(mutableListOf(Color(0xFFcc5200), Color(0xFFFFC299)))
+        gradientColorList.add(mutableListOf(Color(0xFF006600), Color(0xFFb3ffb3)))
+        gradientColorList.add(mutableListOf(Color(0xFF66004d), Color(0xFFffb3ec)))
+        gradientColorList.add(mutableListOf(Color(0xFF0000cc), Color.Cyan))
+        return gradientColorList
     }
 }
