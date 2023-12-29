@@ -21,7 +21,7 @@ import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
-import com.example.connect.presentation.ui.models.PostMediaData
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,8 +52,8 @@ class EditProfileViewModel @Inject constructor(
     lateinit var userBioState: MutableState<String>
     lateinit var selectedDOBState: MutableLongState
     lateinit var selectedGenderState: MutableState<String>
-    lateinit var profilePhotoState: MutableState<PostMediaData?>
-    lateinit var coverPhotoState: MutableState<PostMediaData?>
+    lateinit var profilePhotoState: MutableState<MediaData?>
+    lateinit var coverPhotoState: MutableState<MediaData?>
     lateinit var userDetails: UsersBean
     var isProfileUri = true
     val snackBarMessageState = mutableStateOf("")
@@ -84,7 +84,7 @@ class EditProfileViewModel @Inject constructor(
         // Initialize the profile photo state.
         profilePhotoState =
             mutableStateOf(
-                PostMediaData(
+                MediaData(
                     userDetails.profilePhoto?.toUri() ?: Uri.EMPTY,
                     ConstantsHelper.MEDIA_TYPE_IMAGE
                 )
@@ -92,7 +92,7 @@ class EditProfileViewModel @Inject constructor(
 
         // Initialize the cover photo state.
         coverPhotoState = mutableStateOf(
-            PostMediaData(
+            MediaData(
                 userDetails.coverPhoto?.toUri() ?: Uri.EMPTY,
                 ConstantsHelper.MEDIA_TYPE_IMAGE
             )

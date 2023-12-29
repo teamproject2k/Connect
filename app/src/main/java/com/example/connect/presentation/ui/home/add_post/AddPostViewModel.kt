@@ -14,7 +14,7 @@ import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.PostTypeEnum
-import com.example.connect.presentation.ui.models.PostMediaData
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.ui.models.VisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +34,7 @@ class AddPostViewModel @Inject constructor(
     private val addPostToDbUseCase: AddPostToDbUseCase
 ) : BaseViewModel() {
     val captionTextState = mutableStateOf("")
-    val selectedMediaState: MutableState<PostMediaData?> = mutableStateOf(null)
+    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
     lateinit var postVisibilityScopeList: List<VisibilityScope>
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
     var isFirstTimeSetup = true

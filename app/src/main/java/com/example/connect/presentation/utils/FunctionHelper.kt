@@ -11,6 +11,7 @@ import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.annotation.OptIn
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.database.getLongOrNull
 import androidx.media3.common.MediaItem
@@ -548,4 +549,7 @@ object FunctionHelper {
         }
     }
 
+    fun getStoryBackgroundColorList(): List<Color> {
+        return listOf(Color.Red, Color.Green, Color.Yellow, Color.Black)
+    }
 }

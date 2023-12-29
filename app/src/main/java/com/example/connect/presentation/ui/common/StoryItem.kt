@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.utils.ConstantsHelper
 
 @Composable
 fun StoryItem(
@@ -27,7 +28,7 @@ fun StoryItem(
         AsyncImage(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .size(48.dp)
+                .size(ConstantsHelper.StoryItemHeight)
                 .clip(CircleShape)
                 .border(1.dp, Color.Red, CircleShape),
             model = user.profilePhoto,
@@ -35,6 +36,7 @@ fun StoryItem(
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user)
         )
+        SpacerHeight6()
         Text(text = user.name, fontSize = 12.sp)
     }
 }

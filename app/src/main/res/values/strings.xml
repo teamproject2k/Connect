@@ -180,4 +180,7 @@
     <string name="comments">Comments</string>
     <string name="story_uploaded_successfully">Story Uploaded Successfully</string>
     <string name="uploading_story">Uploading Story...</string>
+    <string name="type_something">Type Something...</string>
+    <string name="story_image">Story Image</string>
+    <string name="change_story_background_color">Change Story Background Color</string>
 </resources>

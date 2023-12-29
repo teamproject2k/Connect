@@ -31,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -50,7 +49,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -64,6 +62,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
+import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.LoaderDialog
@@ -74,7 +73,7 @@ import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
-import com.example.connect.presentation.ui.models.PostMediaData
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -107,33 +106,25 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
         val mediaType = contentResolver.getType(uri)?.substringBefore("/")
         if (mediaType != null) {
             viewModel.selectedMediaState.value =
-                PostMediaData(uri, mediaType)
+                MediaData(uri, mediaType)
         }
     }
 
     Scaffold(topBar = {
-        Surface(shadowElevation = 3.dp) {
-            TopAppBar(title = {
-                Text(
-                    text = stringResource(R.string.create_post),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            }, actions = {
-                Button(
-                    enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
-                    onClick = {
-                        handleButtonClick(
-                            viewModel,
-                            context,
-                            homeSharedViewModel.usersDetails.firebaseUserId
-                        )
-                    }
-                ) {
-                    Text(text = stringResource(R.string.post))
+        AppTopAppBar(title = stringResource(R.string.create_post), actions = {
+            Button(
+                enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
+                onClick = {
+                    handleButtonClick(
+                        viewModel,
+                        context,
+                        homeSharedViewModel.usersDetails.firebaseUserId
+                    )
                 }
-            })
-        }
+            ) {
+                Text(text = stringResource(R.string.post))
+            }
+        })
     }) {
         Column(
             modifier = Modifier
@@ -296,7 +287,7 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
 }
 
 @Composable
-private fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> Unit) {
+private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit) {
     AsyncImage(
         model = selectedMediaData.uri,
         contentDescription = stringResource(R.string.post_image),
@@ -310,7 +301,7 @@ private fun ShowSelectedImage(selectedMediaData: PostMediaData, onError: () -> U
 
 @SuppressLint("OpaqueUnitKey")
 @Composable
-private fun ShowSelectedVideo(selectedMediaData: PostMediaData, context: Context) {
+private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
     val exoPlayer = remember {
         FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
     }
@@ -375,7 +366,7 @@ private fun PostCaptionField(viewModel: AddPostViewModel) {
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
     )
 }
 

@@ -25,7 +25,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +57,6 @@ import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
-import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.StoryItem
@@ -91,7 +89,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
-            Surface(tonalElevation = 0.dp) {
                 AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
                     IconButton(onClick = {
                         navigator.navigate(AddStoryScreenDestination())
@@ -111,7 +108,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                         )
                     }
                 })
-            }
         }) {
         Column(
             modifier = Modifier
@@ -119,7 +115,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 .padding(it)
         ) {
             StorySection(homeSharedViewModel.usersDetails)
-            SpacerHeight12()
             DividerLightGrayAlpha50()
             HandlePostDetailsWithUserDetails(
                 viewModel = viewModel,
@@ -144,7 +139,9 @@ fun HomeScreen(navigator: DestinationsNavigator) {
 
 @Composable
 fun StorySection(usersDetails: UsersBean) {
-    LazyRow(modifier = Modifier.fillMaxWidth()) {
+    LazyRow(modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 16.dp, horizontal = 4.dp)) {
         items(12) {
             StoryItem(user = usersDetails)
         }

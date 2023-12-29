@@ -75,7 +75,7 @@ import com.example.connect.presentation.ui.common.SpacerHeight24
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
-import com.example.connect.presentation.ui.models.PostMediaData
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
@@ -106,10 +106,10 @@ fun EditProfileScreen(
         mediaPicker { uri ->
             if (viewModel.isProfileUri) {
                 viewModel.profilePhotoState.value =
-                    PostMediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
+                    MediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
             } else {
                 viewModel.coverPhotoState.value =
-                    PostMediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
+                    MediaData(uri, ConstantsHelper.MEDIA_TYPE_IMAGE)
             }
         }
 
