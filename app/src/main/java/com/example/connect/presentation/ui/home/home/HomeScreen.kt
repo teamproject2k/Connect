@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -27,6 +28,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -58,15 +60,19 @@ import com.example.connect.presentation.ui.chat.ChatActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
+import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.Dot
 import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.StoryItem
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.UserDetailsSectionLoading
 import com.example.connect.presentation.ui.common.shimmer
+import com.example.connect.presentation.ui.destinations.AddStoryScreenDestination
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
@@ -87,39 +93,44 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     val activity = LocalActivity.current
     val context = LocalContext.current
     val viewModel: HomeViewModel = hiltViewModel()
-    val sharedViewModel: HomeSharedViewModel = hiltViewModel(activity)
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(activity)
     val snackBarHostState = SnackbarHostState()
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
-            AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
-                IconButton(onClick = {
-
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.AddCircle,
-                        contentDescription = stringResource(R.string.add_story)
-                    )
-                }
-                IconButton(onClick = {
-                    val intent = Intent(context, ChatActivity::class.java)
-                    activity.startActivity(intent)
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Chat,
-                        contentDescription = stringResource(id = R.string.chat)
-                    )
-                }
-            })
+            Surface(tonalElevation = 0.dp) {
+                AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
+                    IconButton(onClick = {
+                        navigator.navigate(AddStoryScreenDestination())
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.AddCircle,
+                            contentDescription = stringResource(R.string.add_story)
+                        )
+                    }
+                    IconButton(onClick = {
+                        val intent = Intent(context, ChatActivity::class.java)
+                        activity.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Chat,
+                            contentDescription = stringResource(id = R.string.chat)
+                        )
+                    }
+                })
+            }
         }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
+            StorySection(homeSharedViewModel.usersDetails)
+            SpacerHeight12()
+            DividerLightGrayAlpha50()
             HandlePostDetailsWithUserDetails(
                 viewModel = viewModel,
-                sharedViewModel.usersDetails,
+                homeSharedViewModel.usersDetails,
                 navigator
             )
         }
@@ -132,12 +143,20 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getPostDetailsWithUserDetails(sharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
     }
     HandleLikeUnlikeState(viewModel = viewModel)
     HandleSaveUnSavePost(viewModel)
 }
 
+@Composable
+fun StorySection(usersDetails: UsersBean) {
+    LazyRow(modifier = Modifier.fillMaxWidth()) {
+        items(12) {
+            StoryItem(user = usersDetails)
+        }
+    }
+}
 
 @Composable
 private fun HandlePostDetailsWithUserDetails(

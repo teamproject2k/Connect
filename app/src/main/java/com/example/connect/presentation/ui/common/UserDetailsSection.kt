@@ -26,7 +26,7 @@ import com.example.connect.domain.models.UsersBean
 @Composable
 fun UserDetailsSection(
     user: UsersBean,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
