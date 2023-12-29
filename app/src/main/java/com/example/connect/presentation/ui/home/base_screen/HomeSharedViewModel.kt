@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.base_screen
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -40,6 +41,8 @@ class HomeSharedViewModel @Inject constructor(
 
     val deviceIdStateFlow: StateFlow<ResponseState<Nothing>> get() = _deviceIdStateFlow
 
+    val isBottomBarHiddenState = mutableStateOf(false)
+
     /**
      * Gets the device ID from the remote server.
      */
@@ -58,7 +61,8 @@ class HomeSharedViewModel @Inject constructor(
                         // If the device ID from the remote server does not match the device ID in the shared preferences,
                         if (sharedPreference.deviceId != responseState.data) {
                             // Set the device ID state flow to error with the NewLogin error code.
-                            _deviceIdStateFlow.value = ResponseState.error(FirebaseErrorCodes.NEW_LOGIN)
+                            _deviceIdStateFlow.value =
+                                ResponseState.error(FirebaseErrorCodes.NEW_LOGIN)
                         } else {
                             // Get the user details.
                             getUserDetails(context)
