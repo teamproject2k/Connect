@@ -36,8 +36,8 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -151,7 +151,7 @@ private fun HandleGetFriendsListStateFlow(
     }
     when (getFriendsListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
-            LoaderFullScreen(stringResource(id = R.string.getting_details))
+            SearchAndUserListUiLoading()
             isExceptionHandled = false
         }
 
@@ -239,7 +239,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
     }
     when (getPendingFriendRequestListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
-            LoaderFullScreen(stringResource(id = R.string.getting_details))
+            SearchAndUserListUiLoading()
             isExceptionHandled = false
         }
 

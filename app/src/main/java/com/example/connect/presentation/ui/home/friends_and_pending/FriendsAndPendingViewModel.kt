@@ -5,8 +5,8 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
