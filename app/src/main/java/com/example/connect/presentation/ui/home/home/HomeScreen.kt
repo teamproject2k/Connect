@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Chat
@@ -92,6 +93,14 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
+                IconButton(onClick = {
+
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.AddCircle,
+                        contentDescription = stringResource(R.string.add_story)
+                    )
+                }
                 IconButton(onClick = {
                     val intent = Intent(context, ChatActivity::class.java)
                     activity.startActivity(intent)
