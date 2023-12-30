@@ -44,7 +44,7 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
-import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
@@ -114,16 +114,16 @@ private fun PostDetails(
                 modifier = Modifier.padding(16.dp),
                 text = postDetails.caption,
                 context = context,
-                minimizedMaxLines = if (postDetails.postType == PostTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
+                minimizedMaxLines = if (postDetails.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
             )
         } else {
             SpacerHeight16()
         }
         if (
-            postDetails.postType == PostTypeEnum.Image.name
-            || postDetails.postType == PostTypeEnum.TextImage.name
-            || postDetails.postType == PostTypeEnum.Video.name
-            || postDetails.postType == PostTypeEnum.TextVideo.name
+            postDetails.postType == MediaTypeEnum.Image.name
+            || postDetails.postType == MediaTypeEnum.TextImage.name
+            || postDetails.postType == MediaTypeEnum.Video.name
+            || postDetails.postType == MediaTypeEnum.TextVideo.name
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }

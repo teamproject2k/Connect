@@ -24,7 +24,7 @@ import coil.compose.AsyncImage
 import coil.decode.VideoFrameDecoder
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
-import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 
 @Composable
 fun UserProfilePostItem(
@@ -51,7 +51,7 @@ fun UserProfilePostItem(
         }
     ) {
         if (showShimmer || postDetails == null) return
-        if (postDetails.postType == PostTypeEnum.Text.name) {
+        if (postDetails.postType == MediaTypeEnum.Text.name) {
             UserProfilePostTextOnlyItem(caption = postDetails.caption)
         } else {
             var isImageLoadingFailed by remember {
@@ -60,7 +60,7 @@ fun UserProfilePostItem(
             val imageLoader =
                 ImageLoader.Builder(LocalContext.current)
                     .components {
-                        if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
+                        if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
                             add(VideoFrameDecoder.Factory())
                         }
                     }
@@ -79,7 +79,7 @@ fun UserProfilePostItem(
             } else {
                 UserProfilePostTextOnlyItem(caption = postDetails.caption.ifBlank { stringResource(R.string.unable_to_load_post) })
             }
-            if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
+            if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

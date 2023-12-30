@@ -4,7 +4,7 @@ import com.example.connect.data.models.story.StoryDbEntity
 import com.example.connect.data.models.story.StoryRemoteEntity
 
 data class StoryBean(
-    val id: String,
+    var id: String,
     val fireBaseUserId: String,
     val mediaUrl: String,
     val caption: String,

@@ -1,6 +1,6 @@
 package com.example.connect.presentation.ui.enums
 
-enum class PostTypeEnum {
+enum class MediaTypeEnum {
     Text,
     Image,
     TextImage,

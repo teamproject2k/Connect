@@ -5,8 +5,8 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
-class AddStoryUseCase @Inject constructor(private val repository: IStoryRepository) {
+class AddStoryToRemoteUseCase @Inject constructor(private val repository: IStoryRepository) {
     suspend fun invoke(storyDetails: StoryBean): ResponseState<Nothing> {
-        return repository.addStory(storyDetails)
+        return repository.addStoryToRemote(storyDetails)
     }
 }

@@ -25,7 +25,7 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
-import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 
@@ -37,7 +37,7 @@ fun PostCaptionMediaSection(postDetails: PostBean) {
             .fillMaxWidth()
             .height(ConstantsHelper.POST_DISPLAY_MEDIA_HEIGHT)
     ) {
-        if (postDetails.postType == PostTypeEnum.Image.name || postDetails.postType == PostTypeEnum.TextImage.name) {
+        if (postDetails.postType == MediaTypeEnum.Image.name || postDetails.postType == MediaTypeEnum.TextImage.name) {
             var isImageLoadingFailed by remember {
                 mutableStateOf(false)
             }
@@ -72,7 +72,7 @@ fun PostCaptionMediaSection(postDetails: PostBean) {
                     Text(text = stringResource(R.string.unable_to_load_media))
                 }
             }
-        } else if (postDetails.postType == PostTypeEnum.Video.name || postDetails.postType == PostTypeEnum.TextVideo.name) {
+        } else if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
             val context = LocalContext.current
             val exoPlayer = remember {
                 FunctionHelper.getExoPlayer(context, postDetails.mediaUrl)

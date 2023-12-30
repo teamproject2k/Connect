@@ -115,7 +115,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                     .fillMaxSize(),
                 navigator
             )
-            BottomSection(viewModel) {
+            BottomSection(homeSharedViewModel.usersDetails.firebaseUserId, viewModel) {
                 mediaResultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
             }
         }
@@ -190,7 +190,7 @@ private fun MainContentSection(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(brush = Brush.linearGradient(viewModel.defaultStoryBackgroundColorState.value))
+            .background(brush = Brush.linearGradient(viewModel.storyBackgroundColorState.value))
     ) {
         Box(
             modifier = Modifier
@@ -214,17 +214,20 @@ private fun MainContentSection(
 
 @Composable
 private fun StoryCaptionField(viewModel: AddStoryViewModel) {
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
 
     TransparentTextField(
         modifier = Modifier
-            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+            .offset {
+                IntOffset(
+                    viewModel.captionOffsetX.roundToInt(),
+                    viewModel.captionOffsetY.roundToInt()
+                )
+            }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
-                    offsetX += dragAmount.x
-                    offsetY += dragAmount.y
+                    viewModel.captionOffsetX += dragAmount.x
+                    viewModel.captionOffsetY += dragAmount.y
                 }
             },
         value = viewModel.captionTextState.value,
@@ -318,7 +321,12 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
 }
 
 @Composable
-fun BottomSection(viewModel: AddStoryViewModel, onMediaSelect: () -> Unit) {
+fun BottomSection(
+    currentUserFirebaseId: String,
+    viewModel: AddStoryViewModel,
+    onMediaSelect: () -> Unit
+) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,13 +357,13 @@ fun BottomSection(viewModel: AddStoryViewModel, onMediaSelect: () -> Unit) {
                     .size(34.dp)
                     .clip(CircleShape)
                     .border(1.5.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
-                    .background(brush = Brush.linearGradient(viewModel.defaultStoryBackgroundColorState.value))
+                    .background(brush = Brush.linearGradient(viewModel.storyBackgroundColorState.value))
                     .clickable {
                         val currentColorIndex =
-                            viewModel.gradientColorList.indexOf(viewModel.defaultStoryBackgroundColorState.value)
+                            viewModel.gradientColorList.indexOf(viewModel.storyBackgroundColorState.value)
                         val nextColorIndex =
                             (currentColorIndex + 1) % viewModel.gradientColorList.size
-                        viewModel.defaultStoryBackgroundColorState.value =
+                        viewModel.storyBackgroundColorState.value =
                             viewModel.gradientColorList[nextColorIndex]
                     }
             )
@@ -366,7 +374,9 @@ fun BottomSection(viewModel: AddStoryViewModel, onMediaSelect: () -> Unit) {
                 modifier = Modifier
                     .size(48.dp)
                     .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
-                    .clickable {},
+                    .clickable {
+                        handleButtonClick(viewModel, context, currentUserFirebaseId)
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -387,6 +397,6 @@ private fun handleButtonClick(
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
-        //viewModel.uploadUserPost(currentUserFirebaseId)
+        viewModel.uploadUserStory(currentUserFirebaseId)
     }
 }

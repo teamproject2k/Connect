@@ -54,11 +54,9 @@ class AppModule {
     @Singleton
     fun getFireStore(): FirebaseFirestore = Firebase.firestore
 
-
     @Provides
     @Singleton
     fun getFirebaseStorage(): FirebaseStorage = Firebase.storage
-
 
     @Provides
     @Singleton
@@ -71,14 +69,12 @@ class AppModule {
         return database.build()
     }
 
-
     @Provides
     @Singleton
     fun getAuthRepository(
         firebaseAuth: FirebaseAuth
     ): IAuthenticationRepository =
         IAuthenticationRepositoryImpl(firebaseAuth)
-
 
     @Provides
     @Singleton
@@ -111,8 +107,9 @@ class AppModule {
     @Provides
     @Singleton
     fun getIStoryRepository(
-        firesStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
+        appDatabase: AppDatabase
     ): IStoryRepository =
-        IStoryRepositoryImpl(firesStore)
+        IStoryRepositoryImpl(fireStore, appDatabase)
 
 }

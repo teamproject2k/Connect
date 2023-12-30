@@ -13,7 +13,7 @@ import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
-import com.example.connect.presentation.ui.enums.PostTypeEnum
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.ui.models.VisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
@@ -95,24 +95,24 @@ class AddPostViewModel @Inject constructor(
                     when {
                         // If no media is selected, the post type is Text.
                         selectedMediaState.value == null -> {
-                            PostTypeEnum.Text.name
+                            MediaTypeEnum.Text.name
                         }
 
                         // If the selected media is an image, the post type is Image or TextImage.
                         selectedMediaState.value!!.mediaType.contains("image") -> {
                             if (captionTextState.value.isNotBlank()) {
-                                PostTypeEnum.TextImage.name
+                                MediaTypeEnum.TextImage.name
                             } else {
-                                PostTypeEnum.Image.name
+                                MediaTypeEnum.Image.name
                             }
                         }
 
                         // If the selected media is a video, the post type is Video or TextVideo.
                         selectedMediaState.value!!.mediaType.contains("video") -> {
                             if (captionTextState.value.isNotBlank()) {
-                                PostTypeEnum.TextVideo.name
+                                MediaTypeEnum.TextVideo.name
                             } else {
-                                PostTypeEnum.Video.name
+                                MediaTypeEnum.Video.name
                             }
                         }
 
