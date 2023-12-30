@@ -20,10 +20,13 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.models.VisibilityScope
+import com.google.auth.oauth2.GoogleCredentials
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.Instant
@@ -547,6 +550,26 @@ object FunctionHelper {
                 }
             }
         }
+    }
+
+    fun getAccessToken(context: Context): String {
+        var token = ""
+        try {
+            val fileInputStream = context.assets.open("serviceAccountKey.json")
+            val googleCredential = GoogleCredentials
+                .fromStream(fileInputStream)
+                .createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))
+            googleCredential.refreshIfExpired()
+            token = googleCredential.accessToken.tokenValue
+        } catch (exception: Exception) {
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ERROR_TAG,
+                "getAccessToken",
+                exception.localizedMessage ?: ""
+            )
+        }
+        return if (token.isNotBlank()) "Bearer $token" else ""
     }
 
     fun getStoryBackgroundColorList(): MutableList<MutableList<Color>> {

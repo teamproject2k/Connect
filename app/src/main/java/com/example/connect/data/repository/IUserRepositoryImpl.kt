@@ -734,4 +734,25 @@ class IUserRepositoryImpl @Inject constructor(
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
+
+    override suspend fun updateFCMTokenOnRemote(
+        currentUserFirebaseId: String,
+        fcmToken: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                .update(UserRemoteEntity::fcmToken.name, fcmToken).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun updateFCMTokenOnLocal(
+        currentUserFirebaseId: String,
+        updatedToken: String
+    ): Int {
+        return appDatabase.getUsersDao()
+            .updateFCMTokenOnLocal(currentUserFirebaseId, fcmToken = updatedToken)
+    }
 }

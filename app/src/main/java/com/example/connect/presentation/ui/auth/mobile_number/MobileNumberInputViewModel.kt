@@ -8,8 +8,11 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
+import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
+import com.example.connect.domain.useCase.fcm.UpdateFCMTokenOnRemoteUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
+import com.example.connect.domain.useCase.user.UpdateFcmTokenOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +29,10 @@ class MobileNumberInputViewModel @Inject constructor(
     private val sendOtpUseCase: SendOtpUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val updateDeviceIdOnDbUseCase: UpdateDeviceIdOnDbUseCase,
-    private val updateDeviceIdOnRemoteUseCase: UpdateDeviceIdOnRemoteUseCase
+    private val updateDeviceIdOnRemoteUseCase: UpdateDeviceIdOnRemoteUseCase,
+    private val getFCMTokenUseCase: GetFCMTokenUseCase,
+    private val updateFCMTokenOnRemoteUseCase: UpdateFCMTokenOnRemoteUseCase,
+    private val updateFcmTokenOnLocalUseCase: UpdateFcmTokenOnLocalUseCase
 ) :
     BaseViewModel() {
     val userMobileNumberState = mutableStateOf("")
@@ -97,6 +103,19 @@ class MobileNumberInputViewModel @Inject constructor(
                             updateDeviceIdOnDbUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
+                            )
+                        }
+                    }
+                    val tokenResponseState = getFCMTokenUseCase.invoke()
+                    if (tokenResponseState.status == RequestStatusEnum.Success && tokenResponseState.data != null) {
+                        val responseState = updateFCMTokenOnRemoteUseCase.invoke(
+                            userDetailsResponseState.data.firebaseUserId,
+                            tokenResponseState.data
+                        )
+                        if (responseState.status == RequestStatusEnum.Success) {
+                            updateFcmTokenOnLocalUseCase.invoke(
+                                userDetailsResponseState.data.firebaseUserId,
+                                tokenResponseState.data
                             )
                         }
                     }

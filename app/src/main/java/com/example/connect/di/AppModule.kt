@@ -161,10 +161,9 @@ class AppModule {
     @Provides
     @Singleton
     fun getIFCMRepository(
-        firesStore: FirebaseFirestore,
         firebaseMessaging: FirebaseMessaging,
         remoteRepository: IRemoteRepository
     ): IFCMRepository =
-        IFCMRepositoryImpl(firesStore, firebaseMessaging, remoteRepository)
+        IFCMRepositoryImpl(firebaseMessaging, remoteRepository)
 
 }
