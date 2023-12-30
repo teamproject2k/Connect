@@ -214,4 +214,12 @@ interface IUserRepository {
     suspend fun savePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
 
     suspend fun unSavePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
+
+
+    suspend fun updateFCMTokenOnRemote(
+        currentUserFirebaseId: String,
+        fcmToken: String
+    ): ResponseState<Nothing>
+
+    suspend fun updateFCMTokenOnLocal(currentUserFirebaseId: String, updatedToken: String): Int
 }

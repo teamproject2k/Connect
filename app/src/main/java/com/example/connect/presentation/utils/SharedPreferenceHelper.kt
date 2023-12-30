@@ -5,8 +5,9 @@ import javax.inject.Inject
 
 class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: SharedPreferences) {
     companion object {
-        private const val IsUserDetailEntered = "is_user_detail_entered"
-        private const val DeviceId = "device_id"
+        private const val IS_USER_DETAILS_ENTERED = "is_user_detail_entered"
+        private const val DEVICE_ID = "device_id"
+        private const val MOBILE_NUMBER = "mobile_number"
     }
 
 
@@ -17,10 +18,10 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
      * @property set Sets the value of the user detail entered.
      */
     var isUserDetailsEntered
-        get() = sharedPreferences.getBoolean(IsUserDetailEntered, false)
+        get() = sharedPreferences.getBoolean(IS_USER_DETAILS_ENTERED, false)
         set(isEntered) {
             val editor = sharedPreferences.edit()
-            editor.putBoolean(IsUserDetailEntered, isEntered)
+            editor.putBoolean(IS_USER_DETAILS_ENTERED, isEntered)
             editor.apply()
         }
 
@@ -32,10 +33,19 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
      * @property set Sets the value of the device id.
      */
     var deviceId
-        get() = sharedPreferences.getString(DeviceId, "")
+        get() = sharedPreferences.getString(DEVICE_ID, "")
         set(updatedDeviceId) {
             val editor = sharedPreferences.edit()
-            editor.putString(DeviceId, updatedDeviceId)
+            editor.putString(DEVICE_ID, updatedDeviceId)
+            editor.apply()
+        }
+
+
+    var mobileNumber
+        get() = sharedPreferences.getString(MOBILE_NUMBER, "") ?: ""
+        set(mobileNumber) {
+            val editor = sharedPreferences.edit()
+            editor.putString(MOBILE_NUMBER, mobileNumber)
             editor.apply()
         }
 }

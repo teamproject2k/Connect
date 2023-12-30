@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -277,6 +277,7 @@ private fun handleButtonClick(
         FunctionHelper.vibrateDevice(context)
     } else if (mobileNumberValidationResponseCode == 0) {
         if (context.isNetworkAvailable()) {
+            viewModel.sharedPreference.mobileNumber = viewModel.userMobileNumberState.value
             viewModel.sendOTP()
         } else {
             viewModel.snackBarMessageState.value =

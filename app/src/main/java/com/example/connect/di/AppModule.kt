@@ -4,15 +4,20 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import androidx.room.Room
+import com.chuckerteam.chucker.api.ChuckerCollector
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.connect.data.local_db.AppDatabase
+import com.example.connect.data.remote.IRemoteRepository
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
 import com.example.connect.data.repository.IDeviceIdRepositoryImpl
+import com.example.connect.data.repository.IFCMRepositoryImpl
 import com.example.connect.data.repository.IPostRepositoryImpl
 import com.example.connect.data.repository.IStoryRepositoryImpl
 import com.example.connect.data.repository.IUploadRepositoryImpl
 import com.example.connect.data.repository.IUserRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
 import com.example.connect.domain.repository.IDeviceIdRepository
+import com.example.connect.domain.repository.IFCMRepository
 import com.example.connect.domain.repository.IPostRepository
 import com.example.connect.domain.repository.IStoryRepository
 import com.example.connect.domain.repository.IUploadFileRepository
@@ -22,6 +27,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import dagger.Module
@@ -29,6 +35,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
@@ -53,6 +62,11 @@ class AppModule {
     @Provides
     @Singleton
     fun getFireStore(): FirebaseFirestore = Firebase.firestore
+
+    @Provides
+    @Singleton
+    fun getFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
+
 
     @Provides
     @Singleton
@@ -111,5 +125,43 @@ class AppModule {
         appDatabase: AppDatabase
     ): IStoryRepository =
         IStoryRepositoryImpl(fireStore, appDatabase)
+
+
+    @Provides
+    @Singleton
+    fun getOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val chuckerInterceptor = ChuckerInterceptor.Builder(context)
+            .collector(ChuckerCollector(context))
+            .alwaysReadResponseBody(true)
+            .build()
+        return OkHttpClient.Builder()
+            .addInterceptor(chuckerInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun getRetrofitInstance(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://fcm.googleapis.com/v1/projects/connect-d6237/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun getIRemoteRepository(
+        retrofit: Retrofit
+    ): IRemoteRepository = retrofit
+        .create(IRemoteRepository::class.java)
+
+    @Provides
+    @Singleton
+    fun getIFCMRepository(
+        firebaseMessaging: FirebaseMessaging,
+        remoteRepository: IRemoteRepository
+    ): IFCMRepository =
+        IFCMRepositoryImpl(firebaseMessaging, remoteRepository)
 
 }

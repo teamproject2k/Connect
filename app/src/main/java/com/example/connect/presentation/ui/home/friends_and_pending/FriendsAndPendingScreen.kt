@@ -118,7 +118,10 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
 }
 
 @Composable
-fun FriendsAndPendingTabs(viewModel: FriendsAndPendingViewModel, navigator: DestinationsNavigator) {
+private fun FriendsAndPendingTabs(
+    viewModel: FriendsAndPendingViewModel,
+    navigator: DestinationsNavigator
+) {
     val itemList = stringArrayResource(id = R.array.friends_tab_list)
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = viewModel.selectedTabIndexState.intValue) {

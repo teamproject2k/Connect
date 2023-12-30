@@ -1,9 +1,14 @@
 package com.example.connect.presentation.ui.home.base_screen
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -29,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +46,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.connect.R
@@ -48,6 +55,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
+import com.example.connect.presentation.services.fcm.NotificationTypesEnum
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -65,15 +73,41 @@ import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
 
+
 @Composable
-fun HomeActivityScreen() {
+fun HomeActivityScreen(screenToNavigate: String) {
     val viewModel = hiltViewModel<HomeSharedViewModel>()
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.getDeviceIdFromRemote(context)
     }
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ ->
+    }
+    CheckAndRequestNotificationPermission {
+        SideEffect {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     HandleGetDeviceIdFlow(viewModel, context)
-    HandleUserDetailsFlow(viewModel, context)
+    HandleUserDetailsFlow(viewModel, context, screenToNavigate)
+}
+
+@Composable
+private fun CheckAndRequestNotificationPermission(onPermissionRequest: @Composable () -> Unit) {
+    if (Build.VERSION.SDK_INT >= 33) {
+
+        val context = LocalContext.current
+        val permissionCheckResult =
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+            // do not do anything if not granted
+        } else {
+            // Request a permission
+            onPermissionRequest()
+        }
+    }
 }
 
 @Composable
@@ -141,7 +175,11 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
 }
 
 @Composable
-private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Context) {
+private fun HandleUserDetailsFlow(
+    viewModel: HomeSharedViewModel,
+    context: Context,
+    screenToNavigate: String
+) {
     var isExceptionHandled by rememberSaveable {
         mutableStateOf(false)
     }
@@ -154,7 +192,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(context, viewModel)
+            CreateUi(context, viewModel, screenToNavigate)
         }
 
         RequestStatusEnum.Exception -> {
@@ -186,7 +224,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
 
 @Composable
-private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
+private fun CreateUi(context: Context, viewModel: HomeSharedViewModel, screenToNavigate: String) {
     val selectedRouteState = rememberSaveable {
         mutableStateOf(HomeScreenDestination.route)
     }
@@ -275,7 +313,20 @@ private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
             DestinationsNavHost(
                 navGraph = NavGraphs.home,
                 engine = getAnimatedNavHostEngine(),
-                navController = navController
+                navController = navController,
+                startRoute = when (screenToNavigate) {
+                    NotificationTypesEnum.FriendRequestReceived.name -> {
+                        UserRequestScreenDestination
+                    }
+
+                    NotificationTypesEnum.FriendRequestAccepted.name -> {
+                        UserRequestScreenDestination
+                    }
+
+                    else -> {
+                        HomeScreenDestination
+                    }
+                }
             )
         }
     }

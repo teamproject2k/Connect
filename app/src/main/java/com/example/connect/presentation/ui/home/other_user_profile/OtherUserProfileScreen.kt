@@ -342,6 +342,7 @@ private fun ImageSection(
 private fun ActionButtonsSection(
     viewModel: OtherUserProfileViewModel
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -393,7 +394,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.CheckCircleOutline,
                     buttonText = stringResource(R.string.accept),
                     onButtonClick = {
-                        viewModel.acceptFriendRequest()
+                        viewModel.acceptFriendRequest(context = context)
                     }
                 )
                 SpacerWidth16()
@@ -417,7 +418,7 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.PersonAddAlt1,
                     buttonText = stringResource(R.string.add_friend),
                     onButtonClick = {
-                        viewModel.sendFriendRequest()
+                        viewModel.sendFriendRequest(context)
                     }
                 )
             }

@@ -30,4 +30,7 @@ interface IUsersDao {
     @RawQuery
     fun updateUserDetails(queryToExecute: SimpleSQLiteQuery): Long
 
+    @Query("UPDATE UsersDbEntity SET fcmToken = :fcmToken WHERE firebaseUserId = :currentUserFirebaseId")
+    fun updateFCMTokenOnLocal(currentUserFirebaseId: String, fcmToken: String): Int
+
 }

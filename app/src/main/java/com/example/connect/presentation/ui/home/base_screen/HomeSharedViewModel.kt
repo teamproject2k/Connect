@@ -27,7 +27,7 @@ class HomeSharedViewModel @Inject constructor(
     private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase
+    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
 ) :
     BaseViewModel() {
     lateinit var usersDetails: UsersBean
@@ -80,6 +80,7 @@ class HomeSharedViewModel @Inject constructor(
             }
         }
     }
+
 
     /**
      * Gets the user details from the database or the server.
