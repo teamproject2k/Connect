@@ -214,7 +214,6 @@ private fun MainContentSection(
 
 @Composable
 private fun StoryCaptionField(viewModel: AddStoryViewModel) {
-
     TransparentTextField(
         modifier = Modifier
             .offset {
@@ -321,7 +320,7 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
 }
 
 @Composable
-fun BottomSection(
+private fun BottomSection(
     currentUserFirebaseId: String,
     viewModel: AddStoryViewModel,
     onMediaSelect: () -> Unit

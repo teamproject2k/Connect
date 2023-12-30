@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.common
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,14 +20,19 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
 fun StoryItem(
     user: UsersBean,
-    stories: MutableList<StoryBean>
+    stories: ArrayList<StoryBean>,
+    navigator: DestinationsNavigator
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = Modifier.clickable {
+        navigator.navigate(ShowStoryScreenDestination(stories))
+    }, horizontalAlignment = Alignment.CenterHorizontally) {
         AsyncImage(
             modifier = Modifier
                 .padding(horizontal = 8.dp)

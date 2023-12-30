@@ -34,7 +34,7 @@ class IStoryRepositoryImpl @Inject constructor(
         return appDatabase.getStoryDao().insertStory(story.toStoryDbEntity())
     }
 
-    override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>> {
+    override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>> {
         return try {
             val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
                 .orderBy(StoryRemoteEntity::createdAt.name, Query.Direction.DESCENDING)
@@ -90,13 +90,13 @@ class IStoryRepositoryImpl @Inject constructor(
                     }
                 }
 
-                val storiesPerUser = mutableMapOf<String, MutableList<StoryBean>>()
+                val storiesPerUser = mutableMapOf<String, ArrayList<StoryBean>>()
 
                 storyList.forEach { story ->
                     val storyPoster = userList.find { it.firebaseUserId == story.fireBaseUserId }
                     if (storyPoster != null) {
                         val userStories =
-                            storiesPerUser.getOrPut(storyPoster.firebaseUserId) { mutableListOf() }
+                            storiesPerUser.getOrPut(storyPoster.firebaseUserId) { arrayListOf() }
                         userStories.add(story)
                         storiesPerUser[storyPoster.firebaseUserId] = userStories
                     }
