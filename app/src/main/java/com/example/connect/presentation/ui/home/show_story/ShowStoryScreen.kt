@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,10 +28,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,7 +48,6 @@ import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @HomeNavGraph
@@ -54,6 +58,12 @@ fun ShowStoryScreen(navigator: DestinationsNavigator, stories: ArrayList<StoryBe
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
 
+    if (viewModel.currentStoryState.intValue == -1) {
+        navigator.popBackStack()
+    } else if (viewModel.currentStoryState.intValue == stories.size) {
+        // TODO: 31/12/23 aryan Load next user's stories
+    }
+
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -62,7 +72,7 @@ fun ShowStoryScreen(navigator: DestinationsNavigator, stories: ArrayList<StoryBe
         ) {
             StoryProgressBar(stories.size)
             StoryContentSection(
-                stories[0],
+                stories[viewModel.currentStoryState.value],
                 viewModel,
                 navigator,
                 Modifier
@@ -90,7 +100,6 @@ fun StoryProgressBar(numberOfStories: Int) {
             launch {
                 for (i in 0..100 step 25) {
                     progress = i.toFloat()
-                    delay(5000L) // Wait for 5 seconds for each part
                 }
             }
         }
@@ -113,12 +122,16 @@ private fun StoryContentSection(
 ) {
     val context = LocalContext.current
     val storyGradientColors = story.backgroundGradientColor.split(",")
-
     val colorList = arrayListOf<Color>()
 
     storyGradientColors.forEach { colorString ->
         colorList.add(Color.valueOf(Color.parseColor(colorString)))
     }
+
+    var isWithinFirstHalf by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val threshold = screenWidth.value * 0.5f
 
     Box(
         modifier = modifier
@@ -126,6 +139,18 @@ private fun StoryContentSection(
 //            .background(
 //                brush = Brush.linearGradient(colorList.toList())
 //            )
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    isWithinFirstHalf = offset.x.dp < threshold.dp
+                }
+            }
+            .clickable {
+                if (isWithinFirstHalf) {
+                    viewModel.currentStoryState.value--
+                } else {
+                    viewModel.currentStoryState.value++
+                }
+            }
     ) {
         Box(
             modifier = Modifier
