@@ -1,5 +1,6 @@
 package com.example.connect.presentation.services.fcm
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -8,36 +9,26 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.connect.R
-import com.example.connect.domain.useCase.fcm.SendTokenToRemoteUseCase
 import com.example.connect.presentation.ui.home.base_screen.HomeActivity
 import com.example.connect.presentation.utils.NotificationsConstantHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 @AndroidEntryPoint
 open class MessagingService : FirebaseMessagingService() {
 
-    @Inject
-    protected lateinit var sendTokenToRemoteUseCase: SendTokenToRemoteUseCase
 
     @Inject
     protected lateinit var firebaseAuth: FirebaseAuth
 
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        val currentUser = firebaseAuth.currentUser ?: return
-        CoroutineScope(Dispatchers.IO).launch {
-            sendTokenToRemoteUseCase.invoke(currentUser.uid, token)
-        }
-    }
+    // no need to handle onNewToken as the firebase user is null after clear data so it will not send the token
+
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)

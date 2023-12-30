@@ -3,16 +3,21 @@ package com.example.connect.presentation.ui.home.base_screen
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
+import com.example.connect.domain.useCase.fcm.SendFCMUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.google.auth.oauth2.GoogleCredentials
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +32,8 @@ class HomeSharedViewModel @Inject constructor(
     private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase
+    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
+    private val sendFCMUseCase: SendFCMUseCase
 ) :
     BaseViewModel() {
     lateinit var usersDetails: UsersBean
@@ -49,36 +55,64 @@ class HomeSharedViewModel @Inject constructor(
     fun getDeviceIdFromRemote(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                val token = getAccessToken(context)
+                if (token.isNotBlank()) {
+                    sendFCMUseCase.invoke(
+                        token,
+                        emptyMap(),
+                        "fZUP5P_FQ3SQtYNl5-ZVyG:APA91bHQziGg5fnaRwULxeuAo3mIb_l75TEnmv5F9cbYBwEFAlq2DFxLbywXLNgI3LnQOrapnk7sKXq3V-KBxGYtt-Jh0KqKv5FtocFrS3AgMGy1pKZnOxdlr6bPxsN5qCKQnv0EiHeM"
+                    )
+                }
                 _deviceIdStateFlow.value = ResponseState.loading()
                 // Get the current user's Firebase ID.
-                val firebaseId = fireBaseAuth.currentUser?.uid
-                // If the Firebase ID is not null,
-                if (firebaseId != null) {
-                    // Get the device ID from the remote server using the Firebase ID.
-                    val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
-                    // If the response state is successful,
-                    if (responseState.status == RequestStatusEnum.Success) {
-                        // If the device ID from the remote server does not match the device ID in the shared preferences,
-                        if (sharedPreference.deviceId != responseState.data) {
-                            // Set the device ID state flow to error with the NewLogin error code.
-                            _deviceIdStateFlow.value =
-                                ResponseState.error(FirebaseErrorCodes.NEW_LOGIN)
-                        } else {
-                            // Get the user details.
-                            getUserDetails(context)
-                            // Set the device ID state flow to success with null data.
-                            _deviceIdStateFlow.value = ResponseState.success(null)
-                        }
-                    } else {
-                        // Set the device ID state flow to error with the response state's message.
-                        _deviceIdStateFlow.value = ResponseState.error(responseState.message ?: "")
-                    }
-                } else {
-                    // Set the device ID state flow to error with the NoUserFound error code.
-                    _deviceIdStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
-                }
+//                val firebaseId = fireBaseAuth.currentUser?.uid
+//                // If the Firebase ID is not null,
+//                if (firebaseId != null) {
+//                    // Get the device ID from the remote server using the Firebase ID.
+//                    val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
+//                    // If the response state is successful,
+//                    if (responseState.status == RequestStatusEnum.Success) {
+//                        // If the device ID from the remote server does not match the device ID in the shared preferences,
+//                        if (sharedPreference.deviceId != responseState.data) {
+//                            // Set the device ID state flow to error with the NewLogin error code.
+//                            _deviceIdStateFlow.value =
+//                                ResponseState.error(FirebaseErrorCodes.NEW_LOGIN)
+//                        } else {
+//                            // Get the user details.
+//                            getUserDetails(context)
+//                            // Set the device ID state flow to success with null data.
+//                            _deviceIdStateFlow.value = ResponseState.success(null)
+//                        }
+//                    } else {
+//                        // Set the device ID state flow to error with the response state's message.
+//                        _deviceIdStateFlow.value = ResponseState.error(responseState.message ?: "")
+//                    }
+//                } else {
+//                    // Set the device ID state flow to error with the NoUserFound error code.
+//                    _deviceIdStateFlow.value = ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+//                }
             }
         }
+    }
+
+    private fun getAccessToken(context: Context): String {
+        var token = ""
+        try {
+            val fileInputStream = context.assets.open("serviceAccountKey.json")
+            val googleCredential = GoogleCredentials
+                .fromStream(fileInputStream)
+                .createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))
+            googleCredential.refreshIfExpired()
+            token = googleCredential.accessToken.tokenValue
+        } catch (exception: Exception) {
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ConstantsHelper.ERROR_TAG,
+                "getAccessToken",
+                exception.localizedMessage ?: ""
+            )
+        }
+        return if (token.isNotBlank()) "Bearer $token" else ""
     }
 
     /**

@@ -10,4 +10,11 @@ interface IFCMRepository {
 
 
     suspend fun getFCMToken(): ResponseState<String>
+
+
+    suspend fun sendFCMMessage(
+        token: String,
+        data: Map<String, Any>,
+        sendTo: String
+    ): ResponseState<Nothing>
 }
