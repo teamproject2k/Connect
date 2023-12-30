@@ -8,7 +8,7 @@ class SendFCMUseCase @Inject constructor(private val repository: IFCMRepository)
 
     suspend fun invoke(
         token: String,
-        data: Map<String, Any>,
+        data: Map<String, String>,
         sendTo: String
     ): ResponseState<Nothing> {
         return repository.sendFCMMessage(token, data, sendTo)

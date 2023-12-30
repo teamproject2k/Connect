@@ -49,7 +49,7 @@ open class MessagingService : FirebaseMessagingService() {
                     )
                 }
 
-                NotificationTypesEnum.FriendRequestReceived.name -> {
+                NotificationTypesEnum.FriendRequestAccepted.name -> {
                     val message =
                         getString(
                             R.string.accepted_your_friend_request,

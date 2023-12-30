@@ -9,7 +9,7 @@ interface IFCMRepository {
 
     suspend fun sendFCMMessage(
         token: String,
-        data: Map<String, Any>,
+        data: Map<String, String>,
         sendTo: String
     ): ResponseState<Nothing>
 }
