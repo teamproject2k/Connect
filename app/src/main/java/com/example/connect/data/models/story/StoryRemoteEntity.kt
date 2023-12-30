@@ -12,6 +12,8 @@ data class StoryRemoteEntity(
     val textOffset: String,
     val backgroundGradientColor: String
 ) {
+    constructor() : this("", "", "", "", 0, "", "", "")
+
     fun toStoryBean(): StoryBean {
         return StoryBean(
             id,

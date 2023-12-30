@@ -52,11 +52,9 @@ interface IPostRepository {
         fireBaseId: String
     ): ResponseState<String>
 
-
     suspend fun getAllPostsWithUserDetailsFromRemote(
         currentUserFirebaseId: String
     ): ResponseState<Pair<List<PostBean>, List<UsersBean>>>
-
 
     suspend fun addLikeOf(
         userFirebaseId: String,
@@ -67,6 +65,5 @@ interface IPostRepository {
         userFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
-
 
 }

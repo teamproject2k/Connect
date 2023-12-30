@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.ConstantsHelper
 
 @Composable
 fun StoryItem(
-    user: UsersBean
+    user: UsersBean,
+    stories: MutableList<StoryBean>
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AsyncImage(

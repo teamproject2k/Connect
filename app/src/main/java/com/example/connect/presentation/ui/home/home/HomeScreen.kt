@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.chat.ChatActivity
@@ -89,32 +90,36 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
-                AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
-                    IconButton(onClick = {
-                        navigator.navigate(AddStoryScreenDestination())
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.AddCircle,
-                            contentDescription = stringResource(R.string.add_story)
-                        )
-                    }
-                    IconButton(onClick = {
-                        val intent = Intent(context, ChatActivity::class.java)
-                        activity.startActivity(intent)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Chat,
-                            contentDescription = stringResource(id = R.string.chat)
-                        )
-                    }
-                })
+            AppTopAppBar(title = stringResource(id = R.string.app_name), actions = {
+                IconButton(onClick = {
+                    navigator.navigate(AddStoryScreenDestination())
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.AddCircle,
+                        contentDescription = stringResource(R.string.add_story)
+                    )
+                }
+                IconButton(onClick = {
+                    val intent = Intent(context, ChatActivity::class.java)
+                    activity.startActivity(intent)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Chat,
+                        contentDescription = stringResource(id = R.string.chat)
+                    )
+                }
+            })
         }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
-            StorySection(homeSharedViewModel.usersDetails)
+            HandleStoryDetailsWithUserDetails(
+                viewModel = viewModel,
+                homeSharedViewModel.usersDetails,
+                navigator
+            )
             DividerLightGrayAlpha50()
             HandlePostDetailsWithUserDetails(
                 viewModel = viewModel,
@@ -131,6 +136,9 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
+        viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+    }
+    LaunchedEffect(Unit) {
         viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
     }
     HandleLikeUnlikeState(viewModel = viewModel)
@@ -138,12 +146,66 @@ fun HomeScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun StorySection(usersDetails: UsersBean) {
-    LazyRow(modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 16.dp, horizontal = 4.dp)) {
-        items(12) {
-            StoryItem(user = usersDetails)
+private fun HandleStoryDetailsWithUserDetails(
+    viewModel: HomeViewModel,
+    currentUsersBean: UsersBean,
+    navigator: DestinationsNavigator
+) {
+    val storyDetailsWithUserDetailsState = viewModel.storyDetailsStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (storyDetailsWithUserDetailsState.status) {
+        RequestStatusEnum.Loading -> {
+            PostListLoadingSection()
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Success -> {
+            if (storyDetailsWithUserDetailsState.data != null) {
+                StoryUiSection(
+                    storiesPerUser = storyDetailsWithUserDetailsState.data,
+                    currentUsersBean = currentUsersBean,
+                    navigator = navigator,
+                    viewModel = viewModel
+                )
+            }
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    storyDetailsWithUserDetailsState.message ?: stringResource(
+                        id = R.string.some_error_occurred
+                    )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun StoryUiSection(
+    storiesPerUser: Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>,
+    currentUsersBean: UsersBean,
+    viewModel: HomeViewModel,
+    navigator: DestinationsNavigator
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 4.dp)
+    ) {
+        items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
+            val storyPoster = storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
+            val storiesPosted = storiesPerUser.first[firebaseUserId]
+            if (storyPoster != null && storiesPosted != null) {
+                StoryItem(user = storyPoster, storiesPosted)
+            }
         }
     }
 }

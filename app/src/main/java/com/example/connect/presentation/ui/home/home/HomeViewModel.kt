@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.home.home
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -11,6 +12,7 @@ import com.example.connect.domain.useCase.posts.GetPostDetailsWithUserDetailsUse
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
+import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserDetailsUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val postDetailsWithUserDetailsUseCase: GetPostDetailsWithUserDetailsUseCase,
+    private val storyDetailsWithUserDetailsUseCase: GetStoryDetailsWithUserDetailsUseCase,
     private val addLikeUseCase: AddLikeUseCase,
     private val removeLikeUseCase: RemoveLikeUseCase,
     private val savePostUseCase: SavePostUseCase,
@@ -33,6 +36,11 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
 
     val postDetailsStateFlow: StateFlow<ResponseState<Pair<List<PostBean>, List<UsersBean>>>> get() = _postDetailsStateFlow
+
+    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>>> =
+        MutableStateFlow(ResponseState.none())
+
+    val storyDetailsStateFlow: StateFlow<ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>>> get() = _storyDetailsStateFlow
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
@@ -46,6 +54,15 @@ class HomeViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    fun getStoryDetailsWithUserDetails(currentUserFirebaseId: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _storyDetailsStateFlow.value = ResponseState.loading()
+                _storyDetailsStateFlow.value =
+                    storyDetailsWithUserDetailsUseCase.invoke(currentUserFirebaseId)
+            }
+        }
+    }
 
     fun getPostDetailsWithUserDetails(currentUserFirebaseId: String) {
         viewModelScope.launch {
