@@ -319,7 +319,7 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
 }
 
 @Composable
-fun BottomSection(
+private fun BottomSection(
     currentUserFirebaseId: String,
     viewModel: AddStoryViewModel,
     onMediaSelect: () -> Unit

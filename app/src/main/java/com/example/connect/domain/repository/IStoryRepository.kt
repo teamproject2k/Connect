@@ -9,5 +9,5 @@ interface IStoryRepository {
     suspend fun addStoryToDb(story: StoryBean): Long
     suspend fun getAllStoriesWithUserDetailsFromRemote(
         currentUserFirebaseId: String
-    ): ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>>
+    ): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>>
 }

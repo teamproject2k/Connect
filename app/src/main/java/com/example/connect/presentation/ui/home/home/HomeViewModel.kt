@@ -37,10 +37,10 @@ class HomeViewModel @Inject constructor(
 
     val postDetailsStateFlow: StateFlow<ResponseState<Pair<List<PostBean>, List<UsersBean>>>> get() = _postDetailsStateFlow
 
-    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>>> =
+    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
 
-    val storyDetailsStateFlow: StateFlow<ResponseState<Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>>> get() = _storyDetailsStateFlow
+    val storyDetailsStateFlow: StateFlow<ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>>> get() = _storyDetailsStateFlow
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())

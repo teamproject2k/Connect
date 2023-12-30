@@ -120,7 +120,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 homeSharedViewModel.usersDetails,
                 navigator
             )
-            DividerLightGrayAlpha50()
             HandlePostDetailsWithUserDetails(
                 viewModel = viewModel,
                 homeSharedViewModel.usersDetails,
@@ -189,24 +188,27 @@ private fun HandleStoryDetailsWithUserDetails(
 }
 
 @Composable
-fun StoryUiSection(
-    storiesPerUser: Pair<MutableMap<String, MutableList<StoryBean>>, MutableList<UsersBean>>,
+private fun StoryUiSection(
+    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>,
     currentUsersBean: UsersBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 4.dp)
-    ) {
-        items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
-            val storyPoster = storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
-            val storiesPosted = storiesPerUser.first[firebaseUserId]
-            if (storyPoster != null && storiesPosted != null) {
-                StoryItem(user = storyPoster, storiesPosted)
+    if (storiesPerUser.first.isNotEmpty()) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 4.dp)
+        ) {
+            items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
+                val storyPoster = storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
+                val storiesPosted = storiesPerUser.first[firebaseUserId]
+                if (storyPoster != null && storiesPosted != null) {
+                    StoryItem(user = storyPoster, storiesPosted, navigator)
+                }
             }
         }
+        DividerLightGrayAlpha50()
     }
 }
 
@@ -252,7 +254,7 @@ private fun HandlePostDetailsWithUserDetails(
 }
 
 @Composable
-fun PostListLoadingSection() {
+private fun PostListLoadingSection() {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(4) {
             UserDetailsSectionLoading(
