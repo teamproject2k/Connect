@@ -28,7 +28,6 @@ data class StoryBean(
 
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(
-            id,
             fireBaseUserId,
             mediaUrl,
             caption,

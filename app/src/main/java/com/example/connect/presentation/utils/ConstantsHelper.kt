@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 
 object ConstantsHelper {
     const val MEDIA_TYPE_IMAGE: String = "image"
+    const val MEDIA_TYPE_VIDEO: String = "video"
     const val OTP_TIMEOUT_TIME: Long = 30
     const val OTP_CHAR_COUNT = 6
     const val NAVIGATION_ANIMATION_DURATION = 300

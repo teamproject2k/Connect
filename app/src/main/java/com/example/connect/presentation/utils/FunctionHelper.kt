@@ -572,6 +572,11 @@ object FunctionHelper {
         return if (token.isNotBlank()) "Bearer $token" else ""
     }
 
+
+    fun getMediaType(contentResolver: ContentResolver, uri: Uri): String? {
+        return contentResolver.getType(uri)?.substringBefore("/")
+    }
+
     fun getStoryBackgroundColorList(): MutableList<MutableList<Color>> {
         val gradientColorList = mutableListOf<MutableList<Color>>()
         gradientColorList.add(mutableListOf(Color.Black, Color(0xFF262626)))

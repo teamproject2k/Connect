@@ -19,11 +19,11 @@ class IStoryRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore, private val appDatabase: AppDatabase
 ) :
     IStoryRepository {
-    override suspend fun addStoryToRemote(story: StoryBean): ResponseState<Nothing> {
+    override suspend fun addStoryToRemote(story: StoryBean): ResponseState<String> {
         return try {
-            fireStore.collection(FirebaseConstants.STORY_KEY).document()
-                .set(story.toStoryRemoteEntity()).await()
-            ResponseState.success(null)
+            val response = fireStore.collection(FirebaseConstants.STORY_KEY)
+                .add(story.toStoryRemoteEntity()).await()
+            ResponseState.success(response.id)
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
@@ -50,7 +50,7 @@ class IStoryRepositoryImpl @Inject constructor(
                     if (document.exists()) {
                         val story = document.toObject(StoryRemoteEntity::class.java)
                         if (story != null) {
-                            storyList.add(story.toStoryBean())
+                            storyList.add(story.toStoryBean(document.id))
                         }
                     }
                 }

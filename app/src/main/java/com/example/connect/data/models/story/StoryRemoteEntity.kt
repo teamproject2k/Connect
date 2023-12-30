@@ -3,7 +3,6 @@ package com.example.connect.data.models.story
 import com.example.connect.domain.models.StoryBean
 
 data class StoryRemoteEntity(
-    val id: String,
     val fireBaseUserId: String,
     val mediaUrl: String,
     val caption: String,
@@ -12,11 +11,11 @@ data class StoryRemoteEntity(
     val textOffset: String,
     val backgroundGradientColor: String
 ) {
-    constructor() : this("", "", "", "", 0, "", "", "")
+    constructor() : this("", "", "", 0, "", "", "")
 
-    fun toStoryBean(): StoryBean {
+    fun toStoryBean(storyId: String): StoryBean {
         return StoryBean(
-            id,
+            storyId,
             fireBaseUserId,
             mediaUrl,
             caption,

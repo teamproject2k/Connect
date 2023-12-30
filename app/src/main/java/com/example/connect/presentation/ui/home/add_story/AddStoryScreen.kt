@@ -94,10 +94,9 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val snackBarHostState = SnackbarHostState()
-
     val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
-        val mediaType = contentResolver.getType(uri)?.substringBefore("/")
+        val mediaType = FunctionHelper.getMediaType(contentResolver, uri)
         if (mediaType != null) {
             viewModel.selectedMediaState.value =
                 MediaData(uri, mediaType)
@@ -214,7 +213,6 @@ private fun MainContentSection(
 
 @Composable
 private fun StoryCaptionField(viewModel: AddStoryViewModel) {
-
     TransparentTextField(
         modifier = Modifier
             .offset {
@@ -254,13 +252,13 @@ private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
     val selectedMedia = viewModel.selectedMediaState.value
     if (selectedMedia != null) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            if (selectedMedia.mediaType == "image") {
+            if (selectedMedia.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
                 ShowSelectedImage(selectedMediaData = selectedMedia) {
                     viewModel.selectedMediaState.value = null
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.some_error_occurred)
                 }
-            } else {
+            } else if (selectedMedia.mediaType == ConstantsHelper.MEDIA_TYPE_VIDEO) {
                 ShowSelectedVideo(selectedMediaData = selectedMedia, context = context)
             }
             Box(

@@ -5,7 +5,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 
 interface IStoryRepository {
-    suspend fun addStoryToRemote(story: StoryBean): ResponseState<Nothing>
+    suspend fun addStoryToRemote(story: StoryBean): ResponseState<String>
     suspend fun addStoryToDb(story: StoryBean): Long
     suspend fun getAllStoriesWithUserDetailsFromRemote(
         currentUserFirebaseId: String

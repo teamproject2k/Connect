@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -18,6 +19,7 @@ import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.models.MediaData
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.toHexString
 import javax.inject.Inject
 
 @SuppressLint("StateNameRule")
@@ -60,7 +63,6 @@ class AddStoryViewModel @Inject constructor(
                 _uploadStoryStateFlow.value = ResponseState.loading()
                 // Initialize the file URL to an empty string.
                 var fileUrl = ""
-
                 // Check if the user has selected any media.
                 if (selectedMediaState.value != null) {
                     // Upload the selected media to the remote server.
@@ -91,7 +93,7 @@ class AddStoryViewModel @Inject constructor(
                         }
 
                         // If the selected media is an image, the story type is Image or TextImage.
-                        selectedMediaState.value!!.mediaType.contains("image") -> {
+                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_IMAGE) -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextImage.name
                             } else {
@@ -100,14 +102,13 @@ class AddStoryViewModel @Inject constructor(
                         }
 
                         // If the selected media is a video, the story type is Video or TextVideo.
-                        selectedMediaState.value!!.mediaType.contains("video") -> {
+                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_VIDEO) -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextVideo.name
                             } else {
                                 MediaTypeEnum.Video.name
                             }
                         }
-
                         // Otherwise, the story type is invalid.
                         else -> {
                             ""
@@ -116,7 +117,9 @@ class AddStoryViewModel @Inject constructor(
 
                 // Create a comma separated string from the caption offset values
                 val captionOffset = "$captionOffsetX,$captionOffsetY"
-
+                val colorGradient = storyBackgroundColorState.value.joinToString {
+                    it.toArgb().toHexString()
+                }
                 // Create a StoryBean object with the story details.
                 val storyDetails = StoryBean(
                     "",
@@ -126,7 +129,7 @@ class AddStoryViewModel @Inject constructor(
                     FunctionHelper.getCurrentTimeInMillis(),
                     storyType,
                     captionOffset,
-                    storyBackgroundColorState.value.toString()
+                    colorGradient
                 )
 
                 // Upload the story details to the remote server.
