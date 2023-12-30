@@ -48,6 +48,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
+import com.example.connect.presentation.services.fcm.NotificationTypesEnum
 import com.example.connect.presentation.ui.NavGraphs
 import com.example.connect.presentation.ui.common.LoaderFullScreen
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -66,14 +67,14 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.utils.route
 
 @Composable
-fun HomeActivityScreen() {
+fun HomeActivityScreen(screenToNavigate: String) {
     val viewModel = hiltViewModel<HomeSharedViewModel>()
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.getDeviceIdFromRemote(context)
     }
     HandleGetDeviceIdFlow(viewModel, context)
-    HandleUserDetailsFlow(viewModel, context)
+    HandleUserDetailsFlow(viewModel, context, screenToNavigate)
 }
 
 @Composable
@@ -141,7 +142,11 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
 }
 
 @Composable
-private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Context) {
+private fun HandleUserDetailsFlow(
+    viewModel: HomeSharedViewModel,
+    context: Context,
+    screenToNavigate: String
+) {
     var isExceptionHandled by rememberSaveable {
         mutableStateOf(false)
     }
@@ -154,7 +159,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(context, viewModel)
+            CreateUi(context, viewModel, screenToNavigate)
         }
 
         RequestStatusEnum.Exception -> {
@@ -186,7 +191,7 @@ private fun HandleUserDetailsFlow(viewModel: HomeSharedViewModel, context: Conte
 
 
 @Composable
-private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
+private fun CreateUi(context: Context, viewModel: HomeSharedViewModel, screenToNavigate: String) {
     val selectedRouteState = rememberSaveable {
         mutableStateOf(HomeScreenDestination.route)
     }
@@ -275,7 +280,20 @@ private fun CreateUi(context: Context, viewModel: HomeSharedViewModel) {
             DestinationsNavHost(
                 navGraph = NavGraphs.home,
                 engine = getAnimatedNavHostEngine(),
-                navController = navController
+                navController = navController,
+                startRoute = when (screenToNavigate) {
+                    NotificationTypesEnum.FriendRequestReceived.name -> {
+                        UserRequestScreenDestination
+                    }
+
+                    NotificationTypesEnum.FriendRequestAccepted.name -> {
+                        UserRequestScreenDestination
+                    }
+
+                    else -> {
+                        HomeScreenDestination
+                    }
+                }
             )
         }
     }
