@@ -156,19 +156,17 @@ private fun HandleStoryDetailsWithUserDetails(
     }
     when (storyDetailsWithUserDetailsState.status) {
         RequestStatusEnum.Loading -> {
-            PostListLoadingSection()
+            // TODO: 31/12/23 cd-user  create ui for story loading
             isExceptionHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            if (storyDetailsWithUserDetailsState.data != null) {
-                StoryUiSection(
-                    storiesPerUser = storyDetailsWithUserDetailsState.data,
-                    currentUsersBean = currentUsersBean,
-                    navigator = navigator,
-                    viewModel = viewModel
-                )
-            }
+            StoryUiSection(
+                storiesPerUser = storyDetailsWithUserDetailsState.data,
+                currentUsersBean = currentUsersBean,
+                navigator = navigator,
+                viewModel = viewModel
+            )
         }
 
         RequestStatusEnum.Exception -> {
@@ -189,26 +187,30 @@ private fun HandleStoryDetailsWithUserDetails(
 
 @Composable
 private fun StoryUiSection(
-    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>,
+    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>?,
     currentUsersBean: UsersBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
+    if (storiesPerUser == null) return
     if (storiesPerUser.first.isNotEmpty()) {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 4.dp)
-        ) {
-            items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
-                val storyPoster = storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
-                val storiesPosted = storiesPerUser.first[firebaseUserId]
-                if (storyPoster != null && storiesPosted != null) {
-                    StoryItem(user = storyPoster, storiesPosted, navigator)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 4.dp)
+            ) {
+                items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
+                    val storyPoster =
+                        storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
+                    val storiesPosted = storiesPerUser.first[firebaseUserId]
+                    if (storyPoster != null && storiesPosted != null) {
+                        StoryItem(user = storyPoster, storiesPosted, navigator)
+                    }
                 }
             }
+            DividerLightGrayAlpha50()
         }
-        DividerLightGrayAlpha50()
     }
 }
 
