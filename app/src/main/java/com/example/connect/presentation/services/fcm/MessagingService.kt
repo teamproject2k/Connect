@@ -96,6 +96,7 @@ open class MessagingService : FirebaseMessagingService() {
         val notificationBuilder: NotificationCompat.Builder =
             NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSound(defaultSoundUri)
