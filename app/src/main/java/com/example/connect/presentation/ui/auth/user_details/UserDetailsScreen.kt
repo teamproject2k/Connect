@@ -51,6 +51,7 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.common.AppOutlinedTextField
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -286,7 +287,9 @@ private fun HandleAddUserState(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    if (uiState.message.isNullOrBlank()) context.getString(R.string.something_went_wrong)
+                    if (uiState.message.isNullOrBlank() || uiState.message == FirebaseErrorCodes.FCM_TOKEN_NOT_GENERATED) context.getString(
+                        R.string.something_went_wrong
+                    )
                     else uiState.message.toString()
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
                 LoggingHelper.logData(

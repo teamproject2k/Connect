@@ -8,6 +8,8 @@ import com.example.connect.presentation.utils.FunctionHelper
 data class UserRemoteEntity(
     val firebaseUserId: String,
     val connectUserId: String,
+    val fcmToken: String,
+    val mobileNumber: String,
     val name: String,
     val gender: String,
     val dateOfBirth: Long,
@@ -23,7 +25,7 @@ data class UserRemoteEntity(
     val friendListVisibility: String = VisibilityScopeEnum.Public.name,
     val savedPosts: ArrayList<String> = arrayListOf()
 ) {
-    constructor() : this("1", "", "", "", -1, 0, 0, "", "")
+    constructor() : this("1", "", "", "", "", "", -1, 0, 0, "", "")
 
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()
@@ -52,6 +54,8 @@ data class UserRemoteEntity(
         return UsersBean(
             firebaseUserId,
             connectUserId,
+            fcmToken,
+            mobileNumber,
             FunctionHelper.getFormattedDisplayName(name),
             gender,
             dateOfBirth,

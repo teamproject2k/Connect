@@ -80,6 +80,7 @@ dependencies {
     implementation(Dependencies.firebaseAuth)
     implementation(Dependencies.firebaseFirestore)
     implementation(Dependencies.firebaseStorage)
+    implementation("com.google.firebase:firebase-messaging")
     //coil
     implementation(Dependencies.coil)
     implementation("io.coil-kt:coil-video:2.4.0")

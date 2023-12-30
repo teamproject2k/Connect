@@ -11,6 +11,8 @@ data class UsersDbEntity(
     @PrimaryKey
     val firebaseUserId: String,
     val connectUserId: String,
+    val fcmToken: String,
+    val mobileNumber: String,
     val name: String,
     val gender: String,
     val dateOfBirth: Long,
@@ -53,6 +55,8 @@ data class UsersDbEntity(
         return UsersBean(
             firebaseUserId,
             connectUserId,
+            fcmToken,
+            mobileNumber,
             FunctionHelper.getFormattedDisplayName(name),
             gender,
             dateOfBirth,

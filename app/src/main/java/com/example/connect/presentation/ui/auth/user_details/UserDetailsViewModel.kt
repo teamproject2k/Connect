@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class UserDetailsViewModel @Inject constructor(
     private val addUserToRemoteUseCase: AddUserToRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getUsersFromNameUseCase: GetUsersFromNameUseCaseFromRemote
+    private val getUsersFromNameUseCase: GetUsersFromNameUseCaseFromRemote,
+    private val getFCMTokenUseCase: GetFCMTokenUseCase
 ) :
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
@@ -61,34 +63,43 @@ class UserDetailsViewModel @Inject constructor(
                 if (currentUserByNameResponseState.status != RequestStatusEnum.Exception && sharedPreference.deviceId != null) {
                     // Get the current time in milliseconds.
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
+                    val fcmTokenResponseState = getFCMTokenUseCase.invoke()
+                    if (fcmTokenResponseState.status == RequestStatusEnum.Success && !fcmTokenResponseState.data.isNullOrBlank()) {
+                        // Create a user object with the user's information.
+                        val user = UsersBean(
+                            fireBaseAuth.currentUser!!.uid,
+                            getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
+                            fcmTokenResponseState.data,
+                            sharedPreference.mobileNumber,
+                            formattedUserName,
+                            selectedGenderState.value,
+                            selectedDOBState.longValue,
+                            createdDate,
+                            createdDate,
+                            sharedPreference.deviceId!!,
+                            "Connect User",
+                            genderVisibility = VisibilityScopeEnum.Public.name,
+                            dobVisibility = VisibilityScopeEnum.Public.name,
+                            friendListVisibility = VisibilityScopeEnum.Public.name
+                        )
 
-                    // Create a user object with the user's information.
-                    val user = UsersBean(
-                        fireBaseAuth.currentUser!!.uid,
-                        getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
-                        formattedUserName,
-                        selectedGenderState.value,
-                        selectedDOBState.longValue,
-                        createdDate,
-                        createdDate,
-                        sharedPreference.deviceId!!,
-                        "Connect User",
-                        genderVisibility = VisibilityScopeEnum.Public.name,
-                        dobVisibility = VisibilityScopeEnum.Public.name,
-                        friendListVisibility = VisibilityScopeEnum.Public.name
-                    )
+                        // Add the user to the remote database.
+                        val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
 
-                    // Add the user to the remote database.
-                    val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
+                        // Check if the response is successful.
+                        if (userDetailsResponseState.status == RequestStatusEnum.Success) {
+                            // Add the user to the local database.
+                            addUserToDbUseCase.invoke(user)
+                            sharedPreference.mobileNumber = ""
+                        }
 
-                    // Check if the response is successful.
-                    if (userDetailsResponseState.status == RequestStatusEnum.Success) {
-                        // Add the user to the local database.
-                        addUserToDbUseCase.invoke(user)
+                        // Set the response state of the user profile creation process.
+                        _addUserStateFlow.value = userDetailsResponseState
+                    } else {
+                        // Set the error state of the user profile creation process.
+                        _addUserStateFlow.value =
+                            ResponseState.error(fcmTokenResponseState.message ?: "")
                     }
-
-                    // Set the response state of the user profile creation process.
-                    _addUserStateFlow.value = userDetailsResponseState
                 } else {
                     // Set the error state of the user profile creation process.
                     _addUserStateFlow.value =

@@ -10,6 +10,8 @@ import kotlinx.parcelize.Parcelize
 data class UsersBean(
     val firebaseUserId: String,
     val connectUserId: String,
+    val fcmToken: String,
+    val mobileNumber: String,
     val name: String,
     val gender: String,
     val dateOfBirth: Long,
@@ -45,6 +47,8 @@ data class UsersBean(
         return UserRemoteEntity(
             firebaseUserId,
             connectUserId,
+            fcmToken,
+            mobileNumber,
             name,
             gender,
             dateOfBirth,
@@ -79,6 +83,8 @@ data class UsersBean(
         return UsersDbEntity(
             firebaseUserId,
             connectUserId,
+            fcmToken,
+            mobileNumber,
             name,
             gender,
             dateOfBirth,
