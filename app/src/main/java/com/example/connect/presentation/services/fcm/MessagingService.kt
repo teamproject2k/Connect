@@ -34,7 +34,7 @@ open class MessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         val dataMessage = remoteMessage.data
         if (dataMessage.isNotEmpty()) {
-            when (val type = dataMessage[NotificationTypesEnum::class.simpleName]) {
+            when (val type = dataMessage[NotificationTypesEnum::name.name]) {
                 NotificationTypesEnum.FriendRequestReceived.name -> {
                     val message =
                         getString(

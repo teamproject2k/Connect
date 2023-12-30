@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.other_user_profile
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.fcm.SendFCMUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
@@ -23,7 +25,9 @@ import com.example.connect.domain.useCase.user.UpdateOtherUserStatusOnDbUseCase
 import com.example.connect.domain.useCase.user.WithdrawFriendRequestUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.services.fcm.NotificationTypesEnum
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.NotificationsConstantHelper
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +52,8 @@ class OtherUserProfileViewModel @Inject constructor(
     private val unfriendAndBlockUserUseCase: UnfriendAndBlockUserUseCase,
     private val unfriendUserUseCase: UnfriendUserUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val liveUserObserverFromRemoteUseCase: LiveUserObserverFromRemoteUseCase
+    private val liveUserObserverFromRemoteUseCase: LiveUserObserverFromRemoteUseCase,
+    private val sendFCMUseCase: SendFCMUseCase
 ) : BaseViewModel() {
     var isDataInitialized = false
     val snackBarMessageState = mutableStateOf("")
@@ -182,7 +187,7 @@ class OtherUserProfileViewModel @Inject constructor(
     /**
      * Sends a friend request to the required user.
      */
-    fun sendFriendRequest() {
+    fun sendFriendRequest(context: Context) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Switch to the IO dispatcher.
@@ -209,6 +214,21 @@ class OtherUserProfileViewModel @Inject constructor(
                         currentUserState.value.firebaseUserId,
                         // Get the current user's otherUsersStatus from the currentUserState.
                         currentUserState.value.toUserDbEntity().otherUsersStatus
+                    )
+                    val data = hashMapOf(
+                        Pair(
+                            NotificationsConstantHelper.MESSAGE,
+                            currentUserState.value.name
+                        ),
+                        Pair(
+                            NotificationTypesEnum::name.name,
+                            NotificationTypesEnum.FriendRequestReceived.name
+                        )
+                    )
+                    sendFCMUseCase.invoke(
+                        FunctionHelper.getAccessToken(context),
+                        data,
+                        requiredUserState.value.fcmToken
                     )
                     // Set the sendFriendRequestStateFlow to the responseState.
                     _sendFriendRequestStateFlow.value = responseState
@@ -269,7 +289,7 @@ class OtherUserProfileViewModel @Inject constructor(
     /**
      * Accepts a friend request.
      */
-    fun acceptFriendRequest() {
+    fun acceptFriendRequest(context: Context) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Switch to the IO dispatcher to perform network operations.
@@ -303,7 +323,21 @@ class OtherUserProfileViewModel @Inject constructor(
                         currentUserState.value.firebaseUserId,
                         currentUserState.value.toUserDbEntity().otherUsersStatus
                     )
-
+                    val data = hashMapOf(
+                        Pair(
+                            NotificationsConstantHelper.MESSAGE,
+                            currentUserState.value.name
+                        ),
+                        Pair(
+                            NotificationTypesEnum::name.name,
+                            NotificationTypesEnum.FriendRequestAccepted.name
+                        )
+                    )
+                    sendFCMUseCase.invoke(
+                        FunctionHelper.getAccessToken(context),
+                        data,
+                        requiredUserState.value.fcmToken
+                    )
                     // Set the acceptFriendRequestStateFlow to the responseState.
                     _acceptFriendRequestStateFlow.value = responseState
                 } else {
