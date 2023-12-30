@@ -19,7 +19,7 @@ class BaseApp : Application() {
         val friendRequestChannel = NotificationChannel(
             NotificationsConstantHelper.FRIEND_REQUEST_CHANNEL_ID,
             getString(R.string.friend_request_channel),
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         )
         val defaultNotificationChannel = NotificationChannel(
             NotificationsConstantHelper.DEFAULT_CHANNEL_ID,
