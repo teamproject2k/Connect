@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.common.StoryUserItem
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getColorFromHexString
@@ -75,6 +76,7 @@ fun ShowStoryScreen(
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
+    val context = LocalContext.current
 
     if (!viewModel.isCurrentStoryPosterInitialized) {
         viewModel.currentStoryPosterState = remember {
@@ -105,6 +107,12 @@ fun ShowStoryScreen(
                     )
             ) {
                 // StoryProgressBar(stories.size)
+                StoryUserItem(
+                    user = viewModel.currentStoryPosterState.value,
+                    story = currentStory,
+                    context = context,
+                    navigator = navigator
+                )
                 StoryContentSection(
                     currentStory,
                     viewModel,
@@ -187,7 +195,6 @@ private fun StoryContentSection(
                                     allStoryPosters.getOrNull(currentUserIndex - 1)
                                 if (previousUser == null) {
                                     navigator.popBackStack()
-                                    return@detectHorizontalDragGestures
                                 } else {
                                     viewModel.currentStoryPosterState.value = previousUser
                                     viewModel.currentStoryState.intValue = 0
@@ -201,7 +208,6 @@ private fun StoryContentSection(
                                     allStoryPosters.getOrNull(currentUserIndex + 1)
                                 if (nextUser == null) {
                                     navigator.popBackStack()
-                                    return@detectHorizontalDragGestures
                                 } else {
                                     viewModel.currentStoryPosterState.value = nextUser
                                     viewModel.currentStoryState.intValue = 0
