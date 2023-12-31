@@ -14,7 +14,8 @@ data class StoryDbEntity(
     val createdAt: Long,
     val mediaType: String,
     val textOffset: String,
-    val backgroundGradientColor: String
+    val backgroundGradientColor: String,
+    val seenList: List<String>
 ) {
     fun toStoryBean(): StoryBean {
         return StoryBean(
@@ -25,7 +26,8 @@ data class StoryDbEntity(
             createdAt,
             mediaType,
             textOffset,
-            backgroundGradientColor
+            backgroundGradientColor,
+            seenList
         )
     }
 }

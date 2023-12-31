@@ -12,7 +12,8 @@ data class StoryBean(
     val createdAt: Long,
     val mediaType: String,
     val textOffset: String,
-    val backgroundGradientColor: String
+    val backgroundGradientColor: String,
+    val seenList: List<String>
 ) : Serializable {
     fun toStoryDbEntity(): StoryDbEntity {
         return StoryDbEntity(
@@ -23,7 +24,8 @@ data class StoryBean(
             createdAt,
             mediaType,
             textOffset,
-            backgroundGradientColor
+            backgroundGradientColor,
+            seenList
         )
     }
 
@@ -35,7 +37,8 @@ data class StoryBean(
             createdAt,
             mediaType,
             textOffset,
-            backgroundGradientColor
+            backgroundGradientColor,
+            seenList
         )
     }
 }
