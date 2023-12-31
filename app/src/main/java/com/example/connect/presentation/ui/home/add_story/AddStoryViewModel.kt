@@ -129,7 +129,8 @@ class AddStoryViewModel @Inject constructor(
                     FunctionHelper.getCurrentTimeInMillis(),
                     storyType,
                     captionOffset,
-                    colorGradient
+                    colorGradient,
+                    listOf()
                 )
 
                 // Upload the story details to the remote server.

@@ -28,7 +28,6 @@ import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.FunctionHelper
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
@@ -36,23 +35,47 @@ fun StoryItem(
     storyPoster: UsersBean,
     allStories: MutableMap<String, ArrayList<StoryBean>>,
     allStoryPosters: ArrayList<UsersBean>,
-    isCurrentUser: Boolean,
+    loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    Column(modifier = Modifier.clickable {
-        //  navigator.navigate(ShowStoryScreenDestination(storyPoster, allStories, allStoryPosters))
-    }, horizontalAlignment = Alignment.CenterHorizontally) {
-        BreakCircularBorder(
-            storyPoster.profilePhoto,
-            parts = 6,
-            FunctionHelper.getStoryBackgroundColorList()
-        )
-        SpacerHeight6()
-        Text(
-            text = if (isCurrentUser) stringResource(R.string.your_story) else storyPoster.name,
-            fontSize = 12.sp
-        )
+    val isLoggedInUser = loggedInUserFirebaseId == storyPoster.firebaseUserId
+
+    val currentUserStories = allStories[storyPoster.firebaseUserId]
+    if (currentUserStories != null) {
+        Column(modifier = Modifier.clickable {
+            //  navigator.navigate(ShowStoryScreenDestination(storyPoster, allStories, allStoryPosters))
+        }, horizontalAlignment = Alignment.CenterHorizontally) {
+            BreakCircularBorder(
+                storyPoster.profilePhoto,
+                parts = currentUserStories.size,
+                getColorListFromStories(currentUserStories, loggedInUserFirebaseId)
+            )
+            SpacerHeight6()
+            Text(
+                text = if (isLoggedInUser) stringResource(R.string.your_story) else storyPoster.name,
+                fontSize = 12.sp
+            )
+        }
     }
+}
+
+fun getColorListFromStories(
+    currentUserStories: ArrayList<StoryBean>,
+    loggedInUserFirebaseId: String
+): List<List<Color>> {
+    val colorList = mutableListOf<List<Color>>()
+    val numberOfStoriesSeen =
+        currentUserStories.count { it.seenList.contains(loggedInUserFirebaseId) }
+
+    repeat(numberOfStoriesSeen) {
+        colorList.add(listOf(Color.Gray, Color.LightGray))
+    }
+
+    repeat(currentUserStories.size - numberOfStoriesSeen) {
+        colorList.add(listOf(Color.Red, Color.Magenta))
+    }
+
+    return colorList.toList()
 }
 
 @Composable

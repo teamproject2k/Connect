@@ -25,7 +25,7 @@ data class StoryBean(
             mediaType,
             textOffset,
             backgroundGradientColor,
-            seenList
+           // seenList
         )
     }
 

@@ -2,7 +2,6 @@ package com.example.connect.data.models.story
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.connect.domain.models.StoryBean
 
 @Entity
 data class StoryDbEntity(
@@ -15,19 +14,19 @@ data class StoryDbEntity(
     val mediaType: String,
     val textOffset: String,
     val backgroundGradientColor: String,
-    val seenList: List<String>
+   // val seenList: List<String>
 ) {
-    fun toStoryBean(): StoryBean {
-        return StoryBean(
-            id,
-            fireBaseUserId,
-            mediaUrl,
-            caption,
-            createdAt,
-            mediaType,
-            textOffset,
-            backgroundGradientColor,
-            seenList
-        )
-    }
+//    fun toStoryBean(): StoryBean {
+//        return StoryBean(
+//            id,
+//            fireBaseUserId,
+//            mediaUrl,
+//            caption,
+//            createdAt,
+//            mediaType,
+//            textOffset,
+//            backgroundGradientColor,
+//            seenList
+//        )
+//    }
 }

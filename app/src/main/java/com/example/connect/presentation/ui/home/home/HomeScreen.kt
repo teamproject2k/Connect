@@ -162,7 +162,7 @@ private fun HandleStoryDetailsWithUserDetails(
         RequestStatusEnum.Success -> {
             StoryUiSection(
                 storiesPerUser = storyDetailsWithUserDetailsState.data,
-                currentUsersFirebaseId = currentUsersBean.firebaseUserId,
+                loggedInUserFirebaseId = currentUsersBean.firebaseUserId,
                 navigator = navigator
             )
         }
@@ -186,7 +186,7 @@ private fun HandleStoryDetailsWithUserDetails(
 @Composable
 private fun StoryUiSection(
     storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>?,
-    currentUsersFirebaseId: String,
+    loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
     if (storiesPerUser == null) return
@@ -203,7 +203,6 @@ private fun StoryUiSection(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
-                    val isCurrentUser = currentUsersFirebaseId == firebaseUserId
 
                     val storyPoster =
                         storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
@@ -213,7 +212,7 @@ private fun StoryUiSection(
 //                            storyPoster,
 //                            storiesPerUser.first,
 //                            storiesPerUser.second,
-//                            isCurrentUser,
+                        //                             loggedInUserFirebaseId,
 //                            navigator
 //                        )
                     }

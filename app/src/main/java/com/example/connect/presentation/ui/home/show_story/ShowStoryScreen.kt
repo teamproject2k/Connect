@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 fun ShowStoryScreen(
     navigator: DestinationsNavigator,
     currentStoryPoster: UsersBean,
-    allStories: MutableMap<String, ArrayList<StoryBean>>,
+    allStories: LinkedHashMap<String, ArrayList<StoryBean>>,
     allStoryPosters: ArrayList<UsersBean>,
 ) {
     val viewModel: ShowStoryViewModel = hiltViewModel()
