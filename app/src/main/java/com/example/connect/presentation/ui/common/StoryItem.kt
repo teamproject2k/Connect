@@ -27,7 +27,9 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.google.gson.Gson
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
@@ -43,7 +45,8 @@ fun StoryItem(
     val currentUserStories = allStories[storyPoster.firebaseUserId]
     if (currentUserStories != null) {
         Column(modifier = Modifier.clickable {
-            //  navigator.navigate(ShowStoryScreenDestination(storyPoster, allStories, allStoryPosters))
+            val gsonString: String = Gson().toJson(allStories)
+            navigator.navigate(ShowStoryScreenDestination(storyPoster, gsonString, allStoryPosters))
         }, horizontalAlignment = Alignment.CenterHorizontally) {
             BreakCircularBorder(
                 storyPoster.profilePhoto,

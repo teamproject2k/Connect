@@ -52,6 +52,8 @@ import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getColorFromHexString
 import com.example.connect.presentation.utils.HomeNavGraph
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
@@ -63,9 +65,13 @@ import kotlinx.coroutines.launch
 fun ShowStoryScreen(
     navigator: DestinationsNavigator,
     currentStoryPoster: UsersBean,
-    allStories: LinkedHashMap<String, ArrayList<StoryBean>>,
+    allStoriesString: String,
     allStoryPosters: ArrayList<UsersBean>,
 ) {
+    val allStories: MutableMap<String, ArrayList<StoryBean>> = Gson().fromJson(
+        allStoriesString,
+        object : TypeToken<MutableMap<String, ArrayList<StoryBean>>>() {}.type
+    )
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()

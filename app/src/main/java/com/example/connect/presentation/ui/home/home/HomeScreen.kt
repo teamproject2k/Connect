@@ -60,6 +60,7 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.StoryItem
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.UserDetailsSectionLoading
 import com.example.connect.presentation.ui.common.shimmer
@@ -208,13 +209,13 @@ private fun StoryUiSection(
                         storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
 
                     if (storyPoster != null) {
-//                        StoryItem(
-//                            storyPoster,
-//                            storiesPerUser.first,
-//                            storiesPerUser.second,
-                        //                             loggedInUserFirebaseId,
-//                            navigator
-//                        )
+                        StoryItem(
+                            storyPoster,
+                            storiesPerUser.first,
+                            storiesPerUser.second,
+                            loggedInUserFirebaseId,
+                            navigator
+                        )
                     }
                 }
             }
