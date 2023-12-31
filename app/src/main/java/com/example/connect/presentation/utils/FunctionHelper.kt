@@ -587,4 +587,9 @@ object FunctionHelper {
         gradientColorList.add(mutableListOf(Color(0xFF0000cc), Color.Cyan))
         return gradientColorList
     }
+
+    fun getColorFromHexString(colorString: String): Color {
+        val colorInt = colorString.trim().toLong(radix = 16).toInt() // Parse hex string to integer
+        return Color(colorInt)
+    }
 }

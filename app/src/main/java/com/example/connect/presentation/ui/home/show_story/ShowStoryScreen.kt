@@ -2,9 +2,9 @@ package com.example.connect.presentation.ui.home.show_story
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.view.ViewGroup
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +30,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -43,42 +47,67 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
+import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.getColorFromHexString
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @HomeNavGraph
 @Destination
 @Composable
-fun ShowStoryScreen(navigator: DestinationsNavigator, stories: ArrayList<StoryBean>) {
+fun ShowStoryScreen(
+    navigator: DestinationsNavigator,
+    currentStoryPoster: UsersBean,
+    allStories: MutableMap<String, ArrayList<StoryBean>>,
+    allStoryPosters: ArrayList<UsersBean>,
+) {
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
 
-    if (viewModel.currentStoryState.intValue == -1) {
-        navigator.popBackStack()
-    } else if (viewModel.currentStoryState.intValue == stories.size) {
-        // TODO: 31/12/23 aryan Load next user's stories
+    if (!viewModel.isCurrentStoryPosterInitialized) {
+        viewModel.currentStoryPosterState.value = currentStoryPoster
+        viewModel.isCurrentStoryPosterInitialized = true
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize()
-        ) {
-            StoryProgressBar(stories.size)
-            StoryContentSection(
-                stories[viewModel.currentStoryState.value],
-                viewModel,
-                navigator,
-                Modifier
-                    .weight(1f)
+    val currentUserStories = allStories[viewModel.currentStoryPosterState.value.firebaseUserId]
+
+    if (currentUserStories != null) {
+
+        val currentStory = currentUserStories[viewModel.currentStoryState.intValue]
+        val storyGradientColors = currentStory.backgroundGradientColor.split(",")
+        val colorList = arrayListOf<Color>()
+
+        storyGradientColors.forEach { colorString ->
+            colorList.add(getColorFromHexString(colorString))
+        }
+
+        Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
                     .fillMaxSize()
-            )
+                    .background(
+                        brush = Brush.linearGradient(colorList)
+                    )
+            ) {
+                // StoryProgressBar(stories.size)
+                StoryContentSection(
+                    currentStory,
+                    viewModel,
+                    allStoryPosters,
+                    currentUserStories.size,
+                    navigator,
+                    Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                )
+            }
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -95,21 +124,29 @@ fun ShowStoryScreen(navigator: DestinationsNavigator, stories: ArrayList<StoryBe
 fun StoryProgressBar(numberOfStories: Int) {
     var progress by remember { mutableStateOf(0f) }
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val progressBarWidth = (screenWidth / numberOfStories).dp
+
     LaunchedEffect(Unit) {
         repeat(numberOfStories) { part ->
             launch {
                 for (i in 0..100 step 25) {
                     progress = i.toFloat()
+                    delay(5000)
                 }
             }
         }
     }
 
-    Column {
-        LinearProgressIndicator(
-            progress = progress / 100f,
-            modifier = Modifier.fillMaxWidth()
-        )
+    LazyRow(modifier = Modifier.padding(top = 4.dp)) {
+        items(numberOfStories) {
+            LinearProgressIndicator(
+                progress = progress / 100f,
+                modifier = Modifier.width(progressBarWidth),
+                color = Color.White,
+                trackColor = Color.Gray
+            )
+        }
     }
 }
 
@@ -117,38 +154,69 @@ fun StoryProgressBar(numberOfStories: Int) {
 private fun StoryContentSection(
     story: StoryBean,
     viewModel: ShowStoryViewModel,
+    allStoryPosters: ArrayList<UsersBean>,
+    numberOfStories: Int,
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val storyGradientColors = story.backgroundGradientColor.split(",")
-    val colorList = arrayListOf<Color>()
-
-    storyGradientColors.forEach { colorString ->
-        colorList.add(Color.valueOf(Color.parseColor(colorString)))
-    }
-
     var isWithinFirstHalf by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val threshold = screenWidth.value * 0.5f
+    var horizontalDrag = remember { 0f }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-//            .background(
-//                brush = Brush.linearGradient(colorList.toList())
-//            )
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragEnd = {
+                        when {
+                            horizontalDrag > 0 -> { // Right Swipe
+                                val currentUserIndex =
+                                    allStoryPosters.indexOf(viewModel.currentStoryPosterState.value)
+                                val previousUser =
+                                    allStoryPosters.getOrNull(currentUserIndex - 1)
+                                if (previousUser == null) {
+                                    navigator.popBackStack()
+                                } else {
+                                    viewModel.currentStoryPosterState.value = previousUser
+                                    viewModel.currentStoryState.intValue = 0
+                                }
+                            }
+
+                            horizontalDrag < 0 -> {  // Left Swipe
+                                val currentUserIndex =
+                                    allStoryPosters.indexOf(viewModel.currentStoryPosterState.value)
+                                val nextUser =
+                                    allStoryPosters.getOrNull(currentUserIndex + 1)
+                                if (nextUser == null) {
+                                    navigator.popBackStack()
+                                } else {
+                                    viewModel.currentStoryPosterState.value = nextUser
+                                    viewModel.currentStoryState.intValue = 0
+                                }
+                            }
+                        }
+                    },
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        horizontalDrag = dragAmount
+                    },
+                )
+            }
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    isWithinFirstHalf = offset.x.dp < threshold.dp
-                }
-            }
-            .clickable {
-                if (isWithinFirstHalf) {
-                    viewModel.currentStoryState.value--
-                } else {
-                    viewModel.currentStoryState.value++
+                    isWithinFirstHalf = offset.x.dp < (screenWidth / 2)
+                    if (isWithinFirstHalf) {
+                        if (viewModel.currentStoryState.intValue != 0) {
+                            viewModel.currentStoryState.intValue--
+                        }
+                    } else {
+                        if (viewModel.currentStoryState.intValue != numberOfStories - 1) {
+                            viewModel.currentStoryState.intValue++
+                        }
+                    }
                 }
             }
     ) {
@@ -180,8 +248,9 @@ private fun MediaSection(story: StoryBean, viewModel: ShowStoryViewModel, contex
 @Composable
 private fun StoryCaptionField(story: StoryBean) {
     val captionOffset = story.textOffset.split(",")
-    val captionOffsetX = captionOffset[0].toInt()
-    val captionOffsetY = captionOffset[1].toInt()
+    val captionOffsetX = captionOffset[0].trim().toFloat().toInt()
+    val captionOffsetY = captionOffset[1].trim().toFloat().toInt()
+
     Text(
         modifier = Modifier
             .offset {

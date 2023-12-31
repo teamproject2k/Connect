@@ -33,7 +33,7 @@ class IStoryRepositoryImpl @Inject constructor(
         return appDatabase.getStoryDao().insertStory(story.toStoryDbEntity())
     }
 
-    override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>> {
+    override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
         return try {
             val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
                 .orderBy(StoryRemoteEntity::createdAt.name, Query.Direction.DESCENDING)

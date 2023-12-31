@@ -60,7 +60,6 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
-import com.example.connect.presentation.ui.common.StoryItem
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.UserDetailsSectionLoading
 import com.example.connect.presentation.ui.common.shimmer
@@ -163,9 +162,8 @@ private fun HandleStoryDetailsWithUserDetails(
         RequestStatusEnum.Success -> {
             StoryUiSection(
                 storiesPerUser = storyDetailsWithUserDetailsState.data,
-                currentUsersBean = currentUsersBean,
-                navigator = navigator,
-                viewModel = viewModel
+                currentUsersFirebaseId = currentUsersBean.firebaseUserId,
+                navigator = navigator
             )
         }
 
@@ -187,25 +185,37 @@ private fun HandleStoryDetailsWithUserDetails(
 
 @Composable
 private fun StoryUiSection(
-    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, MutableList<UsersBean>>?,
-    currentUsersBean: UsersBean,
-    viewModel: HomeViewModel,
+    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>?,
+    currentUsersFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
     if (storiesPerUser == null) return
     if (storiesPerUser.first.isNotEmpty()) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .fillMaxWidth()
+        ) {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 4.dp)
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
+                    val isCurrentUser = currentUsersFirebaseId == firebaseUserId
+
                     val storyPoster =
                         storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
-                    val storiesPosted = storiesPerUser.first[firebaseUserId]
-                    if (storyPoster != null && storiesPosted != null) {
-                        StoryItem(user = storyPoster, storiesPosted, navigator)
+
+                    if (storyPoster != null) {
+//                        StoryItem(
+//                            storyPoster,
+//                            storiesPerUser.first,
+//                            storiesPerUser.second,
+//                            isCurrentUser,
+//                            navigator
+//                        )
                     }
                 }
             }
@@ -506,13 +516,11 @@ private fun HandleLikeUnlikeState(viewModel: HomeViewModel) {
         }
 
         RequestStatusEnum.Success -> {
-            //do not handle this
-
+            // do not handle this
         }
 
         RequestStatusEnum.None -> {
-            //do not handle this
-
+            // do not handle this
         }
     }
 }
@@ -539,12 +547,11 @@ private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {
         }
 
         RequestStatusEnum.Success -> {
-            //do not handle this
+            // do not handle this
         }
 
         RequestStatusEnum.None -> {
-            //do not handle this
-
+            // do not handle this
         }
     }
 }

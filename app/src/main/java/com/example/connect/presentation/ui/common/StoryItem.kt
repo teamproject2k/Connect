@@ -27,28 +27,31 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-
 @Composable
 fun StoryItem(
-    user: UsersBean,
-    stories: ArrayList<StoryBean>,
+    storyPoster: UsersBean,
+    allStories: MutableMap<String, ArrayList<StoryBean>>,
+    allStoryPosters: ArrayList<UsersBean>,
+    isCurrentUser: Boolean,
     navigator: DestinationsNavigator
 ) {
     Column(modifier = Modifier.clickable {
-        navigator.navigate(ShowStoryScreenDestination(stories))
+        //  navigator.navigate(ShowStoryScreenDestination(storyPoster, allStories, allStoryPosters))
     }, horizontalAlignment = Alignment.CenterHorizontally) {
         BreakCircularBorder(
-            user.profilePhoto,
+            storyPoster.profilePhoto,
             parts = 6,
             FunctionHelper.getStoryBackgroundColorList()
         )
         SpacerHeight6()
-        Text(text = user.name, fontSize = 12.sp)
+        Text(
+            text = if (isCurrentUser) stringResource(R.string.your_story) else storyPoster.name,
+            fontSize = 12.sp
+        )
     }
 }
 

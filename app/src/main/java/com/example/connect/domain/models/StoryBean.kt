@@ -1,12 +1,9 @@
 package com.example.connect.domain.models
 
-import android.os.Parcelable
 import com.example.connect.data.models.story.StoryDbEntity
 import com.example.connect.data.models.story.StoryRemoteEntity
-import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
-
-@Parcelize
 data class StoryBean(
     var id: String,
     val fireBaseUserId: String,
@@ -16,7 +13,7 @@ data class StoryBean(
     val mediaType: String,
     val textOffset: String,
     val backgroundGradientColor: String
-) : Parcelable {
+) : Serializable {
     fun toStoryDbEntity(): StoryDbEntity {
         return StoryDbEntity(
             id,
