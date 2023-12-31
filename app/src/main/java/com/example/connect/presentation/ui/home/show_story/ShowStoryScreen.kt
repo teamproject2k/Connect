@@ -187,6 +187,7 @@ private fun StoryContentSection(
                                     allStoryPosters.getOrNull(currentUserIndex - 1)
                                 if (previousUser == null) {
                                     navigator.popBackStack()
+                                    return@detectHorizontalDragGestures
                                 } else {
                                     viewModel.currentStoryPosterState.value = previousUser
                                     viewModel.currentStoryState.intValue = 0
@@ -200,6 +201,7 @@ private fun StoryContentSection(
                                     allStoryPosters.getOrNull(currentUserIndex + 1)
                                 if (nextUser == null) {
                                     navigator.popBackStack()
+                                    return@detectHorizontalDragGestures
                                 } else {
                                     viewModel.currentStoryPosterState.value = nextUser
                                     viewModel.currentStoryState.intValue = 0
