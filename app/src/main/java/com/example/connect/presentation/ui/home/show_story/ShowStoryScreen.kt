@@ -71,7 +71,9 @@ fun ShowStoryScreen(
     val snackBarHostState = SnackbarHostState()
 
     if (!viewModel.isCurrentStoryPosterInitialized) {
-        viewModel.currentStoryPosterState.value = currentStoryPoster
+        viewModel.currentStoryPosterState = remember {
+            mutableStateOf(currentStoryPoster)
+        }
         viewModel.isCurrentStoryPosterInitialized = true
     }
 
