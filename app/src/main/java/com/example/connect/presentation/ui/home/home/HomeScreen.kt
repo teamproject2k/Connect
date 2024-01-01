@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Bookmark
@@ -36,13 +38,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.StoryBean
@@ -59,8 +70,8 @@ import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
+import com.example.connect.presentation.ui.common.SpacerHeight6
 import com.example.connect.presentation.ui.common.SpacerWidth12
-import com.example.connect.presentation.ui.common.StoryItem
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.UserDetailsSectionLoading
 import com.example.connect.presentation.ui.common.shimmer
@@ -68,14 +79,15 @@ import com.example.connect.presentation.ui.destinations.AddStoryScreenDestinatio
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
+import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
+import com.google.gson.Gson
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph(start = true)
@@ -222,6 +234,123 @@ private fun StoryUiSection(
             DividerLightGrayAlpha50()
         }
     }
+}
+
+@Composable
+private fun StoryItem(
+    storyPoster: UsersBean,
+    allStories: MutableMap<String, ArrayList<StoryBean>>,
+    allStoryPosters: ArrayList<UsersBean>,
+    loggedInUserFirebaseId: String,
+    navigator: DestinationsNavigator
+) {
+    val isLoggedInUser = loggedInUserFirebaseId == storyPoster.firebaseUserId
+
+    val currentUserStories = allStories[storyPoster.firebaseUserId]
+    if (currentUserStories != null) {
+        Column(modifier = Modifier.clickable {
+            val gsonString: String = Gson().toJson(allStories)
+            navigator.navigate(
+                ShowStoryScreenDestination(
+                    storyPoster,
+                    gsonString,
+                    allStoryPosters,
+                    loggedInUserFirebaseId
+                )
+            )
+        }, horizontalAlignment = Alignment.CenterHorizontally) {
+            BreakCircularBorder(
+                storyPoster.profilePhoto,
+                parts = currentUserStories.size,
+                getColorListFromStories(currentUserStories, loggedInUserFirebaseId)
+            )
+            SpacerHeight6()
+            Text(
+                text = if (isLoggedInUser) stringResource(R.string.your_story) else storyPoster.name,
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+private fun getColorListFromStories(
+    currentUserStories: ArrayList<StoryBean>,
+    loggedInUserFirebaseId: String
+): List<List<Color>> {
+    val colorList = mutableListOf<List<Color>>()
+    val numberOfStoriesSeen =
+        currentUserStories.count {
+            it.seenList.map { list -> list.first }.contains(loggedInUserFirebaseId)
+        }
+
+    repeat(numberOfStoriesSeen) {
+        colorList.add(listOf(Color.Gray, Color.LightGray))
+    }
+
+    repeat(currentUserStories.size - numberOfStoriesSeen) {
+        colorList.add(listOf(Color.Red, Color.Magenta))
+    }
+
+    return colorList.toList()
+}
+
+@Composable
+private fun BreakCircularBorder(
+    imageUrl: String?,
+    parts: Int,
+    colorList: List<List<Color>>,
+    gapAngle: Float = 10f,
+    strokeWidth: Dp = 4.dp,
+) {
+    if (colorList.size != parts || parts == 0) throw IllegalArgumentException("either parts is 0 or color list size not equal to parts")
+
+    val partAngle = if (parts > 1) (360f - parts * gapAngle) / parts else 360f
+    Box(
+        modifier = Modifier
+            .size(ConstantsHelper.StoryItemHeight)
+            .clip(CircleShape)
+    ) {
+        repeat(parts) { index ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .drawWithContent {
+                        drawCircularBorder(
+                            brush = Brush.linearGradient(colorList[index]),
+                            strokeWidth = strokeWidth.toPx(),
+                            startAngle = index * (partAngle + gapAngle) + 90,
+                            sweepAngle = partAngle
+                        )
+                    }
+            )
+        }
+        AsyncImage(
+            modifier = Modifier
+                .padding(strokeWidth + 1.dp)
+                .fillMaxSize()
+                .clip(CircleShape),
+            model = imageUrl,
+            contentDescription = stringResource(id = R.string.profile_image),
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+    }
+}
+
+private fun DrawScope.drawCircularBorder(
+    brush: Brush,
+    strokeWidth: Float,
+    startAngle: Float,
+    sweepAngle: Float
+) {
+    drawArc(
+        brush = brush,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        style = Stroke(width = strokeWidth)
+    )
 }
 
 @Composable
@@ -524,7 +653,6 @@ private fun HandleLikeUnlikeState(viewModel: HomeViewModel) {
         }
     }
 }
-
 
 @Composable
 private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {

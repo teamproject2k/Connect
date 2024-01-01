@@ -12,7 +12,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.story.AddStoryToDbUseCase
 import com.example.connect.domain.useCase.story.AddStoryToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
@@ -35,7 +34,6 @@ import javax.inject.Inject
 class AddStoryViewModel @Inject constructor(
     private val addStoryToRemoteUseCase: AddStoryToRemoteUseCase,
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
-    private val addStoryToDbUseCase: AddStoryToDbUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
@@ -141,9 +139,6 @@ class AddStoryViewModel @Inject constructor(
                 if (serverResponse.status == RequestStatusEnum.Success) {
                     // Get the story ID from the response.
                     storyDetails.id = serverResponse.data ?: ""
-
-                    // Add the story to the local database.
-                    addStoryToDbUseCase.invoke(storyDetails)
 
                     // Set the upload story state to success.
                     _uploadStoryStateFlow.value = ResponseState.success(null)

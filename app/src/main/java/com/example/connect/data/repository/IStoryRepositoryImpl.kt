@@ -9,6 +9,8 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IStoryRepository
 import com.example.connect.domain.utils.FirebaseConstants
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
@@ -26,11 +28,6 @@ class IStoryRepositoryImpl @Inject constructor(
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
-    }
-
-    override suspend fun addStoryToDb(story: StoryBean): Long {
-        // Add the story to the local database.
-        return appDatabase.getStoryDao().insertStory(story.toStoryDbEntity())
     }
 
     override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
@@ -94,6 +91,56 @@ class IStoryRepositoryImpl @Inject constructor(
                 }
             }
             ResponseState.success(Pair(storiesPerUser, userList))
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun addUserToSeenListInRemote(
+        storyId: String,
+        loggedInUserFireBaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            // Get the reference to the story document in the FireStore database.
+            val storyDocumentReference =
+                fireStore.collection(FirebaseConstants.STORY_KEY).document(storyId)
+
+            val listItem = hashMapOf(loggedInUserFireBaseId to System.currentTimeMillis())
+
+            // Update the story document by adding the loggedInUserFirebaseId to the seenList
+            storyDocumentReference.update(
+                StoryRemoteEntity::seenList.name,
+                FieldValue.arrayUnion(listItem)
+            ).await()
+
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun getSeenListFromRemote(storyId: String): ResponseState<List<Pair<String, Long>>> {
+        return try {
+            val storyDocumentReference =
+                fireStore.collection(FirebaseConstants.STORY_KEY).document(storyId)
+            val documentSnapshot: DocumentSnapshot = storyDocumentReference.get().await()
+
+            if (documentSnapshot.exists()) {
+                val seenList =
+                    documentSnapshot[StoryRemoteEntity::seenList.name] as? List<Pair<String, Long>>
+                ResponseState.success(seenList)
+            } else {
+                ResponseState.success(null) // Return null if the document doesn't exist or doesn't contain the seenList field
+            }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun deleteStoryInRemote(storyId: String): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.STORY_KEY).document(storyId).delete().await()
+            ResponseState.success(null)
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }

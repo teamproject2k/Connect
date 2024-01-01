@@ -1,6 +1,5 @@
 package com.example.connect.domain.models
 
-import com.example.connect.data.models.story.StoryDbEntity
 import com.example.connect.data.models.story.StoryRemoteEntity
 import java.io.Serializable
 
@@ -13,22 +12,8 @@ data class StoryBean(
     val mediaType: String,
     val textOffset: String,
     val backgroundGradientColor: String,
-    val seenList: List<String>
+    val seenList: List<Pair<String, Long>>
 ) : Serializable {
-    fun toStoryDbEntity(): StoryDbEntity {
-        return StoryDbEntity(
-            id,
-            fireBaseUserId,
-            mediaUrl,
-            caption,
-            createdAt,
-            mediaType,
-            textOffset,
-            backgroundGradientColor,
-           // seenList
-        )
-    }
-
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(
             fireBaseUserId,

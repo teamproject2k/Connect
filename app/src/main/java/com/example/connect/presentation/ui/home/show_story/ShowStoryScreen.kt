@@ -4,18 +4,30 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -23,20 +35,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,12 +63,20 @@ import androidx.media3.common.MediaItem
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.SpacerWidth32
 import com.example.connect.presentation.ui.common.StoryUserItem
+import com.example.connect.presentation.ui.common.TextBold14
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getColorFromHexString
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
@@ -68,6 +93,7 @@ fun ShowStoryScreen(
     currentStoryPoster: UsersBean,
     allStoriesString: String,
     allStoryPosters: ArrayList<UsersBean>,
+    loggedInUserFirebaseId: String
 ) {
     val allStories: MutableMap<String, ArrayList<StoryBean>> = Gson().fromJson(
         allStoriesString,
@@ -119,10 +145,13 @@ fun ShowStoryScreen(
                     allStoryPosters,
                     currentUserStories.size,
                     navigator,
+                    loggedInUserFirebaseId,
                     Modifier
                         .weight(1f)
                         .fillMaxSize()
                 )
+                HandleGetSeenListState(viewModel, context)
+                HandleDeleteStoryState(viewModel, navigator, context)
             }
         }
     }
@@ -137,7 +166,127 @@ fun ShowStoryScreen(
 }
 
 @Composable
-fun StoryProgressBar(numberOfStories: Int) {
+fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
+    var isExceptionHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val getSeenListState = viewModel.getSeenListStateFlow.collectAsState().value
+    when (getSeenListState.status) {
+        RequestStatusEnum.Loading -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Success -> {
+            if (getSeenListState.data != null) {
+                LoadSeenListBottomSheet(viewModel, getSeenListState.data, context)
+            }
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    getSeenListState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "ShowStoryScreen",
+                    getSeenListState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
+        }
+    }
+}
+
+@Composable
+fun HandleDeleteStoryState(
+    viewModel: ShowStoryViewModel,
+    navigator: DestinationsNavigator,
+    context: Context
+) {
+    var isResponseHandled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val deleteStoryState = viewModel.deleteStoryStateFlow.collectAsState().value
+    when (deleteStoryState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(stringResource(R.string.deleting_story))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                context.showToast(stringResource(R.string.story_deleted_successfully))
+                navigator.popBackStack()
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    deleteStoryState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "ShowStoryScreen",
+                    deleteStoryState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LoadSeenListBottomSheet(
+    viewModel: ShowStoryViewModel,
+    seenList: List<Pair<String, Long>>,
+    context: Context
+) {
+    var showBottomSheet by viewModel.showSeenListBottomSheet
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            shape = RoundedCornerShape(
+                topEnd = ConstantsHelper.BottomSheetRoundness,
+                topStart = ConstantsHelper.BottomSheetRoundness
+            )
+        ) {
+            SeenListBottomSheet(
+                modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                seenList,
+                context
+            )
+        }
+    }
+}
+
+@Composable
+private fun SeenListBottomSheet(
+    modifier: Modifier,
+    seenList: List<Pair<String, Long>>,
+    context: Context
+) {
+    Column(modifier = modifier) {
+        seenList.forEach { listItem ->
+            // SeenListUserItem(user =, postedAt = listItem.second, context)
+        }
+    }
+}
+
+@Composable
+private fun StoryProgressBar(numberOfStories: Int) {
     var progress by remember { mutableStateOf(0f) }
 
     val screenWidth = LocalConfiguration.current.screenWidthDp
@@ -173,6 +322,7 @@ private fun StoryContentSection(
     allStoryPosters: ArrayList<UsersBean>,
     numberOfStories: Int,
     navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -180,6 +330,7 @@ private fun StoryContentSection(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     var horizontalDrag = remember { 0f }
+    val isLoggedInUser = loggedInUserFirebaseId == story.fireBaseUserId
 
     Box(
         modifier = modifier
@@ -188,7 +339,7 @@ private fun StoryContentSection(
                 detectHorizontalDragGestures(
                     onDragEnd = {
                         when {
-                            horizontalDrag > 0 -> { // Right Swipe
+                            horizontalDrag > 0 -> {  // Right Swipe
                                 val currentUserIndex =
                                     allStoryPosters.indexOf(viewModel.currentStoryPosterState.value)
                                 val previousUser =
@@ -243,6 +394,14 @@ private fun StoryContentSection(
         ) {
             MediaSection(story, viewModel, context)
             StoryCaptionField(story)
+            if (isLoggedInUser) {
+                StoryActionButtons(story.id, viewModel)
+            }
+        }
+    }
+    if (!isLoggedInUser) {
+        LaunchedEffect(key1 = Unit) {
+            viewModel.addUserToSeenList(story.id, loggedInUserFirebaseId)
         }
     }
 }
@@ -313,6 +472,73 @@ private fun ShowStoryVideo(videoUrl: String, context: Context) {
     })) {
         onDispose {
             exoPlayer.release()
+        }
+    }
+}
+
+@Composable
+private fun StoryActionButtons(storyId: String, viewModel: ShowStoryViewModel) {
+    LaunchedEffect(Unit) {
+        viewModel.getSeenList(storyId)
+    }
+    LaunchedEffect(Unit) {
+        viewModel.deleteStory(storyId)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 40.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Icon(
+            modifier = Modifier.clickable { viewModel.showSeenListBottomSheet.value = true },
+            imageVector = Icons.Default.RemoveRedEye,
+            contentDescription = stringResource(R.string.seen_by),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+        SpacerWidth32()
+        Icon(
+            modifier = Modifier.clickable { viewModel.deleteStory(storyId) },
+            imageVector = Icons.Default.Delete,
+            contentDescription = stringResource(R.string.delete_story),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+
+@Composable
+private fun SeenListUserItem(
+    user: UsersBean,
+    postedAt: Long,
+    context: Context,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape),
+            model = user.profilePhoto,
+            contentDescription = user.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp),
+        ) {
+            TextBold14(text = user.name, color = MaterialTheme.colorScheme.onPrimary)
+            Text(
+                text = FunctionHelper.getTimeAgo(postedAt, context),
+                fontSize = 12.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
