@@ -205,37 +205,35 @@ private fun StoryUiSection(
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    if (storiesPerUser == null) return
-    if (storiesPerUser.first.isNotEmpty()) {
-        Column(
+    if (storiesPerUser == null || storiesPerUser.first.isEmpty()) return
+    Column(
+        modifier = Modifier
+            .padding(start = 12.dp)
+            .fillMaxWidth()
+    ) {
+        LazyRow(
             modifier = Modifier
-                .padding(start = 12.dp)
                 .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
+            items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
 
-                    val storyPoster =
-                        storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
+                val storyPoster =
+                    storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
 
-                    if (storyPoster != null) {
-                        StoryItem(
-                            storyPoster,
-                            storiesPerUser.first,
-                            storiesPerUser.second,
-                            loggedInUserFirebaseId,
-                            navigator
-                        )
-                    }
+                if (storyPoster != null) {
+                    StoryItem(
+                        storyPoster,
+                        storiesPerUser.first,
+                        storiesPerUser.second,
+                        loggedInUserFirebaseId,
+                        navigator
+                    )
                 }
             }
-            DividerLightGrayAlpha50()
         }
+        DividerLightGrayAlpha50()
     }
 }
 
@@ -274,7 +272,6 @@ private fun StoryItem(
     navigator: DestinationsNavigator
 ) {
     val isLoggedInUser = loggedInUserFirebaseId == storyPoster.firebaseUserId
-
     val currentUserStories = allStories[storyPoster.firebaseUserId]
     if (currentUserStories != null) {
         Column(modifier = Modifier.clickable {

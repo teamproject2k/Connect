@@ -106,10 +106,7 @@ fun ShowStoryScreen(
     val context = LocalContext.current
 
     if (!viewModel.isCurrentStoryPosterInitialized) {
-        viewModel.currentStoryPosterState = remember {
-            mutableStateOf(currentStoryPoster)
-        }
-        viewModel.isCurrentStoryPosterInitialized = true
+        viewModel.initData(currentStoryPoster)
     }
 
     val currentUserStories = allStories[viewModel.currentStoryPosterState.value.firebaseUserId]

@@ -44,6 +44,12 @@ class ShowStoryViewModel @Inject constructor(
 
     var showDeleteStoryAlertDialog = mutableStateOf(false)
 
+
+    fun initData(currentStoryPoster: UsersBean) {
+        currentStoryPosterState.value = currentStoryPoster
+        isCurrentStoryPosterInitialized = true
+    }
+
     fun addUserToSeenList(storyId: String, loggedInUserFireBaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
