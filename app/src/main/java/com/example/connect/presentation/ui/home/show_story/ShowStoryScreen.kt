@@ -151,7 +151,13 @@ fun ShowStoryScreen(
                         .fillMaxSize()
                 )
                 HandleGetSeenListState(viewModel, context)
-                HandleDeleteStoryState(viewModel, navigator, context)
+                HandleDeleteStoryState(
+                    currentUserStories,
+                    currentStory,
+                    viewModel,
+                    navigator,
+                    context
+                )
             }
         }
     }
@@ -205,6 +211,8 @@ fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
 
 @Composable
 fun HandleDeleteStoryState(
+    currentUserStories: ArrayList<StoryBean>,
+    currentStory: StoryBean,
     viewModel: ShowStoryViewModel,
     navigator: DestinationsNavigator,
     context: Context
@@ -222,7 +230,12 @@ fun HandleDeleteStoryState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.story_deleted_successfully))
-                navigator.popBackStack()
+                currentUserStories.remove(currentStory)
+                if (currentUserStories.isEmpty()) {
+                    navigator.popBackStack()
+                } else if (viewModel.currentStoryState.intValue > 0) {
+                    viewModel.currentStoryState.intValue--
+                }
                 isResponseHandled = true
             }
         }
