@@ -2,6 +2,7 @@ package com.example.connect.presentation.ui.home.home
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -168,7 +171,7 @@ private fun HandleStoryDetailsWithUserDetails(
     }
     when (storyDetailsWithUserDetailsState.status) {
         RequestStatusEnum.Loading -> {
-            // TODO: 31/12/23 cd-user  create ui for story loading
+            StoryLoaderItem()
             isExceptionHandled = false
         }
 
@@ -233,6 +236,32 @@ private fun StoryUiSection(
             }
             DividerLightGrayAlpha50()
         }
+    }
+}
+
+@Composable
+fun StoryLoaderItem() {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+            repeat(5) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(ConstantsHelper.StoryItemSize)
+                            .clip(CircleShape)
+                            .shimmer()
+                    )
+                    SpacerHeight6()
+                    Box(
+                        modifier = Modifier
+                            .height(12.dp)
+                            .width(ConstantsHelper.StoryItemSize)
+                            .shimmer()
+                    )
+                }
+            }
+        }
+        DividerLightGrayAlpha50()
     }
 }
 
@@ -307,7 +336,7 @@ private fun BreakCircularBorder(
     val partAngle = if (parts > 1) (360f - parts * gapAngle) / parts else 360f
     Box(
         modifier = Modifier
-            .size(ConstantsHelper.StoryItemHeight)
+            .size(ConstantsHelper.StoryItemSize)
             .clip(CircleShape)
     ) {
         repeat(parts) { index ->

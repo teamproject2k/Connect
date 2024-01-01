@@ -21,5 +21,5 @@ object ConstantsHelper {
     val NavigationBarHeight = 48.dp
     val CoverImageHeight = 200.dp
     val ProfileImageHeight = 150.dp
-    val StoryItemHeight = 60.dp
+    val StoryItemSize = 60.dp
 }
