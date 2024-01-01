@@ -42,6 +42,8 @@ class ShowStoryViewModel @Inject constructor(
 
     var showSeenListBottomSheet = mutableStateOf(false)
 
+    var showDeleteStoryAlertDialog = mutableStateOf(false)
+
     fun addUserToSeenList(storyId: String, loggedInUserFireBaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

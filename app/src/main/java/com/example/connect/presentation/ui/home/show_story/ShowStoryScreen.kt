@@ -72,6 +72,7 @@ import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth32
 import com.example.connect.presentation.ui.common.StoryUserItem
 import com.example.connect.presentation.ui.common.TextBold14
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -150,6 +151,7 @@ fun ShowStoryScreen(
                         .weight(1f)
                         .fillMaxSize()
                 )
+                DeleteStoryDialog(viewModel, currentStory.id)
                 HandleGetSeenListState(viewModel, context)
                 HandleDeleteStoryState(
                     currentUserStories,
@@ -172,7 +174,22 @@ fun ShowStoryScreen(
 }
 
 @Composable
-fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
+private fun DeleteStoryDialog(viewModel: ShowStoryViewModel, currentStoryId: String) {
+    if (viewModel.showDeleteStoryAlertDialog.value) {
+        TitleMessageIconOkCancelDialog(
+            title = stringResource(id = R.string.delete_story),
+            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_your_story),
+            positiveButtonText = stringResource(R.string.delete),
+            onCancel = {
+                viewModel.showDeleteStoryAlertDialog.value = false
+            }) {
+            viewModel.deleteStory(currentStoryId)
+        }
+    }
+}
+
+@Composable
+private fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
     var isExceptionHandled by rememberSaveable {
         mutableStateOf(false)
     }
@@ -210,7 +227,7 @@ fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
 }
 
 @Composable
-fun HandleDeleteStoryState(
+private fun HandleDeleteStoryState(
     currentUserStories: ArrayList<StoryBean>,
     currentStory: StoryBean,
     viewModel: ShowStoryViewModel,
@@ -494,9 +511,6 @@ private fun StoryActionButtons(storyId: String, viewModel: ShowStoryViewModel) {
     LaunchedEffect(Unit) {
         viewModel.getSeenList(storyId)
     }
-    LaunchedEffect(Unit) {
-        viewModel.deleteStory(storyId)
-    }
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -512,7 +526,7 @@ private fun StoryActionButtons(storyId: String, viewModel: ShowStoryViewModel) {
         )
         SpacerWidth32()
         Icon(
-            modifier = Modifier.clickable { viewModel.deleteStory(storyId) },
+            modifier = Modifier.clickable { viewModel.showDeleteStoryAlertDialog.value = true },
             imageVector = Icons.Default.Delete,
             contentDescription = stringResource(R.string.delete_story),
             tint = MaterialTheme.colorScheme.onPrimary
