@@ -200,7 +200,7 @@ fun UserStores(
             .pointerInteropFilter {
                 val tapLocationX = it.x
                 val screenSplitCoordinates = screenWidth.toFloat() / 3
-                if (tapLocationX in 0.0f..screenSplitCoordinates) {
+                if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
                     if (currentStoryIndex > 0) {
                         currentStoryIndex--
                     } else {
@@ -216,7 +216,7 @@ fun UserStores(
                             pauseTimer = false
                         }
                     }
-                } else {
+                } else if(it.action == MotionEvent.ACTION_DOWN){
                     if (currentStoryIndex < storyBeans.lastIndex) {
                         currentStoryIndex++
                     } else {
@@ -273,6 +273,7 @@ fun StoryUi(
     Box(
         modifier = Modifier
             .fillMaxSize(),
+        contentAlignment = if (story.mediaUrl.isBlank()) Alignment.Center else Alignment.BottomCenter
     ) {
         MediaSection(story, viewModel, context)
         StoryCaptionField(story)
@@ -578,20 +579,18 @@ private fun StoryCaptionField(story: StoryBean) {
     val captionOffset = story.textOffset.split(",")
     val captionOffsetX = captionOffset[0].trim().toFloat().toInt()
     val captionOffsetY = captionOffset[1].trim().toFloat().toInt()
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            modifier = Modifier
-                .offset {
-                    IntOffset(
-                        captionOffsetX,
-                        captionOffsetY
-                    )
-                },
-            text = story.caption,
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 18.sp
-        )
-    }
+    Text(
+        modifier = Modifier
+            .offset {
+                IntOffset(
+                    captionOffsetX,
+                    captionOffsetY
+                )
+            },
+        text = story.caption,
+        color = MaterialTheme.colorScheme.onPrimary,
+        fontSize = 18.sp
+    )
 }
 
 @Composable
