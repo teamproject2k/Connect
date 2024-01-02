@@ -68,8 +68,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
-//                _postDetailsStateFlow.value =
-//                    postDetailsWithUserDetailsUseCase.invoke(currentUserFirebaseId)
+                _postDetailsStateFlow.value =
+                    postDetailsWithUserDetailsUseCase.invoke(currentUserFirebaseId)
             }
         }
     }
