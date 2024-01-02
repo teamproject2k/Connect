@@ -1,15 +1,11 @@
-package com.example.connect.presentation.ui.home.blocked_users
+package com.example.connect.presentation.ui.home.saved_posts
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,18 +14,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.UserListLoading
-import com.example.connect.presentation.ui.common.UsersListItem
-import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
+import com.example.connect.presentation.ui.common.PostListLoadingSection
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -40,20 +33,20 @@ import kotlinx.coroutines.launch
 @HomeNavGraph
 @Destination
 @Composable
-fun BlockedListScreen(navigator: DestinationsNavigator) {
+fun SavedPostsScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-    val viewModel: BlockedUsersViewModel = hiltViewModel()
+    val viewModel: SavedPostsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(topBar = {
-        AppTopAppBar(title = stringResource(R.string.blocked_users))
+        AppTopAppBar(title = stringResource(R.string.saved_posts))
     }) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleGetBlockedUsersState(viewModel, navigator)
+            HandleGetSavedPostsState(viewModel, navigator)
         }
     }
 
@@ -66,36 +59,33 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+        viewModel.getSavedPosts(homeSharedViewModel.usersDetails.savedPosts)
     }
 }
 
 @Composable
-private fun HandleGetBlockedUsersState(
-    viewModel: BlockedUsersViewModel,
-    navigator: DestinationsNavigator
-) {
-    val blockedUsersState = viewModel.getBlockedUsersStateFlow.collectAsState().value
+fun HandleGetSavedPostsState(viewModel: SavedPostsViewModel, navigator: DestinationsNavigator) {
+    val savedPostsState = viewModel.getSavedPostsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
-    when (blockedUsersState.status) {
+    when (savedPostsState.status) {
         RequestStatusEnum.Loading -> {
-            UserListLoading()
+            PostListLoadingSection()
             isExceptionHandled = false
         }
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    blockedUsersState.message
+                    savedPostsState.message
                         ?: stringResource(id = R.string.some_error_occurred)
                 isExceptionHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(navigator, blockedUsersState.data ?: emptyList())
+            DisplayPostsList(navigator, savedPostsState.data ?: emptyList())
         }
 
         RequestStatusEnum.None -> {
@@ -105,22 +95,6 @@ private fun HandleGetBlockedUsersState(
 }
 
 @Composable
-private fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList: List<UsersBean>) {
-    if (blockedUsersList.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = stringResource(id = R.string.no_user_found))
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(blockedUsersList, key = {
-                it.firebaseUserId
-            }) { blockedUser ->
-                UsersListItem(blockedUser) {
-                    navigator.navigate(OtherUserProfileScreenDestination(blockedUser))
-                }
-            }
-        }
-    }
+fun DisplayPostsList(navigator: DestinationsNavigator, postBeans: List<PostBean>) {
+
 }

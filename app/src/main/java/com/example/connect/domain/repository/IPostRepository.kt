@@ -66,4 +66,5 @@ interface IPostRepository {
         postFirebaseId: String
     ): ResponseState<Nothing>
 
+    suspend fun getSavedPostsFromRemote(savedPosts: ArrayList<String>): ResponseState<List<PostBean>>
 }

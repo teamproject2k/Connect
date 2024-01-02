@@ -72,11 +72,11 @@ import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
+import com.example.connect.presentation.ui.common.PostListLoadingSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight6
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.UserDetailsSection
-import com.example.connect.presentation.ui.common.UserDetailsSectionLoading
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.AddStoryScreenDestination
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
@@ -419,49 +419,6 @@ private fun HandlePostDetailsWithUserDetails(
         }
     }
 }
-
-@Composable
-private fun PostListLoadingSection() {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(4) {
-            UserDetailsSectionLoading(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .shimmer()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ConstantsHelper.POST_DISPLAY_MEDIA_HEIGHT)
-                    .shimmer()
-            )
-            Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .shimmer()
-            )
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .shimmer()
-            )
-            SpacerHeight16()
-            DividerLightGrayAlpha40()
-        }
-    }
-}
-
 
 @Composable
 private fun PostListUiSection(

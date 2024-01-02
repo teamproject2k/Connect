@@ -43,6 +43,7 @@ import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.destinations.BlockedListScreenDestination
 import com.example.connect.presentation.ui.destinations.RequestedListScreenDestination
+import com.example.connect.presentation.ui.destinations.SavedPostsScreenDestination
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -113,7 +114,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.saved_posts) {
-                // TODO: 29/12/23 cd-user  navigate to saved post screen
+                navigator.navigate(SavedPostsScreenDestination())
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacyClickableItem(itemNameId = R.string.blocked_users) {
