@@ -186,4 +186,8 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getSavedPostsFromRemote(savedPosts: ArrayList<String>): ResponseState<List<PostBean>> {
+        return ResponseState.success(listOf())
+    }
+
 }
