@@ -8,7 +8,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,7 +59,6 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -79,11 +78,11 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth16
-import com.example.connect.presentation.ui.common.SpacerWidth32
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.models.StoryActions
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -104,6 +103,7 @@ fun ShowStoryScreen(
     allStoryPosters: ArrayList<UsersBean>,
     loggedInUserFirebaseId: String
 ) {
+    val context = LocalContext.current
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
@@ -127,7 +127,7 @@ fun ShowStoryScreen(
         }
     }
 //    DeleteStoryDialog(viewModel, currentStory.id)
-//    HandleGetSeenListState(viewModel, context)
+    HandleGetSeenListState(viewModel, context)
 //    HandleDeleteStoryState(
 //        currentUserStories,
 //        currentStory,
@@ -185,6 +185,7 @@ fun UserStories(
 ) {
     val context = LocalContext.current
     val screenWidth = context.resources.displayMetrics.widthPixels
+    val screenHeight = context.resources.displayMetrics.heightPixels
     if (storyBeans.isNullOrEmpty()) {
         navigator.popBackStack()
         return
@@ -202,32 +203,36 @@ fun UserStories(
             .background(Brush.linearGradient(FunctionHelper.getColorListFromColorString(currentStory.backgroundGradientColor)))
             .pointerInteropFilter {
                 val tapLocationX = it.x
-                val screenSplitCoordinates = screenWidth.toFloat() / 3
-                if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
-                    if (currentStoryIndex > 0) {
-                        currentStoryIndex--
-                    } else {
-                        currentStoryIndex = 0
-                    }
-                } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
-                    when (it.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            pauseTimer = true
+                val tapLocationY = it.y
+                if (tapLocationY > screenHeight * 0.4f) {
+                    val screenSplitCoordinates = screenWidth.toFloat() / 3
+                    if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
+                        if (currentStoryIndex > 0) {
+                            currentStoryIndex--
+                        } else {
+                            currentStoryIndex = 0
                         }
+                    } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                pauseTimer = true
+                            }
 
-                        MotionEvent.ACTION_UP -> {
-                            pauseTimer = false
+                            MotionEvent.ACTION_UP -> {
+                                pauseTimer = false
+                            }
+                        }
+                    } else if (it.action == MotionEvent.ACTION_DOWN) {
+                        if (currentStoryIndex < storyBeans.lastIndex) {
+                            currentStoryIndex++
+                        } else {
+                            currentStoryIndex = storyBeans.lastIndex
                         }
                     }
-                } else if (it.action == MotionEvent.ACTION_DOWN) {
-                    if (currentStoryIndex < storyBeans.lastIndex) {
-                        currentStoryIndex++
-                    } else {
-                        currentStoryIndex = storyBeans.lastIndex
-                    }
+                    true
+                } else {
+                    false
                 }
-
-                true
             }
     ) {
         Row(
@@ -251,11 +256,12 @@ fun UserStories(
             }
         }
         StoryTopSection(
-            user = storyPoster,
+            storyPoster = storyPoster,
             createdAt = currentStory.createdAt,
             context = context,
             navigator = navigator,
-            loggedInUserFirebaseId = loggedInUserFirebaseId
+            loggedInUserFirebaseId = loggedInUserFirebaseId,
+            viewModel = viewModel
         )
         StoryUi(
             viewModel = viewModel,
@@ -271,7 +277,7 @@ fun StoryUi(
     viewModel: ShowStoryViewModel,
     story: StoryBean,
     storyPoster: UsersBean,
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
     Box(
@@ -287,12 +293,13 @@ fun StoryUi(
 
 @Composable
 private fun StoryTopSection(
-    user: UsersBean,
+    storyPoster: UsersBean,
     createdAt: Long,
     context: Context,
     modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
-    loggedInUserFirebaseId: String
+    loggedInUserFirebaseId: String,
+    viewModel: ShowStoryViewModel
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -310,8 +317,8 @@ private fun StoryTopSection(
                 .size(40.dp)
                 .clip(CircleShape)
                 .border(1.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
-            model = user.profilePhoto,
-            contentDescription = user.name,
+            model = storyPoster.profilePhoto,
+            contentDescription = storyPoster.name,
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user)
         )
@@ -321,7 +328,7 @@ private fun StoryTopSection(
                 .weight(1f),
         ) {
             TextBold14(
-                text = if (user.firebaseUserId == loggedInUserFirebaseId) stringResource(R.string.your_story) else user.name,
+                text = if (storyPoster.firebaseUserId == loggedInUserFirebaseId) stringResource(R.string.your_story) else storyPoster.name,
                 color = MaterialTheme.colorScheme.onPrimary
             )
             Text(
@@ -332,50 +339,92 @@ private fun StoryTopSection(
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
-        StoryDropDownSection()
+        if (storyPoster.firebaseUserId == loggedInUserFirebaseId) {
+            StoryDropDownSection(viewModel)
+        }
     }
 }
 
 @Composable
-fun StoryDropDownSection() {
-    val genderList = stringArrayResource(id = R.array.gender_list)
+fun StoryDropDownSection(viewModel: ShowStoryViewModel) {
+    val context = LocalContext.current
+    val storyActionsList = getStoryActions(context)
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
     }
-    Icon(
-        modifier = Modifier.clickable { isDropdownMenuVisible = true },
-        imageVector = Icons.Default.MoreVert,
-        contentDescription = stringResource(id = R.string.more_options)
-    )
-    if (isDropdownMenuVisible) {
-        DropdownMenu(
-            expanded = true, onDismissRequest = { isDropdownMenuVisible = false },
-            modifier = Modifier
-                .fillMaxWidth(.9f),
-        ) {
-            genderList.forEach { item ->
-                DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                    //  viewModel.selectedGenderState.value = item
-                    isDropdownMenuVisible = false
-                })
+
+    var showDeleteStoryAlertDialog by remember {
+        mutableStateOf(false)
+    }
+
+    Box {
+        Icon(
+            modifier = Modifier.clickable { isDropdownMenuVisible = true },
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(id = R.string.more_options),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+        if (isDropdownMenuVisible) {
+            DropdownMenu(
+                expanded = true, onDismissRequest = { isDropdownMenuVisible = false }
+            ) {
+                storyActionsList.forEach { item ->
+                    DropdownMenuItem(text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                modifier = Modifier.size(20.dp),
+                                imageVector = item.icon,
+                                contentDescription = item.text
+                            )
+                            SpacerWidth16()
+                            Text(text = item.text)
+                        }
+                    }, onClick = {
+                        if (item.id == 1) {
+                            viewModel.showSeenListBottomSheet.value = true
+                        } else if (item.id == 2) {
+                            showDeleteStoryAlertDialog = true
+                        }
+                        isDropdownMenuVisible = false
+                    })
+                }
+            }
+        }
+        if (showDeleteStoryAlertDialog) {
+            TitleMessageIconOkCancelDialog(
+                imageVector = Icons.Default.Warning,
+                iconTint = ColorsHelper.warning(),
+                title = stringResource(id = R.string.delete_story),
+                subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_your_story),
+                positiveButtonText = stringResource(R.string.delete),
+                onCancel = {
+                    showDeleteStoryAlertDialog = false
+                }) {
+                // viewModel.deleteStory(currentStoryId)
             }
         }
     }
 }
 
-@Composable
-private fun DeleteStoryDialog(viewModel: ShowStoryViewModel, currentStoryId: String) {
-    if (viewModel.showDeleteStoryAlertDialog.value) {
-        TitleMessageIconOkCancelDialog(
-            title = stringResource(id = R.string.delete_story),
-            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_your_story),
-            positiveButtonText = stringResource(R.string.delete),
-            onCancel = {
-                viewModel.showDeleteStoryAlertDialog.value = false
-            }) {
-            viewModel.deleteStory(currentStoryId)
-        }
-    }
+private fun getStoryActions(context: Context): ArrayList<StoryActions> {
+    val storyActionsList = arrayListOf<StoryActions>()
+    storyActionsList.add(
+        StoryActions(
+            1,
+            context.getString(R.string.seen_list),
+            Icons.Default.RemoveRedEye,
+            null
+        )
+    )
+    storyActionsList.add(
+        StoryActions(
+            2,
+            context.getString(R.string.delete_story),
+            Icons.Default.Delete,
+            null
+        )
+    )
+    return storyActionsList
 }
 
 @Composable
@@ -437,12 +486,12 @@ private fun HandleDeleteStoryState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.story_deleted_successfully))
-                currentUserStories.remove(currentStory)
-                if (currentUserStories.isEmpty()) {
-                    navigator.popBackStack()
-                } else if (viewModel.currentStoryState.intValue > 0) {
-                    viewModel.currentStoryState.intValue--
-                }
+//                currentUserStories.remove(currentStory)
+//                if (currentUserStories.isEmpty()) {
+//                    navigator.popBackStack()
+//                } else if (viewModel.currentStoryState.intValue > 0) {
+//                    viewModel.currentStoryState.intValue--
+//                }
                 isResponseHandled = true
             }
         }
@@ -504,7 +553,6 @@ private fun SeenListBottomSheet(
         }
     }
 }
-
 
 @Composable
 private fun MediaSection(story: StoryBean, viewModel: ShowStoryViewModel, context: Context) {
@@ -572,34 +620,6 @@ private fun ShowStoryVideo(videoUrl: String, context: Context) {
         onDispose {
             exoPlayer.release()
         }
-    }
-}
-
-@Composable
-private fun StoryActionButtons(storyId: String, viewModel: ShowStoryViewModel) {
-    LaunchedEffect(Unit) {
-        viewModel.getSeenList(storyId)
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 40.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        Icon(
-            modifier = Modifier.clickable { viewModel.showSeenListBottomSheet.value = true },
-            imageVector = Icons.Default.RemoveRedEye,
-            contentDescription = stringResource(R.string.seen_by),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
-        SpacerWidth32()
-        Icon(
-            modifier = Modifier.clickable { viewModel.showDeleteStoryAlertDialog.value = true },
-            imageVector = Icons.Default.Delete,
-            contentDescription = stringResource(R.string.delete_story),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
     }
 }
 
