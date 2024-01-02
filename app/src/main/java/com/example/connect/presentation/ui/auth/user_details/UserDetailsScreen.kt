@@ -164,7 +164,7 @@ private fun NameInputTextField(viewModel: UserDetailsViewModel) {
 @Composable
 private fun GenderPickerSection(viewModel: UserDetailsViewModel) {
     val genderList = stringArrayResource(id = R.array.gender_list)
-    var isDialogVisible by remember {
+    var isDropdownMenuVisible by remember {
         mutableStateOf(false)
     }
     OutlinedTextFieldDisabledFeelsLikeEnabled(
@@ -183,22 +183,22 @@ private fun GenderPickerSection(viewModel: UserDetailsViewModel) {
             Image(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = stringResource(id = R.string.gender),
-                modifier = Modifier.scale(if (isDialogVisible) -1f else 1f)
+                modifier = Modifier.scale(if (isDropdownMenuVisible) -1f else 1f)
             )
         }
     ) {
-        isDialogVisible = true
+        isDropdownMenuVisible = true
     }
-    if (isDialogVisible) {
+    if (isDropdownMenuVisible) {
         DropdownMenu(
-            expanded = true, onDismissRequest = { isDialogVisible = false },
+            expanded = true, onDismissRequest = { isDropdownMenuVisible = false },
             modifier = Modifier
                 .fillMaxWidth(.9f),
         ) {
             genderList.forEach { item ->
                 DropdownMenuItem(text = { Text(text = item) }, onClick = {
                     viewModel.selectedGenderState.value = item
-                    isDialogVisible = false
+                    isDropdownMenuVisible = false
                 })
             }
         }

@@ -26,7 +26,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -60,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -121,7 +125,8 @@ fun ShowStoryScreen(
                 viewModel = viewModel,
                 initialPage = viewModel.allUsersStories.keys.toList()
                     .indexOf(currentStoryPosterFirebaseId),
-                navigator = navigator
+                navigator = navigator,
+                loggedInUserFirebaseId
             )
         }
     }
@@ -145,13 +150,13 @@ fun ShowStoryScreen(
     }
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun StoryMainSection(
     viewModel: ShowStoryViewModel,
     initialPage: Int,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String
 ) {
     val pageState = rememberPagerState(initialPage) {
         viewModel.allUsersStories.size
@@ -163,22 +168,24 @@ fun StoryMainSection(
             navigator.popBackStack()
             return@HorizontalPager
         }
-        UserStores(
+        UserStories(
             viewModel = viewModel,
             storyBeans = viewModel.allUsersStories[key],
             storyPoster = currentStoryPoster,
-            navigator = navigator
+            navigator = navigator,
+            loggedInUserFirebaseId
         )
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun UserStores(
+fun UserStories(
     viewModel: ShowStoryViewModel,
     storyBeans: ArrayList<StoryBean>?,
     storyPoster: UsersBean,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String
 ) {
     val context = LocalContext.current
     val screenWidth = context.resources.displayMetrics.widthPixels
@@ -251,7 +258,8 @@ fun UserStores(
             user = storyPoster,
             createdAt = currentStory.createdAt,
             context = context,
-            navigator = navigator
+            navigator = navigator,
+            loggedInUserFirebaseId = loggedInUserFirebaseId
         )
         StoryUi(
             viewModel = viewModel,
@@ -286,7 +294,8 @@ private fun StoryTopSection(
     createdAt: Long,
     context: Context,
     modifier: Modifier = Modifier,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -295,7 +304,7 @@ private fun StoryTopSection(
         Icon(
             modifier = Modifier.clickable { navigator.popBackStack() },
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = "",
+            contentDescription = stringResource(id = R.string.go_back),
             tint = MaterialTheme.colorScheme.onPrimary
         )
         SpacerWidth16()
@@ -311,9 +320,13 @@ private fun StoryTopSection(
         )
         Column(
             modifier = Modifier
-                .padding(start = 12.dp),
+                .padding(start = 12.dp)
+                .weight(1f),
         ) {
-            TextBold14(text = user.name, color = MaterialTheme.colorScheme.onPrimary)
+            TextBold14(
+                text = if (user.firebaseUserId == loggedInUserFirebaseId) stringResource(R.string.you) else user.name,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
             Text(
                 text = FunctionHelper.getTimeAgo(createdAt, context),
                 fontSize = 12.sp,
@@ -321,6 +334,34 @@ private fun StoryTopSection(
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onPrimary
             )
+        }
+        StoryDropDownSection()
+    }
+}
+
+@Composable
+fun StoryDropDownSection() {
+    val genderList = stringArrayResource(id = R.array.gender_list)
+    var isDropdownMenuVisible by remember {
+        mutableStateOf(false)
+    }
+    Icon(
+        modifier = Modifier.clickable { isDropdownMenuVisible = true },
+        imageVector = Icons.Default.MoreVert,
+        contentDescription = stringResource(id = R.string.more_options)
+    )
+    if (isDropdownMenuVisible) {
+        DropdownMenu(
+            expanded = true, onDismissRequest = { isDropdownMenuVisible = false },
+            modifier = Modifier
+                .fillMaxWidth(.9f),
+        ) {
+            genderList.forEach { item ->
+                DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                    //  viewModel.selectedGenderState.value = item
+                    isDropdownMenuVisible = false
+                })
+            }
         }
     }
 }
