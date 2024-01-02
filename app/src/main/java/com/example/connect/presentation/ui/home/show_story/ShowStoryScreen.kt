@@ -156,7 +156,7 @@ fun StoryMainSection(
     val pageState = rememberPagerState(initialPage) {
         viewModel.allUsersStories.size
     }
-    HorizontalPager(state = pageState) { index ->
+    HorizontalPager(state = pageState, modifier = Modifier.fillMaxSize()) { index ->
         val key = viewModel.allUsersStories.keys.toList()[index]
         val currentStoryPoster = viewModel.allUsersList.find { it.firebaseUserId == key }
         if (currentStoryPoster == null) {
@@ -253,14 +253,13 @@ fun UserStores(
             context = context,
             navigator = navigator
         )
+        StoryUi(
+            viewModel = viewModel,
+            story = currentStory,
+            storyPoster = storyPoster,
+            navigator = navigator
+        )
     }
-    StoryUi(
-        viewModel = viewModel,
-        story = currentStory,
-        storyPoster = storyPoster,
-        navigator = navigator
-    )
-
 }
 
 @Composable
@@ -271,22 +270,12 @@ fun StoryUi(
     navigator: DestinationsNavigator,
 ) {
     val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.linearGradient(FunctionHelper.getColorListFromColorString(story.backgroundGradientColor)))
-    ) {
-
-    }
     Box(
         modifier = Modifier
             .fillMaxSize(),
     ) {
         MediaSection(story, viewModel, context)
         StoryCaptionField(story)
-//            if (isLoggedInUser) {
-//                StoryActionButtons(story.id, viewModel)
-//            }
     }
 }
 
@@ -589,19 +578,20 @@ private fun StoryCaptionField(story: StoryBean) {
     val captionOffset = story.textOffset.split(",")
     val captionOffsetX = captionOffset[0].trim().toFloat().toInt()
     val captionOffsetY = captionOffset[1].trim().toFloat().toInt()
-
-    Text(
-        modifier = Modifier
-            .offset {
-                IntOffset(
-                    captionOffsetX,
-                    captionOffsetY
-                )
-            },
-        text = story.caption,
-        color = MaterialTheme.colorScheme.onPrimary,
-        fontSize = 18.sp
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text(
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        captionOffsetX,
+                        captionOffsetY
+                    )
+                },
+            text = story.caption,
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 18.sp
+        )
+    }
 }
 
 @Composable
@@ -609,7 +599,7 @@ private fun ShowStoryImage(imageUrl: String, onError: () -> Unit) {
     AsyncImage(
         model = imageUrl,
         contentDescription = stringResource(R.string.story_image),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
         onError = {
             onError()
