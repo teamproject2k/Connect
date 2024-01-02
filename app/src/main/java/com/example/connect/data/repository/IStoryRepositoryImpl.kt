@@ -108,10 +108,10 @@ class IStoryRepositoryImpl @Inject constructor(
             val listItem = hashMapOf(loggedInUserFireBaseId to System.currentTimeMillis())
 
             // Update the story document by adding the loggedInUserFirebaseId to the seenList
-            storyDocumentReference.update(
-                StoryRemoteEntity::seenList.name,
-                FieldValue.arrayUnion(listItem)
-            ).await()
+//            storyDocumentReference.update(
+//                StoryRemoteEntity::seenList.name,
+//                FieldValue.arrayUnion(listItem)
+//            ).await()
 
             ResponseState.success(null)
         } catch (exception: Exception) {
@@ -126,9 +126,9 @@ class IStoryRepositoryImpl @Inject constructor(
             val documentSnapshot: DocumentSnapshot = storyDocumentReference.get().await()
 
             if (documentSnapshot.exists()) {
-                val seenList =
-                    documentSnapshot[StoryRemoteEntity::seenList.name] as? List<Pair<String, Long>>
-                ResponseState.success(seenList)
+//                val seenList =
+//                    documentSnapshot[StoryRemoteEntity::seenList.name] as? List<Pair<String, Long>>
+                ResponseState.success(emptyList())
             } else {
                 ResponseState.success(null) // Return null if the document doesn't exist or doesn't contain the seenList field
             }

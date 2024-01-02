@@ -5,12 +5,15 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.story.AddUserToSeenListInRemoteUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
 import com.example.connect.domain.useCase.story.GetSeenListFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +33,7 @@ class ShowStoryViewModel @Inject constructor(
     val snackBarMessageState = mutableStateOf("")
     val currentStoryState = mutableIntStateOf(0)
     lateinit var currentStoryPosterState: MutableState<UsersBean>
-    var isCurrentStoryPosterInitialized = false
+    var areDetailsInitialized = false
 
     private val _getSeenListStateFlow: MutableStateFlow<ResponseState<List<Pair<String, Long>>>> =
         MutableStateFlow(ResponseState.none())
@@ -45,9 +48,20 @@ class ShowStoryViewModel @Inject constructor(
     var showDeleteStoryAlertDialog = mutableStateOf(false)
 
 
-    fun initData(currentStoryPoster: UsersBean) {
-        currentStoryPosterState.value = currentStoryPoster
-        isCurrentStoryPosterInitialized = true
+    lateinit var allUsersStories: MutableMap<String, ArrayList<StoryBean>>
+
+    lateinit var allUsersList: MutableList<UsersBean>
+
+
+
+
+    fun init(userStoriesString: String, allUsersList: MutableList<UsersBean>) {
+        allUsersStories = Gson().fromJson(
+            userStoriesString,
+            object : TypeToken<MutableMap<String, ArrayList<StoryBean>>>() {}.type
+        )
+        this.allUsersList = allUsersList
+        areDetailsInitialized = true
     }
 
     fun addUserToSeenList(storyId: String, loggedInUserFireBaseId: String) {

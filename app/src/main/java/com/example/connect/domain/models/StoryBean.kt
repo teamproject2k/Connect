@@ -12,7 +12,7 @@ data class StoryBean(
     val mediaType: String,
     val textOffset: String,
     val backgroundGradientColor: String,
-    val seenList: List<Pair<String, Long>>
+    //val seenList: List<Pair<String, Long>>
 ) : Serializable {
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(
@@ -23,7 +23,6 @@ data class StoryBean(
             mediaType,
             textOffset,
             backgroundGradientColor,
-            seenList
         )
     }
 }

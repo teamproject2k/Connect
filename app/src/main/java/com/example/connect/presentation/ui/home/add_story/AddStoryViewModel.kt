@@ -128,7 +128,6 @@ class AddStoryViewModel @Inject constructor(
                     storyType,
                     captionOffset,
                     colorGradient,
-                    listOf()
                 )
 
                 // Upload the story details to the remote server.

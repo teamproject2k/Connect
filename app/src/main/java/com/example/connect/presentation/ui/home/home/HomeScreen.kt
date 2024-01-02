@@ -278,7 +278,7 @@ private fun StoryItem(
             val gsonString: String = Gson().toJson(allStories)
             navigator.navigate(
                 ShowStoryScreenDestination(
-                    storyPoster,
+                    storyPoster.firebaseUserId,
                     gsonString,
                     allStoryPosters,
                     loggedInUserFirebaseId
@@ -304,17 +304,17 @@ private fun getColorListFromStories(
     loggedInUserFirebaseId: String
 ): List<List<Color>> {
     val colorList = mutableListOf<List<Color>>()
-    val numberOfStoriesSeen =
-        currentUserStories.count {
-            it.seenList.map { list -> list.first }.contains(loggedInUserFirebaseId)
-        }
+    val numberOfStoriesSeen = 0
+//        currentUserStories.count {
+////            it.seenList.map { list -> list.first }.contains(loggedInUserFirebaseId)
+//        }
 
     repeat(numberOfStoriesSeen) {
         colorList.add(listOf(Color.Gray, Color.LightGray))
     }
 
     repeat(currentUserStories.size - numberOfStoriesSeen) {
-        colorList.add(listOf(Color.Red, Color.Magenta))
+        colorList.add(listOf(Color(0xFF00668B), Color(0xff0083b3)))
     }
 
     return colorList.toList()

@@ -2,8 +2,11 @@ package com.example.connect.presentation.ui.home.show_story
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -16,11 +19,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,17 +41,21 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -68,22 +76,22 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth32
-import com.example.connect.presentation.ui.common.StoryUserItem
+import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
-import com.example.connect.presentation.utils.FunctionHelper.getColorFromHexString
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
-import com.google.common.reflect.TypeToken
-import com.google.gson.Gson
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @HomeNavGraph
@@ -91,81 +99,239 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShowStoryScreen(
     navigator: DestinationsNavigator,
-    currentStoryPoster: UsersBean,
+    currentStoryPosterFirebaseId: String,
     allStoriesString: String,
     allStoryPosters: ArrayList<UsersBean>,
     loggedInUserFirebaseId: String
 ) {
-    val allStories: MutableMap<String, ArrayList<StoryBean>> = Gson().fromJson(
-        allStoriesString,
-        object : TypeToken<MutableMap<String, ArrayList<StoryBean>>>() {}.type
-    )
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
-    val context = LocalContext.current
-
-    if (!viewModel.isCurrentStoryPosterInitialized) {
-        viewModel.initData(currentStoryPoster)
+    if (!viewModel.areDetailsInitialized) {
+        viewModel.init(allStoriesString, allStoryPosters)
     }
 
-    val currentUserStories = allStories[viewModel.currentStoryPosterState.value.firebaseUserId]
-
-    if (currentUserStories != null) {
-
-        val currentStory = currentUserStories[viewModel.currentStoryState.intValue]
-        val storyGradientColors = currentStory.backgroundGradientColor.split(",")
-        val colorList = arrayListOf<Color>()
-
-        storyGradientColors.forEach { colorString ->
-            colorList.add(getColorFromHexString(colorString))
-        }
-
-        Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-            Column(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.linearGradient(colorList)
-                    )
-            ) {
-                // StoryProgressBar(stories.size)
-                StoryUserItem(
-                    user = viewModel.currentStoryPosterState.value,
-                    story = currentStory,
-                    context = context,
-                    navigator = navigator
-                )
-                StoryContentSection(
-                    currentStory,
-                    viewModel,
-                    allStoryPosters,
-                    currentUserStories.size,
-                    navigator,
-                    loggedInUserFirebaseId,
-                    Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                )
-                DeleteStoryDialog(viewModel, currentStory.id)
-                HandleGetSeenListState(viewModel, context)
-                HandleDeleteStoryState(
-                    currentUserStories,
-                    currentStory,
-                    viewModel,
-                    navigator,
-                    context
-                )
-            }
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
+            StoryMainSection(
+                viewModel = viewModel,
+                initialPage = viewModel.allUsersStories.keys.toList()
+                    .indexOf(currentStoryPosterFirebaseId),
+                navigator = navigator
+            )
         }
     }
+//    DeleteStoryDialog(viewModel, currentStory.id)
+//    HandleGetSeenListState(viewModel, context)
+//    HandleDeleteStoryState(
+//        currentUserStories,
+//        currentStory,
+//        viewModel,
+//        navigator,
+//        context
+//    )
+
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
                 snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
                 viewModel.snackBarMessageState.value = ""
             }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun StoryMainSection(
+    viewModel: ShowStoryViewModel,
+    initialPage: Int,
+    navigator: DestinationsNavigator
+) {
+    val pageState = rememberPagerState(initialPage) {
+        viewModel.allUsersStories.size
+    }
+    HorizontalPager(state = pageState) { index ->
+        val key = viewModel.allUsersStories.keys.toList()[index]
+        val currentStoryPoster = viewModel.allUsersList.find { it.firebaseUserId == key }
+        if (currentStoryPoster == null) {
+            navigator.popBackStack()
+            return@HorizontalPager
+        }
+        UserStores(
+            viewModel = viewModel,
+            storyBeans = viewModel.allUsersStories[key],
+            storyPoster = currentStoryPoster,
+            navigator = navigator
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun UserStores(
+    viewModel: ShowStoryViewModel,
+    storyBeans: ArrayList<StoryBean>?,
+    storyPoster: UsersBean,
+    navigator: DestinationsNavigator
+) {
+    val context = LocalContext.current
+    val screenWidth = context.resources.displayMetrics.widthPixels
+    if (storyBeans.isNullOrEmpty()) {
+        navigator.popBackStack()
+        return
+    }
+    var currentStoryIndex by remember {
+        mutableIntStateOf(0)
+    }
+    val currentStory = storyBeans[currentStoryIndex]
+    var pauseTimer by remember {
+        mutableStateOf(false)
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.linearGradient(FunctionHelper.getColorListFromColorString(currentStory.backgroundGradientColor)))
+            .pointerInteropFilter {
+                val tapLocationX = it.x
+                val screenSplitCoordinates = screenWidth.toFloat() / 3
+                if (tapLocationX in 0.0f..screenSplitCoordinates) {
+                    if (currentStoryIndex > 0) {
+                        currentStoryIndex--
+                    } else {
+                        currentStoryIndex = 0
+                    }
+                } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            pauseTimer = true
+                        }
+
+                        MotionEvent.ACTION_UP -> {
+                            pauseTimer = false
+                        }
+                    }
+                } else {
+                    if (currentStoryIndex < storyBeans.lastIndex) {
+                        currentStoryIndex++
+                    } else {
+                        currentStoryIndex = storyBeans.lastIndex
+                    }
+                }
+
+                true
+            }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            SpacerWidth6()
+            for (index in 0 until storyBeans.size) {
+                LinearIndicator(
+                    modifier = Modifier.weight(1f),
+                    currentPageIndex = currentStoryIndex,
+                    progressBarIndex = index,
+                    startProgress = index == currentStoryIndex,
+                    onPauseTimer = pauseTimer
+                ) {
+                    if (currentStoryIndex < storyBeans.lastIndex) {
+                        currentStoryIndex++
+                    }
+                }
+                SpacerWidth6()
+            }
+        }
+        StoryTopSection(
+            user = storyPoster,
+            createdAt = currentStory.createdAt,
+            context = context,
+            navigator = navigator
+        )
+    }
+    StoryUi(
+        viewModel = viewModel,
+        story = currentStory,
+        storyPoster = storyPoster,
+        navigator = navigator
+    )
+
+}
+
+@Composable
+fun StoryUi(
+    viewModel: ShowStoryViewModel,
+    story: StoryBean,
+    storyPoster: UsersBean,
+    navigator: DestinationsNavigator,
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.linearGradient(FunctionHelper.getColorListFromColorString(story.backgroundGradientColor)))
+    ) {
+
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        MediaSection(story, viewModel, context)
+        StoryCaptionField(story)
+//            if (isLoggedInUser) {
+//                StoryActionButtons(story.id, viewModel)
+//            }
+    }
+}
+
+
+@Composable
+private fun StoryTopSection(
+    user: UsersBean,
+    createdAt: Long,
+    context: Context,
+    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Icon(
+            modifier = Modifier.clickable { navigator.popBackStack() },
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+        SpacerWidth16()
+        AsyncImage(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+            model = user.profilePhoto,
+            contentDescription = user.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp),
+        ) {
+            TextBold14(text = user.name, color = MaterialTheme.colorScheme.onPrimary)
+            Text(
+                text = FunctionHelper.getTimeAgo(createdAt, context),
+                fontSize = 12.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
@@ -312,35 +478,6 @@ private fun SeenListBottomSheet(
     }
 }
 
-@Composable
-private fun StoryProgressBar(numberOfStories: Int) {
-    var progress by remember { mutableStateOf(0f) }
-
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val progressBarWidth = (screenWidth / numberOfStories).dp
-
-    LaunchedEffect(Unit) {
-        repeat(numberOfStories) { part ->
-            launch {
-                for (i in 0..100 step 25) {
-                    progress = i.toFloat()
-                    delay(5000)
-                }
-            }
-        }
-    }
-
-    LazyRow(modifier = Modifier.padding(top = 4.dp)) {
-        items(numberOfStories) {
-            LinearProgressIndicator(
-                progress = progress / 100f,
-                modifier = Modifier.width(progressBarWidth),
-                color = Color.White,
-                trackColor = Color.Gray
-            )
-        }
-    }
-}
 
 @Composable
 private fun StoryContentSection(
@@ -565,4 +702,55 @@ private fun SeenListUserItem(
             )
         }
     }
+}
+
+
+@Composable
+fun LinearIndicator(
+    modifier: Modifier,
+    currentPageIndex: Int,
+    progressBarIndex: Int,
+    startProgress: Boolean = false,
+    indicatorBackgroundColor: Color = ColorsHelper.gray(),
+    indicatorProgressColor: Color = MaterialTheme.colorScheme.onPrimary,
+    slideDurationInSeconds: Long = 10,
+    onPauseTimer: Boolean = false,
+    onAnimationEnd: () -> Unit
+) {
+
+    val delayInMillis = rememberSaveable {
+        (slideDurationInSeconds * 1000) / 100
+    }
+
+    var progress by remember {
+        mutableFloatStateOf(0.00f)
+    }
+    LaunchedEffect(key1 = currentPageIndex) {
+        progress = if (progressBarIndex < currentPageIndex) {
+            1f
+        } else 0f
+    }
+
+    if (startProgress) {
+        LaunchedEffect(key1 = onPauseTimer) {
+            while (progress < 1f && isActive && onPauseTimer.not()) {
+                progress += 0.01f
+                delay(delayInMillis)
+            }
+
+            //When the timer is not paused and animation completes then move to next page.
+            if (onPauseTimer.not()) {
+                delay(200)
+                onAnimationEnd()
+            }
+        }
+    }
+    LinearProgressIndicator(
+        trackColor = indicatorBackgroundColor,
+        color = indicatorProgressColor,
+        modifier = modifier
+            .padding(top = 12.dp, bottom = 12.dp)
+            .clip(RoundedCornerShape(12.dp)),
+        progress = progress
+    )
 }

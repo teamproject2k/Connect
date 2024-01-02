@@ -588,8 +588,17 @@ object FunctionHelper {
         return gradientColorList
     }
 
-    fun getColorFromHexString(colorString: String): Color {
-        val colorInt = colorString.trim().toLong(radix = 16).toInt() // Parse hex string to integer
-        return Color(colorInt)
+
+    fun getColorListFromColorString(
+        colorListString: String,
+        delimiter: Char = ','
+    ): List<Color> {
+        val colorStringList = colorListString.split(delimiter)
+        val colorList = arrayListOf<Color>()
+        colorStringList.forEach { colorString ->
+            val colorInt = colorString.trim().toLong(radix = 16).toInt()
+            colorList.add(Color(colorInt))
+        }
+        return colorList
     }
 }
