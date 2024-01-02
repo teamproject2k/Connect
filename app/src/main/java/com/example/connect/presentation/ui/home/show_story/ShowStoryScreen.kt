@@ -216,7 +216,7 @@ fun UserStores(
                             pauseTimer = false
                         }
                     }
-                } else if(it.action == MotionEvent.ACTION_DOWN){
+                } else if (it.action == MotionEvent.ACTION_DOWN) {
                     if (currentStoryIndex < storyBeans.lastIndex) {
                         currentStoryIndex++
                     } else {
@@ -468,97 +468,6 @@ private fun SeenListBottomSheet(
     }
 }
 
-
-@Composable
-private fun StoryContentSection(
-    story: StoryBean,
-    viewModel: ShowStoryViewModel,
-    allStoryPosters: ArrayList<UsersBean>,
-    numberOfStories: Int,
-    navigator: DestinationsNavigator,
-    loggedInUserFirebaseId: String,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    var isWithinFirstHalf by remember { mutableStateOf(false) }
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    var horizontalDrag = remember { 0f }
-    val isLoggedInUser = loggedInUserFirebaseId == story.fireBaseUserId
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragEnd = {
-                        when {
-                            horizontalDrag > 0 -> {  // Right Swipe
-                                val currentUserIndex =
-                                    allStoryPosters.indexOf(viewModel.currentStoryPosterState.value)
-                                val previousUser =
-                                    allStoryPosters.getOrNull(currentUserIndex - 1)
-                                if (previousUser == null) {
-                                    navigator.popBackStack()
-                                } else {
-                                    viewModel.currentStoryPosterState.value = previousUser
-                                    viewModel.currentStoryState.intValue = 0
-                                }
-                            }
-
-                            horizontalDrag < 0 -> {  // Left Swipe
-                                val currentUserIndex =
-                                    allStoryPosters.indexOf(viewModel.currentStoryPosterState.value)
-                                val nextUser =
-                                    allStoryPosters.getOrNull(currentUserIndex + 1)
-                                if (nextUser == null) {
-                                    navigator.popBackStack()
-                                } else {
-                                    viewModel.currentStoryPosterState.value = nextUser
-                                    viewModel.currentStoryState.intValue = 0
-                                }
-                            }
-                        }
-                    },
-                    onHorizontalDrag = { change, dragAmount ->
-                        change.consume()
-                        horizontalDrag = dragAmount
-                    },
-                )
-            }
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    isWithinFirstHalf = offset.x.dp < (screenWidth / 2)
-                    if (isWithinFirstHalf) {
-                        if (viewModel.currentStoryState.intValue != 0) {
-                            viewModel.currentStoryState.intValue--
-                        }
-                    } else {
-                        if (viewModel.currentStoryState.intValue != numberOfStories - 1) {
-                            viewModel.currentStoryState.intValue++
-                        }
-                    }
-                }
-            }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            MediaSection(story, viewModel, context)
-            StoryCaptionField(story)
-            if (isLoggedInUser) {
-                StoryActionButtons(story.id, viewModel)
-            }
-        }
-    }
-    if (!isLoggedInUser) {
-        LaunchedEffect(key1 = Unit) {
-            viewModel.addUserToSeenList(story.id, loggedInUserFirebaseId)
-        }
-    }
-}
 
 @Composable
 private fun MediaSection(story: StoryBean, viewModel: ShowStoryViewModel, context: Context) {
