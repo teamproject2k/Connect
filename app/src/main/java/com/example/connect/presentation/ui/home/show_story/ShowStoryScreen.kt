@@ -352,11 +352,9 @@ fun StoryDropDownSection(viewModel: ShowStoryViewModel) {
     var isDropdownMenuVisible by remember {
         mutableStateOf(false)
     }
-
     var showDeleteStoryAlertDialog by remember {
         mutableStateOf(false)
     }
-
     Box {
         Icon(
             modifier = Modifier.clickable { isDropdownMenuVisible = true },

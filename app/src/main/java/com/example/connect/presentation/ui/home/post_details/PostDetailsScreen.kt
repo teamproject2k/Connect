@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -50,6 +51,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -137,7 +139,7 @@ private fun PostDetails(
                         contentDescription = stringResource(id = R.string.more_options),
                     )
                 }
-                PostDetailsDropDownSection(viewModel)
+                PostDetailsDropDownSection(viewModel, postDetails.id)
             }
         }
         if (postDetails.caption.isNotBlank()) {
@@ -165,34 +167,49 @@ private fun PostDetails(
 }
 
 @Composable
-fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
+fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel, id: String) {
     val postDetailsDropdownList = listOf(stringResource(R.string.delete_post))
     var isDropdownMenuVisible by remember {
+        mutableStateOf(false)
+    }
+    var showDeletePostAlertDialog by remember {
         mutableStateOf(false)
     }
     if (isDropdownMenuVisible) {
         DropdownMenu(
             expanded = true, onDismissRequest = { isDropdownMenuVisible = false }
         ) {
-            postDetailsDropdownList.forEach { text ->
+            postDetailsDropdownList.forEach { item ->
                 DropdownMenuItem(text = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             modifier = Modifier.size(20.dp),
                             imageVector = Icons.Default.Delete,
-                            contentDescription = text
+                            contentDescription = item
                         )
                         SpacerWidth16()
-                        Text(text = text)
+                        Text(text = item)
                     }
                 }, onClick = {
-                    viewModel.deletePost(postId = "") // Todo
+                    showDeletePostAlertDialog = true
                 })
             }
         }
     }
+    if (showDeletePostAlertDialog) {
+        TitleMessageIconOkCancelDialog(
+            imageVector = Icons.Default.Warning,
+            iconTint = ColorsHelper.warning(),
+            title = stringResource(id = R.string.delete_post),
+            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_post),
+            positiveButtonText = stringResource(R.string.delete),
+            onCancel = {
+                showDeletePostAlertDialog = false
+            }) {
+            viewModel.deletePost(postId = id)
+        }
+    }
 }
-
 
 @Composable
 private fun PostBottomSection(
