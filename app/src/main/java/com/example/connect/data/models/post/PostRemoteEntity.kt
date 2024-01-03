@@ -11,8 +11,9 @@ data class PostRemoteEntity(
     val postType: String,
     val commentCount: Long,
     val likedBy: ArrayList<String>,
+    val isDeleted: Boolean
 ) {
-    constructor() : this("", "", "", 0, "", "", 0, arrayListOf())
+    constructor() : this("", "", "", 0, "", "", 0, arrayListOf(), false)
 
     fun toPostBean(id: String, isSavedByCurrentUser: Boolean): PostBean {
         return PostBean(
@@ -25,7 +26,8 @@ data class PostRemoteEntity(
             postType,
             commentCount,
             isSavedByCurrentUser,
-            likedBy
+            likedBy,
+            isDeleted
         )
     }
 }

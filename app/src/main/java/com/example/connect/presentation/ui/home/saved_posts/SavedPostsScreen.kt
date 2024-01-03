@@ -101,13 +101,11 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            Column {
-                HandleGetSavedPostsState(
-                    viewModel,
-                    navigator,
-                    homeSharedViewModel.usersDetails.firebaseUserId
-                )
-            }
+            HandleGetSavedPostsState(
+                viewModel,
+                navigator,
+                homeSharedViewModel.usersDetails.firebaseUserId
+            )
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -161,7 +159,7 @@ fun HandleGetSavedPostsState(
         RequestStatusEnum.Success -> {
             DisplaySavedPostsList(
                 navigator,
-                savedPostsState.data ?: Pair(arrayListOf(), arrayListOf()),
+                savedPostsState.data,
                 loggedInUserFirebaseId,
                 viewModel
             )
@@ -176,11 +174,11 @@ fun HandleGetSavedPostsState(
 @Composable
 fun DisplaySavedPostsList(
     navigator: DestinationsNavigator,
-    postWithUsers: Pair<ArrayList<PostBean>, ArrayList<UsersBean>>,
+    postWithUsers: Pair<ArrayList<PostBean>, ArrayList<UsersBean>>?,
     loggedInUserFirebaseId: String,
     viewModel: SavedPostsViewModel
 ) {
-    if (postWithUsers.first.isEmpty() || postWithUsers.second.isEmpty()) {
+    if (postWithUsers == null || postWithUsers.first.isEmpty() || postWithUsers.second.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_posts_found))
         }

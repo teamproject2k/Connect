@@ -18,6 +18,7 @@ data class PostBean(
     val commentCount: Long,
     var isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
+    val isDeleted: Boolean
 ) : Parcelable {
     fun toPostRemoteEntity(): PostRemoteEntity {
         return PostRemoteEntity(
@@ -28,7 +29,8 @@ data class PostBean(
             postScope,
             postType,
             commentCount,
-            likedBy
+            likedBy,
+            isDeleted
         )
     }
 
@@ -43,7 +45,8 @@ data class PostBean(
             postType,
             commentCount,
             isSavedByCurrentUser,
-            likedBy
+            likedBy,
+            isDeleted
         )
     }
 }
