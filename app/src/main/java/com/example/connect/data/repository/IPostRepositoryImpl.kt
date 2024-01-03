@@ -46,7 +46,7 @@ class IPostRepositoryImpl @Inject constructor(
             }
             response.documents.forEach { document ->
                 val post = document.toObject(PostRemoteEntity::class.java)
-                if (post != null) {
+                if (post != null && !post.isDeleted) {
                     postList.add(
                         post.toPostBean(
                             document.id,
@@ -104,7 +104,7 @@ class IPostRepositoryImpl @Inject constructor(
                 postListResponse.documents.forEach { document ->
                     if (document.exists()) {
                         val post = document.toObject(PostRemoteEntity::class.java)
-                        if (post != null) {
+                        if (post != null && !post.isDeleted) {
                             postList.add(
                                 post.toPostBean(
                                     document.id,
@@ -205,7 +205,11 @@ class IPostRepositoryImpl @Inject constructor(
                     val postList = arrayListOf<PostBean>()
                     postListDocument.documents.forEach { document ->
                         document.toObject(PostRemoteEntity::class.java)
-                            ?.let { postList.add(it.toPostBean(document.id, true)) }
+                            ?.let {
+                                if (!it.isDeleted) {
+                                    postList.add(it.toPostBean(document.id, true))
+                                }
+                            }
                     }
                     postList.sortByDescending { it.createdAt }
 
@@ -255,6 +259,17 @@ class IPostRepositoryImpl @Inject constructor(
             }
         } catch (exception: Exception) {
             // An error occurred while getting the post details from the server.
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.POST_KEY).document(postId)
+                .update(PostRemoteEntity::isDeleted.name, true).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            // An error occurred while deleting the post from remote.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }

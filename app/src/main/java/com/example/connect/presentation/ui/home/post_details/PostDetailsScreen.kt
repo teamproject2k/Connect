@@ -2,16 +2,21 @@ package com.example.connect.presentation.ui.home.post_details
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -42,6 +47,7 @@ import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.UserDetailsSection
@@ -124,11 +130,14 @@ private fun PostDetails(
                         }
                     }
             )
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(id = R.string.more_options),
-                )
+            Box {
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(id = R.string.more_options),
+                    )
+                }
+                PostDetailsDropDownSection(viewModel)
             }
         }
         if (postDetails.caption.isNotBlank()) {
@@ -152,6 +161,35 @@ private fun PostDetails(
         PostBottomSection(postDetails, viewModel, currentUserFirebaseId)
         SpacerHeight16()
         DividerLightGrayAlpha40()
+    }
+}
+
+@Composable
+fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
+    val postDetailsDropdownList = listOf(stringResource(R.string.delete_post))
+    var isDropdownMenuVisible by remember {
+        mutableStateOf(false)
+    }
+    if (isDropdownMenuVisible) {
+        DropdownMenu(
+            expanded = true, onDismissRequest = { isDropdownMenuVisible = false }
+        ) {
+            postDetailsDropdownList.forEach { text ->
+                DropdownMenuItem(text = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            modifier = Modifier.size(20.dp),
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = text
+                        )
+                        SpacerWidth16()
+                        Text(text = text)
+                    }
+                }, onClick = {
+                    viewModel.deletePost(postId = "") // Todo
+                })
+            }
+        }
     }
 }
 

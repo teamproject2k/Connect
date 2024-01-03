@@ -70,4 +70,6 @@ interface IPostRepository {
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
     ): ResponseState<Pair<ArrayList<PostBean>, ArrayList<UsersBean>>>
+
+    suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing>
 }
