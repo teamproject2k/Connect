@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.add_story
 
 import android.annotation.SuppressLint
+import android.util.Size
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -8,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -51,6 +53,18 @@ class AddStoryViewModel @Inject constructor(
 
     var captionOffsetX by mutableFloatStateOf(0f)
     var captionOffsetY by mutableFloatStateOf(0f)
+
+    lateinit var colorOnMedia: MutableState<Color>
+
+    var isDataInitialized = false
+
+    var textSize: IntSize? = null
+
+
+    fun initData(textColor: Color) {
+        this.colorOnMedia = mutableStateOf(textColor)
+        isDataInitialized = true
+    }
 
     fun uploadUserStory(currentUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
@@ -115,7 +129,10 @@ class AddStoryViewModel @Inject constructor(
 
                 // Create a comma separated string from the caption offset values
                 val captionOffset = "$captionOffsetX,$captionOffsetY"
-                val colorGradient = storyBackgroundColorState.value.joinToString {
+
+                val backgroundColorGradient =
+                    if (selectedMediaState.value == null) storyBackgroundColorState.value else FunctionHelper.getDefaultBackgroundGradient()
+                val colorGradientString = backgroundColorGradient.joinToString {
                     it.toArgb().toHexString()
                 }
                 // Create a StoryBean object with the story details.
@@ -126,8 +143,9 @@ class AddStoryViewModel @Inject constructor(
                     captionTextState.value,
                     FunctionHelper.getCurrentTimeInMillis(),
                     storyType,
+                    colorOnMedia.value.toArgb().toHexString(),
                     captionOffset,
-                    colorGradient,
+                    colorGradientString,
                 )
 
                 // Upload the story details to the remote server.

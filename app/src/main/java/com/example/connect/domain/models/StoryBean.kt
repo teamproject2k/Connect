@@ -10,6 +10,7 @@ data class StoryBean(
     val caption: String,
     val createdAt: Long,
     val mediaType: String,
+    val textColor: String,
     val textOffset: String,
     val backgroundGradientColor: String,
     //val seenList: List<Pair<String, Long>>
@@ -21,6 +22,7 @@ data class StoryBean(
             caption,
             createdAt,
             mediaType,
+            textColor,
             textOffset,
             backgroundGradientColor,
         )

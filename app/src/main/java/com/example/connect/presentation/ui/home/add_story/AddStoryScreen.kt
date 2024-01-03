@@ -46,8 +46,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +63,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.ui.PlayerView
+import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
@@ -85,6 +88,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+
 @HomeNavGraph
 @Destination
 @Composable
@@ -94,6 +98,8 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val snackBarHostState = SnackbarHostState()
+    val screenWidth = context.resources.displayMetrics.widthPixels
+    val screenHeight = context.resources.displayMetrics.heightPixels
     val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
         val mediaType = FunctionHelper.getMediaType(contentResolver, uri)
@@ -101,6 +107,11 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
             viewModel.selectedMediaState.value =
                 MediaData(uri, mediaType)
         }
+    }
+    val textColor = MaterialTheme.colorScheme.onPrimary
+    if (!viewModel.isDataInitialized) {
+
+        viewModel.initData(textColor)
     }
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
@@ -128,7 +139,32 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
             }
         }
     }
+    LaunchedEffect(key1 = viewModel.selectedMediaState.value) {
+        if (viewModel.selectedMediaState.value == null) {
+            viewModel.colorOnMedia.value = textColor
+            val textSize = viewModel.textSize
+            if (textSize != null) {
+                val desiredOffsetX = ((screenWidth - textSize.width) / 2).toFloat()
+                val desiredOffsetY = ((screenWidth - textSize.height) / 2).toFloat()
+
+            }
+        } else {
+            val fileBitmap = FunctionHelper.uriToBitmap(
+                context.contentResolver,
+                viewModel.selectedMediaState.value!!.uri
+            )
+            if (fileBitmap != null) {
+                Palette.from(fileBitmap).generate { palette ->
+                    val vibrant = palette?.vibrantSwatch
+                    if (vibrant != null) {
+                        viewModel.colorOnMedia.value = Color(vibrant.rgb)
+                    }
+                }
+            }
+        }
+    }
 }
+
 
 @Composable
 private fun HandleAddStorySection(
@@ -194,7 +230,7 @@ private fun MainContentSection(
         Box(
             modifier = Modifier
                 .fillMaxSize(),
-            contentAlignment = if (viewModel.selectedMediaState.value == null) Alignment.Center else Alignment.BottomCenter
+              contentAlignment = if (viewModel.selectedMediaState.value == null) Alignment.Center else Alignment.BottomCenter
         ) {
             MediaSection(viewModel, context)
             StoryCaptionField(viewModel)
@@ -206,26 +242,36 @@ private fun MainContentSection(
                 .clickable { navigator.popBackStack() },
             painter = painterResource(id = R.drawable.ic_cancel),
             contentDescription = stringResource(id = R.string.clear),
-            tint = MaterialTheme.colorScheme.onPrimary
+            tint = viewModel.colorOnMedia.value
         )
     }
 }
 
 @Composable
 private fun StoryCaptionField(viewModel: AddStoryViewModel) {
+    val context = LocalContext.current
+    val screenWidth = context.resources.displayMetrics.widthPixels
+    val screenHeight = context.resources.displayMetrics.heightPixels
     TransparentTextField(
         modifier = Modifier
-            .offset {
-                IntOffset(
-                    viewModel.captionOffsetX.roundToInt(),
-                    viewModel.captionOffsetY.roundToInt()
-                )
-            }
-            .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                    change.consume()
-                    viewModel.captionOffsetX += dragAmount.x
-                    viewModel.captionOffsetY += dragAmount.y
+//            .offset {
+//                IntOffset(
+//                    viewModel.captionOffsetX.roundToInt(),
+//                    viewModel.captionOffsetY.roundToInt()
+//                )
+//            }
+//            .pointerInput(Unit) {
+//                detectDragGestures { change, dragAmount ->
+//                    change.consume()
+//                    viewModel.captionOffsetX += dragAmount.x
+//                    viewModel.captionOffsetY += dragAmount.y
+//                }
+//            }
+            .onGloballyPositioned {
+                if (viewModel.textSize == null) {
+                    viewModel.captionOffsetX = ((screenWidth - it.size.width) / 2).toFloat()
+                    viewModel.captionOffsetY = ((screenHeight - it.size.height) / 2).toFloat()
+                    viewModel.textSize = it.size
                 }
             },
         value = viewModel.captionTextState.value,
@@ -233,7 +279,7 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
             Text(
                 text = stringResource(R.string.type_something),
                 fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = viewModel.colorOnMedia.value,
                 textAlign = TextAlign.Center
             )
         },
@@ -241,7 +287,7 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
             viewModel.captionTextState.value = updatedValue
         },
         textStyle = TextStyle.Default.copy(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = viewModel.colorOnMedia.value,
             fontSize = 18.sp
         )
     )

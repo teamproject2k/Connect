@@ -2,6 +2,8 @@ package com.example.connect.presentation.utils
 
 import android.content.ContentResolver
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -27,6 +29,9 @@ import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.models.VisibilityScope
 import com.google.auth.oauth2.GoogleCredentials
+import org.checkerframework.checker.units.qual.A
+import java.io.FileDescriptor
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.Instant
@@ -589,6 +594,11 @@ object FunctionHelper {
     }
 
 
+    fun getDefaultBackgroundGradient(): MutableList<Color> {
+        return (mutableListOf(Color.Black, Color(0xFF262626)))
+    }
+
+
     fun getColorListFromColorString(
         colorListString: String,
         delimiter: Char = ','
@@ -596,9 +606,26 @@ object FunctionHelper {
         val colorStringList = colorListString.split(delimiter)
         val colorList = arrayListOf<Color>()
         colorStringList.forEach { colorString ->
-            val colorInt = colorString.trim().toLong(radix = 16).toInt()
-            colorList.add(Color(colorInt))
+            colorList.add(getColorFromColorString(colorString))
         }
         return colorList
+    }
+
+    fun getColorFromColorString(colorString: String): Color {
+        val colorInt = colorString.trim().toLong(radix = 16).toInt()
+        return Color(colorInt)
+    }
+
+    fun uriToBitmap(contentResolver: ContentResolver, selectedFileUri: Uri): Bitmap? {
+        try {
+            val parcelFileDescriptor = contentResolver.openFileDescriptor(selectedFileUri, "r")
+            val fileDescriptor: FileDescriptor = parcelFileDescriptor!!.fileDescriptor
+            val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+            parcelFileDescriptor.close()
+            return image
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
     }
 }
