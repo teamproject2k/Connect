@@ -508,7 +508,6 @@ private fun PostListItem(
     }
 }
 
-
 @Composable
 private fun PostBottomSection(
     postDetails: PostBean,

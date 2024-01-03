@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -40,6 +42,7 @@ import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
@@ -96,19 +99,36 @@ private fun PostDetails(
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
-        UserDetailsSection(
-            user = usersDetails,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                .clickable {
-                    if (currentUserFirebaseId == usersDetails.firebaseUserId) {
-                        navigator.navigate(CurrentUserProfileScreenDestination)
-                    } else {
-                        navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
+        Row(
+            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navigator.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(id = R.string.go_back),
+                )
+            }
+            SpacerWidth8()
+            UserDetailsSection(
+                user = usersDetails,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (currentUserFirebaseId == usersDetails.firebaseUserId) {
+                            navigator.navigate(CurrentUserProfileScreenDestination)
+                        } else {
+                            navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
+                        }
                     }
-                }
-        )
+            )
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(id = R.string.more_options),
+                )
+            }
+        }
         if (postDetails.caption.isNotBlank()) {
             ExpandingText(
                 modifier = Modifier.padding(16.dp),

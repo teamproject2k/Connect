@@ -11,6 +11,7 @@ import com.example.connect.domain.repository.IPostRepository
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.domain.utils.VisibilityScopeEnum
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -186,8 +187,75 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getSavedPostsFromRemote(savedPosts: ArrayList<String>): ResponseState<List<PostBean>> {
-        return ResponseState.success(listOf())
-    }
+    override suspend fun getSavedPostsWithUsersFromRemote(
+        loggedInUserFirebaseId: String,
+        savedPosts: ArrayList<String>
+    ): ResponseState<Pair<ArrayList<PostBean>, ArrayList<UsersBean>>> {
+        // Get the post details from the server for the given list of IDs.
+        return try {
+            val response =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
+                    .get().await()
+            if (response != null && response.exists()) {
+                val loggedInUser = response.toObject(UserRemoteEntity::class.java)
+                if (loggedInUser != null) {
+                    val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY).whereIn(
+                        FieldPath.documentId(), loggedInUser.savedPosts
+                    ).get().await()
+                    val postList = arrayListOf<PostBean>()
+                    postListDocument.documents.forEach { document ->
+                        document.toObject(PostRemoteEntity::class.java)
+                            ?.let { postList.add(it.toPostBean(document.id, true)) }
+                    }
+                    postList.sortByDescending { it.createdAt }
 
+                    val userList = arrayListOf<UsersBean>()
+                    postList.forEach { post ->
+                        val isUserPresent =
+                            userList.find { it.firebaseUserId == post.fireBaseUserId } != null
+                        if (!isUserPresent) {
+                            val user = fireStore.collection(FirebaseConstants.USER_KEY)
+                                .document(post.fireBaseUserId)
+                                .get()
+                                .await()
+                            if (user.exists()) {
+                                val userDetails = user.toObject(UserRemoteEntity::class.java)
+                                if (userDetails != null) {
+                                    val whetherShowPost =
+                                        (post.fireBaseUserId == loggedInUserFirebaseId)
+                                                || (post.postScope == VisibilityScopeEnum.Public.name)
+                                                || (post.postScope == VisibilityScopeEnum.FriendsOnly.name && userDetails.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name)
+                                    if (!whetherShowPost) {
+                                        postList.remove(post)
+                                    }
+                                    userList.add(userDetails.toUserBean())
+                                } else {
+                                    postList.remove(post)
+                                }
+                            } else {
+                                postList.remove(post)
+                            }
+                        }
+                    }
+
+                    userList.forEach { user ->
+                        val isPostPresentForUser =
+                            postList.find { it.fireBaseUserId == user.firebaseUserId } != null
+                        if (!isPostPresentForUser) {
+                            userList.remove(user)
+                        }
+                    }
+
+                    ResponseState.success(Pair(postList, userList))
+                } else {
+                    ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+                }
+            } else {
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+            }
+        } catch (exception: Exception) {
+            // An error occurred while getting the post details from the server.
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 }
