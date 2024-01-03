@@ -77,7 +77,10 @@ fun PostDetailsScreen(
                 viewModel = viewModel,
                 navigator = navigator
             )
-            TextBold18(text = stringResource(R.string.comments), modifier = Modifier.padding(16.dp))
+            TextBold18(
+                text = stringResource(R.string.comments),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
             HandleCommentSections(viewModel)
         }
     }
@@ -87,7 +90,6 @@ fun PostDetailsScreen(
 fun HandleCommentSections(viewModel: PostDetailsViewModel) {
 
 }
-
 
 @Composable
 private fun PostDetails(
@@ -100,7 +102,7 @@ private fun PostDetails(
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+            modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navigator.popBackStack() }) {

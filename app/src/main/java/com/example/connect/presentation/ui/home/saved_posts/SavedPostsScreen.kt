@@ -99,7 +99,7 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
                 .pullRefresh(pullRefreshState),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter
         ) {
             Column {
                 HandleGetSavedPostsState(
@@ -122,11 +122,12 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    LaunchedEffect(Unit) {
+    if (!viewModel.isSavedListFetched) {
         viewModel.getSavedPosts(
             homeSharedViewModel.usersDetails.firebaseUserId,
             homeSharedViewModel.usersDetails.savedPosts
         )
+        viewModel.isSavedListFetched = true
     }
     HandleLikeUnlikeState(viewModel)
     HandleSaveUnSavePost(viewModel)
