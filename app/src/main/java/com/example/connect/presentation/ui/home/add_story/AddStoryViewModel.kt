@@ -1,7 +1,6 @@
 package com.example.connect.presentation.ui.home.add_story
 
 import android.annotation.SuppressLint
-import android.util.Size
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -9,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -60,7 +58,7 @@ class AddStoryViewModel @Inject constructor(
 
     var isDataInitialized = false
 
-    var textSize: IntSize? = null
+    var isFirstTimePlaced = true
 
 
     fun initData(textColor: Color) {
@@ -148,6 +146,7 @@ class AddStoryViewModel @Inject constructor(
                     colorOnMedia.value.toArgb().toHexString(),
                     captionOffset,
                     colorGradientString,
+                    selectedMediaState.value?.mediaDuration ?: 0
                 )
 
                 // Upload the story details to the remote server.

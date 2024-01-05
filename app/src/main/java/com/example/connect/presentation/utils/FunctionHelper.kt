@@ -9,6 +9,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.DisplayMetrics
 import android.widget.Toast
@@ -581,8 +582,16 @@ object FunctionHelper {
         return contentResolver.getType(uri)?.substringBefore("/")
     }
 
-    fun getMediaDuration() {
-
+    fun getVideoDuration(contentResolver: ContentResolver, uri: Uri): Long {
+        val projection = arrayOf(MediaStore.Video.Media.DURATION)
+        var duration: Long = 0
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val durationIndex = cursor.getColumnIndex(MediaStore.Video.Media.DURATION)
+            if (cursor.moveToFirst()) {
+                duration = cursor.getLong(durationIndex)
+            }
+        }
+        return duration
     }
 
     fun getStoryBackgroundColorList(): MutableList<MutableList<Color>> {
@@ -598,6 +607,8 @@ object FunctionHelper {
 
     fun getStoryTextColorList(): MutableList<Color> {
         return mutableListOf(
+            Color(0xFFFFD700),
+            Color(0xff8B4513),
             Color.White,
             Color.Black,
             Color.Red,
@@ -614,6 +625,13 @@ object FunctionHelper {
     }
 
 
+    /**
+     * Parses a string of colors into a list of [Color] objects.
+     *
+     * @param colorListString The string of colors, separated by the given delimiter.
+     * @param delimiter The delimiter used to separate the colors.
+     * @return A list of [Color] objects.
+     */
     fun getColorListFromColorString(
         colorListString: String,
         delimiter: Char = ','
@@ -626,11 +644,27 @@ object FunctionHelper {
         return colorList
     }
 
-    fun getColorFromColorString(colorString: String): Color {
+    /**
+     * Converts a color string to a [Color] object.
+     *
+     * The color string must be in the format "#RRGGBB", where RR, GG, and BB are the
+     * hexadecimal values of the red, green, and blue components of the color, respectively.
+     *
+     * @param colorString The color string to convert.
+     * @return The [Color] object representing the color string.
+     */
+    private fun getColorFromColorString(colorString: String): Color {
         val colorInt = colorString.trim().toLong(radix = 16).toInt()
         return Color(colorInt)
     }
 
+    /**
+     * Converts a URI to a Bitmap.
+     *
+     * @param contentResolver The ContentResolver to use.
+     * @param selectedFileUri The URI of the file to convert.
+     * @return The Bitmap representation of the file, or null if the conversion failed.
+     */
     fun uriToBitmap(contentResolver: ContentResolver, selectedFileUri: Uri): Bitmap? {
         try {
             val parcelFileDescriptor = contentResolver.openFileDescriptor(selectedFileUri, "r")
