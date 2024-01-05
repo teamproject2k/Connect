@@ -32,7 +32,6 @@ class ShowStoryViewModel @Inject constructor(
     BaseViewModel() {
     val snackBarMessageState = mutableStateOf("")
     val currentStoryState = mutableIntStateOf(0)
-    lateinit var currentStoryPosterState: MutableState<UsersBean>
     var areDetailsInitialized = false
 
     private val _getSeenListStateFlow: MutableStateFlow<ResponseState<List<Pair<String, Long>>>> =
@@ -45,15 +44,9 @@ class ShowStoryViewModel @Inject constructor(
 
     var showSeenListBottomSheet = mutableStateOf(false)
 
-    var showDeleteStoryAlertDialog = mutableStateOf(false)
-
-
     lateinit var allUsersStories: MutableMap<String, ArrayList<StoryBean>>
 
     lateinit var allUsersList: MutableList<UsersBean>
-
-
-
 
     fun init(userStoriesString: String, allUsersList: MutableList<UsersBean>) {
         allUsersStories = Gson().fromJson(

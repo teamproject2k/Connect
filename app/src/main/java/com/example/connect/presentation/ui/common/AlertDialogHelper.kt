@@ -56,8 +56,8 @@ fun TitleMessageIconOkCancelDialog(
                         tint = iconTint,
                     )
                     SpacerWidth12()
-                    TextBold18(text = title)
                 }
+                TextBold18(text = title)
             }
         },
         text = {

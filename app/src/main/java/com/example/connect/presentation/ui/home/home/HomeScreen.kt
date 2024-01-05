@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.home
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
@@ -189,6 +192,12 @@ private fun HandleStoryDetailsWithUserDetails(
                     storyDetailsWithUserDetailsState.message ?: stringResource(
                         id = R.string.some_error_occurred
                     )
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    "HomeScreen",
+                    storyDetailsWithUserDetailsState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
