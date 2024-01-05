@@ -146,7 +146,8 @@ class AddStoryViewModel @Inject constructor(
                     colorOnMedia.value.toArgb().toHexString(),
                     captionOffset,
                     colorGradientString,
-                    selectedMediaState.value?.mediaDuration ?: 0
+                    selectedMediaState.value?.mediaDuration ?: 0,
+                    false
                 )
 
                 // Upload the story details to the remote server.

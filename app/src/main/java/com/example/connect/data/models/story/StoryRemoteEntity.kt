@@ -15,7 +15,7 @@ data class StoryRemoteEntity(
     val isDeleted: Boolean = false
     // val seenList: List<Pair<String, Long>>
 ) {
-    constructor() : this("", "", "", 0, "", "", "", "", 0)
+    constructor() : this("", "", "", 0, "", "", "", "", 0, false)
 
     fun toStoryBean(storyId: String): StoryBean {
         return StoryBean(
