@@ -755,4 +755,16 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao()
             .updateFCMTokenOnLocal(currentUserFirebaseId, fcmToken = updatedToken)
     }
+
+    override suspend fun updateSavedPost(
+        loggedInUserFirebaseId: String,
+        savedPost: List<String>
+    ): Int {
+        return appDatabase.getUsersDao().updateSavedPostOnLocal(
+            savedPostList = savedPost,
+            currentUserFirebaseId = loggedInUserFirebaseId
+        )
+    }
+
+
 }

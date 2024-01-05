@@ -222,4 +222,7 @@ interface IUserRepository {
     ): ResponseState<Nothing>
 
     suspend fun updateFCMTokenOnLocal(currentUserFirebaseId: String, updatedToken: String): Int
+
+
+    suspend fun updateSavedPost(loggedInUserFirebaseId: String, savedPost: List<String>): Int
 }

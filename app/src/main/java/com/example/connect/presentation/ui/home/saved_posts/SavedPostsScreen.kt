@@ -104,7 +104,7 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             HandleGetSavedPostsState(
                 viewModel,
                 navigator,
-                homeSharedViewModel.usersDetails.firebaseUserId
+                homeSharedViewModel.usersDetails
             )
             PullRefreshIndicator(
                 refreshing = refreshing,
@@ -135,7 +135,7 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
 fun HandleGetSavedPostsState(
     viewModel: SavedPostsViewModel,
     navigator: DestinationsNavigator,
-    loggedInUserFirebaseId: String
+    loggedInUsersBean: UsersBean
 ) {
     val savedPostsState = viewModel.getSavedPostsWithUsersStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -160,7 +160,7 @@ fun HandleGetSavedPostsState(
             DisplaySavedPostsList(
                 navigator,
                 savedPostsState.data,
-                loggedInUserFirebaseId,
+                loggedInUsersBean,
                 viewModel
             )
         }
@@ -175,7 +175,7 @@ fun HandleGetSavedPostsState(
 fun DisplaySavedPostsList(
     navigator: DestinationsNavigator,
     postWithUsers: Pair<ArrayList<PostBean>, ArrayList<UsersBean>>?,
-    loggedInUserFirebaseId: String,
+    loggedInUsersBean: UsersBean,
     viewModel: SavedPostsViewModel
 ) {
     if (postWithUsers == null || postWithUsers.first.isEmpty() || postWithUsers.second.isEmpty()) {
@@ -193,7 +193,7 @@ fun DisplaySavedPostsList(
                     PostListItem(
                         usersDetails = userDetails,
                         postDetails = post,
-                        loggedInUserFirebaseId = loggedInUserFirebaseId,
+                        loggedInUsersBean = loggedInUsersBean,
                         navigator = navigator,
                         viewModel = viewModel
                     )
@@ -207,7 +207,7 @@ fun DisplaySavedPostsList(
 private fun PostListItem(
     usersDetails: UsersBean,
     postDetails: PostBean,
-    loggedInUserFirebaseId: String,
+    loggedInUsersBean: UsersBean,
     viewModel: SavedPostsViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -219,7 +219,7 @@ private fun PostListItem(
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                 .clickable {
-                    if (loggedInUserFirebaseId == usersDetails.firebaseUserId) {
+                    if (loggedInUsersBean.firebaseUserId == usersDetails.firebaseUserId) {
                         navigator.navigate(CurrentUserProfileScreenDestination)
                     } else {
                         navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
@@ -244,7 +244,7 @@ private fun PostListItem(
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
-        PostBottomSection(postDetails, viewModel, usersDetails, loggedInUserFirebaseId, navigator)
+        PostBottomSection(postDetails, viewModel, usersDetails, loggedInUsersBean, navigator)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -255,7 +255,7 @@ private fun PostBottomSection(
     postDetails: PostBean,
     viewModel: SavedPostsViewModel,
     userDetails: UsersBean,
-    currentUserFirebaseId: String,
+    loggedInUsersBean: UsersBean,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -269,26 +269,26 @@ private fun PostBottomSection(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 IconButton(onClick = {
-                    if (postDetails.likedBy.contains(currentUserFirebaseId)) {
-                        viewModel.removeLike(postDetails.id, currentUserFirebaseId) {
-                            postDetails.likedBy.remove(currentUserFirebaseId)
+                    if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) {
+                        viewModel.removeLike(postDetails.id, loggedInUsersBean.firebaseUserId) {
+                            postDetails.likedBy.remove(loggedInUsersBean.firebaseUserId)
                             likeCount--
                         }
                     } else {
-                        viewModel.addLike(postDetails.id, currentUserFirebaseId) {
-                            postDetails.likedBy.add(currentUserFirebaseId)
+                        viewModel.addLike(postDetails.id, loggedInUsersBean.firebaseUserId) {
+                            postDetails.likedBy.add(loggedInUsersBean.firebaseUserId)
                             likeCount++
                         }
                     }
                 }) {
                     Icon(
-                        painter = if (postDetails.likedBy.contains(currentUserFirebaseId)) painterResource(
+                        painter = if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
                             id = R.string.like_post
                         ),
-                        tint = if (postDetails.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                        tint = if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) ColorsHelper.red() else LocalContentColor.current
                     )
                 }
                 IconButton(onClick = {
@@ -296,7 +296,7 @@ private fun PostBottomSection(
                         PostDetailsScreenDestination(
                             postDetails,
                             userDetails,
-                            currentUserFirebaseId
+                            loggedInUsersBean.firebaseUserId
                         )
                     )
                 }) {
@@ -308,12 +308,12 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.unSavePost(loggedInUsersBean, postDetails.id) {
                         postDetails.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.savePost(loggedInUsersBean, postDetails.id) {
                         postDetails.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }
