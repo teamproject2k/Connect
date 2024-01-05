@@ -10,7 +10,7 @@ data class PostRemoteEntity(
     val postScope: String,
     val postType: String,
     val commentCount: Long,
-    val likedBy: ArrayList<String>,
+    val likedBy: ArrayList<String>
 ) {
     constructor() : this("", "", "", 0, "", "", 0, arrayListOf())
 

@@ -389,6 +389,22 @@ private fun BottomSection(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onPrimary
         )
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .border(1.5.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
+                .background(viewModel.colorOnMedia.value)
+                .clickable {
+                    val currentColorIndex =
+                        viewModel.textColorList.indexOf(viewModel.colorOnMedia.value)
+                    val nextColorIndex =
+                        (currentColorIndex + 1) % viewModel.textColorList.size
+                    viewModel.colorOnMedia.value =
+                        viewModel.textColorList[nextColorIndex]
+                }
+        )
+        SpacerWidth16()
         if (viewModel.selectedMediaState.value == null) {
             Box(
                 modifier = Modifier

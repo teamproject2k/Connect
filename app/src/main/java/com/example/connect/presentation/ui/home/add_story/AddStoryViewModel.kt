@@ -51,6 +51,8 @@ class AddStoryViewModel @Inject constructor(
     var storyBackgroundColorState: MutableState<List<Color>> =
         mutableStateOf(gradientColorList[0])
 
+    var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
+
     var captionOffsetX by mutableFloatStateOf(0f)
     var captionOffsetY by mutableFloatStateOf(0f)
 

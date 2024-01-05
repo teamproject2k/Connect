@@ -596,6 +596,18 @@ object FunctionHelper {
         return gradientColorList
     }
 
+    fun getStoryTextColorList(): MutableList<Color> {
+        return mutableListOf(
+            Color.White,
+            Color.Black,
+            Color.Red,
+            Color.Blue,
+            Color.Green,
+            Color.Magenta,
+            Color.Yellow,
+            Color.Cyan
+        )
+    }
 
     fun getDefaultBackgroundGradient(): MutableList<Color> {
         return (mutableListOf(Color.Black, Color(0xFF262626)))
