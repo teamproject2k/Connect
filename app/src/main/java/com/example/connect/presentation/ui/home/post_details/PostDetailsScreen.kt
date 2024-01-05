@@ -133,7 +133,7 @@ private fun PostDetails(
                     }
             )
             Box {
-                IconButton(onClick = { }) {
+                IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(id = R.string.more_options),
@@ -169,15 +169,13 @@ private fun PostDetails(
 @Composable
 fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel, id: String) {
     val postDetailsDropdownList = listOf(stringResource(R.string.delete_post))
-    var isDropdownMenuVisible by remember {
-        mutableStateOf(false)
-    }
     var showDeletePostAlertDialog by remember {
         mutableStateOf(false)
     }
-    if (isDropdownMenuVisible) {
+    if (viewModel.isDropdownMenuVisibleState.value) {
         DropdownMenu(
-            expanded = true, onDismissRequest = { isDropdownMenuVisible = false }
+            expanded = true,
+            onDismissRequest = { viewModel.isDropdownMenuVisibleState.value = false }
         ) {
             postDetailsDropdownList.forEach { item ->
                 DropdownMenuItem(text = {

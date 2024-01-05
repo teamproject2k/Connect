@@ -1,7 +1,6 @@
 package com.example.connect.presentation.ui.home.home
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -451,7 +450,7 @@ private fun PostListUiSection(
                     PostListItem(
                         usersDetails = userDetails,
                         postDetails = post,
-                        currentUserFirebaseId = currentUsersBean.firebaseUserId,
+                        currentUser = currentUsersBean,
                         navigator = navigator,
                         viewModel = viewModel
                     )
@@ -465,7 +464,7 @@ private fun PostListUiSection(
 private fun PostListItem(
     usersDetails: UsersBean,
     postDetails: PostBean,
-    currentUserFirebaseId: String,
+    currentUser: UsersBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -477,7 +476,7 @@ private fun PostListItem(
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                 .clickable {
-                    if (currentUserFirebaseId == usersDetails.firebaseUserId) {
+                    if (currentUser.firebaseUserId == usersDetails.firebaseUserId) {
                         navigator.navigate(CurrentUserProfileScreenDestination)
                     } else {
                         navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
@@ -502,7 +501,13 @@ private fun PostListItem(
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
-        PostBottomSection(postDetails, viewModel, usersDetails, currentUserFirebaseId, navigator)
+        PostBottomSection(
+            postDetails,
+            viewModel,
+            usersDetails,
+            currentUser,
+            navigator
+        )
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -512,8 +517,8 @@ private fun PostListItem(
 private fun PostBottomSection(
     postDetails: PostBean,
     viewModel: HomeViewModel,
-    userDetails: UsersBean,
-    currentUserFirebaseId: String,
+    userDetails: UsersBean,  // Post's poster user
+    currentUser: UsersBean,  // Logged in user
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -527,26 +532,26 @@ private fun PostBottomSection(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 IconButton(onClick = {
-                    if (postDetails.likedBy.contains(currentUserFirebaseId)) {
-                        viewModel.removeLike(postDetails.id, currentUserFirebaseId) {
-                            postDetails.likedBy.remove(currentUserFirebaseId)
+                    if (postDetails.likedBy.contains(currentUser.firebaseUserId)) {
+                        viewModel.removeLike(postDetails.id, currentUser.firebaseUserId) {
+                            postDetails.likedBy.remove(currentUser.firebaseUserId)
                             likeCount--
                         }
                     } else {
-                        viewModel.addLike(postDetails.id, currentUserFirebaseId) {
-                            postDetails.likedBy.add(currentUserFirebaseId)
+                        viewModel.addLike(postDetails.id, currentUser.firebaseUserId) {
+                            postDetails.likedBy.add(currentUser.firebaseUserId)
                             likeCount++
                         }
                     }
                 }) {
                     Icon(
-                        painter = if (postDetails.likedBy.contains(currentUserFirebaseId)) painterResource(
+                        painter = if (postDetails.likedBy.contains(currentUser.firebaseUserId)) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
                             id = R.string.like_post
                         ),
-                        tint = if (postDetails.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                        tint = if (postDetails.likedBy.contains(currentUser.firebaseUserId)) ColorsHelper.red() else LocalContentColor.current
                     )
                 }
                 IconButton(onClick = {
@@ -554,7 +559,7 @@ private fun PostBottomSection(
                         PostDetailsScreenDestination(
                             postDetails,
                             userDetails,
-                            currentUserFirebaseId
+                            currentUser.firebaseUserId
                         )
                     )
                 }) {
@@ -566,12 +571,12 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.unSavePost(currentUser, postDetails.id) {
                         postDetails.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.savePost(currentUser, postDetails.id) {
                         postDetails.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }

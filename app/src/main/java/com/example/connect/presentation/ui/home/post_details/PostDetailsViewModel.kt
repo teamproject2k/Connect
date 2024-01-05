@@ -1,5 +1,7 @@
 package com.example.connect.presentation.ui.home.post_details
 
+import android.annotation.SuppressLint
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -18,6 +20,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
+@SuppressLint("StateNameRule")
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val addLikeUseCase: AddLikeUseCase,
@@ -30,6 +33,8 @@ class PostDetailsViewModel @Inject constructor(
     private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val deletePostStateFlow: StateFlow<ResponseState<Nothing>> get() = _deletePostStateFlow
+
+    var isDropdownMenuVisibleState = mutableStateOf(false)
 
     fun addLike(postId: String, currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {

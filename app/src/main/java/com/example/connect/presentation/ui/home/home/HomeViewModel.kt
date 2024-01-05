@@ -13,6 +13,7 @@ import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
 import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserDetailsUseCase
+import com.example.connect.domain.useCase.user.UpdatedSavedPostsOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,8 @@ class HomeViewModel @Inject constructor(
     private val addLikeUseCase: AddLikeUseCase,
     private val removeLikeUseCase: RemoveLikeUseCase,
     private val savePostUseCase: SavePostUseCase,
-    private val unSavePostUseCase: UnSavePostUseCase
+    private val unSavePostUseCase: UnSavePostUseCase,
+    private val updatedSavedPostsOnLocalUseCase: UpdatedSavedPostsOnLocalUseCase
 ) : BaseViewModel() {
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<Pair<List<PostBean>, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
@@ -106,12 +108,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun savePost(currentUserFirebaseId: String, postId: String, onUpdate: () -> Unit) {
+    fun savePost(loggedInUsersBean: UsersBean, postId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = savePostUseCase.invoke(currentUserFirebaseId, postId)
+                val responseState = savePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postId)
                 if (responseState.status == RequestStatusEnum.Success) {
+                    loggedInUsersBean.savedPosts.add(postId)
+                    updatedSavedPostsOnLocalUseCase.invoke(
+                        loggedInUsersBean.firebaseUserId,
+                        loggedInUsersBean.savedPosts
+                    )
                     onUpdate()
                 }
                 _saveUnSavePostStateFlow.value = responseState
@@ -119,12 +126,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun unSavePost(currentUserFirebaseId: String, postId: String, onUpdate: () -> Unit) {
+    fun unSavePost(loggedInUsersBean: UsersBean, postId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = unSavePostUseCase.invoke(currentUserFirebaseId, postId)
+                val responseState =
+                    unSavePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postId)
                 if (responseState.status == RequestStatusEnum.Success) {
+                    loggedInUsersBean.savedPosts.remove(postId)
+                    updatedSavedPostsOnLocalUseCase.invoke(
+                        loggedInUsersBean.firebaseUserId,
+                        loggedInUsersBean.savedPosts
+                    )
                     onUpdate()
                 }
                 _saveUnSavePostStateFlow.value = responseState
