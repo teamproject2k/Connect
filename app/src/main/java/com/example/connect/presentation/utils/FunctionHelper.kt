@@ -29,7 +29,6 @@ import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.models.VisibilityScope
 import com.google.auth.oauth2.GoogleCredentials
-import org.checkerframework.checker.units.qual.A
 import java.io.FileDescriptor
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -580,6 +579,10 @@ object FunctionHelper {
 
     fun getMediaType(contentResolver: ContentResolver, uri: Uri): String? {
         return contentResolver.getType(uri)?.substringBefore("/")
+    }
+
+    fun getMediaDuration() {
+
     }
 
     fun getStoryBackgroundColorList(): MutableList<MutableList<Color>> {
