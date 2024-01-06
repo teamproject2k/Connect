@@ -364,6 +364,7 @@ object FunctionHelper {
         return exoPlayer
     }
 
+
     /**
      * Converts a dp value to a pixel value.
      *
@@ -653,7 +654,7 @@ object FunctionHelper {
      * @param colorString The color string to convert.
      * @return The [Color] object representing the color string.
      */
-    private fun getColorFromColorString(colorString: String): Color {
+    fun getColorFromColorString(colorString: String): Color {
         val colorInt = colorString.trim().toLong(radix = 16).toInt()
         return Color(colorInt)
     }

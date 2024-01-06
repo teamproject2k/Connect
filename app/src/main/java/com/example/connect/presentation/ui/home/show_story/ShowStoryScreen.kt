@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,7 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -197,6 +198,9 @@ fun UserStories(
     var pauseTimer by remember {
         mutableStateOf(false)
     }
+    var isMediaLoaded by remember {
+        mutableStateOf(false)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -245,8 +249,9 @@ fun UserStories(
                     modifier = Modifier.weight(1f),
                     currentPageIndex = currentStoryIndex,
                     progressBarIndex = index,
-                    startProgress = index == currentStoryIndex,
-                    onPauseTimer = pauseTimer
+                    startProgress = index == currentStoryIndex && isMediaLoaded,
+                    onPauseTimer = pauseTimer,
+                    progressMaxTime = if (currentStory.mediaType == MediaTypeEnum.Video.name || currentStory.mediaType == MediaTypeEnum.TextVideo.name) currentStory.videoLength else ConstantsHelper.STORY_PROGRESS_MAX_TIME
                 ) {
                     if (currentStoryIndex < storyBeans.lastIndex) {
                         currentStoryIndex++
@@ -268,7 +273,9 @@ fun UserStories(
             story = currentStory,
             storyPoster = storyPoster,
             navigator = navigator
-        )
+        ) {
+            isMediaLoaded = true
+        }
     }
 }
 
@@ -277,15 +284,20 @@ fun StoryUi(
     viewModel: ShowStoryViewModel,
     story: StoryBean,
     storyPoster: UsersBean,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    onMediaLoaded: () -> Unit
 ) {
     val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize(),
-        contentAlignment = if (story.mediaUrl.isBlank()) Alignment.Center else Alignment.BottomCenter
     ) {
-        MediaSection(story, viewModel, context)
+        if (story.mediaType == MediaTypeEnum.Text.name) {
+            onMediaLoaded()
+        }
+        MediaSection(story, viewModel, context) {
+            onMediaLoaded()
+        }
         StoryCaptionField(story)
     }
 }
@@ -555,15 +567,24 @@ private fun SeenListBottomSheet(
 }
 
 @Composable
-private fun MediaSection(story: StoryBean, viewModel: ShowStoryViewModel, context: Context) {
+private fun MediaSection(
+    story: StoryBean,
+    viewModel: ShowStoryViewModel,
+    context: Context,
+    onMediaLoaded: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        if (story.mediaType == MediaTypeEnum.Image::name.name || story.mediaType == MediaTypeEnum.TextImage::name.name) {
-            ShowStoryImage(imageUrl = story.mediaUrl) {
+        if (story.mediaType == MediaTypeEnum.Image.name || story.mediaType == MediaTypeEnum.TextImage.name) {
+            ShowStoryImage(imageUrl = story.mediaUrl, onError = {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.some_error_occurred)
+            }) {
+                onMediaLoaded()
             }
-        } else if (story.mediaType == MediaTypeEnum.Video::name.name || story.mediaType == MediaTypeEnum.TextVideo::name.name) {
-            ShowStoryVideo(videoUrl = story.mediaUrl, context = context)
+        } else if (story.mediaType == MediaTypeEnum.Video.name || story.mediaType == MediaTypeEnum.TextVideo.name) {
+            ShowStoryVideo(videoUrl = story.mediaUrl, context = context) {
+                onMediaLoaded()
+            }
         }
     }
 }
@@ -582,45 +603,76 @@ private fun StoryCaptionField(story: StoryBean) {
                 )
             },
         text = story.caption,
-        color = MaterialTheme.colorScheme.onPrimary,
+        color = FunctionHelper.getColorFromColorString(story.textColor),
         fontSize = 18.sp
     )
 }
 
 @Composable
-private fun ShowStoryImage(imageUrl: String, onError: () -> Unit) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = stringResource(R.string.story_image),
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-        onError = {
-            onError()
+private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded: () -> Unit) {
+    var isImageLoading by remember {
+        mutableStateOf(false)
+    }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = stringResource(R.string.story_image),
+            contentScale = ContentScale.Crop,
+            onLoading = {
+                isImageLoading = true
+            },
+            onError = {
+                isImageLoading = false
+                onError()
+            },
+            onSuccess = {
+                isImageLoading = false
+                onMediaLoaded()
+            }
+        )
+        if (isImageLoading) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
         }
-    )
+    }
 }
 
 @SuppressLint("OpaqueUnitKey")
 @Composable
-private fun ShowStoryVideo(videoUrl: String, context: Context) {
+private fun ShowStoryVideo(videoUrl: String, context: Context, onMediaLoaded: () -> Unit) {
     val exoPlayer = remember {
         FunctionHelper.getExoPlayer(context, videoUrl)
     }
-    DisposableEffect(AndroidView(factory = {
-        PlayerView(context).apply {
-            player = exoPlayer
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+    var isPlayerLoading by remember {
+        mutableStateOf(false)
+    }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        DisposableEffect(AndroidView(factory = {
+            PlayerView(context).apply {
+                player = exoPlayer
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                exoPlayer.addListener(object : Player.Listener {
+                    override fun onIsLoadingChanged(isLoading: Boolean) {
+                        isPlayerLoading = isLoading
+                    }
+                })
+                setShowNextButton(false)
+                setShowPreviousButton(false)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady
+            }
+        })) {
+            onDispose {
+                exoPlayer.release()
+            }
         }
-    }, update = {
-        exoPlayer.setMediaItem(MediaItem.fromUri(videoUrl))
-    })) {
-        onDispose {
-            exoPlayer.release()
+        if (isPlayerLoading) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
         }
     }
+
 }
 
 @Composable
@@ -668,13 +720,13 @@ fun LinearIndicator(
     startProgress: Boolean = false,
     indicatorBackgroundColor: Color = ColorsHelper.gray(),
     indicatorProgressColor: Color = MaterialTheme.colorScheme.onPrimary,
-    slideDurationInSeconds: Long = 10,
+    progressMaxTime: Long = ConstantsHelper.STORY_PROGRESS_MAX_TIME,
     onPauseTimer: Boolean = false,
     onAnimationEnd: () -> Unit
 ) {
 
     val delayInMillis = rememberSaveable {
-        (slideDurationInSeconds * 1000) / 100
+        progressMaxTime / 100
     }
 
     var progress by remember {
