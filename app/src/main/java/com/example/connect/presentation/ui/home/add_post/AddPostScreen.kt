@@ -302,7 +302,7 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
     val videoHeight = context.resources.displayMetrics.heightPixels
     GetPlayerView(
         context = context,
-        selectedMediaData = selectedMediaData,
+        uri = selectedMediaData.uri.toString(),
         height = (videoHeight * .5).toInt()
     ) { exoPlayer, _ ->
         exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
