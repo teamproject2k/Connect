@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.common
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -32,13 +33,14 @@ fun TextBold13(text: String, modifier: Modifier = Modifier, color: Color = Color
 }
 
 @Composable
-fun TextBold14(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified) {
+fun TextBold14(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified,alignment: TextAlign?=null) {
     Text(
         text = text,
         modifier = modifier,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
-        color = color
+        color = color,
+        textAlign = alignment
     )
 }
 

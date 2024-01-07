@@ -42,8 +42,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -317,8 +323,14 @@ fun CommentUi(
     viewModel: PostDetailsViewModel
 ) {
     if (usersBeans.isNullOrEmpty() || viewModel.commentsStateList.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            TextBold14(text = stringResource(R.string.no_comments_found))
+        Column {
+            TextBold14(
+                text = stringResource(R.string.no_comments_found),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp),
+                alignment = TextAlign.Center
+            )
         }
         return
     }
@@ -410,7 +422,7 @@ fun CommentItem(
                 TextBold13(text = commentPoster.connectUserId)
                 SpacerWidth8()
                 Text(
-                    text = FunctionHelper.getTimeAgo(comment.commentedTime, context, true),
+                    text = FunctionHelper.getTimeAgo(comment.createdAt, context, true),
                     color = ColorsHelper.gray(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -418,7 +430,20 @@ fun CommentItem(
             }
             SpacerHeight4()
             Text(
-                text = comment.comment,
+                buildAnnotatedString {
+                    if (comment.postId != comment.commentedOn) {
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.5.sp,
+                                color = ColorsHelper.gray()
+                            )
+                        ) {
+                            append("${commentPoster.connectUserId}  ")
+                        }
+                    }
+                    append(comment.comment)
+                },
                 fontSize = 13.sp,
                 lineHeight = 16.sp
             )
@@ -541,7 +566,7 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
             viewModel.isSendingComment.value = false
             val comment = addCommentState.data
             if (comment != null) {
-                viewModel.commentsStateList.add(comment)
+                viewModel.commentsStateList.add(0, comment)
             }
             viewModel.commentedOn.value = viewModel.postId
             viewModel.commentText.value = ""

@@ -228,6 +228,7 @@ class IPostRepositoryImpl @Inject constructor(
                         }
                     }
                 }
+                commentList.sortByDescending { it.createdAt }
 
                 commentList.forEach { comment ->
                     val isUserPresent =
@@ -245,14 +246,14 @@ class IPostRepositoryImpl @Inject constructor(
                                             || ((userDetails.otherUsersStatus[loggedInUserFireId] != StatusWithCurrentUserRemoteEnum.Blocked.name)
                                             && (loggedInUser.otherUsersStatus[userDetails.firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name))
                                 if (!whetherShowComment) {
-                                  //  commentList.remove(comment)
+                                    //  commentList.remove(comment)
                                 }
                                 userList.add(userDetails.toUserBean())
                             } else {
-                              //  commentList.remove(comment)
+                                //  commentList.remove(comment)
                             }
                         } else {
-                           // commentList.remove(comment)
+                            // commentList.remove(comment)
                         }
                     }
                 }

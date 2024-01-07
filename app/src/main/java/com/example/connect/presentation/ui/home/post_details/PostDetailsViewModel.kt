@@ -57,7 +57,7 @@ class PostDetailsViewModel @Inject constructor(
 
     lateinit var postId: String
 
-    val isSendingComment= mutableStateOf(false)
+    val isSendingComment = mutableStateOf(false)
 
     fun initialize(postId: String) {
         if (!isInitialized) {
@@ -130,7 +130,7 @@ class PostDetailsViewModel @Inject constructor(
     fun addComment(loggedInUserFirebaseId: String) {
         val comment = CommentBean(
             commentFirebaseId = "",
-            commentedTime = FunctionHelper.getCurrentTimeInMillis(),
+            createdAt = FunctionHelper.getCurrentTimeInMillis(),
             commentedBy = loggedInUserFirebaseId,
             commentedOn = commentedOn.value,
             postId = postId,

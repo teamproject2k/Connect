@@ -4,7 +4,7 @@ import com.example.connect.data.models.comment.CommentRemoteEntity
 
 data class CommentBean(
     var commentFirebaseId: String,
-    val commentedTime: Long,
+    val createdAt: Long,
     val commentedBy: String,
     val commentedOn: String,
     val postId: String,
@@ -12,7 +12,7 @@ data class CommentBean(
 ) {
     fun toCommentRemoteEntity(): CommentRemoteEntity {
         return CommentRemoteEntity(
-            commentedTime,
+            createdAt,
             commentedBy,
             commentedOn,
             postId,
