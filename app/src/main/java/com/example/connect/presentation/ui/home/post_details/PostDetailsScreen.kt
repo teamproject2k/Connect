@@ -333,18 +333,18 @@ fun CommentUi(
     }
     Column {
         val parentList =
-            viewModel.commentsStateMap.keys.filter { it.repliedOnCommentId == it.postId }
+            viewModel.commentsStateMap.keys.filter { it.repliedOnCommentId == null }
         parentList.forEach { parent ->
-            PostComment(usersBeans, parent, viewModel, true)
+            AddComment(usersBeans, parent, viewModel, true)
             viewModel.commentsStateMap[parent]?.forEach { child ->
-                PostComment(usersBeans = usersBeans, comment = child, viewModel = viewModel, false)
+                AddComment(usersBeans = usersBeans, comment = child, viewModel = viewModel, false)
             }
         }
     }
 }
 
 @Composable
-fun PostComment(
+fun AddComment(
     usersBeans: List<UsersBean>,
     comment: CommentBean,
     viewModel: PostDetailsViewModel,
@@ -581,7 +581,9 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
             if (comment != null) {
                 val parent =
                     viewModel.commentsStateMap.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
-                viewModel.commentsStateMap[parent]?.add(0, comment)
+                if (parent != null) {
+                    viewModel.commentsStateMap.getOrPut(parent) { arrayListOf() }.add(0, comment)
+                }
             }
         }
 

@@ -2,7 +2,9 @@ package com.example.connect.presentation.ui.home.post_details
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.UsersBean
@@ -41,7 +43,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    lateinit var commentsStateMap: MutableMap<CommentBean, ArrayList<CommentBean>>
+    lateinit var commentsStateMap: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
@@ -60,7 +62,7 @@ class PostDetailsViewModel @Inject constructor(
     fun initialize(postId: String) {
         if (!isInitialized) {
             this.postId = postId
-            commentsStateMap = mutableMapOf()
+            commentsStateMap = mutableStateMapOf()
             isInitialized = true
         }
     }
@@ -93,7 +95,6 @@ class PostDetailsViewModel @Inject constructor(
                     onUpdate()
                 }
                 // _likeUnlikePostStateFlow.value = responseState
-
             }
         }
     }
@@ -177,9 +178,9 @@ class PostDetailsViewModel @Inject constructor(
                 val getAllCommentResponse =
                     getAllCommentsWithUsersUseCase.invoke(postId, loggedInUserFireId)
                 if (getAllCommentResponse.status == RequestStatusEnum.Success) {
-                    val commentList = getAllCommentResponse.data?.first
-                    if (!commentList.isNullOrEmpty()) {
-                        commentsStateMap = commentList
+                    val commentMap = getAllCommentResponse.data?.first
+                    if (!commentMap.isNullOrEmpty()) {
+                        commentsStateMap.putAll(commentMap)
                     }
                     _getAllCommentsStateFlow.value = getAllCommentResponse
                 } else {

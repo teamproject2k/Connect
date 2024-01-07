@@ -276,12 +276,13 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     private fun buildCommentTree(commentList: ArrayList<CommentBean>): MutableMap<CommentBean, ArrayList<CommentBean>> {
-        val commentMap = commentList.associateWith { arrayListOf<CommentBean>() }.toMutableMap()
-        commentList.forEach { comment ->
-            val parentNode = commentMap.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
-            if (parentNode != null) {
-                commentMap[parentNode]?.add(comment)
-            }
+        val commentMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
+        val parentList =
+            commentList.filter { it.repliedOnCommentId == null }
+        parentList.forEach { parent ->
+            val children =
+                commentList.filter { comment -> comment.parentCommentId == parent.commentFirebaseId }
+            commentMap.getOrPut(parent) { arrayListOf() }.addAll(children.reversed())
         }
         return commentMap
     }
