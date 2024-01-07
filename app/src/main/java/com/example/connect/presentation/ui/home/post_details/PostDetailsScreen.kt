@@ -67,8 +67,9 @@ import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight4
-import com.example.connect.presentation.ui.common.SpacerHeight6
+import com.example.connect.presentation.ui.common.SpacerHeight8
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold13
 import com.example.connect.presentation.ui.common.TextBold14
@@ -131,6 +132,7 @@ fun PostDetailsScreen(
                 homeSharedViewModel.usersDetails
             )
             HandleAddCommentSection(viewModel = viewModel)
+            HandleDeleteCommentSection(viewModel = viewModel)
         }
     }
     LaunchedEffect(viewModel.snackBarMessageState.value) {
@@ -281,20 +283,20 @@ private fun PostBottomSection(
 @Composable
 fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
     val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
-    var isResponseHandled by remember {
+    var isExceptionHandled by remember {
         mutableStateOf(false)
     }
     when (getAllCommentsState.status) {
         RequestStatusEnum.Loading -> {
             CommentUiLoading()
-            isResponseHandled = false
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
+            if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
-                isResponseHandled = true
+                isExceptionHandled = true
             }
         }
 
@@ -371,7 +373,7 @@ fun ParentCommentItem(
             }
         }
         if (childCommentList.isNotEmpty()) {
-            SpacerHeight12()
+            SpacerHeight8()
         }
     }
 }
@@ -429,7 +431,7 @@ fun CommentItem(
 ) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 12.dp)
     ) {
         AsyncImage(
             modifier = Modifier
@@ -474,17 +476,30 @@ fun CommentItem(
                 fontSize = 13.sp,
                 lineHeight = 16.sp
             )
-            SpacerHeight6()
-            Text(
-                modifier = Modifier.clickable {
-                    viewModel.repliedCommentPosterConnectIdState.value = commentPoster.connectUserId
-                    viewModel.commentedOnState.value = comment
-                },
-                text = stringResource(R.string.reply),
-                fontSize = 12.sp,
-                color = ColorsHelper.gray(),
-                fontWeight = FontWeight.Medium
-            )
+            SpacerHeight12()
+            Row {
+                Text(
+                    modifier = Modifier.clickable {
+                        viewModel.repliedCommentPosterConnectIdState.value =
+                            commentPoster.connectUserId
+                        viewModel.commentedOnState.value = comment
+                    },
+                    text = stringResource(R.string.reply),
+                    fontSize = 12.sp,
+                    color = ColorsHelper.gray(),
+                    fontWeight = FontWeight.Medium
+                )
+                SpacerWidth16()
+                Text(
+                    modifier = Modifier.clickable {
+                        viewModel.deleteComment(comment.commentFirebaseId, comment.parentCommentId)
+                    },
+                    text = stringResource(R.string.delete),
+                    fontSize = 12.sp,
+                    color = ColorsHelper.gray(),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
@@ -591,6 +606,7 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
         }
 
         RequestStatusEnum.Success -> {
+            viewModel.post.commentCount++
             val comment = addCommentState.data
             viewModel.commentedOnState.value = null
             viewModel.commentTextState.value = ""
@@ -606,6 +622,48 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
                 }
             }
             viewModel.isSendingCommentState.value = false
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
+}
+
+@Composable
+fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
+    val deleteCommentState = viewModel.deleteCommentStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (deleteCommentState.status) {
+        RequestStatusEnum.Loading -> {
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    deleteCommentState.message ?: stringResource(id = R.string.some_error_occurred)
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            val commentId = deleteCommentState.data?.first
+            val parentCommentId = deleteCommentState.data?.second
+            if (commentId != null) {
+                if (parentCommentId == null) {
+                    val comment =
+                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == commentId }
+                    viewModel.commentsMapState.remove(comment)
+                } else {
+                    val parent =
+                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == parentCommentId }
+                    viewModel.commentsMapState[parent]?.removeIf { it.commentFirebaseId == commentId }
+                }
+                viewModel.post.commentCount--
+            }
         }
 
         RequestStatusEnum.None -> {

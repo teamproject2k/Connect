@@ -10,7 +10,8 @@ data class CommentBean(
     val repliedOnCommentId: String?,
     val repliedOnUserId: String?,
     val postId: String,
-    val comment: String
+    val comment: String,
+    val whetherDeleted: Boolean
 ) {
     fun toCommentRemoteEntity(): CommentRemoteEntity {
         return CommentRemoteEntity(
@@ -20,7 +21,8 @@ data class CommentBean(
             repliedOnCommentId,
             repliedOnUserId,
             postId,
-            comment
+            comment,
+            whetherDeleted
         )
     }
 }

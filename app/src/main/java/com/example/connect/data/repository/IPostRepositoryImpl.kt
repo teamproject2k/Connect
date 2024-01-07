@@ -194,10 +194,49 @@ class IPostRepositoryImpl @Inject constructor(
 
     override suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String> {
         return try {
-            val response = fireStore.collection(FirebaseConstants.COMMENT_KEY)
-                .add(comment.toCommentRemoteEntity())
-                .await()
-            ResponseState.success(response.id)
+            fireStore.runTransaction { transaction ->
+                val postDocument =
+                    fireStore.collection(FirebaseConstants.POST_KEY).document(comment.postId)
+                transaction.update(
+                    postDocument,
+                    PostRemoteEntity::commentCount.name,
+                    FieldValue.increment(1)
+                )
+                val addCommentDocumentRef =
+                    fireStore.collection(FirebaseConstants.COMMENT_KEY).document()
+                transaction.set(
+                    addCommentDocumentRef,
+                    comment.toCommentRemoteEntity()
+                )
+                ResponseState.success(addCommentDocumentRef.id)
+            }.await()
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun deleteCommentOnRemote(
+        commentId: String,
+        postId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.runTransaction { transaction ->
+                val postDocument =
+                    fireStore.collection(FirebaseConstants.POST_KEY).document(postId)
+                transaction.update(
+                    postDocument,
+                    PostRemoteEntity::commentCount.name,
+                    FieldValue.increment(-1)
+                )
+                val deleteCommentDocumentRef =
+                    fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId)
+                transaction.update(
+                    deleteCommentDocumentRef,
+                    CommentRemoteEntity::whetherDeleted.name,
+                    true
+                )
+                ResponseState.success(null)
+            }.await()
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }

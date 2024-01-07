@@ -13,6 +13,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
+import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
 import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
@@ -35,7 +36,8 @@ class PostDetailsViewModel @Inject constructor(
     private val savePostUseCase: SavePostUseCase,
     private val unSavePostUseCase: UnSavePostUseCase,
     private val addCommentUseCase: AddCommentUseCase,
-    private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase
+    private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase,
+    private val deleteCommentUseCase: DeleteCommentUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
@@ -49,6 +51,10 @@ class PostDetailsViewModel @Inject constructor(
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
+
+    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Pair<String, String?>>> =
+        MutableStateFlow(ResponseState.none())
+    val deleteCommentStateFlow: StateFlow<ResponseState<Pair<String, String?>>> get() = _deleteCommentStateFlow
 
     val commentTextState = mutableStateOf("")
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
@@ -138,7 +144,8 @@ class PostDetailsViewModel @Inject constructor(
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
                 postId = post.id,
-                comment = commentTextState.value
+                comment = commentTextState.value,
+                whetherDeleted = false
             )
         } else {  // Child comment
             comment = CommentBean(
@@ -149,7 +156,8 @@ class PostDetailsViewModel @Inject constructor(
                 repliedOnCommentId = commentedOn.commentFirebaseId,
                 repliedOnUserId = commentedOn.commentedBy,
                 postId = post.id,
-                comment = commentTextState.value
+                comment = commentTextState.value,
+                whetherDeleted = false
             )
         }
         viewModelScope.launch {
@@ -166,6 +174,22 @@ class PostDetailsViewModel @Inject constructor(
                 } else {
                     _addCommentStateFlow.value =
                         ResponseState.error(addCommentResponseState.message ?: "")
+                }
+            }
+        }
+    }
+
+    fun deleteComment(commentId: String, parentCommentId: String?) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _deleteCommentStateFlow.value = ResponseState.loading()
+                val deleteCommentResponseState = deleteCommentUseCase.invoke(commentId, post.id)
+                if (deleteCommentResponseState.status == RequestStatusEnum.Success) {
+                    _deleteCommentStateFlow.value =
+                        ResponseState.success(Pair(commentId, parentCommentId))
+                } else {
+                    _deleteCommentStateFlow.value =
+                        ResponseState.error(deleteCommentResponseState.message ?: "")
                 }
             }
         }

@@ -15,7 +15,7 @@ data class PostBean(
     val createdAt: Long,
     val postScope: String,
     val postType: String,
-    val commentCount: Long,
+    var commentCount: Long,
     var isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
 ) : Parcelable {
