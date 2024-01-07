@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@SuppressLint("StateNameRule")
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val addLikeUseCase: AddLikeUseCase,
@@ -43,7 +44,6 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    @SuppressLint("StateNameRule")
     lateinit var commentsMapState: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
@@ -159,8 +159,6 @@ class PostDetailsViewModel @Inject constructor(
                 if (addCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
-                        commentedOnState.value = null
-                        commentTextState.value = ""
                         _addCommentStateFlow.value = ResponseState.success(comment)
                     } else {
                         _addCommentStateFlow.value = ResponseState.error("")

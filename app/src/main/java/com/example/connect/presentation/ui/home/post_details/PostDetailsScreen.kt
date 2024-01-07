@@ -64,6 +64,7 @@ import com.example.connect.presentation.ui.common.Dot
 import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
+import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight4
 import com.example.connect.presentation.ui.common.SpacerHeight6
@@ -312,10 +313,10 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
 
 @Composable
 fun CommentUi(
-    usersBeans: List<UsersBean>?,
+    userList: List<UsersBean>?,
     viewModel: PostDetailsViewModel
 ) {
-    if (usersBeans.isNullOrEmpty() || viewModel.commentsMapState.isEmpty()) {
+    if (userList.isNullOrEmpty() || viewModel.commentsMapState.isEmpty()) {
         Column {
             TextBold14(
                 text = stringResource(R.string.no_comments_found),
@@ -329,32 +330,49 @@ fun CommentUi(
     }
     Column {
         val parentList =
-            viewModel.commentsMapState.keys.filter { it.repliedOnCommentId == null }
+            viewModel.commentsMapState.keys.filter { it.parentCommentId == null }
         parentList.forEach { parent ->
-            AddComment(usersBeans, parent, viewModel, true)
-            viewModel.commentsMapState[parent]?.forEach { child ->
-                AddComment(usersBeans = usersBeans, comment = child, viewModel = viewModel, false)
+            val childCommentList = viewModel.commentsMapState[parent]
+            if (childCommentList != null) {
+                ParentCommentItem(viewModel, parent, childCommentList, userList)
             }
         }
     }
 }
 
 @Composable
-fun AddComment(
-    usersBeans: List<UsersBean>,
-    comment: CommentBean,
+fun ParentCommentItem(
     viewModel: PostDetailsViewModel,
-    isParent: Boolean
+    parentComment: CommentBean,
+    childCommentList: List<CommentBean>,
+    userList: List<UsersBean>
 ) {
-    val commentPoster =
-        usersBeans.find { user -> user.firebaseUserId == comment.commentedBy }
-    if (commentPoster != null) {
-        CommentItem(
-            comment = comment,
-            commentPoster = commentPoster,
-            viewModel = viewModel,
-            isParent = isParent
-        )
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        val parentCommentPoster =
+            userList.find { user -> user.firebaseUserId == parentComment.commentedBy }
+        if (parentCommentPoster != null) {
+            CommentItem(
+                comment = parentComment,
+                commentPoster = parentCommentPoster,
+                viewModel = viewModel
+            )
+        }
+        Column(modifier = Modifier.padding(start = 32.dp)) {
+            childCommentList.forEach { comment ->
+                val childCommentPoster =
+                    userList.find { user -> user.firebaseUserId == comment.commentedBy }
+                if (childCommentPoster != null) {
+                    CommentItem(
+                        comment = comment,
+                        commentPoster = childCommentPoster,
+                        viewModel = viewModel
+                    )
+                }
+            }
+        }
+        if (childCommentList.isNotEmpty()) {
+            SpacerHeight12()
+        }
     }
 }
 
@@ -407,12 +425,11 @@ fun CommentUiLoading() {
 fun CommentItem(
     comment: CommentBean,
     commentPoster: UsersBean,
-    viewModel: PostDetailsViewModel,
-    isParent: Boolean
+    viewModel: PostDetailsViewModel
 ) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.padding(horizontal = if (isParent) 16.dp else 40.dp, vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp)
     ) {
         AsyncImage(
             modifier = Modifier
@@ -553,33 +570,39 @@ fun AddCommentSection(
 @Composable
 fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
     val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
-    var isResponseHandled by remember {
+    var isExceptionHandled by remember {
         mutableStateOf(false)
     }
     when (addCommentState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.isSendingCommentState.value = true
-            isResponseHandled = false
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
+            if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     if (addCommentState.message.isNullOrBlank()) stringResource(
                         id = R.string.some_error_occurred
                     ) else addCommentState.message
                 viewModel.isSendingCommentState.value = false
-                isResponseHandled = true
+                isExceptionHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
             val comment = addCommentState.data
+            viewModel.commentedOnState.value = null
+            viewModel.commentTextState.value = ""
             if (comment != null) {
-                val parent =
-                    viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
-                if (parent != null) {
-                    viewModel.commentsMapState.getOrPut(parent) { arrayListOf() }.add(0, comment)
+                if (comment.parentCommentId == null) {
+                    viewModel.commentsMapState[comment] = arrayListOf()
+                } else {
+                    val parent =
+                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.parentCommentId }
+                    if (parent != null) {
+                        viewModel.commentsMapState.getOrPut(parent) { arrayListOf() }.add(comment)
+                    }
                 }
             }
             viewModel.isSendingCommentState.value = false
