@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
+import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -55,25 +56,25 @@ class PostDetailsViewModel @Inject constructor(
     var repliedCommentPosterConnectId = mutableStateOf("")
     var isInitialized = false
 
-    lateinit var postId: String
+    lateinit var post: PostBean
 
     val isSendingComment = mutableStateOf(false)
 
-    fun initialize(postId: String) {
+    fun initialize(post: PostBean) {
         if (!isInitialized) {
-            this.postId = postId
+            this.post = post
             commentsStateMap = mutableStateMapOf()
             isInitialized = true
         }
     }
 
-    fun addLike(postId: String, currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun addLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 //_likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
                     currentUserFirebaseId = currentUserFirebaseId,
-                    postFirebaseId = postId
+                    postFirebaseId = post.id
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
@@ -83,13 +84,13 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun removeLike(postId: String, currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun removeLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = removeLikeUseCase.invoke(
                     currentUserFirebaseId = currentUserFirebaseId,
-                    postFirebaseId = postId
+                    postFirebaseId = post.id
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
@@ -99,11 +100,11 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun savePost(currentUserFirebaseId: String, postId: String, onUpdate: () -> Unit) {
+    fun savePost(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = savePostUseCase.invoke(currentUserFirebaseId, postId)
+                val responseState = savePostUseCase.invoke(currentUserFirebaseId, post.id)
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
                 }
@@ -112,11 +113,11 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun unSavePost(currentUserFirebaseId: String, postId: String, onUpdate: () -> Unit) {
+    fun unSavePost(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = unSavePostUseCase.invoke(currentUserFirebaseId, postId)
+                val responseState = unSavePostUseCase.invoke(currentUserFirebaseId, post.id)
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
                 }
@@ -135,7 +136,7 @@ class PostDetailsViewModel @Inject constructor(
                 parentCommentId = null,
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
-                postId = postId,
+                postId = post.id,
                 comment = commentText.value
             )
         } else {  // Child comment
@@ -147,7 +148,7 @@ class PostDetailsViewModel @Inject constructor(
                     ?: commentedOn.value!!.commentFirebaseId,
                 repliedOnCommentId = commentedOn.value!!.commentFirebaseId,
                 repliedOnUserId = commentedOn.value!!.commentedBy,
-                postId = postId,
+                postId = post.id,
                 comment = commentText.value
             )
         }
@@ -171,12 +172,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun getAllCommentsWithUsers(postId: String, loggedInUserFireId: String) {
+    fun getAllCommentsWithUsers(loggedInUserFireId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
                 val getAllCommentResponse =
-                    getAllCommentsWithUsersUseCase.invoke(postId, loggedInUserFireId)
+                    getAllCommentsWithUsersUseCase.invoke(post.id, loggedInUserFireId)
                 if (getAllCommentResponse.status == RequestStatusEnum.Success) {
                     val commentMap = getAllCommentResponse.data?.first
                     if (!commentMap.isNullOrEmpty()) {

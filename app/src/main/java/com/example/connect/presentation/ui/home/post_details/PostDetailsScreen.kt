@@ -97,7 +97,7 @@ fun PostDetailsScreen(
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
 
     if (!viewModel.isInitialized) {
-        viewModel.initialize(post.id)
+        viewModel.initialize(post)
     }
 
     val snackBarHostState = SnackbarHostState()
@@ -115,7 +115,6 @@ fun PostDetailsScreen(
             ) {
                 PostDetails(
                     usersDetails = posterDetails,
-                    postDetails = post,
                     loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
                     viewModel = viewModel,
                     navigator = navigator
@@ -141,14 +140,13 @@ fun PostDetailsScreen(
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getAllCommentsWithUsers(post.id, homeSharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getAllCommentsWithUsers(homeSharedViewModel.usersDetails.firebaseUserId)
     }
 }
 
 @Composable
 private fun PostDetails(
     usersDetails: UsersBean,
-    postDetails: PostBean,
     loggedInUserFirebaseId: String,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator
@@ -168,25 +166,25 @@ private fun PostDetails(
                     }
                 }
         )
-        if (postDetails.caption.isNotBlank()) {
+        if (viewModel.post.caption.isNotBlank()) {
             ExpandingText(
                 modifier = Modifier.padding(16.dp),
-                text = postDetails.caption,
+                text = viewModel.post.caption,
                 context = context,
-                minimizedMaxLines = if (postDetails.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
+                minimizedMaxLines = if (viewModel.post.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
             )
         } else {
             SpacerHeight16()
         }
         if (
-            postDetails.postType == MediaTypeEnum.Image.name
-            || postDetails.postType == MediaTypeEnum.TextImage.name
-            || postDetails.postType == MediaTypeEnum.Video.name
-            || postDetails.postType == MediaTypeEnum.TextVideo.name
+            viewModel.post.postType == MediaTypeEnum.Image.name
+            || viewModel.post.postType == MediaTypeEnum.TextImage.name
+            || viewModel.post.postType == MediaTypeEnum.Video.name
+            || viewModel.post.postType == MediaTypeEnum.TextVideo.name
         ) {
-            PostCaptionMediaSection(postDetails = postDetails)
+            PostCaptionMediaSection(postDetails = viewModel.post)
         }
-        PostBottomSection(postDetails, viewModel, loggedInUserFirebaseId)
+        PostBottomSection(viewModel, loggedInUserFirebaseId)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -194,51 +192,50 @@ private fun PostDetails(
 
 @Composable
 private fun PostBottomSection(
-    postDetails: PostBean,
     viewModel: PostDetailsViewModel,
     currentUserFirebaseId: String,
 ) {
     val context = LocalContext.current
     var likeCount by remember {
-        mutableIntStateOf(postDetails.likedBy.size)
+        mutableIntStateOf(viewModel.post.likedBy.size)
     }
     var isSavedByCurrentUser by remember {
-        mutableStateOf(postDetails.isSavedByCurrentUser)
+        mutableStateOf(viewModel.post.isSavedByCurrentUser)
     }
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             IconButton(onClick = {
-                if (postDetails.likedBy.contains(currentUserFirebaseId)) {
-                    viewModel.removeLike(postDetails.id, currentUserFirebaseId) {
-                        postDetails.likedBy.remove(currentUserFirebaseId)
+                if (viewModel.post.likedBy.contains(currentUserFirebaseId)) {
+                    viewModel.removeLike(currentUserFirebaseId) {
+                        viewModel.post.likedBy.remove(currentUserFirebaseId)
                         likeCount--
                     }
                 } else {
-                    viewModel.addLike(postDetails.id, currentUserFirebaseId) {
-                        postDetails.likedBy.add(currentUserFirebaseId)
+                    viewModel.addLike(currentUserFirebaseId) {
+                        viewModel.post.likedBy.add(currentUserFirebaseId)
                         likeCount++
                     }
                 }
             }) {
                 Icon(
-                    painter = if (postDetails.likedBy.contains(currentUserFirebaseId)) painterResource(
+                    painter = if (viewModel.post.likedBy.contains(currentUserFirebaseId)) painterResource(
                         id = R.drawable.ic_heart_filled
                     ) else painterResource(id = R.drawable.ic_heart),
                     contentDescription = stringResource(
                         id = R.string.like_post
                     ),
-                    tint = if (postDetails.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                    tint = if (viewModel.post.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
                 )
             }
             IconButton(onClick = {
-                if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId, postDetails.id) {
-                        postDetails.isSavedByCurrentUser = false
+                if (viewModel.post.isSavedByCurrentUser) {
+                    viewModel.unSavePost(currentUserFirebaseId) {
+                        viewModel.post.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId, postDetails.id) {
-                        postDetails.isSavedByCurrentUser = true
+                    viewModel.savePost(currentUserFirebaseId) {
+                        viewModel.post.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }
                 }
@@ -263,9 +260,9 @@ private fun PostBottomSection(
             Dot()
             SpacerWidth12()
             Text(
-                text = if (postDetails.commentCount == 1L) stringResource(R.string._1_comment) else stringResource(
+                text = if (viewModel.post.commentCount == 1L) stringResource(R.string._1_comment) else stringResource(
                     R.string.comment_count_comments,
-                    postDetails.commentCount
+                    viewModel.post.commentCount
                 ),
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp
@@ -274,7 +271,7 @@ private fun PostBottomSection(
             Dot()
             SpacerWidth12()
             Text(
-                text = FunctionHelper.getTimeAgo(postDetails.createdAt, context),
+                text = FunctionHelper.getTimeAgo(viewModel.post.createdAt, context),
                 fontSize = 12.sp
             )
         }
@@ -485,7 +482,7 @@ fun AddCommentSection(
     val isReply = viewModel.commentedOn.value != null
     Row(
         modifier = Modifier
-            .padding(start = 12.dp, end = 6.dp)
+            .padding(horizontal = 12.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
