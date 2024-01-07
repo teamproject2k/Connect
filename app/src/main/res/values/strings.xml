@@ -199,9 +199,9 @@
     <string name="seen_list">Seen list</string>
     <string name="save_post">Save Post</string>
     <string name="reply">Reply</string>
-    <string name="add_a_comment_for_poster_id">Add a comment for %1$s</string>
+    <string name="add_a_comment">Add a comment</string>
     <string name="no_comments_found">No comments found</string>
-    <string name="tag_poster">"\@%1$s"</string>
+    <string name="tag_poster">"%1$s"</string>
     <string name="post_comment">Post comment</string>
     <string name="remove_tag">Remove Tag</string>
     <string name="_1_h">1 h</string>

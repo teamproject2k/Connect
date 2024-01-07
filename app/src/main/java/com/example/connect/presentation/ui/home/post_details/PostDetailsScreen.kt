@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.post_details
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -41,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +55,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
+import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.Dot
 import com.example.connect.presentation.ui.common.ExpandingText
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -61,7 +64,6 @@ import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight4
 import com.example.connect.presentation.ui.common.SpacerHeight6
 import com.example.connect.presentation.ui.common.SpacerWidth12
-import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold13
 import com.example.connect.presentation.ui.common.TextBold14
@@ -118,13 +120,14 @@ fun PostDetailsScreen(
                     text = stringResource(R.string.comments),
                     modifier = Modifier.padding(16.dp)
                 )
-                HandleCommentSections(viewModel)
+                HandleGetAllCommentsSection(viewModel)
             }
+            DividerLightGrayAlpha50()
             AddCommentSection(
                 viewModel,
-                posterDetails.connectUserId,
                 homeSharedViewModel.usersDetails
             )
+            HandleAddCommentSection(viewModel = viewModel)
         }
     }
     LaunchedEffect(viewModel.snackBarMessageState.value) {
@@ -138,234 +141,6 @@ fun PostDetailsScreen(
     }
 }
 
-@Composable
-fun HandleCommentSections(viewModel: PostDetailsViewModel) {
-    val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
-    var isResponseHandled by remember {
-        mutableStateOf(false)
-    }
-    when (getAllCommentsState.status) {
-        RequestStatusEnum.Loading -> {
-            CommentUiLoading()
-            isResponseHandled = false
-        }
-
-        RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
-                isResponseHandled = true
-            }
-        }
-
-        RequestStatusEnum.Success -> {
-            CommentUi(
-                getAllCommentsState.data,
-                viewModel
-            )
-        }
-
-        RequestStatusEnum.None -> {
-            // do not handle this
-        }
-    }
-}
-
-@Composable
-fun CommentUi(
-    data: Pair<List<CommentBean>, List<UsersBean>>?,
-    viewModel: PostDetailsViewModel
-) {
-    if (data == null || data.first.isEmpty() || data.second.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            TextBold14(text = stringResource(R.string.no_comments_found))
-        }
-        return
-    }
-    Column {
-        data.first.forEach { comment ->
-            val commentPoster =
-                data.second.find { it.firebaseUserId == comment.commentedBy }
-            if (commentPoster != null) {
-                CommentItem(
-                    comment = comment,
-                    commentPoster = commentPoster,
-                    viewModel = viewModel
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CommentUiLoading() {
-    repeat(4) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .shimmer()
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .height(13.dp)
-                            .fillMaxWidth()
-                            .shimmer()
-                            .weight(1f)
-                    )
-                    SpacerWidth8()
-                    Box(
-                        modifier = Modifier
-                            .height(12.dp)
-                            .width(40.dp)
-                            .shimmer()
-                    )
-                }
-                SpacerHeight4()
-                Box(
-                    modifier = Modifier
-                        .height(13.dp)
-                        .fillMaxWidth()
-                        .shimmer()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CommentItem(
-    comment: CommentBean,
-    commentPoster: UsersBean,
-    viewModel: PostDetailsViewModel
-) {
-    val context = LocalContext.current
-    Row(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape),
-            model = commentPoster.profilePhoto,
-            contentDescription = commentPoster.name,
-            contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ic_default_user)
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 12.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextBold13(text = commentPoster.connectUserId)
-                SpacerWidth8()
-                Text(
-                    text = FunctionHelper.getTimeAgo(comment.commentedTime, context, true),
-                    color = ColorsHelper.gray(),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            SpacerHeight4()
-            Text(
-                text = comment.comment,
-                fontSize = 13.sp,
-                lineHeight = 16.sp
-            )
-            SpacerHeight6()
-            Text(
-                modifier = Modifier.clickable {
-                    viewModel.repliedCommentPosterConnectId.value = commentPoster.connectUserId
-                    viewModel.commentedOn.value = comment.commentFirebaseId
-                },
-                text = stringResource(R.string.reply),
-                fontSize = 12.sp,
-                color = ColorsHelper.gray(),
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-@Composable
-fun AddCommentSection(
-    viewModel: PostDetailsViewModel,
-    posterConnectId: String,
-    loggedInUser: UsersBean
-) {
-    val context = LocalContext.current
-    val isReply = viewModel.commentedOn.value != viewModel.postId
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape),
-            model = loggedInUser.profilePhoto,
-            contentDescription = loggedInUser.name,
-            contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ic_default_user)
-        )
-        if (isReply) {
-            SpacerWidth6()
-            Text(
-                text = context.getString(
-                    R.string.tag_poster,
-                    viewModel.repliedCommentPosterConnectId.value
-                ),
-                fontSize = 12.sp,
-                color = ColorsHelper.gray()
-            )
-        }
-        TransparentTextField(
-            modifier = Modifier.weight(1f),
-            value = viewModel.commentText.value,
-            onValueChange = { text -> viewModel.commentText.value = text },
-            placeholder = {
-                if (!isReply) {
-                    Text(
-                        text = stringResource(
-                            R.string.add_a_comment_for_poster_id,
-                            posterConnectId
-                        ),
-                        color = ColorsHelper.gray(),
-                        fontSize = 13.sp
-                    )
-                }
-            })
-        if (isReply) {
-            IconButton(onClick = { viewModel.commentedOn.value = viewModel.postId }) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.remove_tag)
-                )
-            }
-        }
-        if (viewModel.commentText.value.isNotBlank()) {
-            IconButton(onClick = {
-                viewModel.addComment(loggedInUser.firebaseUserId)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = stringResource(R.string.post_comment)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun PostDetails(
@@ -499,6 +274,281 @@ private fun PostBottomSection(
                 text = FunctionHelper.getTimeAgo(postDetails.createdAt, context),
                 fontSize = 12.sp
             )
+        }
+    }
+}
+
+@Composable
+fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
+    val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getAllCommentsState.status) {
+        RequestStatusEnum.Loading -> {
+            CommentUiLoading()
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            CommentUi(
+                getAllCommentsState.data?.second,
+                viewModel
+            )
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
+}
+
+@Composable
+fun CommentUi(
+    usersBeans: List<UsersBean>?,
+    viewModel: PostDetailsViewModel
+) {
+    if (usersBeans.isNullOrEmpty() || viewModel.commentsStateList.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            TextBold14(text = stringResource(R.string.no_comments_found))
+        }
+        return
+    }
+    Column {
+        viewModel.commentsStateList.forEach { comment ->
+            val commentPoster =
+                usersBeans.find { it.firebaseUserId == comment.commentedBy }
+            if (commentPoster != null) {
+                CommentItem(
+                    comment = comment,
+                    commentPoster = commentPoster,
+                    viewModel = viewModel
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CommentUiLoading() {
+    repeat(4) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .shimmer()
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .height(13.dp)
+                            .fillMaxWidth()
+                            .shimmer()
+                            .weight(1f)
+                    )
+                    SpacerWidth8()
+                    Box(
+                        modifier = Modifier
+                            .height(12.dp)
+                            .width(40.dp)
+                            .shimmer()
+                    )
+                }
+                SpacerHeight4()
+                Box(
+                    modifier = Modifier
+                        .height(13.dp)
+                        .fillMaxWidth()
+                        .shimmer()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CommentItem(
+    comment: CommentBean,
+    commentPoster: UsersBean,
+    viewModel: PostDetailsViewModel
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .border(1.dp, ColorsHelper.black(), CircleShape),
+            model = commentPoster.profilePhoto,
+            contentDescription = commentPoster.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextBold13(text = commentPoster.connectUserId)
+                SpacerWidth8()
+                Text(
+                    text = FunctionHelper.getTimeAgo(comment.commentedTime, context, true),
+                    color = ColorsHelper.gray(),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            SpacerHeight4()
+            Text(
+                text = comment.comment,
+                fontSize = 13.sp,
+                lineHeight = 16.sp
+            )
+            SpacerHeight6()
+            Text(
+                modifier = Modifier.clickable {
+                    viewModel.repliedCommentPosterConnectId.value = commentPoster.connectUserId
+                    viewModel.commentedOn.value = comment.commentFirebaseId
+                },
+                text = stringResource(R.string.reply),
+                fontSize = 12.sp,
+                color = ColorsHelper.gray(),
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun AddCommentSection(
+    viewModel: PostDetailsViewModel,
+    loggedInUser: UsersBean
+) {
+    val context = LocalContext.current
+    val isReply = viewModel.commentedOn.value != viewModel.postId
+    Row(
+        modifier = Modifier
+            .padding(start = 12.dp, end = 6.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .border(1.dp, ColorsHelper.gray(), CircleShape),
+            model = loggedInUser.profilePhoto,
+            contentDescription = loggedInUser.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        if (isReply) {
+            SpacerWidth8()
+            Text(
+                text = context.getString(
+                    R.string.tag_poster,
+                    viewModel.repliedCommentPosterConnectId.value
+                ),
+                fontSize = 12.sp,
+                color = ColorsHelper.black(),
+                fontWeight = FontWeight.Medium
+            )
+        }
+        TransparentTextField(
+            modifier = Modifier.weight(1f),
+            value = viewModel.commentText.value,
+            singleLine = true,
+            maxLines = 1,
+            onValueChange = { text -> viewModel.commentText.value = text },
+            textStyle = TextStyle(fontSize = 14.sp),
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.add_a_comment),
+                    color = ColorsHelper.gray(),
+                    fontSize = 13.sp
+                )
+            })
+        if (isReply) {
+            IconButton(onClick = { viewModel.commentedOn.value = viewModel.postId }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.remove_tag),
+                    tint = ColorsHelper.gray()
+                )
+            }
+        }
+        if (viewModel.commentText.value.isNotBlank() && !viewModel.isSendingComment.value) {
+            IconButton(onClick = {
+                viewModel.addComment(loggedInUser.firebaseUserId)
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_send),
+                    contentDescription = stringResource(R.string.post_comment)
+                )
+            }
+        } else if (viewModel.isSendingComment.value) {
+            CircularProgressIndicator(
+                strokeWidth = 2.dp,
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(end = 4.dp)
+            )
+        }
+
+    }
+}
+
+@Composable
+fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
+    val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (addCommentState.status) {
+        RequestStatusEnum.Loading -> {
+            viewModel.isSendingComment.value = true
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.isSendingComment.value = false
+                viewModel.snackBarMessageState.value =
+                    addCommentState.message ?: stringResource(id = R.string.some_error_occurred)
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            viewModel.isSendingComment.value = false
+            val comment = addCommentState.data
+            if (comment != null) {
+                viewModel.commentsStateList.add(comment)
+            }
+            viewModel.commentedOn.value = viewModel.postId
+            viewModel.commentText.value = ""
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
         }
     }
 }

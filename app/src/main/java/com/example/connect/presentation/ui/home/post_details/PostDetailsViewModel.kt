@@ -2,7 +2,9 @@ package com.example.connect.presentation.ui.home.post_details
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.UsersBean
@@ -41,9 +43,11 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<List<CommentBean>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    private val _addCommentStateFlow: MutableStateFlow<ResponseState<String>> =
+    lateinit var commentsStateList: SnapshotStateList<CommentBean>
+
+    private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
-    val addCommentStateFlow: StateFlow<ResponseState<String>> get() = _addCommentStateFlow
+    val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
 
     val commentText = mutableStateOf("")
     lateinit var commentedOn: MutableState<String>
@@ -53,10 +57,13 @@ class PostDetailsViewModel @Inject constructor(
 
     lateinit var postId: String
 
+    val isSendingComment= mutableStateOf(false)
+
     fun initialize(postId: String) {
         if (!isInitialized) {
             this.postId = postId
             commentedOn = mutableStateOf(postId)
+            commentsStateList = mutableStateListOf()
             isInitialized = true
         }
     }
@@ -135,7 +142,13 @@ class PostDetailsViewModel @Inject constructor(
                 val response = addCommentUseCase.invoke(comment)
                 if (response.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = response.data ?: ""
-                    _addCommentStateFlow.value = response
+                    if (comment.commentFirebaseId.isNotBlank()) {
+                        _addCommentStateFlow.value = ResponseState.success(comment)
+                    } else {
+                        _addCommentStateFlow.value = ResponseState.error("")
+                    }
+                } else {
+                    _addCommentStateFlow.value = ResponseState.error(response.message ?: "")
                 }
             }
         }
@@ -145,8 +158,17 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
-                _getAllCommentsStateFlow.value =
+                val getAllCommentResponse =
                     getAllCommentsUseCase.invoke(postId, loggedInUserFireId)
+                if (getAllCommentResponse.status == RequestStatusEnum.Success) {
+                    val commentList = getAllCommentResponse.data?.first
+                    if (!commentList.isNullOrEmpty()) {
+                        commentsStateList.addAll(commentList)
+                    }
+                    _getAllCommentsStateFlow.value = getAllCommentResponse
+                } else {
+                    _getAllCommentsStateFlow.value = getAllCommentResponse
+                }
             }
         }
     }
