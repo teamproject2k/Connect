@@ -15,7 +15,6 @@ data class StoryBean(
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
     val isDeleted: Boolean = false
-    //val seenList: List<Pair<String, Long>>
 ) : Serializable {
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(

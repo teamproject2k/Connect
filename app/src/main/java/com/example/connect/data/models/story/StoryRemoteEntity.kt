@@ -13,7 +13,6 @@ data class StoryRemoteEntity(
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
     val whetherDeleted: Boolean = false
-    // val seenList: List<Pair<String, Long>>
 ) {
     constructor() : this("", "", "", 0, "", "", "", "", 0, false)
 
@@ -30,7 +29,6 @@ data class StoryRemoteEntity(
             backgroundGradientColor,
             videoLength,
             whetherDeleted
-            // seenList
         )
     }
 }
