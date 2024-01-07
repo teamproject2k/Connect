@@ -1,9 +1,11 @@
 package com.example.connect.data.repository
 
 import com.example.connect.data.local_db.AppDatabase
+import com.example.connect.data.models.comment.CommentRemoteEntity
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
+import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
@@ -190,4 +192,84 @@ class IPostRepositoryImpl @Inject constructor(
         return ResponseState.success(listOf())
     }
 
+    override suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String> {
+        return try {
+            val response = fireStore.collection(FirebaseConstants.COMMENT_KEY)
+                .add(comment.toCommentRemoteEntity())
+                .await()
+            ResponseState.success(response.id)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun getAllCommentsFromRemote(
+        postId: String,
+        loggedInUserFireId: String
+    ): ResponseState<Pair<List<CommentBean>, List<UsersBean>>> {
+        return try {
+            val commentListResponse = fireStore.collection(FirebaseConstants.COMMENT_KEY)
+                .whereEqualTo(CommentRemoteEntity::postId.name, postId)
+                .get()
+                .await()
+
+            val commentList = arrayListOf<CommentBean>()
+            val userList = arrayListOf<UsersBean>()
+            val loggedInUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                .document(loggedInUserFireId).get().await()
+            val loggedInUser = loggedInUserDocument.toObject(UserRemoteEntity::class.java)
+            if (loggedInUserDocument != null && loggedInUserDocument.exists() && loggedInUser != null) {
+                userList.add(loggedInUser.toUserBean())
+                commentListResponse.documents.forEach { document ->
+                    if (document.exists()) {
+                        val comment = document.toObject(CommentRemoteEntity::class.java)
+                        if (comment != null) {
+                            commentList.add(comment.toCommentBean(document.id))
+                        }
+                    }
+                }
+
+                commentList.forEach { comment ->
+                    val isUserPresent =
+                        userList.find { it.firebaseUserId == comment.commentedBy } != null
+                    if (!isUserPresent) {
+                        val user = fireStore.collection(FirebaseConstants.USER_KEY)
+                            .document(comment.commentedBy)
+                            .get()
+                            .await()
+                        if (user.exists()) {
+                            val userDetails = user.toObject(UserRemoteEntity::class.java)
+                            if (userDetails != null) {
+                                val whetherShowComment =
+                                    (comment.commentedBy == loggedInUser.firebaseUserId)
+                                            || ((userDetails.otherUsersStatus[loggedInUserFireId] != StatusWithCurrentUserRemoteEnum.Blocked.name)
+                                            && (loggedInUser.otherUsersStatus[userDetails.firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name))
+                                if (!whetherShowComment) {
+                                  //  commentList.remove(comment)
+                                }
+                                userList.add(userDetails.toUserBean())
+                            } else {
+                              //  commentList.remove(comment)
+                            }
+                        } else {
+                           // commentList.remove(comment)
+                        }
+                    }
+                }
+
+                userList.forEach { user ->
+                    val isCommentPresentForUser =
+                        commentList.find { it.commentedBy == user.firebaseUserId } != null
+                    if (!isCommentPresentForUser) {
+                        //userList.remove(user)
+                    }
+                }
+                ResponseState.success(Pair(commentList, userList))
+            } else {
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+            }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 }

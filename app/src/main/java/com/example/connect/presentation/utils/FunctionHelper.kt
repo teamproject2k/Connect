@@ -500,57 +500,81 @@ object FunctionHelper {
     }
 
 
-    fun getTimeAgo(timestamp: Long, context: Context): String {
+    fun getTimeAgo(timestamp: Long, context: Context, useShortNotation: Boolean = false): String {
         val instant = Instant.ofEpochMilli(timestamp)
         val timeAgoDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         val currentDateTime = LocalDateTime.now()
         val duration = Duration.between(timeAgoDateTime, currentDateTime)
         return when {
             duration.seconds < 60 -> {
-                if (duration.seconds == 1L) context.getString(R.string._1_sec_ago) else context.getString(
-                    R.string.secs_ago, duration.seconds
-                )
+                if (duration.seconds == 1L) {
+                    if (useShortNotation) context.getString(R.string._1_sec)
+                    else context.getString(R.string._1_sec_ago)
+                } else {
+                    if (useShortNotation) context.getString(R.string.duration_sec, duration.seconds)
+                    else context.getString(R.string.secs_ago, duration.seconds)
+                }
             }
 
             duration.toMinutes() < 60 -> {
                 if (duration.toMinutes() == 1L) {
-                    context.getString(R.string._1_min_ago)
+                    if (useShortNotation) context.getString(R.string._1_m)
+                    else context.getString(R.string._1_min_ago)
                 } else {
-                    context.getString(R.string.mins_ago, duration.toMinutes())
+                    if (useShortNotation) context.getString(
+                        R.string.duration_m,
+                        duration.toMinutes()
+                    )
+                    else context.getString(R.string.mins_ago, duration.toMinutes())
                 }
             }
 
             duration.toHours() < 24 -> {
                 if (duration.toHours() == 1L) {
-                    context.getString(R.string._1_hour_ago)
+                    if (useShortNotation) context.getString(R.string._1_h)
+                    else context.getString(R.string._1_hour_ago)
                 } else {
-                    context.getString(R.string.hours_ago, duration.toHours())
+                    if (useShortNotation) context.getString(
+                        R.string.duration_h,
+                        duration.toHours()
+                    )
+                    else context.getString(R.string.hours_ago, duration.toHours())
                 }
             }
 
             duration.toDays() < 30 -> {
                 if (duration.toDays() == 1L) {
-                    context.getString(R.string._1_day_ago)
+                    if (useShortNotation) context.getString(R.string._1_d)
+                    else context.getString(R.string._1_day_ago)
                 } else {
-                    context.getString(R.string.days_ago, duration.toDays())
+                    if (useShortNotation) context.getString(R.string.duration_d, duration.toDays())
+                    else context.getString(R.string.days_ago, duration.toDays())
                 }
             }
 
             duration.toDays() < 365 -> {
                 if (duration.toDays() / 30 == 1L) {
-                    context.getString(R.string._1_month_ago)
-
+                    if (useShortNotation) context.getString(R.string._1_mon)
+                    else context.getString(R.string._1_month_ago)
                 } else {
-                    context.getString(R.string.months_ago, duration.toDays() / 30)
-
+                    if (useShortNotation) context.getString(
+                        R.string.duration_mon,
+                        duration.toDays() / 30
+                    )
+                    else context.getString(R.string.months_ago, duration.toDays() / 30)
                 }
             }
 
             else -> {
                 if (duration.toDays() / 365 == 1L) {
-                    context.getString(R.string._1_year_ago)
+                    if (useShortNotation) context.getString(R.string._1_yr)
+                    else context.getString(R.string._1_year_ago)
                 } else {
-                    context.getString(R.string.years_ago, duration.toDays() / 365)
+                    if (useShortNotation) context.getString(
+                        R.string.duration_yr,
+                        duration.toDays() / 365
+                    )
+                    else context.getString(R.string.years_ago, duration.toDays() / 365)
                 }
             }
         }

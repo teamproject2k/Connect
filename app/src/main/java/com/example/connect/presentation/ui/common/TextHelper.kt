@@ -21,7 +21,18 @@ fun TextBoldOnPrimary28(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TextBold14(text: String, color: Color = Color.Unspecified, modifier: Modifier = Modifier) {
+fun TextBold13(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified) {
+    Text(
+        text = text,
+        modifier = modifier,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Bold,
+        color = color
+    )
+}
+
+@Composable
+fun TextBold14(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified) {
     Text(
         text = text,
         modifier = modifier,

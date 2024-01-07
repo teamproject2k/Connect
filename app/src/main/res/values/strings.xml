@@ -197,4 +197,23 @@
     <string name="are_you_sure_you_want_to_delete_your_story">Are you sure you want to delete your story?</string>
     <string name="delete">Delete</string>
     <string name="seen_list">Seen list</string>
+    <string name="save_post">Save Post</string>
+    <string name="reply">Reply</string>
+    <string name="add_a_comment_for_poster_id">Add a comment for %1$s</string>
+    <string name="no_comments_found">No comments found</string>
+    <string name="tag_poster">"\@%1$s"</string>
+    <string name="post_comment">Post comment</string>
+    <string name="remove_tag">Remove Tag</string>
+    <string name="_1_h">1 h</string>
+    <string name="duration_h">%1$s h</string>
+    <string name="duration_d">%1$s d</string>
+    <string name="_1_mon">1 mon</string>
+    <string name="duration_mon">%1$s mon</string>
+    <string name="_1_yr">1 yr</string>
+    <string name="duration_yr">%1$s yr</string>
+    <string name="_1_d">1 d</string>
+    <string name="_1_sec">1 sec</string>
+    <string name="duration_sec">%1$s sec</string>
+    <string name="_1_m">1 m</string>
+    <string name="duration_m">%1$s m</string>
 </resources>

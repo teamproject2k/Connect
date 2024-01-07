@@ -2,20 +2,33 @@ package com.example.connect.presentation.ui.home.post_details
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,21 +45,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
 import com.example.connect.presentation.ui.common.Dot
 import com.example.connect.presentation.ui.common.ExpandingText
+import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.PostCaptionMediaSection
 import com.example.connect.presentation.ui.common.SpacerHeight16
+import com.example.connect.presentation.ui.common.SpacerHeight4
+import com.example.connect.presentation.ui.common.SpacerHeight6
 import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.SpacerWidth6
+import com.example.connect.presentation.ui.common.SpacerWidth8
+import com.example.connect.presentation.ui.common.TextBold13
+import com.example.connect.presentation.ui.common.TextBold14
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
@@ -56,41 +84,294 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun PostDetailsScreen(
     navigator: DestinationsNavigator,
-    postBean: PostBean,
-    usersDetails: UsersBean,
-    currentUserFirebaseId: String
+    post: PostBean,
+    posterDetails: UsersBean
 ) {
     val viewModel: PostDetailsViewModel = hiltViewModel()
-    Scaffold(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize()
-        ) {
-            PostDetails(
-                usersDetails = usersDetails,
-                postDetails = postBean,
-                currentUserFirebaseId = currentUserFirebaseId,
-                viewModel = viewModel,
-                navigator = navigator
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+
+    if (!viewModel.isInitialized) {
+        viewModel.initialize(post.id)
+    }
+
+    val snackBarHostState = SnackbarHostState()
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f)
+            ) {
+                PostDetails(
+                    usersDetails = posterDetails,
+                    postDetails = post,
+                    loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
+                    viewModel = viewModel,
+                    navigator = navigator
+                )
+                TextBold18(
+                    text = stringResource(R.string.comments),
+                    modifier = Modifier.padding(16.dp)
+                )
+                HandleCommentSections(viewModel)
+            }
+            AddCommentSection(
+                viewModel,
+                posterDetails.connectUserId,
+                homeSharedViewModel.usersDetails
             )
-            TextBold18(text = stringResource(R.string.comments), modifier = Modifier.padding(16.dp))
-            HandleCommentSections(viewModel)
         }
+    }
+    LaunchedEffect(viewModel.snackBarMessageState.value) {
+        if (viewModel.snackBarMessageState.value.isNotBlank()) {
+            snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
+            viewModel.snackBarMessageState.value = ""
+        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.getAllComments(post.id, homeSharedViewModel.usersDetails.firebaseUserId)
     }
 }
 
 @Composable
 fun HandleCommentSections(viewModel: PostDetailsViewModel) {
+    val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getAllCommentsState.status) {
+        RequestStatusEnum.Loading -> {
+            CommentUiLoading()
+            isResponseHandled = false
+        }
 
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            CommentUi(
+                getAllCommentsState.data,
+                viewModel
+            )
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
 }
 
+@Composable
+fun CommentUi(
+    data: Pair<List<CommentBean>, List<UsersBean>>?,
+    viewModel: PostDetailsViewModel
+) {
+    if (data == null || data.first.isEmpty() || data.second.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            TextBold14(text = stringResource(R.string.no_comments_found))
+        }
+        return
+    }
+    Column {
+        data.first.forEach { comment ->
+            val commentPoster =
+                data.second.find { it.firebaseUserId == comment.commentedBy }
+            if (commentPoster != null) {
+                CommentItem(
+                    comment = comment,
+                    commentPoster = commentPoster,
+                    viewModel = viewModel
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CommentUiLoading() {
+    repeat(4) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .shimmer()
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .height(13.dp)
+                            .fillMaxWidth()
+                            .shimmer()
+                            .weight(1f)
+                    )
+                    SpacerWidth8()
+                    Box(
+                        modifier = Modifier
+                            .height(12.dp)
+                            .width(40.dp)
+                            .shimmer()
+                    )
+                }
+                SpacerHeight4()
+                Box(
+                    modifier = Modifier
+                        .height(13.dp)
+                        .fillMaxWidth()
+                        .shimmer()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CommentItem(
+    comment: CommentBean,
+    commentPoster: UsersBean,
+    viewModel: PostDetailsViewModel
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape),
+            model = commentPoster.profilePhoto,
+            contentDescription = commentPoster.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextBold13(text = commentPoster.connectUserId)
+                SpacerWidth8()
+                Text(
+                    text = FunctionHelper.getTimeAgo(comment.commentedTime, context, true),
+                    color = ColorsHelper.gray(),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            SpacerHeight4()
+            Text(
+                text = comment.comment,
+                fontSize = 13.sp,
+                lineHeight = 16.sp
+            )
+            SpacerHeight6()
+            Text(
+                modifier = Modifier.clickable {
+                    viewModel.repliedCommentPosterConnectId.value = commentPoster.connectUserId
+                    viewModel.commentedOn.value = comment.commentFirebaseId
+                },
+                text = stringResource(R.string.reply),
+                fontSize = 12.sp,
+                color = ColorsHelper.gray(),
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun AddCommentSection(
+    viewModel: PostDetailsViewModel,
+    posterConnectId: String,
+    loggedInUser: UsersBean
+) {
+    val context = LocalContext.current
+    val isReply = viewModel.commentedOn.value != viewModel.postId
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape),
+            model = loggedInUser.profilePhoto,
+            contentDescription = loggedInUser.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        if (isReply) {
+            SpacerWidth6()
+            Text(
+                text = context.getString(
+                    R.string.tag_poster,
+                    viewModel.repliedCommentPosterConnectId.value
+                ),
+                fontSize = 12.sp,
+                color = ColorsHelper.gray()
+            )
+        }
+        TransparentTextField(
+            modifier = Modifier.weight(1f),
+            value = viewModel.commentText.value,
+            onValueChange = { text -> viewModel.commentText.value = text },
+            placeholder = {
+                if (!isReply) {
+                    Text(
+                        text = stringResource(
+                            R.string.add_a_comment_for_poster_id,
+                            posterConnectId
+                        ),
+                        color = ColorsHelper.gray(),
+                        fontSize = 13.sp
+                    )
+                }
+            })
+        if (isReply) {
+            IconButton(onClick = { viewModel.commentedOn.value = viewModel.postId }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.remove_tag)
+                )
+            }
+        }
+        if (viewModel.commentText.value.isNotBlank()) {
+            IconButton(onClick = {
+                viewModel.addComment(loggedInUser.firebaseUserId)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = stringResource(R.string.post_comment)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun PostDetails(
     usersDetails: UsersBean,
     postDetails: PostBean,
-    currentUserFirebaseId: String,
+    loggedInUserFirebaseId: String,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -102,7 +383,7 @@ private fun PostDetails(
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                 .clickable {
-                    if (currentUserFirebaseId == usersDetails.firebaseUserId) {
+                    if (loggedInUserFirebaseId == usersDetails.firebaseUserId) {
                         navigator.navigate(CurrentUserProfileScreenDestination)
                     } else {
                         navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
@@ -127,12 +408,11 @@ private fun PostDetails(
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
-        PostBottomSection(postDetails, viewModel, currentUserFirebaseId)
+        PostBottomSection(postDetails, viewModel, loggedInUserFirebaseId)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
 }
-
 
 @Composable
 private fun PostBottomSection(
@@ -187,7 +467,7 @@ private fun PostBottomSection(
             }) {
                 Icon(
                     imageVector = if (isSavedByCurrentUser) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = stringResource(R.string.comment_on_post)
+                    contentDescription = stringResource(R.string.save_post)
                 )
             }
         }

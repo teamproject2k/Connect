@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" tools:ignore="LockedOrientationActivity">
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -20,6 +20,7 @@
         <activity
             android:name=".presentation.ui.auth.AuthenticationActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/SplashScreenTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -28,8 +29,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.ui.home.base_screen.HomeActivity" />
-        <activity android:name=".presentation.ui.chat.ChatActivity" />
+        <activity
+            android:name=".presentation.ui.home.base_screen.HomeActivity"
+            android:screenOrientation="portrait"
+             />
+        <activity
+            android:name=".presentation.ui.chat.ChatActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".presentation.services.fcm.MessagingService"

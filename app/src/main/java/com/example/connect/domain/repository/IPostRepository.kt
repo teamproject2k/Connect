@@ -1,5 +1,6 @@
 package com.example.connect.domain.repository
 
+import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
@@ -67,4 +68,8 @@ interface IPostRepository {
     ): ResponseState<Nothing>
 
     suspend fun getSavedPostsFromRemote(savedPosts: ArrayList<String>): ResponseState<List<PostBean>>
+
+    suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
+
+    suspend fun getAllCommentsFromRemote(postId: String, loggedInUserFireId: String): ResponseState<Pair<List<CommentBean>, List<UsersBean>>>
 }

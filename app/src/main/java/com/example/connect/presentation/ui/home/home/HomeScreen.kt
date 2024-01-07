@@ -1,7 +1,6 @@
 package com.example.connect.presentation.ui.home.home
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -554,8 +553,7 @@ private fun PostBottomSection(
                     navigator.navigate(
                         PostDetailsScreenDestination(
                             postDetails,
-                            userDetails,
-                            currentUserFirebaseId
+                            userDetails
                         )
                     )
                 }) {
@@ -580,7 +578,7 @@ private fun PostBottomSection(
             }) {
                 Icon(
                     imageVector = if (isSavedByCurrentUser) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = stringResource(R.string.comment_on_post)
+                    contentDescription = stringResource(R.string.save_post)
                 )
             }
         }

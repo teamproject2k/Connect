@@ -110,8 +110,7 @@ fun UserProfilePostSection(
                         navigator.navigate(
                             PostDetailsScreenDestination(
                                 details,
-                                userDetails,
-                                currentUserFirebaseId
+                                userDetails
                             )
                         )
                     }
