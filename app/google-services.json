@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "124992599351",
-    "project_id": "connect-d6237",
-    "storage_bucket": "connect-d6237.appspot.com"
+    "project_number": "932737234135",
+    "project_id": "connect-6b6fe",
+    "storage_bucket": "connect-6b6fe.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:124992599351:android:631ef4e56f0251576256b2",
+        "mobilesdk_app_id": "1:932737234135:android:8ad5d88b883f1f0d9aac92",
         "android_client_info": {
           "package_name": "com.example.connect"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBC0wKT7OItMCxrOrAv44ZAqkBWK73Cnvw"
+          "current_key": "AIzaSyC8SxU2dB3LevkHpErT9Pn8RRG3EKy_Gis"
         }
       ],
       "services": {

@@ -12,7 +12,7 @@ data class StoryRemoteEntity(
     val textOffset: String,
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
-    val isDeleted: Boolean = false
+    val whetherDeleted: Boolean = false
     // val seenList: List<Pair<String, Long>>
 ) {
     constructor() : this("", "", "", 0, "", "", "", "", 0, false)
@@ -29,7 +29,7 @@ data class StoryRemoteEntity(
             textOffset,
             backgroundGradientColor,
             videoLength,
-            isDeleted
+            whetherDeleted
             // seenList
         )
     }

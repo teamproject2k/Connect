@@ -1,9 +1,7 @@
 package com.example.connect.presentation.ui.home.add_story
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.view.ViewGroup
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -36,12 +34,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -61,10 +57,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
-import androidx.media3.ui.PlayerView
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -74,6 +68,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerWidth16
@@ -343,26 +338,10 @@ private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit)
     )
 }
 
-@SuppressLint("OpaqueUnitKey")
 @Composable
 private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
-    val exoPlayer = remember {
-        FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
-    }
-    DisposableEffect(AndroidView(factory = {
-        PlayerView(context).apply {
-            player = exoPlayer
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
-    }, update = {
+    GetPlayerView(context = context, uri = selectedMediaData.uri.toString()) { exoPlayer, _ ->
         exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
-    })) {
-        onDispose {
-            exoPlayer.release()
-        }
     }
 }
 
