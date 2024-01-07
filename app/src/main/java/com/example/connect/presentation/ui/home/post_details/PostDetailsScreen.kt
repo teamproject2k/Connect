@@ -109,9 +109,8 @@ fun PostDetailsScreen(
             Column(
                 modifier = Modifier
                     .padding(it)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
                 PostDetails(
                     usersDetails = posterDetails,
@@ -316,7 +315,7 @@ fun CommentUi(
     usersBeans: List<UsersBean>?,
     viewModel: PostDetailsViewModel
 ) {
-    if (usersBeans.isNullOrEmpty() || viewModel.commentsStateMap.isEmpty()) {
+    if (usersBeans.isNullOrEmpty() || viewModel.commentsMapState.isEmpty()) {
         Column {
             TextBold14(
                 text = stringResource(R.string.no_comments_found),
@@ -330,10 +329,10 @@ fun CommentUi(
     }
     Column {
         val parentList =
-            viewModel.commentsStateMap.keys.filter { it.repliedOnCommentId == null }
+            viewModel.commentsMapState.keys.filter { it.repliedOnCommentId == null }
         parentList.forEach { parent ->
             AddComment(usersBeans, parent, viewModel, true)
-            viewModel.commentsStateMap[parent]?.forEach { child ->
+            viewModel.commentsMapState[parent]?.forEach { child ->
                 AddComment(usersBeans = usersBeans, comment = child, viewModel = viewModel, false)
             }
         }
@@ -461,8 +460,8 @@ fun CommentItem(
             SpacerHeight6()
             Text(
                 modifier = Modifier.clickable {
-                    viewModel.repliedCommentPosterConnectId.value = commentPoster.connectUserId
-                    viewModel.commentedOn.value = comment
+                    viewModel.repliedCommentPosterConnectIdState.value = commentPoster.connectUserId
+                    viewModel.commentedOnState.value = comment
                 },
                 text = stringResource(R.string.reply),
                 fontSize = 12.sp,
@@ -479,7 +478,7 @@ fun AddCommentSection(
     loggedInUser: UsersBean
 ) {
     val context = LocalContext.current
-    val isReply = viewModel.commentedOn.value != null
+    val isReply = viewModel.commentedOnState.value != null
     Row(
         modifier = Modifier
             .padding(horizontal = 12.dp)
@@ -501,7 +500,7 @@ fun AddCommentSection(
             Text(
                 text = context.getString(
                     R.string.tag_poster,
-                    viewModel.repliedCommentPosterConnectId.value
+                    viewModel.repliedCommentPosterConnectIdState.value
                 ),
                 fontSize = 12.sp,
                 color = ColorsHelper.black(),
@@ -510,10 +509,10 @@ fun AddCommentSection(
         }
         TransparentTextField(
             modifier = Modifier.weight(1f),
-            value = viewModel.commentText.value,
+            value = viewModel.commentTextState.value,
             singleLine = true,
             maxLines = 1,
-            onValueChange = { text -> viewModel.commentText.value = text },
+            onValueChange = { text -> viewModel.commentTextState.value = text },
             textStyle = TextStyle(fontSize = 14.sp),
             placeholder = {
                 Text(
@@ -523,7 +522,7 @@ fun AddCommentSection(
                 )
             })
         if (isReply) {
-            IconButton(onClick = { viewModel.commentedOn.value = null }) {
+            IconButton(onClick = { viewModel.commentedOnState.value = null }) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.remove_tag),
@@ -531,7 +530,7 @@ fun AddCommentSection(
                 )
             }
         }
-        if (viewModel.commentText.value.isNotBlank() && !viewModel.isSendingComment.value) {
+        if (viewModel.commentTextState.value.isNotBlank() && !viewModel.isSendingCommentState.value) {
             IconButton(onClick = {
                 viewModel.addComment(loggedInUser.firebaseUserId)
             }) {
@@ -540,7 +539,7 @@ fun AddCommentSection(
                     contentDescription = stringResource(R.string.post_comment)
                 )
             }
-        } else if (viewModel.isSendingComment.value) {
+        } else if (viewModel.isSendingCommentState.value) {
             CircularProgressIndicator(
                 strokeWidth = 2.dp,
                 modifier = Modifier
@@ -559,29 +558,31 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
     }
     when (addCommentState.status) {
         RequestStatusEnum.Loading -> {
-            viewModel.isSendingComment.value = true
+            viewModel.isSendingCommentState.value = true
             isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                viewModel.isSendingComment.value = false
                 viewModel.snackBarMessageState.value =
-                    addCommentState.message ?: stringResource(id = R.string.some_error_occurred)
+                    if (addCommentState.message.isNullOrBlank()) stringResource(
+                        id = R.string.some_error_occurred
+                    ) else addCommentState.message
+                viewModel.isSendingCommentState.value = false
                 isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.isSendingComment.value = false
             val comment = addCommentState.data
             if (comment != null) {
                 val parent =
-                    viewModel.commentsStateMap.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
+                    viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
                 if (parent != null) {
-                    viewModel.commentsStateMap.getOrPut(parent) { arrayListOf() }.add(0, comment)
+                    viewModel.commentsMapState.getOrPut(parent) { arrayListOf() }.add(0, comment)
                 }
             }
+            viewModel.isSendingCommentState.value = false
         }
 
         RequestStatusEnum.None -> {

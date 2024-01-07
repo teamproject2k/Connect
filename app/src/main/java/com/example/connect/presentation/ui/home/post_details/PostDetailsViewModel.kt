@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val addLikeUseCase: AddLikeUseCase,
@@ -44,26 +43,27 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    lateinit var commentsStateMap: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
+    @SuppressLint("StateNameRule")
+    lateinit var commentsMapState: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
 
-    val commentText = mutableStateOf("")
-    var commentedOn: MutableState<CommentBean?> = mutableStateOf(null)
+    val commentTextState = mutableStateOf("")
+    val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
 
-    var repliedCommentPosterConnectId = mutableStateOf("")
+    val repliedCommentPosterConnectIdState = mutableStateOf("")
     var isInitialized = false
 
     lateinit var post: PostBean
 
-    val isSendingComment = mutableStateOf(false)
+    val isSendingCommentState = mutableStateOf(false)
 
     fun initialize(post: PostBean) {
         if (!isInitialized) {
             this.post = post
-            commentsStateMap = mutableStateMapOf()
+            commentsMapState = mutableStateMapOf()
             isInitialized = true
         }
     }
@@ -127,8 +127,9 @@ class PostDetailsViewModel @Inject constructor(
     }
 
     fun addComment(loggedInUserFirebaseId: String) {
-        lateinit var comment: CommentBean
-        if (commentedOn.value == null) {  // Parent comment
+        val comment: CommentBean
+        val commentedOn = commentedOnState.value
+        if (commentedOn == null) {  // Parent comment
             comment = CommentBean(
                 commentFirebaseId = "",
                 createdAt = FunctionHelper.getCurrentTimeInMillis(),
@@ -137,36 +138,36 @@ class PostDetailsViewModel @Inject constructor(
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
                 postId = post.id,
-                comment = commentText.value
+                comment = commentTextState.value
             )
         } else {  // Child comment
             comment = CommentBean(
                 commentFirebaseId = "",
                 createdAt = FunctionHelper.getCurrentTimeInMillis(),
                 commentedBy = loggedInUserFirebaseId,
-                parentCommentId = commentedOn.value!!.parentCommentId
-                    ?: commentedOn.value!!.commentFirebaseId,
-                repliedOnCommentId = commentedOn.value!!.commentFirebaseId,
-                repliedOnUserId = commentedOn.value!!.commentedBy,
+                parentCommentId = commentedOn.parentCommentId ?: commentedOn.commentFirebaseId,
+                repliedOnCommentId = commentedOn.commentFirebaseId,
+                repliedOnUserId = commentedOn.commentedBy,
                 postId = post.id,
-                comment = commentText.value
+                comment = commentTextState.value
             )
         }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()
-                val response = addCommentUseCase.invoke(comment)
-                if (response.status == RequestStatusEnum.Success) {
-                    comment.commentFirebaseId = response.data ?: ""
+                val addCommentResponseState = addCommentUseCase.invoke(comment)
+                if (addCommentResponseState.status == RequestStatusEnum.Success) {
+                    comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
-                        commentedOn.value = null
-                        commentText.value = ""
+                        commentedOnState.value = null
+                        commentTextState.value = ""
                         _addCommentStateFlow.value = ResponseState.success(comment)
                     } else {
                         _addCommentStateFlow.value = ResponseState.error("")
                     }
                 } else {
-                    _addCommentStateFlow.value = ResponseState.error(response.message ?: "")
+                    _addCommentStateFlow.value =
+                        ResponseState.error(addCommentResponseState.message ?: "")
                 }
             }
         }
@@ -176,16 +177,16 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
-                val getAllCommentResponse =
+                val getAllCommentResponseState =
                     getAllCommentsWithUsersUseCase.invoke(post.id, loggedInUserFireId)
-                if (getAllCommentResponse.status == RequestStatusEnum.Success) {
-                    val commentMap = getAllCommentResponse.data?.first
+                if (getAllCommentResponseState.status == RequestStatusEnum.Success) {
+                    val commentMap = getAllCommentResponseState.data?.first
                     if (!commentMap.isNullOrEmpty()) {
-                        commentsStateMap.putAll(commentMap)
+                        commentsMapState.putAll(commentMap)
                     }
-                    _getAllCommentsStateFlow.value = getAllCommentResponse
+                    _getAllCommentsStateFlow.value = getAllCommentResponseState
                 } else {
-                    _getAllCommentsStateFlow.value = getAllCommentResponse
+                    _getAllCommentsStateFlow.value = getAllCommentResponseState
                 }
             }
         }
