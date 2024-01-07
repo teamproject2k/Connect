@@ -203,10 +203,10 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllCommentsFromRemote(
+    override suspend fun getAllCommentsWithUsersFromRemote(
         postId: String,
         loggedInUserFireId: String
-    ): ResponseState<Pair<List<CommentBean>, List<UsersBean>>> {
+    ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>> {
         return try {
             val commentListResponse = fireStore.collection(FirebaseConstants.COMMENT_KEY)
                 .whereEqualTo(CommentRemoteEntity::postId.name, postId)
@@ -265,12 +265,24 @@ class IPostRepositoryImpl @Inject constructor(
                         //userList.remove(user)
                     }
                 }
-                ResponseState.success(Pair(commentList, userList))
+
+                ResponseState.success(Pair(buildCommentTree(commentList), userList))
             } else {
                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
+    }
+
+    private fun buildCommentTree(commentList: ArrayList<CommentBean>): MutableMap<CommentBean, ArrayList<CommentBean>> {
+        val commentMap = commentList.associateWith { arrayListOf<CommentBean>() }.toMutableMap()
+        commentList.forEach { comment ->
+            val parentNode = commentMap.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
+            if (parentNode != null) {
+                commentMap[parentNode]?.add(comment)
+            }
+        }
+        return commentMap
     }
 }

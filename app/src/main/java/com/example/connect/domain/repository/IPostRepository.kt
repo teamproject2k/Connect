@@ -71,5 +71,5 @@ interface IPostRepository {
 
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
 
-    suspend fun getAllCommentsFromRemote(postId: String, loggedInUserFireId: String): ResponseState<Pair<List<CommentBean>, List<UsersBean>>>
+    suspend fun getAllCommentsWithUsersFromRemote(postId: String, loggedInUserFireId: String): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>
 }

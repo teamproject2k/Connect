@@ -6,11 +6,11 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
-class GetAllCommentsUseCase @Inject constructor(private val repository: IPostRepository) {
+class GetAllCommentsWithUsersUseCase @Inject constructor(private val repository: IPostRepository) {
     suspend fun invoke(
         postId: String,
         loggedInUserFireId: String
-    ): ResponseState<Pair<List<CommentBean>, List<UsersBean>>> {
-        return repository.getAllCommentsFromRemote(postId, loggedInUserFireId)
+    ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>> {
+        return repository.getAllCommentsWithUsersFromRemote(postId, loggedInUserFireId)
     }
 }

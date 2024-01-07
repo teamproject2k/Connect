@@ -6,7 +6,9 @@ data class CommentBean(
     var commentFirebaseId: String,
     val createdAt: Long,
     val commentedBy: String,
-    val commentedOn: String,
+    val parentCommentId: String?,
+    val repliedOnCommentId: String?,
+    val repliedOnUserId: String?,
     val postId: String,
     val comment: String
 ) {
@@ -14,7 +16,9 @@ data class CommentBean(
         return CommentRemoteEntity(
             createdAt,
             commentedBy,
-            commentedOn,
+            parentCommentId,
+            repliedOnCommentId,
+            repliedOnUserId,
             postId,
             comment
         )

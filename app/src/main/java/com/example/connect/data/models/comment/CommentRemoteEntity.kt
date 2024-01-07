@@ -5,18 +5,22 @@ import com.example.connect.domain.models.CommentBean
 data class CommentRemoteEntity(
     val createdAt: Long,
     val commentedBy: String,
-    val commentedOn: String,
+    val parentCommentId: String?,
+    val repliedOnCommentId: String?,
+    val repliedOnUserId: String?,
     val postId: String,
     val comment: String
 ) {
-    constructor() : this(0L, "", "", "", "")
+    constructor() : this(0L, "", "", "", "", "", "")
 
     fun toCommentBean(commentId: String): CommentBean {
         return CommentBean(
             commentId,
             createdAt,
             commentedBy,
-            commentedOn,
+            parentCommentId,
+            repliedOnCommentId,
+            repliedOnUserId,
             postId,
             comment
         )

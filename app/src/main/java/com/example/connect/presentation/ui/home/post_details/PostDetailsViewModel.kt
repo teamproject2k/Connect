@@ -2,9 +2,7 @@ package com.example.connect.presentation.ui.home.post_details
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.UsersBean
@@ -12,7 +10,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
-import com.example.connect.domain.useCase.posts.GetAllCommentsUseCase
+import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
@@ -34,23 +32,23 @@ class PostDetailsViewModel @Inject constructor(
     private val savePostUseCase: SavePostUseCase,
     private val unSavePostUseCase: UnSavePostUseCase,
     private val addCommentUseCase: AddCommentUseCase,
-    private val getAllCommentsUseCase: GetAllCommentsUseCase
+    private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
 
-    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<Pair<List<CommentBean>, List<UsersBean>>>> =
+    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
-    val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<List<CommentBean>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
+    val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    lateinit var commentsStateList: SnapshotStateList<CommentBean>
+    lateinit var commentsStateMap: MutableMap<CommentBean, ArrayList<CommentBean>>
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
 
     val commentText = mutableStateOf("")
-    lateinit var commentedOn: MutableState<String>
+    var commentedOn: MutableState<CommentBean?> = mutableStateOf(null)
 
     var repliedCommentPosterConnectId = mutableStateOf("")
     var isInitialized = false
@@ -62,8 +60,7 @@ class PostDetailsViewModel @Inject constructor(
     fun initialize(postId: String) {
         if (!isInitialized) {
             this.postId = postId
-            commentedOn = mutableStateOf(postId)
-            commentsStateList = mutableStateListOf()
+            commentsStateMap = mutableMapOf()
             isInitialized = true
         }
     }
@@ -128,14 +125,31 @@ class PostDetailsViewModel @Inject constructor(
     }
 
     fun addComment(loggedInUserFirebaseId: String) {
-        val comment = CommentBean(
-            commentFirebaseId = "",
-            createdAt = FunctionHelper.getCurrentTimeInMillis(),
-            commentedBy = loggedInUserFirebaseId,
-            commentedOn = commentedOn.value,
-            postId = postId,
-            comment = commentText.value
-        )
+        lateinit var comment: CommentBean
+        if (commentedOn.value == null) {  // Parent comment
+            comment = CommentBean(
+                commentFirebaseId = "",
+                createdAt = FunctionHelper.getCurrentTimeInMillis(),
+                commentedBy = loggedInUserFirebaseId,
+                parentCommentId = null,
+                repliedOnCommentId = null,
+                repliedOnUserId = null,
+                postId = postId,
+                comment = commentText.value
+            )
+        } else {  // Child comment
+            comment = CommentBean(
+                commentFirebaseId = "",
+                createdAt = FunctionHelper.getCurrentTimeInMillis(),
+                commentedBy = loggedInUserFirebaseId,
+                parentCommentId = commentedOn.value!!.parentCommentId
+                    ?: commentedOn.value!!.commentFirebaseId,
+                repliedOnCommentId = commentedOn.value!!.commentFirebaseId,
+                repliedOnUserId = commentedOn.value!!.commentedBy,
+                postId = postId,
+                comment = commentText.value
+            )
+        }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()
@@ -143,6 +157,8 @@ class PostDetailsViewModel @Inject constructor(
                 if (response.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = response.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
+                        commentedOn.value = null
+                        commentText.value = ""
                         _addCommentStateFlow.value = ResponseState.success(comment)
                     } else {
                         _addCommentStateFlow.value = ResponseState.error("")
@@ -154,16 +170,16 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun getAllComments(postId: String, loggedInUserFireId: String) {
+    fun getAllCommentsWithUsers(postId: String, loggedInUserFireId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
                 val getAllCommentResponse =
-                    getAllCommentsUseCase.invoke(postId, loggedInUserFireId)
+                    getAllCommentsWithUsersUseCase.invoke(postId, loggedInUserFireId)
                 if (getAllCommentResponse.status == RequestStatusEnum.Success) {
                     val commentList = getAllCommentResponse.data?.first
                     if (!commentList.isNullOrEmpty()) {
-                        commentsStateList.addAll(commentList)
+                        commentsStateMap = commentList
                     }
                     _getAllCommentsStateFlow.value = getAllCommentResponse
                 } else {

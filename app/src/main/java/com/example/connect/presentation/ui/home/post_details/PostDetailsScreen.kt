@@ -45,10 +45,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -143,10 +141,9 @@ fun PostDetailsScreen(
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getAllComments(post.id, homeSharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getAllCommentsWithUsers(post.id, homeSharedViewModel.usersDetails.firebaseUserId)
     }
 }
-
 
 @Composable
 private fun PostDetails(
@@ -322,7 +319,7 @@ fun CommentUi(
     usersBeans: List<UsersBean>?,
     viewModel: PostDetailsViewModel
 ) {
-    if (usersBeans.isNullOrEmpty() || viewModel.commentsStateList.isEmpty()) {
+    if (usersBeans.isNullOrEmpty() || viewModel.commentsStateMap.isEmpty()) {
         Column {
             TextBold14(
                 text = stringResource(R.string.no_comments_found),
@@ -335,17 +332,33 @@ fun CommentUi(
         return
     }
     Column {
-        viewModel.commentsStateList.forEach { comment ->
-            val commentPoster =
-                usersBeans.find { it.firebaseUserId == comment.commentedBy }
-            if (commentPoster != null) {
-                CommentItem(
-                    comment = comment,
-                    commentPoster = commentPoster,
-                    viewModel = viewModel
-                )
+        val parentList =
+            viewModel.commentsStateMap.keys.filter { it.repliedOnCommentId == it.postId }
+        parentList.forEach { parent ->
+            PostComment(usersBeans, parent, viewModel, true)
+            viewModel.commentsStateMap[parent]?.forEach { child ->
+                PostComment(usersBeans = usersBeans, comment = child, viewModel = viewModel, false)
             }
         }
+    }
+}
+
+@Composable
+fun PostComment(
+    usersBeans: List<UsersBean>,
+    comment: CommentBean,
+    viewModel: PostDetailsViewModel,
+    isParent: Boolean
+) {
+    val commentPoster =
+        usersBeans.find { user -> user.firebaseUserId == comment.commentedBy }
+    if (commentPoster != null) {
+        CommentItem(
+            comment = comment,
+            commentPoster = commentPoster,
+            viewModel = viewModel,
+            isParent = isParent
+        )
     }
 }
 
@@ -398,11 +411,12 @@ fun CommentUiLoading() {
 fun CommentItem(
     comment: CommentBean,
     commentPoster: UsersBean,
-    viewModel: PostDetailsViewModel
+    viewModel: PostDetailsViewModel,
+    isParent: Boolean
 ) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(horizontal = if (isParent) 16.dp else 40.dp, vertical = 8.dp)
     ) {
         AsyncImage(
             modifier = Modifier
@@ -431,7 +445,7 @@ fun CommentItem(
             SpacerHeight4()
             Text(
                 buildAnnotatedString {
-                    if (comment.postId != comment.commentedOn) {
+                    if (comment.postId != comment.repliedOnCommentId) {
                         withStyle(
                             SpanStyle(
                                 fontWeight = FontWeight.Bold,
@@ -451,7 +465,7 @@ fun CommentItem(
             Text(
                 modifier = Modifier.clickable {
                     viewModel.repliedCommentPosterConnectId.value = commentPoster.connectUserId
-                    viewModel.commentedOn.value = comment.commentFirebaseId
+                    viewModel.commentedOn.value = comment
                 },
                 text = stringResource(R.string.reply),
                 fontSize = 12.sp,
@@ -468,7 +482,7 @@ fun AddCommentSection(
     loggedInUser: UsersBean
 ) {
     val context = LocalContext.current
-    val isReply = viewModel.commentedOn.value != viewModel.postId
+    val isReply = viewModel.commentedOn.value != null
     Row(
         modifier = Modifier
             .padding(start = 12.dp, end = 6.dp)
@@ -512,7 +526,7 @@ fun AddCommentSection(
                 )
             })
         if (isReply) {
-            IconButton(onClick = { viewModel.commentedOn.value = viewModel.postId }) {
+            IconButton(onClick = { viewModel.commentedOn.value = null }) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.remove_tag),
@@ -537,7 +551,6 @@ fun AddCommentSection(
                     .padding(end = 4.dp)
             )
         }
-
     }
 }
 
@@ -566,10 +579,10 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
             viewModel.isSendingComment.value = false
             val comment = addCommentState.data
             if (comment != null) {
-                viewModel.commentsStateList.add(0, comment)
+                val parent =
+                    viewModel.commentsStateMap.keys.find { it.commentFirebaseId == comment.repliedOnCommentId }
+                viewModel.commentsStateMap[parent]?.add(0, comment)
             }
-            viewModel.commentedOn.value = viewModel.postId
-            viewModel.commentText.value = ""
         }
 
         RequestStatusEnum.None -> {
