@@ -217,4 +217,6 @@
     <string name="_1_m">1 m</string>
     <string name="duration_m">%1$s m</string>
     <string name="text_color">Text Color</string>
+    <string name="deleting_comment">Deleting comment...</string>
+    <string name="like_comment">Like Comment</string>
 </resources>

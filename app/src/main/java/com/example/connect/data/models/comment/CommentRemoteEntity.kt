@@ -9,10 +9,11 @@ data class CommentRemoteEntity(
     val repliedOnCommentId: String?,
     val repliedOnUserId: String?,
     val postId: String,
-    val comment: String,
-    val whetherDeleted: Boolean
+    val commentMessage: String,
+    val whetherDeleted: Boolean,
+    val likedBy: ArrayList<String>
 ) {
-    constructor() : this(0L, "", "", "", "", "", "", false)
+    constructor() : this(0L, "", "", "", "", "", "", false, arrayListOf())
 
     fun toCommentBean(commentId: String): CommentBean {
         return CommentBean(
@@ -23,8 +24,9 @@ data class CommentRemoteEntity(
             repliedOnCommentId,
             repliedOnUserId,
             postId,
-            comment,
-            whetherDeleted
+            commentMessage,
+            whetherDeleted,
+            likedBy
         )
     }
 }

@@ -33,7 +33,7 @@ fun UserProfilePostSection(
     navigator: DestinationsNavigator,
     postDetailsList: List<PostBean>?,
     isLoggedInUser: Boolean = false,
-    currentUserFirebaseId: String,
+    loggedInUserFirebaseId: String,
     userDetails: UsersBean
 ) {
     Column(
@@ -110,7 +110,8 @@ fun UserProfilePostSection(
                         navigator.navigate(
                             PostDetailsScreenDestination(
                                 details,
-                                userDetails
+                                userDetails,
+                                loggedInUserFirebaseId
                             )
                         )
                     }
