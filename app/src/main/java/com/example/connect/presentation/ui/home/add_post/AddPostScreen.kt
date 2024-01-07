@@ -1,9 +1,7 @@
 package com.example.connect.presentation.ui.home.add_post
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.view.ViewGroup
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -33,7 +31,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,16 +43,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
-import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
@@ -65,6 +59,7 @@ import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -104,7 +99,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = SnackbarHostState()
     val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
-        val mediaType = contentResolver.getType(uri)?.substringBefore("/")
+        val mediaType = FunctionHelper.getMediaType(contentResolver, uri)
         if (mediaType != null) {
             viewModel.selectedMediaState.value =
                 MediaData(uri, mediaType)
@@ -258,8 +253,8 @@ private fun CaptionMediaSection(viewModel: AddPostViewModel) {
 private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
     val selectedMedia = viewModel.selectedMediaState.value
     if (selectedMedia != null) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            if (selectedMedia.mediaType == "image") {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (selectedMedia.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
                 ShowSelectedImage(selectedMediaData = selectedMedia) {
                     viewModel.selectedMediaState.value = null
                     viewModel.snackBarMessageState.value =
@@ -302,28 +297,15 @@ private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit)
     )
 }
 
-@SuppressLint("OpaqueUnitKey")
 @Composable
 private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
-    val exoPlayer = remember {
-        FunctionHelper.getExoPlayer(context, selectedMediaData.uri.toString())
-    }
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val height = FunctionHelper.convertDpToPixel(screenHeight * .50f, context)
-    DisposableEffect(AndroidView(factory = {
-        PlayerView(context).apply {
-            player = exoPlayer
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                height.toInt()
-            )
-        }
-    }, update = {
+    val videoHeight = context.resources.displayMetrics.heightPixels
+    GetPlayerView(
+        context = context,
+        uri = selectedMediaData.uri.toString(),
+        height = (videoHeight * .5).toInt()
+    ) { exoPlayer, _ ->
         exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
-    })) {
-        onDispose {
-            exoPlayer.release()
-        }
     }
 }
 

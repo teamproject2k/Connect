@@ -5,6 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import com.example.connect.R
 import com.example.connect.presentation.utils.NotificationsConstantHelper
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -12,6 +15,7 @@ import dagger.hilt.android.HiltAndroidApp
 class BaseApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        Firebase.crashlytics.setUserId(Firebase.auth.uid ?: "")
         createNotificationChannels()
     }
 
