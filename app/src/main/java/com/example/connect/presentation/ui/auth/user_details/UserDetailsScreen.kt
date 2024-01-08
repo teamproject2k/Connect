@@ -307,6 +307,14 @@ private fun HandleAddUserState(
     }
 }
 
+
+/**
+ * Handles the button click event in the [UserDetailsScreen].
+ *
+ * @param viewModel The [UserDetailsViewModel] instance.
+ * @param context The current context.
+ * @param navigator The [DestinationsNavigator] instance.
+ */
 private fun handleButtonClick(
     viewModel: UserDetailsViewModel,
     context: Context,
@@ -340,6 +348,9 @@ private fun handleButtonClick(
 
         else -> {
             if (userNameValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
                 return
             }
         }
@@ -362,6 +373,9 @@ private fun handleButtonClick(
 
         else -> {
             if (genderValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
                 return
             }
         }
@@ -384,6 +398,9 @@ private fun handleButtonClick(
 
         else -> {
             if (dobValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
                 return
             }
         }
@@ -402,6 +419,11 @@ private fun handleButtonClick(
     }
 }
 
+/**
+ * Checks if the button should be enabled.
+ * @param viewModel The view model.
+ * @return True if the button should be enabled, false otherwise.
+ */
 private fun isButtonEnabled(viewModel: UserDetailsViewModel): Boolean {
     var result = true
     if (viewModel.userNameState.value.isBlank() || viewModel.selectedGenderState.value.isBlank() || viewModel.selectedDOBState.longValue == -1L) {

@@ -26,7 +26,7 @@
     <string name="please_select_your_date_of_birth">Please select your date of birth</string>
     <string name="invalid_date_of_birth">Invalid date of birth</string>
     <string name="_91">+91</string>
-    <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than %1$d digits</string>
+    <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than 10 digits</string>
     <string name="bio_can_t_be_more_than_limited_characters">Bio can\'t be more than %1$d characters long</string>
     <string name="resend_now">Resend Now</string>
     <string name="didn_t_receive_otp">Didn\'t Receive OTP?</string>
