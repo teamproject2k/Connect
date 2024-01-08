@@ -13,12 +13,11 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeForCommentUseCase
-import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
+import com.example.connect.domain.useCase.posts.DeletePostUseCase
 import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
-import com.example.connect.domain.useCase.posts.DeletePostUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
@@ -42,7 +41,7 @@ class PostDetailsViewModel @Inject constructor(
     private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase,
     private val deleteCommentUseCase: DeleteCommentUseCase,
     private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
-    private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase
+    private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase,
     private val deletePostUseCase: DeletePostUseCase
 ) : BaseViewModel() {
 
@@ -50,7 +49,6 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deletePostStateFlow: StateFlow<ResponseState<Nothing>> get() = _deletePostStateFlow
 
-    fun addLike(postId: String, currentUserFirebaseId: String, onUpdate: () -> Unit) {
 
     val snackBarMessageState = mutableStateOf("")
 
