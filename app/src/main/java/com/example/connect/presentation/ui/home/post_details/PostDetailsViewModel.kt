@@ -13,10 +13,12 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeForCommentUseCase
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
 import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
+import com.example.connect.domain.useCase.posts.DeletePostUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
@@ -41,7 +43,14 @@ class PostDetailsViewModel @Inject constructor(
     private val deleteCommentUseCase: DeleteCommentUseCase,
     private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
     private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase
+    private val deletePostUseCase: DeletePostUseCase
 ) : BaseViewModel() {
+
+    private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val deletePostStateFlow: StateFlow<ResponseState<Nothing>> get() = _deletePostStateFlow
+
+    fun addLike(postId: String, currentUserFirebaseId: String, onUpdate: () -> Unit) {
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -132,6 +141,15 @@ class PostDetailsViewModel @Inject constructor(
                     onUpdate()
                 }
                 //  _saveUnSavePostStateFlow.value = responseState
+            }
+        }
+    }
+
+    fun deletePost(postId: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _deletePostStateFlow.value = ResponseState.loading()
+                _deletePostStateFlow.value = deletePostUseCase.invoke(postId)
             }
         }
     }

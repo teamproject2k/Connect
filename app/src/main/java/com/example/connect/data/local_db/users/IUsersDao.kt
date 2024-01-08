@@ -33,4 +33,10 @@ interface IUsersDao {
     @Query("UPDATE UsersDbEntity SET fcmToken = :fcmToken WHERE firebaseUserId = :currentUserFirebaseId")
     fun updateFCMTokenOnLocal(currentUserFirebaseId: String, fcmToken: String): Int
 
+    @Query("UPDATE UsersDbEntity SET savedPosts = :savedPostList WHERE firebaseUserId = :currentUserFirebaseId")
+    fun updateSavedPostOnLocal(
+        savedPostList: List<String>,
+        currentUserFirebaseId: String
+    ): Int
+
 }

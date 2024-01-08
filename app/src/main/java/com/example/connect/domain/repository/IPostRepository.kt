@@ -67,8 +67,12 @@ interface IPostRepository {
         postFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun getSavedPostsFromRemote(savedPosts: ArrayList<String>): ResponseState<List<PostBean>>
+    suspend fun getSavedPostsWithUsersFromRemote(
+        loggedInUserFirebaseId: String,
+        savedPosts: ArrayList<String>
+    ): ResponseState<Pair<ArrayList<PostBean>, ArrayList<UsersBean>>>
 
+    suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing>
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
 
     suspend fun deleteCommentOnRemote(

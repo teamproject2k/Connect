@@ -195,8 +195,10 @@
     <string name="deleting_story">Deleting Story...</string>
     <string name="story_deleted_successfully">Story Deleted Successfully</string>
     <string name="are_you_sure_you_want_to_delete_your_story">Are you sure you want to delete your story?</string>
+    <string name="are_you_sure_you_want_to_delete_this_post">Are you sure you want to delete this post?</string>
     <string name="delete">Delete</string>
     <string name="seen_list">Seen list</string>
+    <string name="delete_post">Delete Post</string>
     <string name="save_post">Save Post</string>
     <string name="reply">Reply</string>
     <string name="add_a_comment">Add a comment</string>

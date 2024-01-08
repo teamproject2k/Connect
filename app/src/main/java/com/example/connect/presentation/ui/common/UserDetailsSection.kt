@@ -22,7 +22,6 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 
-
 @Composable
 fun UserDetailsSection(
     user: UsersBean,
@@ -58,7 +57,7 @@ fun UserDetailsSection(
 
 @Composable
 fun UserDetailsSectionLoading(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

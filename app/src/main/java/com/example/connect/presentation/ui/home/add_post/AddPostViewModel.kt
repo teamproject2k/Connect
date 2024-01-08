@@ -134,7 +134,8 @@ class AddPostViewModel @Inject constructor(
                     postType,
                     0,
                     false,
-                    arrayListOf()
+                    arrayListOf(),
+                    false
                 )
 
                 // Upload the post details to the remote server.
