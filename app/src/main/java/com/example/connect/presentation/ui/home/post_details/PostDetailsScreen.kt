@@ -124,7 +124,10 @@ fun PostDetailsScreen(
                     text = stringResource(R.string.comments),
                     modifier = Modifier.padding(16.dp)
                 )
-                HandleGetAllCommentsSection(viewModel)
+                HandleGetAllCommentsSection(
+                    viewModel,
+                    homeSharedViewModel.usersDetails.firebaseUserId
+                )
             }
             DividerLightGrayAlpha50()
             AddCommentSection(
@@ -281,7 +284,7 @@ private fun PostBottomSection(
 }
 
 @Composable
-fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
+fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel, loggedInUserFirebaseId: String) {
     val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -303,7 +306,8 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
         RequestStatusEnum.Success -> {
             CommentUi(
                 getAllCommentsState.data?.second,
-                viewModel
+                viewModel,
+                loggedInUserFirebaseId
             )
         }
 
@@ -316,7 +320,8 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
 @Composable
 fun CommentUi(
     userList: List<UsersBean>?,
-    viewModel: PostDetailsViewModel
+    viewModel: PostDetailsViewModel,
+    loggedInUserFirebaseId: String
 ) {
     if (userList.isNullOrEmpty() || viewModel.commentsMapState.isEmpty()) {
         Column {
@@ -336,7 +341,13 @@ fun CommentUi(
         parentList.forEach { parent ->
             val childCommentList = viewModel.commentsMapState[parent]
             if (childCommentList != null) {
-                ParentCommentItem(viewModel, parent, childCommentList, userList)
+                ParentCommentItem(
+                    viewModel,
+                    parent,
+                    childCommentList,
+                    userList,
+                    loggedInUserFirebaseId
+                )
             }
         }
     }
@@ -347,7 +358,8 @@ fun ParentCommentItem(
     viewModel: PostDetailsViewModel,
     parentComment: CommentBean,
     childCommentList: List<CommentBean>,
-    userList: List<UsersBean>
+    userList: List<UsersBean>,
+    loggedInUserFirebaseId: String
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         val parentCommentPoster =
@@ -356,7 +368,8 @@ fun ParentCommentItem(
             CommentItem(
                 comment = parentComment,
                 commentPoster = parentCommentPoster,
-                viewModel = viewModel
+                viewModel = viewModel,
+                loggedInUserFirebaseId
             )
         }
         Column(modifier = Modifier.padding(start = 32.dp)) {
@@ -367,7 +380,8 @@ fun ParentCommentItem(
                     CommentItem(
                         comment = comment,
                         commentPoster = childCommentPoster,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        loggedInUserFirebaseId
                     )
                 }
             }
@@ -427,7 +441,8 @@ fun CommentUiLoading() {
 fun CommentItem(
     comment: CommentBean,
     commentPoster: UsersBean,
-    viewModel: PostDetailsViewModel
+    viewModel: PostDetailsViewModel,
+    loggedInUserFirebaseId: String
 ) {
     val context = LocalContext.current
     Row(
@@ -490,15 +505,19 @@ fun CommentItem(
                     fontWeight = FontWeight.Medium
                 )
                 SpacerWidth16()
-                Text(
-                    modifier = Modifier.clickable {
-                        viewModel.deleteComment(comment.commentFirebaseId, comment.parentCommentId)
-                    },
-                    text = stringResource(R.string.delete),
-                    fontSize = 12.sp,
-                    color = ColorsHelper.gray(),
-                    fontWeight = FontWeight.Medium
-                )
+                if (viewModel.post.fireBaseUserId == loggedInUserFirebaseId || comment.commentedBy == loggedInUserFirebaseId)
+                    Text(
+                        modifier = Modifier.clickable {
+                            viewModel.deleteComment(
+                                comment.commentFirebaseId,
+                                comment.parentCommentId
+                            )
+                        },
+                        text = stringResource(R.string.delete),
+                        fontSize = 12.sp,
+                        color = ColorsHelper.gray(),
+                        fontWeight = FontWeight.Medium
+                    )
             }
         }
     }
