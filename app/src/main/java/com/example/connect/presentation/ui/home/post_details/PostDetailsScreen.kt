@@ -538,15 +538,17 @@ fun CommentItem(
                     fontWeight = FontWeight.Medium
                 )
                 SpacerWidth16()
-                Text(
-                    modifier = Modifier.clickable {
-                        onDeleteCommentClicked()
-                    },
-                    text = stringResource(R.string.delete),
-                    fontSize = 12.sp,
-                    color = ColorsHelper.gray(),
-                    fontWeight = FontWeight.Medium
-                )
+                if (viewModel.post.fireBaseUserId == loggedInUserFirebaseId || comment.commentedBy == loggedInUserFirebaseId) {
+                    Text(
+                        modifier = Modifier.clickable {
+                            onDeleteCommentClicked()
+                        },
+                        text = stringResource(R.string.delete),
+                        fontSize = 12.sp,
+                        color = ColorsHelper.gray(),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
         Box(modifier = Modifier.padding(top = 12.dp)) {
