@@ -71,10 +71,26 @@ interface IPostRepository {
 
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
 
-    suspend fun deleteCommentOnRemote(commentId: String, postId: String): ResponseState<Nothing>
+    suspend fun deleteCommentOnRemote(
+        commentId: String,
+        postId: String,
+        deleteCount: Int
+    ): ResponseState<Nothing>
 
     suspend fun getAllCommentsWithUsersFromRemote(
         postId: String,
         loggedInUserFireId: String
     ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>
+
+
+    suspend fun addLikeForComment(
+        commentId: String,
+        loggedInUserFirebaseId: String
+    ): ResponseState<Nothing>
+
+
+    suspend fun removeLikeForComment(
+        commentId: String,
+        loggedInUserFirebaseId: String
+    ): ResponseState<Nothing>
 }

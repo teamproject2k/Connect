@@ -553,7 +553,8 @@ private fun PostBottomSection(
                     navigator.navigate(
                         PostDetailsScreenDestination(
                             postDetails,
-                            userDetails
+                            userDetails,
+                            currentUserFirebaseId
                         )
                     )
                 }) {

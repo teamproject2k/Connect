@@ -7,8 +7,9 @@ import javax.inject.Inject
 class DeleteCommentUseCase @Inject constructor(private val repository: IPostRepository) {
     suspend fun invoke(
         commentId: String,
-        postId: String
+        postId: String,
+        deleteCount: Int,
     ): ResponseState<String> {
-        return repository.deleteCommentOnRemote(commentId, postId)
+        return repository.deleteCommentOnRemote(commentId, postId, deleteCount)
     }
 }

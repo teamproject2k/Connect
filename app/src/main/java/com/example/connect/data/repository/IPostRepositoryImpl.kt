@@ -115,7 +115,6 @@ class IPostRepositoryImpl @Inject constructor(
                         }
                     }
                 }
-
                 postList.forEach { post ->
                     val isUserPresent =
                         userList.find { it.firebaseUserId == post.fireBaseUserId } != null
@@ -217,7 +216,8 @@ class IPostRepositoryImpl @Inject constructor(
 
     override suspend fun deleteCommentOnRemote(
         commentId: String,
-        postId: String
+        postId: String,
+        deleteCount: Int
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
@@ -226,7 +226,7 @@ class IPostRepositoryImpl @Inject constructor(
                 transaction.update(
                     postDocument,
                     PostRemoteEntity::commentCount.name,
-                    FieldValue.increment(-1)
+                    FieldValue.increment(-(deleteCount).toLong())
                 )
                 val deleteCommentDocumentRef =
                     fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId)
@@ -309,6 +309,36 @@ class IPostRepositoryImpl @Inject constructor(
             } else {
                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun addLikeForComment(
+        commentId: String,
+        loggedInUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId).update(
+                CommentBean::likedBy.name,
+                FieldValue.arrayUnion(loggedInUserFirebaseId)
+            ).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun removeLikeForComment(
+        commentId: String,
+        loggedInUserFirebaseId: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId).update(
+                CommentBean::likedBy.name,
+                FieldValue.arrayRemove(loggedInUserFirebaseId)
+            ).await()
+            ResponseState.success(null)
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }

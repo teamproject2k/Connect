@@ -12,9 +12,11 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentUseCase
+import com.example.connect.domain.useCase.posts.AddLikeForCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
 import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
+import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
@@ -28,7 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val addLikeUseCase: AddLikeUseCase,
@@ -37,7 +38,9 @@ class PostDetailsViewModel @Inject constructor(
     private val unSavePostUseCase: UnSavePostUseCase,
     private val addCommentUseCase: AddCommentUseCase,
     private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase,
-    private val deleteCommentUseCase: DeleteCommentUseCase
+    private val deleteCommentUseCase: DeleteCommentUseCase,
+    private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
+    private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
@@ -46,6 +49,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
+    @SuppressLint("StateNameRule")
     lateinit var commentsMapState: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
@@ -144,8 +148,9 @@ class PostDetailsViewModel @Inject constructor(
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
                 postId = post.id,
-                comment = commentTextState.value,
-                whetherDeleted = false
+                commentMessage = commentTextState.value,
+                whetherDeleted = false,
+                arrayListOf()
             )
         } else {  // Child comment
             comment = CommentBean(
@@ -156,8 +161,9 @@ class PostDetailsViewModel @Inject constructor(
                 repliedOnCommentId = commentedOn.commentFirebaseId,
                 repliedOnUserId = commentedOn.commentedBy,
                 postId = post.id,
-                comment = commentTextState.value,
-                whetherDeleted = false
+                commentMessage = commentTextState.value,
+                whetherDeleted = false,
+                arrayListOf()
             )
         }
         viewModelScope.launch {
@@ -179,14 +185,21 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun deleteComment(commentId: String, parentCommentId: String?) {
+    fun deleteComment(comment: CommentBean, deleteCount: Int) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _deleteCommentStateFlow.value = ResponseState.loading()
-                val deleteCommentResponseState = deleteCommentUseCase.invoke(commentId, post.id)
+                val deleteCommentResponseState =
+                    deleteCommentUseCase.invoke(comment.commentFirebaseId, post.id, deleteCount)
                 if (deleteCommentResponseState.status == RequestStatusEnum.Success) {
+                    comment.whetherDeleted = true
                     _deleteCommentStateFlow.value =
-                        ResponseState.success(Pair(commentId, parentCommentId))
+                        ResponseState.success(
+                            Pair(
+                                comment.commentFirebaseId,
+                                comment.parentCommentId
+                            )
+                        )
                 } else {
                     _deleteCommentStateFlow.value =
                         ResponseState.error(deleteCommentResponseState.message ?: "")
@@ -209,6 +222,51 @@ class PostDetailsViewModel @Inject constructor(
                     _getAllCommentsStateFlow.value = getAllCommentResponseState
                 } else {
                     _getAllCommentsStateFlow.value = getAllCommentResponseState
+                }
+            }
+        }
+    }
+
+    fun addLikeForComment(
+        comment: CommentBean,
+        loggedInUserFireId: String,
+        onSuccess: () -> Unit,
+        onError: (errorMessage: String?) -> Unit,
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val addLikeForCommentResponseState =
+                    addLikeForCommentUseCase.invoke(comment.commentFirebaseId, loggedInUserFireId)
+                if (addLikeForCommentResponseState.status == RequestStatusEnum.Success) {
+                    if (!comment.likedBy.contains(loggedInUserFireId)) {
+                        comment.likedBy.add(loggedInUserFireId)
+                    }
+                    onSuccess()
+                } else {
+                    onError(addLikeForCommentResponseState.message)
+                }
+            }
+        }
+    }
+
+    fun removeLikeForComment(
+        comment: CommentBean,
+        loggedInUserFireId: String,
+        onSuccess: () -> Unit,
+        onError: (errorMessage: String?) -> Unit,
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val removeLikeForCommentResponseState =
+                    removeLikeForCommentUseCase.invoke(
+                        comment.commentFirebaseId,
+                        loggedInUserFireId
+                    )
+                if (removeLikeForCommentResponseState.status == RequestStatusEnum.Success) {
+                    comment.likedBy.remove(loggedInUserFireId)
+                    onSuccess()
+                } else {
+                    onError(removeLikeForCommentResponseState.message)
                 }
             }
         }
