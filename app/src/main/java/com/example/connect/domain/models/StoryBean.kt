@@ -10,9 +10,11 @@ data class StoryBean(
     val caption: String,
     val createdAt: Long,
     val mediaType: String,
+    val textColor: String,
     val textOffset: String,
     val backgroundGradientColor: String,
-    //val seenList: List<Pair<String, Long>>
+    val videoLength: Long = 0,
+    val isDeleted: Boolean = false
 ) : Serializable {
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(
@@ -21,8 +23,11 @@ data class StoryBean(
             caption,
             createdAt,
             mediaType,
+            textColor,
             textOffset,
             backgroundGradientColor,
+            videoLength,
+            isDeleted
         )
     }
 }

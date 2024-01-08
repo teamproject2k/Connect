@@ -16,6 +16,7 @@ import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.ui.models.VisibilityScope
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -99,7 +100,7 @@ class AddPostViewModel @Inject constructor(
                         }
 
                         // If the selected media is an image, the post type is Image or TextImage.
-                        selectedMediaState.value!!.mediaType.contains("image") -> {
+                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_IMAGE) -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextImage.name
                             } else {
@@ -108,7 +109,7 @@ class AddPostViewModel @Inject constructor(
                         }
 
                         // If the selected media is a video, the post type is Video or TextVideo.
-                        selectedMediaState.value!!.mediaType.contains("video") -> {
+                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_VIDEO) -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextVideo.name
                             } else {

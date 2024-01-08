@@ -49,8 +49,22 @@ class AddStoryViewModel @Inject constructor(
     var storyBackgroundColorState: MutableState<List<Color>> =
         mutableStateOf(gradientColorList[0])
 
+    var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
+
     var captionOffsetX by mutableFloatStateOf(0f)
     var captionOffsetY by mutableFloatStateOf(0f)
+
+    lateinit var colorOnMedia: MutableState<Color>
+
+    var isDataInitialized = false
+
+    var isFirstTimePlaced = true
+
+
+    fun initData(textColor: Color) {
+        this.colorOnMedia = mutableStateOf(textColor)
+        isDataInitialized = true
+    }
 
     fun uploadUserStory(currentUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
@@ -115,7 +129,10 @@ class AddStoryViewModel @Inject constructor(
 
                 // Create a comma separated string from the caption offset values
                 val captionOffset = "$captionOffsetX,$captionOffsetY"
-                val colorGradient = storyBackgroundColorState.value.joinToString {
+
+                val backgroundColorGradient =
+                    if (selectedMediaState.value == null) storyBackgroundColorState.value else FunctionHelper.getDefaultBackgroundGradient()
+                val colorGradientString = backgroundColorGradient.joinToString {
                     it.toArgb().toHexString()
                 }
                 // Create a StoryBean object with the story details.
@@ -126,8 +143,11 @@ class AddStoryViewModel @Inject constructor(
                     captionTextState.value,
                     FunctionHelper.getCurrentTimeInMillis(),
                     storyType,
+                    colorOnMedia.value.toArgb().toHexString(),
                     captionOffset,
-                    colorGradient,
+                    colorGradientString,
+                    selectedMediaState.value?.mediaDuration ?: 0,
+                    false
                 )
 
                 // Upload the story details to the remote server.

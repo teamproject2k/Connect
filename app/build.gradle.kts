@@ -67,6 +67,7 @@ dependencies {
     implementation(Dependencies.composeGraphics)
     implementation(Dependencies.composeToolingPreview)
     implementation(Dependencies.material3)
+    implementation("androidx.palette:palette-ktx:1.0.0")
     testImplementation(Dependencies.junitTest)
     androidTestImplementation(Dependencies.espresso)
     androidTestImplementation(platform(Dependencies.composeBom))
