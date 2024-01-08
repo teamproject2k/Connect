@@ -29,7 +29,8 @@ fun GetPlayerView(
     @ColorRes loadingColorRes: Int = R.color.light_app_theme,
     height: Int = ViewGroup.LayoutParams.MATCH_PARENT,
     width: Int = ViewGroup.LayoutParams.MATCH_PARENT,
-    onStateChange: (() -> Unit)? = null,
+    playWhenReady: Boolean = false,
+    onStateChange: ((isError: Boolean) -> Unit)? = null,
     onUpdate: (ExoPlayer, PlayerView) -> Unit
 ) {
     val exoPlayer = remember {
@@ -45,16 +46,30 @@ fun GetPlayerView(
             setShowNextButton(false)
             setShowFastForwardButton(false)
             setShowRewindButton(false)
-            exoPlayer.addListener(object : Player.Listener {
-                override fun onIsLoadingChanged(isLoading: Boolean) {
-                    // isPlayerLoading = isLoading
-                }
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = playWhenReady
+            if (onStateChange != null) {
+                exoPlayer.addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        onStateChange(true)
+                    }
 
-                override fun onPlayerError(error: PlaybackException) {
-                    onStateChange
-                }
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        super.onPlaybackStateChanged(playbackState)
+                        when (playbackState) {
+                            Player.STATE_READY -> {
+                                onStateChange(false)
+                            }
 
-            })
+                            else -> {
+                                // no need to handle it
+                            }
+                        }
+                    }
+
+
+                })
+            }
             setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
             val progressBar = this.findViewById<ProgressBar>(androidx.media3.ui.R.id.exo_buffering)
             progressBar.indeterminateTintList =

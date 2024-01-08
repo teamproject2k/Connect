@@ -21,25 +21,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,18 +56,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
-import com.example.connect.domain.logger.LoggingHelper
-import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.GetPlayerView
-import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
-import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -84,7 +70,6 @@ import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.StoryActions
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
-import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -102,7 +87,6 @@ fun ShowStoryScreen(
     allStoryPosters: ArrayList<UsersBean>,
     loggedInUserFirebaseId: String
 ) {
-    val context = LocalContext.current
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
@@ -124,13 +108,6 @@ fun ShowStoryScreen(
             )
         }
     }
-    HandleGetSeenListState(viewModel, context)
-    HandleDeleteStoryState(
-        viewModel,
-        navigator,
-        context
-    )
-
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -187,7 +164,7 @@ fun UserStories(
         navigator.popBackStack()
         return
     }
-    val currentStory = storyBeans[viewModel.currentStoryIndex.value]
+    val currentStory = storyBeans[viewModel.currentStoryIndex.intValue]
     var pauseTimer by remember {
         mutableStateOf(false)
     }
@@ -204,10 +181,10 @@ fun UserStories(
                 if (tapLocationY > screenHeight * 0.4f) {
                     val screenSplitCoordinates = screenWidth.toFloat() / 3
                     if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
-                        if (viewModel.currentStoryIndex.value > 0) {
-                            viewModel.currentStoryIndex.value--
+                        if (viewModel.currentStoryIndex.intValue > 0) {
+                            viewModel.currentStoryIndex.intValue--
                         } else {
-                            viewModel.currentStoryIndex.value = 0
+                            viewModel.currentStoryIndex.intValue = 0
                         }
                     } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
                         when (it.action) {
@@ -220,10 +197,10 @@ fun UserStories(
                             }
                         }
                     } else if (it.action == MotionEvent.ACTION_DOWN) {
-                        if (viewModel.currentStoryIndex.value < storyBeans.lastIndex) {
-                            viewModel.currentStoryIndex.value++
+                        if (viewModel.currentStoryIndex.intValue < storyBeans.lastIndex) {
+                            viewModel.currentStoryIndex.intValue++
                         } else {
-                            viewModel.currentStoryIndex.value = storyBeans.lastIndex
+                            viewModel.currentStoryIndex.intValue = storyBeans.lastIndex
                         }
                     }
                     true
@@ -240,14 +217,14 @@ fun UserStories(
             for (index in 0 until storyBeans.size) {
                 LinearIndicator(
                     modifier = Modifier.weight(1f),
-                    currentPageIndex = viewModel.currentStoryIndex.value,
+                    currentPageIndex = viewModel.currentStoryIndex.intValue,
                     progressBarIndex = index,
-                    startProgress = index == viewModel.currentStoryIndex.value && isMediaLoaded,
+                    startProgress = index == viewModel.currentStoryIndex.intValue && isMediaLoaded,
                     onPauseTimer = pauseTimer,
                     progressMaxTime = if (currentStory.mediaType == MediaTypeEnum.Video.name || currentStory.mediaType == MediaTypeEnum.TextVideo.name) currentStory.videoLength else ConstantsHelper.STORY_PROGRESS_MAX_TIME
                 ) {
-                    if (viewModel.currentStoryIndex.value < storyBeans.lastIndex) {
-                        viewModel.currentStoryIndex.value++
+                    if (viewModel.currentStoryIndex.intValue < storyBeans.lastIndex) {
+                        viewModel.currentStoryIndex.intValue++
                     }
                 }
                 SpacerWidth6()
@@ -259,13 +236,10 @@ fun UserStories(
             context = context,
             navigator = navigator,
             loggedInUserFirebaseId = loggedInUserFirebaseId,
-            viewModel = viewModel
         )
         StoryUi(
             viewModel = viewModel,
             story = currentStory,
-            storyPoster = storyPoster,
-            navigator = navigator
         ) {
             isMediaLoaded = true
         }
@@ -276,8 +250,6 @@ fun UserStories(
 fun StoryUi(
     viewModel: ShowStoryViewModel,
     story: StoryBean,
-    storyPoster: UsersBean,
-    navigator: DestinationsNavigator,
     onMediaLoaded: () -> Unit
 ) {
     val context = LocalContext.current
@@ -304,7 +276,6 @@ private fun StoryTopSection(
     modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String,
-    viewModel: ShowStoryViewModel
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -359,228 +330,9 @@ private fun StoryTopSection(
             }
         }
 
-        if (storyPoster.firebaseUserId == loggedInUserFirebaseId) {
-            StoryDropDownSection(viewModel, story.id)
-        }
     }
 }
 
-@Composable
-fun StoryDropDownSection(viewModel: ShowStoryViewModel, currentStoryId: String) {
-    val context = LocalContext.current
-    val storyActionsList = getStoryActions(context)
-    var isDropdownMenuVisible by remember {
-        mutableStateOf(false)
-    }
-
-    var showDeleteStoryAlertDialog by remember {
-        mutableStateOf(false)
-    }
-
-    Box {
-        Icon(
-            modifier = Modifier.clickable { isDropdownMenuVisible = true },
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(id = R.string.more_options),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
-        if (isDropdownMenuVisible) {
-            DropdownMenu(
-                expanded = true, onDismissRequest = {
-                    isDropdownMenuVisible = false
-                }
-            ) {
-                storyActionsList.forEach { item ->
-                    DropdownMenuItem(text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                modifier = Modifier.size(20.dp),
-                                imageVector = item.icon,
-                                contentDescription = item.text
-                            )
-                            SpacerWidth16()
-                            Text(text = item.text)
-                        }
-                    }, onClick = {
-                        if (item.id == 1) {
-                            viewModel.showSeenListBottomSheet.value = true
-                        } else if (item.id == 2) {
-                            showDeleteStoryAlertDialog = true
-                        }
-                        isDropdownMenuVisible = false
-                    })
-                }
-            }
-        }
-        if (showDeleteStoryAlertDialog) {
-            TitleMessageIconOkCancelDialog(
-                imageVector = Icons.Default.Warning,
-                iconTint = ColorsHelper.warning(),
-                title = stringResource(id = R.string.delete_story),
-                subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_your_story),
-                positiveButtonText = stringResource(R.string.delete),
-                onCancel = {
-                    showDeleteStoryAlertDialog = false
-                }) {
-                showDeleteStoryAlertDialog = false
-                viewModel.deleteStory(currentStoryId)
-            }
-        }
-    }
-}
-
-private fun getStoryActions(context: Context): ArrayList<StoryActions> {
-    val storyActionsList = arrayListOf<StoryActions>()
-    storyActionsList.add(
-        StoryActions(
-            1,
-            context.getString(R.string.seen_list),
-            Icons.Default.RemoveRedEye,
-            null
-        )
-    )
-    storyActionsList.add(
-        StoryActions(
-            2,
-            context.getString(R.string.delete_story),
-            Icons.Default.Delete,
-            null
-        )
-    )
-    return storyActionsList
-}
-
-@Composable
-private fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Context) {
-    var isExceptionHandled by rememberSaveable {
-        mutableStateOf(false)
-    }
-    val getSeenListState = viewModel.getSeenListStateFlow.collectAsState().value
-    when (getSeenListState.status) {
-        RequestStatusEnum.Loading -> {
-            isExceptionHandled = false
-        }
-
-        RequestStatusEnum.Success -> {
-            if (getSeenListState.data != null) {
-                LoadSeenListBottomSheet(viewModel, getSeenListState.data, context)
-            }
-        }
-
-        RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    getSeenListState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
-                LoggingHelper.logData(
-                    LoggingLevelEnum.Error,
-                    ConstantsHelper.ERROR_TAG,
-                    ScreenNameEnum.ShowStoryScreen.name,
-                    getSeenListState.message.toString()
-                )
-                isExceptionHandled = true
-            }
-        }
-
-        RequestStatusEnum.None -> {
-            // no need to handle this
-        }
-    }
-}
-
-@Composable
-private fun HandleDeleteStoryState(
-    viewModel: ShowStoryViewModel,
-    navigator: DestinationsNavigator,
-    context: Context
-) {
-    var isResponseHandled by rememberSaveable {
-        mutableStateOf(false)
-    }
-    val deleteStoryState = viewModel.deleteStoryStateFlow.collectAsState().value
-    when (deleteStoryState.status) {
-        RequestStatusEnum.Loading -> {
-            LoaderDialog(stringResource(R.string.deleting_story))
-            isResponseHandled = false
-        }
-
-        RequestStatusEnum.Success -> {
-            if (!isResponseHandled) {
-                context.showToast(stringResource(R.string.story_deleted_successfully))
-                val userStories = viewModel.allUsersStories[viewModel.storyVisibleForUserId.value]
-                userStories?.removeIf { it.id == deleteStoryState.data }
-                if (userStories.isNullOrEmpty()) {
-                    navigator.popBackStack()
-                } else {
-
-                }
-//                currentUserStories.remove(currentStory)
-//                if (currentUserStories.isEmpty()) {
-//                    navigator.popBackStack()
-//                } else if (viewModel.currentStoryState.intValue > 0) {
-//                    viewModel.currentStoryState.intValue--
-//                }
-                isResponseHandled = true
-            }
-        }
-
-        RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    deleteStoryState.message ?: stringResource(id = R.string.some_error_occurred)
-                LoggingHelper.logData(
-                    LoggingLevelEnum.Error,
-                    ConstantsHelper.ERROR_TAG,
-                    ScreenNameEnum.ShowStoryScreen.name,
-                    deleteStoryState.message.toString()
-                )
-                isResponseHandled = true
-            }
-        }
-
-        RequestStatusEnum.None -> {
-            // no need to handle this
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LoadSeenListBottomSheet(
-    viewModel: ShowStoryViewModel,
-    seenList: List<Pair<String, Long>>,
-    context: Context
-) {
-    var showBottomSheet by viewModel.showSeenListBottomSheet
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            shape = RoundedCornerShape(
-                topEnd = ConstantsHelper.BottomSheetRoundness,
-                topStart = ConstantsHelper.BottomSheetRoundness
-            )
-        ) {
-            SeenListBottomSheet(
-                modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                seenList,
-                context
-            )
-        }
-    }
-}
-
-@Composable
-private fun SeenListBottomSheet(
-    modifier: Modifier,
-    seenList: List<Pair<String, Long>>,
-    context: Context
-) {
-    Column(modifier = modifier) {
-        seenList.forEach { listItem ->
-            // SeenListUserItem(user =, postedAt = listItem.second, context)
-        }
-    }
-}
 
 @Composable
 private fun MediaSection(
@@ -598,7 +350,7 @@ private fun MediaSection(
                 onMediaLoaded()
             }
         } else if (story.mediaType == MediaTypeEnum.Video.name || story.mediaType == MediaTypeEnum.TextVideo.name) {
-            ShowStoryVideo(videoUrl = story.mediaUrl, context = context) {
+            ShowStoryVideo(videoUrl = story.mediaUrl, viewModel, context = context) {
                 onMediaLoaded()
             }
         }
@@ -654,64 +406,30 @@ private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded:
 
 @SuppressLint("OpaqueUnitKey")
 @Composable
-private fun ShowStoryVideo(videoUrl: String, context: Context, onMediaLoaded: () -> Unit) {
-    val exoPlayer = remember {
-        FunctionHelper.getExoPlayer(context, videoUrl)
-    }
-    var isPlayerLoading by remember {
-        mutableStateOf(false)
-    }
+private fun ShowStoryVideo(
+    videoUrl: String,
+    viewModel: ShowStoryViewModel,
+    context: Context,
+    onMediaLoaded: () -> Unit
+) {
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         GetPlayerView(
             context = context,
             uri = videoUrl,
             loadingColorRes = R.color.white,
-            onStateChange = {
-
+            onStateChange = {isError->
+                if (isError) {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.some_error_occurred)
+                } else {
+                    onMediaLoaded()
+                }
             }) { _, _ ->
 
         }
-        if (isPlayerLoading) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
-        }
     }
 
-}
-
-@Composable
-private fun SeenListUserItem(
-    user: UsersBean,
-    postedAt: Long,
-    context: Context,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            model = user.profilePhoto,
-            contentDescription = user.name,
-            contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ic_default_user)
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 12.dp),
-        ) {
-            TextBold14(text = user.name, color = MaterialTheme.colorScheme.onPrimary)
-            Text(
-                text = FunctionHelper.getTimeAgo(postedAt, context),
-                fontSize = 12.sp,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
 }
 
 
