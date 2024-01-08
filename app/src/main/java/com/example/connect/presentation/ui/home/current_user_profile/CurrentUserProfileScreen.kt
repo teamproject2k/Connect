@@ -72,6 +72,7 @@ import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
 import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.SettingsScreenDestination
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -310,7 +311,7 @@ private fun HandleFriendListSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "CurrentUserProfileScreen",
+                    ScreenNameEnum.CurrentUserProfileScreen.name,
                     friendsDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -366,7 +367,7 @@ private fun HandlePostSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "CurrentUserProfileScreen",
+                    ScreenNameEnum.CurrentUserProfileScreen.name,
                     postDetailState.message.toString()
                 )
                 isExceptionHandled = true

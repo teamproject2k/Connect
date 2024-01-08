@@ -67,6 +67,7 @@ import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreen
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
 import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -152,7 +153,7 @@ private fun HandleGetDeviceIdFlow(viewModel: HomeSharedViewModel, context: Conte
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "HomeActivityScreen",
+                    ScreenNameEnum.HomeActivityScreen.name,
                     getDeviceIdState.message.toString()
                 )
                 isExceptionHandled = true
@@ -209,7 +210,7 @@ private fun HandleUserDetailsFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "HomeActivityScreen",
+                    ScreenNameEnum.HomeActivityScreen.name,
                     getUserDetailsState.message.toString()
                 )
                 isExceptionHandled = true

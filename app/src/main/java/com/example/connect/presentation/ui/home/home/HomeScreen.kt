@@ -86,6 +86,7 @@ import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDe
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
 import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -194,7 +195,7 @@ private fun HandleStoryDetailsWithUserDetails(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "HomeScreen",
+                    ScreenNameEnum.HomeScreen.name,
                     storyDetailsWithUserDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -418,6 +419,12 @@ private fun HandlePostDetailsWithUserDetails(
                     postDetailsWithUserDetailsState.message ?: stringResource(
                         id = R.string.some_error_occurred
                     )
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.HomeScreen.name,
+                    postDetailsWithUserDetailsState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -631,6 +638,12 @@ private fun HandleLikeUnlikeState(viewModel: HomeViewModel) {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.HomeScreen.name,
+                    likeUnlikeState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -661,6 +674,12 @@ private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.HomeScreen.name,
+                    saveUnSavePostState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }

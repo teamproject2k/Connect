@@ -83,6 +83,7 @@ import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
 import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
@@ -492,7 +493,7 @@ private fun HandleFriendListSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     friendsDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -555,7 +556,7 @@ private fun HandlePostSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     postDetailState.message.toString()
                 )
                 isExceptionHandled = true
@@ -640,7 +641,7 @@ private fun HandleSendFriendRequestStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     sendFriendRequestState.message.toString()
                 )
                 isResponseHandled = true
@@ -690,7 +691,7 @@ private fun HandleWithdrawFriendRequestStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     withDrawRequestState.message.toString()
                 )
                 isResponseHandled = true
@@ -740,7 +741,7 @@ private fun HandleAcceptFriendRequestStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     acceptFriendRequestState.message.toString()
                 )
                 isResponseHandled = true
@@ -790,7 +791,7 @@ private fun HandleRemoveFriendRequestStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     removeFriendRequestState.message.toString()
                 )
                 isResponseHandled = true
@@ -841,7 +842,7 @@ private fun HandleUnBlockUserStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     unblockUserState.message.toString()
                 )
                 isResponseHandled = true
@@ -891,7 +892,7 @@ private fun HandleBlockUserStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     blockUserState.message.toString()
                 )
                 isResponseHandled = true
@@ -941,7 +942,7 @@ private fun HandleUnfriendUserStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     unfriendUserState.message.toString()
                 )
                 isResponseHandled = true
@@ -991,7 +992,7 @@ private fun HandleUnfriendAndBlockUserStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OtherUserProfileScreen",
+                    ScreenNameEnum.OtherUserProfileScreen.name,
                     unfriendAndBlockUserState.message.toString()
                 )
                 isResponseHandled = true
@@ -1043,7 +1044,7 @@ private fun HandleGetCurrentUserDetailsStateFlow(
                     LoggingHelper.logData(
                         LoggingLevelEnum.Error,
                         ConstantsHelper.ERROR_TAG,
-                        "OtherUserProfileScreen",
+                        ScreenNameEnum.OtherUserProfileScreen.name,
                         getCurrentUserDetailsState.message.toString()
                     )
                 }

@@ -72,6 +72,7 @@ import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.destinations.UserDetailsScreenDestination
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -319,7 +320,7 @@ private fun HandleUserDetailsState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OTPInputScreen",
+                    ScreenNameEnum.OtpInputScreen.name,
                     userDetailsState.message.toString()
                 )
                 isExceptionHandled = true
@@ -374,7 +375,7 @@ private fun HandleVerifyOTPState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OTPInputScreen",
+                    ScreenNameEnum.OtpInputScreen.name,
                     verifyOtpState.message.toString()
                 )
                 isExceptionHandled = true
@@ -428,7 +429,7 @@ private fun HandleResendOTPState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "OTPInputScreen",
+                    ScreenNameEnum.OtpInputScreen.name,
                     resendOtpState.message.toString()
                 )
                 isExceptionHandled = true

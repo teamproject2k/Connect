@@ -68,6 +68,7 @@ import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.common.mediaPicker
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -211,7 +212,7 @@ private fun HandleAddPostSection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "AddPostScreen",
+                    ScreenNameEnum.AddPostScreen.name,
                     addPostState.message.toString()
                 )
                 isResponseHandled = true

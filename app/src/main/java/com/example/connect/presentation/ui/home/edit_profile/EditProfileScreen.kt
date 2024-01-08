@@ -74,6 +74,7 @@ import com.example.connect.presentation.ui.common.OutlinedTextFieldDisabledFeels
 import com.example.connect.presentation.ui.common.SpacerHeight24
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -579,7 +580,7 @@ private fun HandleUpdateUserState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "EditProfileScreen",
+                    ScreenNameEnum.EditProfileScreen.name,
                     updateUserState.message.toString()
                 )
                 isExceptionHandled = true

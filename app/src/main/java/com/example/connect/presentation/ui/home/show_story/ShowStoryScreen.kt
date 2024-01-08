@@ -80,6 +80,7 @@ import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.StoryActions
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -474,7 +475,7 @@ private fun HandleGetSeenListState(viewModel: ShowStoryViewModel, context: Conte
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "ShowStoryScreen",
+                    ScreenNameEnum.ShowStoryScreen.name,
                     getSeenListState.message.toString()
                 )
                 isExceptionHandled = true
@@ -530,7 +531,7 @@ private fun HandleDeleteStoryState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "ShowStoryScreen",
+                    ScreenNameEnum.ShowStoryScreen.name,
                     deleteStoryState.message.toString()
                 )
                 isResponseHandled = true

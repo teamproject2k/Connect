@@ -41,6 +41,7 @@ import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
 import com.example.connect.presentation.ui.pull_refresh.pullRefresh
@@ -62,7 +63,7 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
         LoggingHelper.logData(
             LoggingLevelEnum.Error,
             ERROR_TAG,
-            "UserRequestScreen",
+            ScreenNameEnum.FriendsAndPendingScreen.name,
             "Tab Index $defaultSelectedTab not in range 0..1"
         )
     }
@@ -168,6 +169,12 @@ private fun HandleGetFriendsListStateFlow(
                         getFriendsListAsUsersState.message
                             ?: stringResource(id = R.string.some_error_occurred)
                 }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ERROR_TAG,
+                    ScreenNameEnum.FriendsAndPendingScreen.name,
+                    getFriendsListAsUsersState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -258,6 +265,12 @@ private fun HandleGetPendingFriendRequestListStateFlow(
                         getPendingFriendRequestListAsUsersState.message
                             ?: stringResource(id = R.string.some_error_occurred)
                 }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ERROR_TAG,
+                    ScreenNameEnum.FriendsAndPendingScreen.name,
+                    getPendingFriendRequestListAsUsersState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }

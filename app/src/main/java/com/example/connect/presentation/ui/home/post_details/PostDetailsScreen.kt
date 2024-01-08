@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
@@ -81,6 +83,7 @@ import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -302,6 +305,12 @@ fun HandleGetAllCommentsSection(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.PostDetailsScreen.name,
+                    getAllCommentsState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -704,6 +713,12 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
                         id = R.string.some_error_occurred
                     ) else addCommentState.message
                 viewModel.isSendingCommentState.value = false
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.PostDetailsScreen.name,
+                    addCommentState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }
@@ -749,6 +764,12 @@ fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     deleteCommentState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.PostDetailsScreen.name,
+                    deleteCommentState.message.toString()
+                )
                 isExceptionHandled = true
             }
         }

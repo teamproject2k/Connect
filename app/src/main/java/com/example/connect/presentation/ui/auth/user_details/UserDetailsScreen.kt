@@ -61,6 +61,7 @@ import com.example.connect.presentation.ui.common.SpacerHeight48
 import com.example.connect.presentation.ui.common.TopPageSection
 import com.example.connect.presentation.ui.destinations.MobileNumberInputScreenDestination
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeActivity
 import com.example.connect.presentation.utils.AuthenticationNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -295,7 +296,7 @@ private fun HandleAddUserState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "UserDetailsScreen",
+                    ScreenNameEnum.UserDetailsScreen.name,
                     uiState.message.toString()
                 )
                 isExceptionHandled = true

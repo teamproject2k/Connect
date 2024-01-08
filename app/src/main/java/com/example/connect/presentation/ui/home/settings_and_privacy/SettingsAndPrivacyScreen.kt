@@ -44,6 +44,7 @@ import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.destinations.BlockedListScreenDestination
 import com.example.connect.presentation.ui.destinations.RequestedListScreenDestination
 import com.example.connect.presentation.ui.destinations.SavedPostsScreenDestination
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -330,7 +331,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "SettingsAndPrivacyScreen",
+                    ScreenNameEnum.SettingsAndPrivacyScreen.name,
                     updateUserGenderState.message.toString()
                 )
                 isResponseHandled = true
@@ -376,7 +377,7 @@ fun HandleUpdateDobVisibilityStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "SettingsAndPrivacyScreen",
+                    ScreenNameEnum.SettingsAndPrivacyScreen.name,
                     updateDobVisibilityState.message.toString()
                 )
                 isResponseHandled = true
@@ -423,7 +424,7 @@ fun HandleUpdateFriendListVisibilityStateFlow(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "SettingsAndPrivacyScreen",
+                    ScreenNameEnum.SettingsAndPrivacyScreen.name,
                     updateFriendListVisibilityState.message.toString()
                 )
                 isResponseHandled = true

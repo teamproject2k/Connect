@@ -37,6 +37,7 @@ import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
 import com.example.connect.presentation.ui.pull_refresh.pullRefresh
@@ -120,7 +121,7 @@ private fun HandleSearchUserState(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "SearchUserScreen",
+                    ScreenNameEnum.SearchUserScreen.name,
                     searchUserState.message.toString()
                 )
                 isExceptionHandled = true

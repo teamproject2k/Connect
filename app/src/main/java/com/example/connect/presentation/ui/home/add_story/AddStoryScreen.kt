@@ -75,6 +75,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.mediaPicker
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -197,7 +198,7 @@ private fun HandleAddStorySection(
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    "AddStoryScreen",
+                    ScreenNameEnum.AddStoryScreen.name,
                     addStoryState.message.toString()
                 )
                 isResponseHandled = true
