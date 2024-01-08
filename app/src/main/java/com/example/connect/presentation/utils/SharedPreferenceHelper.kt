@@ -41,6 +41,12 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
         }
 
 
+    /**
+     * A string value that represent the mobile number of user
+     *
+     * @property get Returns the value of the mobile number.
+     * @property set Sets the value of the mobile number.
+     */
     var mobileNumber
         get() = sharedPreferences.getString(MOBILE_NUMBER, "") ?: ""
         set(mobileNumber) {

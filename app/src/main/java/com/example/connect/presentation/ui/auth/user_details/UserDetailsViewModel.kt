@@ -90,7 +90,6 @@ class UserDetailsViewModel @Inject constructor(
                         if (userDetailsResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the local database.
                             addUserToDbUseCase.invoke(user)
-                            sharedPreference.mobileNumber = ""
                         }
 
                         // Set the response state of the user profile creation process.

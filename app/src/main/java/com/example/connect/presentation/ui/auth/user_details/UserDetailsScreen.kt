@@ -267,26 +267,29 @@ private fun HandleAddUserState(
     viewModel: UserDetailsViewModel,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val uiState = viewModel.addUserStateFlow.collectAsState().value
     when (uiState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.sharedPreference.isUserDetailsEntered = true
-            val intent = Intent(context, HomeActivity::class.java)
-            context.startActivity(intent)
-            LocalActivity.current.finish()
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+            if (!isResponseHandled) {
+                viewModel.sharedPreference.isUserDetailsEntered = true
+                val intent = Intent(context, HomeActivity::class.java)
+                context.startActivity(intent)
+                LocalActivity.current.finish()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (uiState.message.isNullOrBlank() || uiState.message == FirebaseErrorCodes.FCM_TOKEN_NOT_GENERATED) context.getString(
                         R.string.something_went_wrong
@@ -299,7 +302,7 @@ private fun HandleAddUserState(
                     ScreenNameEnum.UserDetailsScreen.name,
                     uiState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
