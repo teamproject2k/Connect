@@ -26,7 +26,7 @@
     <string name="please_select_your_date_of_birth">Please select your date of birth</string>
     <string name="invalid_date_of_birth">Invalid date of birth</string>
     <string name="_91">+91</string>
-    <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than 10 digits</string>
+    <string name="mobile_number_can_t_be_greater_than_10_digits">Mobile number can\'t be greater than %1$d digits</string>
     <string name="bio_can_t_be_more_than_limited_characters">Bio can\'t be more than %1$d characters long</string>
     <string name="resend_now">Resend Now</string>
     <string name="didn_t_receive_otp">Didn\'t Receive OTP?</string>
@@ -42,7 +42,7 @@
     <string name="no_date_selected">No Date Selected</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="otp_sent_successfully">OTP Sent Successfully</string>
-    <string name="sending_otp">Sending OTP...</string>
+    <string name="getting_otp">Getting OTP...</string>
     <string name="verifying_otp">Verifying OTP...</string>
     <string name="some_error_occurred_please_login_again">Some Error Occurred , Please Login Again</string>
     <string name="creating_account">Creating Account...</string>

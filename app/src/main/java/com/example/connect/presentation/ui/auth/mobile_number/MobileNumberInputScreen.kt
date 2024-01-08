@@ -92,7 +92,7 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                 SpacerHeight48()
                 LoaderButton(
                     loaderButtonState = viewModel.currentButtonLoadingState,
-                    loadingText = stringResource(R.string.sending_otp),
+                    loadingText = stringResource(R.string.getting_otp),
                     buttonText = stringResource(id = R.string.get_otp),
                     isEnabled = viewModel.userMobileNumberState.value.length == 10,
                     onClick = {
@@ -120,31 +120,34 @@ private fun HandleGetUserDetailsState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            if (userDetailsState.data == null) {
-                navigator.navigate(UserDetailsScreenDestination())
-                navigator.popBackStack()
-            } else {
-                viewModel.sharedPreference.isUserDetailsEntered = true
-                val intent = Intent(context, HomeActivity::class.java)
-                context.startActivity(intent)
-                LocalActivity.current.finish()
+            if (!isResponseHandled) {
+                if (userDetailsState.data == null) {
+                    navigator.navigate(UserDetailsScreenDestination())
+                    navigator.popBackStack()
+                } else {
+                    viewModel.sharedPreference.isUserDetailsEntered = true
+                    val intent = Intent(context, HomeActivity::class.java)
+                    context.startActivity(intent)
+                    LocalActivity.current.finish()
+                }
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                isResponseHandled = true
             }
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
@@ -157,12 +160,12 @@ private fun HandleGetUserDetailsState(
                     ScreenNameEnum.MobileNumberInputScreen.name,
                     userDetailsState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.None -> {
-
+            // no need to handle this
         }
     }
 }
@@ -173,39 +176,41 @@ private fun HandleSendOTPState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val sendOtpState = viewModel.sendOtpUIStateFlow.collectAsState().value
     when (sendOtpState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
-            if (sendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
-                if (context.isNetworkAvailable()) {
-                    viewModel.getUserDetails(sendOtpState.data.second)
+            if (!isResponseHandled) {
+                if (sendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
+                    if (context.isNetworkAvailable()) {
+                        viewModel.getUserDetails(sendOtpState.data.second)
+                    } else {
+                        viewModel.snackBarMessageState.value =
+                            stringResource(id = R.string.no_internet_connection)
+                    }
                 } else {
-                    viewModel.snackBarMessageState.value =
-                        stringResource(id = R.string.no_internet_connection)
-                }
-            } else {
-                navigator.navigate(
-                    OTPScreenDestination(
-                        viewModel.userMobileNumberState.value,
-                        sendOtpState.data?.second.toString(),
-                        viewModel.selectedCountryCodeState.value
+                    navigator.navigate(
+                        OTPScreenDestination(
+                            viewModel.userMobileNumberState.value,
+                            sendOtpState.data?.second.toString(),
+                            viewModel.selectedCountryCodeState.value
+                        )
                     )
-                )
-                viewModel.resetStateFlow()
+                    viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                    isResponseHandled = true
+                }
             }
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Error
                 viewModel.snackBarMessageState.value =
                     if (sendOtpState.message.isNullOrBlank() || sendOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
@@ -218,12 +223,12 @@ private fun HandleSendOTPState(
                     ScreenNameEnum.MobileNumberInputScreen.name,
                     sendOtpState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.None -> {
-
+            // no need to handle this
         }
     }
 }
@@ -262,27 +267,46 @@ private fun MobileInputTextField(viewModel: MobileNumberInputViewModel) {
     )
 }
 
+/**
+ * Handles the button click event.
+ *
+ * @param viewModel The view model.
+ * @param context The context.
+ */
 private fun handleButtonClick(
     viewModel: MobileNumberInputViewModel,
     context: Context
 ) {
     val mobileNumberValidationResponseCode =
         Validator.isValidMobileNumber(viewModel.userMobileNumberState.value)
-    if (mobileNumberValidationResponseCode == 1) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_mobile_number)
-        FunctionHelper.vibrateDevice(context)
-    } else if (mobileNumberValidationResponseCode == 2) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.invalid_mobile_number)
-        FunctionHelper.vibrateDevice(context)
-    } else if (mobileNumberValidationResponseCode == 0) {
-        if (context.isNetworkAvailable()) {
-            viewModel.sharedPreference.mobileNumber = viewModel.userMobileNumberState.value
-            viewModel.sendOTP()
-        } else {
+    when (mobileNumberValidationResponseCode) {
+        0 -> {
+            if (context.isNetworkAvailable()) {
+                viewModel.sharedPreference.mobileNumber = viewModel.userMobileNumberState.value
+                viewModel.sendOTP()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
+        }
+
+        1 -> {
             viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
+                context.getString(R.string.please_enter_mobile_number)
+            FunctionHelper.vibrateDevice(context)
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_mobile_number)
+            FunctionHelper.vibrateDevice(context)
+        }
+
+        else -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.something_went_wrong)
+            FunctionHelper.vibrateDevice(context)
         }
     }
 }

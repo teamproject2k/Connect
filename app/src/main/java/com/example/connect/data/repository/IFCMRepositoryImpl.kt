@@ -24,12 +24,15 @@ class IFCMRepositoryImpl @Inject constructor(
     override suspend fun getFCMToken(): ResponseState<String> {
         return try {
             val token = firebaseMessaging.token.await()
+            // If the token is not null, return it as a success response.
             if (token != null) {
                 ResponseState.success(token)
             } else {
+                // Otherwise, return an error response.
                 ResponseState.error(FirebaseErrorCodes.FCM_TOKEN_NOT_GENERATED)
             }
         } catch (exception: Exception) {
+            // If an exception occurs, return an error response with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }

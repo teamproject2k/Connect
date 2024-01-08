@@ -13,6 +13,7 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class BaseApp : Application() {
+
     override fun onCreate() {
         super.onCreate()
         Firebase.crashlytics.setUserId(Firebase.auth.uid ?: "")

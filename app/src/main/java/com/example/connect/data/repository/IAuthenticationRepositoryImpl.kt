@@ -30,13 +30,11 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                 // If the verification is completed, check if the user is already logged in.
-                if (firebaseAuth.currentUser?.uid != null) {
+                val firebaseUserId = firebaseAuth.currentUser?.uid
+                if (firebaseUserId != null) {
                     // If the user is already logged in, send a success response with the user's ID.
                     responseStateFlow.value = ResponseState.success(
-                        Pair(
-                            FirebaseConstants.AUTO_LOGIN,
-                            firebaseAuth.currentUser!!.uid
-                        )
+                        Pair(FirebaseConstants.AUTO_LOGIN, firebaseUserId)
                     )
                 } else {
                     // If the user is not logged in, send an error response.
@@ -65,8 +63,9 @@ class IAuthenticationRepositoryImpl @Inject constructor(
             .setCallbacks(callbacks)
 
         // If the AuthenticationActivity is not null, set the activity to the options object.
-        if (AuthenticationActivity.Instance != null) {
-            options.setActivity(AuthenticationActivity.Instance!!)
+        val authenticationActivityInstance = AuthenticationActivity.Instance
+        if (authenticationActivityInstance != null) {
+            options.setActivity(authenticationActivityInstance)
         }
 
         // Verify the phone number using the PhoneAuthProvider.
@@ -83,8 +82,9 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.signInWithCredential(credentials).await()
             // If the sign in is successful, return a success response with the user object.
-            if (result.user != null) {
-                ResponseState.success(result.user!!)
+            val user = result.user
+            if (user != null) {
+                ResponseState.success(user)
             } else {
                 // If the sign in fails, sign out the user and return an error response.
                 firebaseAuth.signOut()
@@ -96,3 +96,4 @@ class IAuthenticationRepositoryImpl @Inject constructor(
         }
     }
 }
+

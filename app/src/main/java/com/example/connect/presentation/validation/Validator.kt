@@ -11,9 +11,12 @@ object Validator {
      *  Validates mobile number
      *  @param userMobileNumber [String] user entered mobile number
      *  @return response code of validation
+     *
      *  0 -> Correct
-     *  1-> empty mobile number
-     *  2-> invalid mobile number
+     *
+     *  1-> Empty mobile number
+     *
+     *  2-> Invalid mobile number
      */
     fun isValidMobileNumber(userMobileNumber: String): Int {
         var responseCode = 0
@@ -33,9 +36,12 @@ object Validator {
      * Validates otp
      * @param otp [String] user entered OTP
      * @return response code of validation
-     * 0 -> Correct
-     * 1-> empty otp
-     * 2-> invalid otp
+     *
+     * 0-> Correct
+     *
+     * 1-> Empty otp
+     *
+     * 2-> Invalid otp
      */
     fun isValidOTP(otp: String): Int {
         var responseCode = 0
@@ -56,10 +62,14 @@ object Validator {
      * Validates name
      * @param userName [String] user entered name
      * @return response code of validation
+     *
      * 0 -> Correct
-     * 1->  empty name
-     * 2->  invalid name
-     * 3->  max limit of name exceeded
+     *
+     * 1->  Empty name
+     *
+     * 2->  Invalid name
+     *
+     * 3->  Max limit of name exceeded
      */
     fun isValidName(userName: String): Int {
         var responseCode = 0
@@ -84,9 +94,12 @@ object Validator {
      *  @param gender [String] user selected gender
      *  @param context [String]
      *  @return response code of validation
+     *
      *  0 -> Correct
-     *  1-> empty gender
-     *  2-> incorrect gender
+     *
+     *  1-> Empty gender
+     *
+     *  2-> Incorrect gender
      */
     fun isValidGender(gender: String, context: Context): Int {
         val genderList = context.resources.getStringArray(R.array.gender_list)
@@ -105,12 +118,15 @@ object Validator {
 
 
     /**
-     * Validates dob
-     * @param dob [Long] user entered dob
+     * Validates DOB
+     * @param dob [Long] user entered DOB
      * @return response code of validation
-     * 0-> correct
-     * 1->dob not selected
-     * 2-> incorrect dob
+     *
+     * 0-> Correct
+     *
+     * 1-> DOB not selected
+     *
+     * 2-> Incorrect DOB
      */
     fun isValidDob(dob: Long): Int {
         var responseCode = 0
@@ -131,9 +147,12 @@ object Validator {
      * Validates bio
      *  @param bio [String] user entered
      *  @return response code of validation
+     *
      *  0 -> Correct
-     *  1-> empty bio
-     *  2-> max limit of bio exceeded
+     *
+     *  1-> Empty bio
+     *
+     *  2-> Max limit of bio exceeded
      */
     fun isValidBio(bio: String): Int {
         var responseCode = 0

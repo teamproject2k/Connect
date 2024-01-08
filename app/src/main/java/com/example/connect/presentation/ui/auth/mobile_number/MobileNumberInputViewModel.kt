@@ -14,6 +14,7 @@ import com.example.connect.domain.useCase.user.AddUserToDbUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateFcmTokenOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,6 @@ class MobileNumberInputViewModel @Inject constructor(
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
     val selectedCountryCodeState = mutableStateOf("+91")
-
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =
         MutableStateFlow(ResponseState.none())
     val sendOtpUIStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _sendOtpUIStateFlow
@@ -47,6 +47,7 @@ class MobileNumberInputViewModel @Inject constructor(
     private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow: StateFlow<ResponseState<UsersBean?>> get() = _getUserDetailsStateFlow
+
 
     /**
      * Sends an OTP to the user's mobile number.
@@ -126,14 +127,8 @@ class MobileNumberInputViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Resets the send OTP UI state flow and the get user details state flow to their initial values.
-     */
-    fun resetStateFlow() {
-        // Reset the send OTP UI state flow to its initial value.
-        _sendOtpUIStateFlow.value = ResponseState.none()
-
-        // Reset the get user details state flow to its initial value.
-        _getUserDetailsStateFlow.value = ResponseState.none()
+    override fun onCleared() {
+        super.onCleared()
+        AuthenticationActivity.Instance = null
     }
 }

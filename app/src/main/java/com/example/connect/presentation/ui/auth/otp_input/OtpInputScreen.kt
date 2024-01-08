@@ -54,11 +54,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
@@ -285,31 +285,38 @@ private fun HandleUserDetailsState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val userDetailsState = viewModel.getUserDetailsStateFlow.collectAsState().value
     when (userDetailsState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            if (userDetailsState.data == null) {
-                navigator.popBackStack(MobileNumberInputScreenDestination.route, inclusive = true)
-                navigator.navigate(UserDetailsScreenDestination())
-            } else {
-                viewModel.sharedPreference.isUserDetailsEntered = true
-                val intent = Intent(context, HomeActivity::class.java)
-                context.startActivity(intent)
-                LocalActivity.current.finish()
+            if (!isResponseHandled) {
+                if (userDetailsState.data == null) {
+                    navigator.popBackStack(
+                        MobileNumberInputScreenDestination.route,
+                        inclusive = true
+                    )
+                    navigator.navigate(UserDetailsScreenDestination())
+                } else {
+                    viewModel.sharedPreference.isUserDetailsEntered = true
+                    val intent = Intent(context, HomeActivity::class.java)
+                    context.startActivity(intent)
+                    LocalActivity.current.finish()
+                }
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                isResponseHandled = true
             }
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (userDetailsState.message.isNullOrBlank() || userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
@@ -323,7 +330,7 @@ private fun HandleUserDetailsState(
                     ScreenNameEnum.OtpInputScreen.name,
                     userDetailsState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -339,33 +346,36 @@ private fun HandleVerifyOTPState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val verifyOtpState = viewModel.verifyOtpStateFlow.collectAsState().value
     when (verifyOtpState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            if (verifyOtpState.data != null) {
-                if (context.isNetworkAvailable()) {
-                    viewModel.getUserDetails(verifyOtpState.data.uid)
+            if (!isResponseHandled) {
+                if (verifyOtpState.data != null) {
+                    if (context.isNetworkAvailable()) {
+                        viewModel.getUserDetails(verifyOtpState.data.uid)
+                    } else {
+                        viewModel.snackBarMessageState.value =
+                            stringResource(id = R.string.no_internet_connection)
+                    }
                 } else {
-                    viewModel.snackBarMessageState.value =
-                        stringResource(id = R.string.no_internet_connection)
+                    context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
+                    navigator.popBackStack()
                 }
-            } else {
-                context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-                navigator.popBackStack()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                isResponseHandled = true
             }
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (verifyOtpState.message.isNullOrBlank() || verifyOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
@@ -378,7 +388,7 @@ private fun HandleVerifyOTPState(
                     ScreenNameEnum.OtpInputScreen.name,
                     verifyOtpState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -393,33 +403,36 @@ private fun HandleResendOTPState(
     viewModel: OtpInputViewModel,
     context: Context
 ) {
-    var isExceptionHandled by rememberSaveable {
+    var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }
     val resendOtpState = viewModel.resendOtpStateFlow.collectAsState().value
     when (resendOtpState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            if (resendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
-                if (context.isNetworkAvailable()) {
-                    viewModel.getUserDetails(resendOtpState.data.second)
+            if (!isResponseHandled) {
+                if (resendOtpState.data?.first == FirebaseConstants.AUTO_LOGIN) {
+                    if (context.isNetworkAvailable()) {
+                        viewModel.getUserDetails(resendOtpState.data.second)
+                    } else {
+                        viewModel.snackBarMessageState.value =
+                            stringResource(id = R.string.no_internet_connection)
+                    }
                 } else {
                     viewModel.snackBarMessageState.value =
-                        stringResource(id = R.string.no_internet_connection)
+                        stringResource(R.string.otp_sent_successfully)
                 }
-            } else {
-                viewModel.snackBarMessageState.value =
-                    stringResource(R.string.otp_sent_successfully)
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                isResponseHandled = true
             }
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (resendOtpState.message.isNullOrBlank() || resendOtpState.message == FirebaseErrorCodes.NO_USER_FOUND) context.getString(
                         R.string.something_went_wrong
@@ -432,7 +445,7 @@ private fun HandleResendOTPState(
                     ScreenNameEnum.OtpInputScreen.name,
                     resendOtpState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -443,37 +456,14 @@ private fun HandleResendOTPState(
 
 }
 
-private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
-    val otpValidationResponseCode = Validator.isValidOTP(viewModel.otpState.value)
-    if (otpValidationResponseCode == 1) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.please_enter_an_otp)
-        FunctionHelper.vibrateDevice(context)
-    } else if (otpValidationResponseCode == 2) {
-        viewModel.snackBarMessageState.value =
-            context.getString(R.string.invalid_otp)
-        FunctionHelper.vibrateDevice(context)
-    } else if (otpValidationResponseCode == 0) {
-        if (context.isNetworkAvailable()) {
-            viewModel.verifyOTP(viewModel.verificationId)
-        } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
-        }
-    }
-}
-
 @Composable
 private fun HandleBackPressed(navigator: DestinationsNavigator) {
-
     var showLogoutDialog by remember {
         mutableStateOf(false)
     }
-
     BackHandler {
         showLogoutDialog = true
     }
-
     if (showLogoutDialog) {
         TitleMessageIconOkCancelDialog(
             title = stringResource(id = R.string.go_back),
@@ -483,6 +473,45 @@ private fun HandleBackPressed(navigator: DestinationsNavigator) {
             onCancel = { showLogoutDialog = false }) {
             showLogoutDialog = false
             navigator.popBackStack()
+        }
+    }
+}
+
+/**
+ * Handles the button click event in the OTP input screen.
+ *
+ * @param viewModel The OTP input view model.
+ * @param context The context of the activity.
+ */
+private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
+    val otpValidationResponseCode = Validator.isValidOTP(viewModel.otpState.value)
+    when (otpValidationResponseCode) {
+        0 -> {
+            if (context.isNetworkAvailable()) {
+                viewModel.verifyOTP(viewModel.verificationId)
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
+        }
+
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_enter_an_otp)
+            FunctionHelper.vibrateDevice(context)
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_otp)
+            FunctionHelper.vibrateDevice(context)
+        }
+
+        else -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.something_went_wrong)
+            FunctionHelper.vibrateDevice(context)
         }
     }
 }
