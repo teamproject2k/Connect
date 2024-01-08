@@ -350,7 +350,8 @@ fun CommentUi(
     }
     Column {
         val parentList =
-            viewModel.commentsMapState.keys.filter { it.parentCommentId == null }
+            viewModel.commentsMapState.keys.sortedByDescending { it.createdAt }
+
         parentList.forEach { parent ->
             val childCommentList = viewModel.commentsMapState[parent]
             if (childCommentList != null) {
@@ -697,17 +698,17 @@ fun AddCommentSection(
 @Composable
 fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
     val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (addCommentState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.isSendingCommentState.value = true
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (addCommentState.message.isNullOrBlank()) stringResource(
                         id = R.string.some_error_occurred
@@ -719,27 +720,36 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
                     ScreenNameEnum.PostDetailsScreen.name,
                     addCommentState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.post.commentCount++
-            val comment = addCommentState.data
-            viewModel.commentedOnState.value = null
-            viewModel.commentTextState.value = ""
-            if (comment != null) {
-                if (comment.parentCommentId == null) {
-                    viewModel.commentsMapState[comment] = arrayListOf()
-                } else {
-                    val parent =
-                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.parentCommentId }
-                    if (parent != null) {
-                        viewModel.commentsMapState.getOrPut(parent) { arrayListOf() }.add(comment)
+            if (!isResponseHandled) {
+                viewModel.post.commentCount++
+                val comment = addCommentState.data
+                viewModel.commentedOnState.value = null
+                viewModel.commentTextState.value = ""
+                if (comment != null) {
+                    if (comment.parentCommentId == null) {
+                        viewModel.commentsMapState[comment] = arrayListOf()
+                    } else {
+                        val parent =
+                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.parentCommentId }
+                        if (parent != null) {
+                            val updatedChildList = arrayListOf<CommentBean>()
+                            val currentChildList = viewModel.commentsMapState[parent]
+                            if (currentChildList != null) {
+                                updatedChildList.addAll(currentChildList)
+                                updatedChildList.add(comment)
+                                viewModel.commentsMapState[parent] = updatedChildList
+                            }
+                        }
                     }
                 }
+                viewModel.isSendingCommentState.value = false
+                isResponseHandled = true
             }
-            viewModel.isSendingCommentState.value = false
         }
 
         RequestStatusEnum.None -> {
@@ -751,17 +761,17 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
 @Composable
 fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
     val deleteCommentState = viewModel.deleteCommentStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (deleteCommentState.status) {
         RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(R.string.deleting_comment))
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     deleteCommentState.message ?: stringResource(id = R.string.some_error_occurred)
                 LoggingHelper.logData(
@@ -770,24 +780,30 @@ fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
                     ScreenNameEnum.PostDetailsScreen.name,
                     deleteCommentState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            val commentId = deleteCommentState.data?.first
-            val parentCommentId = deleteCommentState.data?.second
-            if (commentId != null) {
-                if (parentCommentId == null) {
-                    val comment =
-                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == commentId }
-                    viewModel.commentsMapState.remove(comment)
-                } else {
-                    val parent =
-                        viewModel.commentsMapState.keys.find { it.commentFirebaseId == parentCommentId }
-                    viewModel.commentsMapState[parent]?.removeIf { it.commentFirebaseId == commentId }
+            if (!isResponseHandled) {
+                val commentId = deleteCommentState.data?.first
+                val parentCommentId = deleteCommentState.data?.second
+                if (commentId != null) {
+                    if (parentCommentId == null) {
+                        val comment =
+                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == commentId }
+                        if (comment != null) {
+                            viewModel.commentsMapState.keys.removeIf { commentId == it.commentFirebaseId }
+                        }
+                    } else {
+                        val updatedChildList = arrayListOf<CommentBean>()
+                        val parent =
+                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == parentCommentId }
+                        viewModel.commentsMapState[parent]?.removeIf { it.commentFirebaseId == commentId }
+                    }
+                    viewModel.post.commentCount--
                 }
-                viewModel.post.commentCount--
+                isResponseHandled = true
             }
         }
 

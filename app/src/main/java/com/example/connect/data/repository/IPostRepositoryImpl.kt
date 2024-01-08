@@ -375,7 +375,7 @@ class IPostRepositoryImpl @Inject constructor(
                         }
                     }
                 }
-                commentList.sortByDescending { it.createdAt }
+                commentList.sortBy { it.createdAt }
                 val parentCommentList =
                     commentList.filter { comment -> comment.parentCommentId == null }
                 val parentChildMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()

@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.post_details
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -234,6 +235,8 @@ class PostDetailsViewModel @Inject constructor(
                     val commentMap = getAllCommentResponseState.data?.first
                     if (!commentMap.isNullOrEmpty()) {
                         commentsMapState.putAll(commentMap)
+                        Log.e("aryan", commentsMapState.toMutableMap().toString())
+                        Log.e("arpit", commentMap.toString())
                     }
                     _getAllCommentsStateFlow.value = getAllCommentResponseState
                 } else {
@@ -258,6 +261,7 @@ class PostDetailsViewModel @Inject constructor(
                         comment.likedBy.add(loggedInUserFireId)
                     }
                     onSuccess()
+                    // Log.e("aryan",commentsMapState.toString())
                 } else {
                     onError(addLikeForCommentResponseState.message)
                 }
