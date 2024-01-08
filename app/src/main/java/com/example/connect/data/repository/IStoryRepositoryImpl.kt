@@ -27,7 +27,7 @@ class IStoryRepositoryImpl @Inject constructor(
         }
     }
 
-    fun isUploadedBeforeOneDay(createdAtInMillis: Long): Boolean {
+    private fun isUploadedBeforeOneDay(createdAtInMillis: Long): Boolean {
         val currentTimeMillis = System.currentTimeMillis()
         val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L // 24 hours in milliseconds
 

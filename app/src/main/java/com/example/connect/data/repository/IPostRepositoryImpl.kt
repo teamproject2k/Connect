@@ -320,7 +320,7 @@ class IPostRepositoryImpl @Inject constructor(
     ): ResponseState<Nothing> {
         return try {
             fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId).update(
-                CommentBean::likedBy.name,
+                CommentRemoteEntity::likedBy.name,
                 FieldValue.arrayUnion(loggedInUserFirebaseId)
             ).await()
             ResponseState.success(null)
@@ -335,7 +335,7 @@ class IPostRepositoryImpl @Inject constructor(
     ): ResponseState<Nothing> {
         return try {
             fireStore.collection(FirebaseConstants.COMMENT_KEY).document(commentId).update(
-                CommentBean::likedBy.name,
+                CommentRemoteEntity::likedBy.name,
                 FieldValue.arrayRemove(loggedInUserFirebaseId)
             ).await()
             ResponseState.success(null)
