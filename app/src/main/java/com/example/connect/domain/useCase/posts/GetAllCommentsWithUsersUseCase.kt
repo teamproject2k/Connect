@@ -9,8 +9,8 @@ import javax.inject.Inject
 class GetAllCommentsWithUsersUseCase @Inject constructor(private val repository: IPostRepository) {
     suspend fun invoke(
         postId: String,
-        loggedInUserFireId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>> {
-        return repository.getAllCommentsWithUsersFromRemote(postId, loggedInUserFireId)
+        return repository.getAllCommentsWithUsersFromRemote(postId, loggedInUserFirebaseId)
     }
 }

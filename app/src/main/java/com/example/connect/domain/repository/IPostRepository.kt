@@ -79,7 +79,7 @@ interface IPostRepository {
 
     suspend fun getAllCommentsWithUsersFromRemote(
         postId: String,
-        loggedInUserFireId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>
 
 
