@@ -43,15 +43,20 @@ class IFCMRepositoryImpl @Inject constructor(
         sendTo: String
     ): ResponseState<Nothing> {
         return try {
+            // Create a JSON object with the message data.
             val dataJson = JsonObject()
             data.forEach {
+                // Add each key-value pair to the JSON object.
                 dataJson.addProperty(it.key, it.value)
             }
+            // Create a JSON object with the message recipient.
             val messageJson = JsonObject()
             messageJson.addProperty(FCMConstantHelper.TOKEN_KEY, sendTo)
             messageJson.add(FCMConstantHelper.DATA_KEY, dataJson)
+            // Create a JSON object with the entire message.
             val parentJson = JsonObject()
             parentJson.add(FCMConstantHelper.MESSAGE_KEY, messageJson)
+            // Send the message to the FCM server.
             remoteRepository.sendFcmMessage(
                 token = token,
                 data = parentJson

@@ -6,6 +6,11 @@ import javax.inject.Inject
 
 class GetFCMTokenUseCase @Inject constructor(private val repository: IFCMRepository) {
 
+    /**
+     * Invokes the repository's getFCMToken method and returns the result as a ResponseState.
+     *
+     * @return A ResponseState containing the fcm token or error.
+     */
     suspend fun invoke(): ResponseState<String> {
         return repository.getFCMToken()
     }
