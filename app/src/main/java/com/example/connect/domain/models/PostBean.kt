@@ -8,13 +8,13 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class PostBean(
-    var id: String,
-    val fireBaseUserId: String,
+    var postFirebaseId: String,
+    val createdByUserFirebaseId: String,
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val postScope: String,
-    val postType: String,
+    val postVisibilityScope: String,
+    val postContentType: String,
     var commentCount: Long,
     var isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
@@ -22,12 +22,12 @@ data class PostBean(
 ) : Parcelable {
     fun toPostRemoteEntity(): PostRemoteEntity {
         return PostRemoteEntity(
-            fireBaseUserId,
+            createdByUserFirebaseId,
             mediaUrl,
             caption,
             createdAt,
-            postScope,
-            postType,
+            postVisibilityScope,
+            postContentType,
             commentCount,
             likedBy,
             isDeleted
@@ -36,13 +36,13 @@ data class PostBean(
 
     fun toPostDbEntity(): PostDbEntity {
         return PostDbEntity(
-            id,
-            fireBaseUserId,
+            postFirebaseId,
+            createdByUserFirebaseId,
             mediaUrl,
             caption,
             createdAt,
-            postScope,
-            postType,
+            postVisibilityScope,
+            postContentType,
             commentCount,
             isSavedByCurrentUser,
             likedBy,

@@ -51,7 +51,7 @@ fun UserProfilePostItem(
         }
     ) {
         if (showShimmer || postDetails == null) return
-        if (postDetails.postType == MediaTypeEnum.Text.name) {
+        if (postDetails.postContentType == MediaTypeEnum.Text.name) {
             UserProfilePostTextOnlyItem(caption = postDetails.caption)
         } else {
             var isImageLoadingFailed by remember {
@@ -60,7 +60,7 @@ fun UserProfilePostItem(
             val imageLoader =
                 ImageLoader.Builder(LocalContext.current)
                     .components {
-                        if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
+                        if (postDetails.postContentType == MediaTypeEnum.Video.name || postDetails.postContentType == MediaTypeEnum.TextVideo.name) {
                             add(VideoFrameDecoder.Factory())
                         }
                     }
@@ -79,7 +79,7 @@ fun UserProfilePostItem(
             } else {
                 UserProfilePostTextOnlyItem(caption = postDetails.caption.ifBlank { stringResource(R.string.unable_to_load_post) })
             }
-            if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
+            if (postDetails.postContentType == MediaTypeEnum.Video.name || postDetails.postContentType == MediaTypeEnum.TextVideo.name) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

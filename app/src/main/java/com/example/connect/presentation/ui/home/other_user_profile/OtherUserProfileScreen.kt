@@ -527,7 +527,7 @@ private fun HandlePostSection(
         RequestStatusEnum.Success -> {
             val postDetailsList = postDetailState.data?.reversed() ?: emptyList()
             val updatedPostList = postDetailsList.filter { post ->
-                post.postScope == VisibilityScopeEnum.Public.name || (post.postScope == VisibilityScopeEnum.FriendsOnly.name && viewModel.requiredUserState.value.friendList.contains(
+                post.postVisibilityScope == VisibilityScopeEnum.Public.name || (post.postVisibilityScope == VisibilityScopeEnum.FriendsOnly.name && viewModel.requiredUserState.value.friendList.contains(
                     viewModel.currentUserState.value.firebaseUserId
                 ))
             }

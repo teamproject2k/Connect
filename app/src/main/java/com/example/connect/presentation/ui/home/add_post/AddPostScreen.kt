@@ -55,8 +55,6 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.GetPlayerView
@@ -73,6 +71,7 @@ import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -93,7 +92,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
         viewModel.setUpData(context)
     }
 
-    var showBottomSheet by remember {
+    var showPostVisibilityScopeBottomSheet by remember {
         mutableStateOf(false)
     }
 
@@ -130,11 +129,11 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 .fillMaxSize()
                 .padding(it)
         ) {
-            HandleAddPostSection(viewModel, context, navigator)
+            HandleAddPostState(viewModel, context, navigator)
             TopDetailsSection(viewModel = viewModel, homeSharedViewModel) {
                 coroutineScope.launch {
                     keyboardController?.hide()
-                    showBottomSheet = true
+                    showPostVisibilityScopeBottomSheet = true
                 }
             }
             Column(
@@ -148,9 +147,9 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 mediaResultLauncher.launch(PickVisualMediaRequest(mediaType))
             }
         }
-        if (showBottomSheet) {
+        if (showPostVisibilityScopeBottomSheet) {
             ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
+                onDismissRequest = { showPostVisibilityScopeBottomSheet = false },
                 shape = RoundedCornerShape(
                     topEnd = ConstantsHelper.BottomSheetRoundness,
                     topStart = ConstantsHelper.BottomSheetRoundness
@@ -160,7 +159,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     viewModel = viewModel
                 ) {
-                    showBottomSheet = false
+                    showPostVisibilityScopeBottomSheet = false
                 }
             }
         }
@@ -177,7 +176,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-private fun HandleAddPostSection(
+private fun HandleAddPostState(
     viewModel: AddPostViewModel,
     context: Context,
     navigator: DestinationsNavigator
@@ -202,13 +201,8 @@ private fun HandleAddPostSection(
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                if (addPostState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                    (LocalActivity.current as BaseActivity).logout()
-                } else {
-                    viewModel.snackBarMessageState.value =
-                        addPostState.message ?: stringResource(id = R.string.some_error_occurred)
-                }
+                viewModel.snackBarMessageState.value =
+                    addPostState.message ?: stringResource(id = R.string.some_error_occurred)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -300,14 +294,15 @@ private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit)
 
 @Composable
 private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
-    val videoHeight = context.resources.displayMetrics.heightPixels
+    val screenHeight = context.resources.displayMetrics.heightPixels
     GetPlayerView(
         context = context,
         uri = selectedMediaData.uri.toString(),
-        height = (videoHeight * .5).toInt()
+        height = (screenHeight * .5).toInt()
     ) { exoPlayer, _ ->
         exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
     }
+
 }
 
 @Composable
@@ -357,7 +352,7 @@ private fun PostCaptionField(viewModel: AddPostViewModel) {
 }
 
 @Composable
-private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.PickVisualMedia.VisualMediaType) -> Unit) {
+private fun BottomButtons(onSelectMedia: (mediaType: ActivityResultContracts.PickVisualMedia.VisualMediaType) -> Unit) {
     Surface(tonalElevation = 2.dp) {
         Row(
             modifier = Modifier
@@ -369,7 +364,7 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
                 text = stringResource(R.string.add_image),
                 modifier = Modifier.weight(1f)
             ) {
-                selectFileClick(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                onSelectMedia(ActivityResultContracts.PickVisualMedia.ImageOnly)
             }
             IconTextSection(
                 icon = Icons.Rounded.VideoCameraFront,
@@ -377,12 +372,19 @@ private fun BottomButtons(selectFileClick: (mediaType: ActivityResultContracts.P
                 modifier = Modifier.weight(1f),
                 contentArrangement = Arrangement.End
             ) {
-                selectFileClick(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                onSelectMedia(ActivityResultContracts.PickVisualMedia.VideoOnly)
             }
         }
     }
 }
 
+/**
+ * Handles the click event of the add post button.
+ *
+ * @param viewModel The view model for the add post screen.
+ * @param context The context of the activity.
+ * @param currentUserFirebaseId The Firebase ID of the current user.
+ */
 private fun handleButtonClick(
     viewModel: AddPostViewModel,
     context: Context,
@@ -392,6 +394,11 @@ private fun handleButtonClick(
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
-        viewModel.uploadUserPost(currentUserFirebaseId)
+        if (context.isNetworkAvailable()) {
+            viewModel.uploadUserPost(currentUserFirebaseId)
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
     }
 }

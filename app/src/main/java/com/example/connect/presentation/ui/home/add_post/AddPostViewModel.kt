@@ -100,7 +100,7 @@ class AddPostViewModel @Inject constructor(
                         }
 
                         // If the selected media is an image, the post type is Image or TextImage.
-                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_IMAGE) -> {
+                        selectedMediaState.value!!.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextImage.name
                             } else {
@@ -109,7 +109,7 @@ class AddPostViewModel @Inject constructor(
                         }
 
                         // If the selected media is a video, the post type is Video or TextVideo.
-                        selectedMediaState.value!!.mediaType.contains(ConstantsHelper.MEDIA_TYPE_VIDEO) -> {
+                        selectedMediaState.value!!.mediaType == ConstantsHelper.MEDIA_TYPE_VIDEO -> {
                             if (captionTextState.value.isNotBlank()) {
                                 MediaTypeEnum.TextVideo.name
                             } else {
@@ -145,7 +145,7 @@ class AddPostViewModel @Inject constructor(
                 // Check if the upload operation was successful.
                 if (serverResponse.status == RequestStatusEnum.Success) {
                     // Get the post ID from the response.
-                    postDetails.id = serverResponse.data ?: ""
+                    postDetails.postFirebaseId = serverResponse.data ?: ""
 
                     // Add the post to the local database.
                     addPostToDbUseCase.invoke(postDetails)

@@ -194,10 +194,10 @@ fun DisplaySavedPostsList(
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(postWithUsers.first.toList(), key = {
-                it.id
+                it.postFirebaseId
             }) { post ->
                 val userDetails =
-                    postWithUsers.second.find { it.firebaseUserId == post.fireBaseUserId }
+                    postWithUsers.second.find { it.firebaseUserId == post.createdByUserFirebaseId }
                 if (userDetails != null) {
                     PostListItem(
                         usersDetails = userDetails,
@@ -240,16 +240,16 @@ private fun PostListItem(
                 modifier = Modifier.padding(16.dp),
                 text = postDetails.caption,
                 context = context,
-                minimizedMaxLines = if (postDetails.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
+                minimizedMaxLines = if (postDetails.postContentType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
             )
         } else {
             SpacerHeight16()
         }
         if (
-            postDetails.postType == MediaTypeEnum.Image.name
-            || postDetails.postType == MediaTypeEnum.TextImage.name
-            || postDetails.postType == MediaTypeEnum.Video.name
-            || postDetails.postType == MediaTypeEnum.TextVideo.name
+            postDetails.postContentType == MediaTypeEnum.Image.name
+            || postDetails.postContentType == MediaTypeEnum.TextImage.name
+            || postDetails.postContentType == MediaTypeEnum.Video.name
+            || postDetails.postContentType == MediaTypeEnum.TextVideo.name
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
@@ -279,12 +279,18 @@ private fun PostBottomSection(
             Row {
                 IconButton(onClick = {
                     if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) {
-                        viewModel.removeLike(postDetails.id, loggedInUsersBean.firebaseUserId) {
+                        viewModel.removeLike(
+                            postDetails.postFirebaseId,
+                            loggedInUsersBean.firebaseUserId
+                        ) {
                             postDetails.likedBy.remove(loggedInUsersBean.firebaseUserId)
                             likeCount--
                         }
                     } else {
-                        viewModel.addLike(postDetails.id, loggedInUsersBean.firebaseUserId) {
+                        viewModel.addLike(
+                            postDetails.postFirebaseId,
+                            loggedInUsersBean.firebaseUserId
+                        ) {
                             postDetails.likedBy.add(loggedInUsersBean.firebaseUserId)
                             likeCount++
                         }
@@ -317,12 +323,12 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(loggedInUsersBean, postDetails.id) {
+                    viewModel.unSavePost(loggedInUsersBean, postDetails.postFirebaseId) {
                         postDetails.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(loggedInUsersBean, postDetails.id) {
+                    viewModel.savePost(loggedInUsersBean, postDetails.postFirebaseId) {
                         postDetails.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }

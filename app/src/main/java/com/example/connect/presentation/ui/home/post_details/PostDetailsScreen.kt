@@ -178,16 +178,16 @@ private fun PostDetails(
                 modifier = Modifier.padding(16.dp),
                 text = viewModel.post.caption,
                 context = context,
-                minimizedMaxLines = if (viewModel.post.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
+                minimizedMaxLines = if (viewModel.post.postContentType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
             )
         } else {
             SpacerHeight16()
         }
         if (
-            viewModel.post.postType == MediaTypeEnum.Image.name
-            || viewModel.post.postType == MediaTypeEnum.TextImage.name
-            || viewModel.post.postType == MediaTypeEnum.Video.name
-            || viewModel.post.postType == MediaTypeEnum.TextVideo.name
+            viewModel.post.postContentType == MediaTypeEnum.Image.name
+            || viewModel.post.postContentType == MediaTypeEnum.TextImage.name
+            || viewModel.post.postContentType == MediaTypeEnum.Video.name
+            || viewModel.post.postContentType == MediaTypeEnum.TextVideo.name
         ) {
             PostCaptionMediaSection(postDetails = viewModel.post)
         }
@@ -548,7 +548,7 @@ fun CommentItem(
                     fontWeight = FontWeight.Medium
                 )
                 SpacerWidth16()
-                if (viewModel.post.fireBaseUserId == loggedInUserFirebaseId || comment.commentedBy == loggedInUserFirebaseId) {
+                if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId || comment.commentedBy == loggedInUserFirebaseId) {
                     Text(
                         modifier = Modifier.clickable {
                             onDeleteCommentClicked()

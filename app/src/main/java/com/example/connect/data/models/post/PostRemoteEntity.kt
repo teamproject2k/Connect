@@ -3,12 +3,12 @@ package com.example.connect.data.models.post
 import com.example.connect.domain.models.PostBean
 
 data class PostRemoteEntity(
-    val fireBaseUserId: String,
+    val createdByUserFirebaseId: String,
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val postScope: String,
-    val postType: String,
+    val postVisibilityScope: String,
+    val postContentType: String,
     val commentCount: Long,
     val likedBy: ArrayList<String>,
     val isDeleted: Boolean
@@ -18,12 +18,12 @@ data class PostRemoteEntity(
     fun toPostBean(id: String, isSavedByCurrentUser: Boolean): PostBean {
         return PostBean(
             id,
-            fireBaseUserId,
+            createdByUserFirebaseId,
             mediaUrl,
             caption,
             createdAt,
-            postScope,
-            postType,
+            postVisibilityScope,
+            postContentType,
             commentCount,
             isSavedByCurrentUser,
             likedBy,

@@ -96,7 +96,7 @@ fun UserProfilePostSection(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(postDetailsList, key = { it.id }) { details ->
+                items(postDetailsList, key = { it.postFirebaseId }) { details ->
                     UserProfilePostItem(
                         postDetails = details,
                         modifier = Modifier.size(

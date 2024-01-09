@@ -32,7 +32,7 @@ fun PostCaptionMediaSection(postDetails: PostBean) {
             .fillMaxWidth()
             .height(ConstantsHelper.POST_DISPLAY_MEDIA_HEIGHT)
     ) {
-        if (postDetails.postType == MediaTypeEnum.Image.name || postDetails.postType == MediaTypeEnum.TextImage.name) {
+        if (postDetails.postContentType == MediaTypeEnum.Image.name || postDetails.postContentType == MediaTypeEnum.TextImage.name) {
             var isImageLoadingFailed by remember {
                 mutableStateOf(false)
             }
@@ -67,7 +67,7 @@ fun PostCaptionMediaSection(postDetails: PostBean) {
                     Text(text = stringResource(R.string.unable_to_load_media))
                 }
             }
-        } else if (postDetails.postType == MediaTypeEnum.Video.name || postDetails.postType == MediaTypeEnum.TextVideo.name) {
+        } else if (postDetails.postContentType == MediaTypeEnum.Video.name || postDetails.postContentType == MediaTypeEnum.TextVideo.name) {
             val context = LocalContext.current
             GetPlayerView(context = context, uri = postDetails.mediaUrl) { _, _ ->
                 // no need to handle it

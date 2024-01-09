@@ -449,10 +449,10 @@ private fun PostListUiSection(
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(postWithUser.first, key = {
-                it.id
+                it.postFirebaseId
             }) { post ->
                 val userDetails =
-                    postWithUser.second.find { it.firebaseUserId == post.fireBaseUserId }
+                    postWithUser.second.find { it.firebaseUserId == post.createdByUserFirebaseId }
                 if (userDetails != null) {
                     PostListItem(
                         usersDetails = userDetails,
@@ -495,16 +495,16 @@ private fun PostListItem(
                 modifier = Modifier.padding(16.dp),
                 text = postDetails.caption,
                 context = context,
-                minimizedMaxLines = if (postDetails.postType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
+                minimizedMaxLines = if (postDetails.postContentType == MediaTypeEnum.Text.name) 8 else ConstantsHelper.MINIMIZED_MAX_LINES
             )
         } else {
             SpacerHeight16()
         }
         if (
-            postDetails.postType == MediaTypeEnum.Image.name
-            || postDetails.postType == MediaTypeEnum.TextImage.name
-            || postDetails.postType == MediaTypeEnum.Video.name
-            || postDetails.postType == MediaTypeEnum.TextVideo.name
+            postDetails.postContentType == MediaTypeEnum.Image.name
+            || postDetails.postContentType == MediaTypeEnum.TextImage.name
+            || postDetails.postContentType == MediaTypeEnum.Video.name
+            || postDetails.postContentType == MediaTypeEnum.TextVideo.name
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
@@ -534,12 +534,12 @@ private fun PostBottomSection(
             Row {
                 IconButton(onClick = {
                     if (postDetails.likedBy.contains(currentUserFirebaseId)) {
-                        viewModel.removeLike(postDetails.id, currentUserFirebaseId) {
+                        viewModel.removeLike(postDetails.postFirebaseId, currentUserFirebaseId) {
                             postDetails.likedBy.remove(currentUserFirebaseId)
                             likeCount--
                         }
                     } else {
-                        viewModel.addLike(postDetails.id, currentUserFirebaseId) {
+                        viewModel.addLike(postDetails.postFirebaseId, currentUserFirebaseId) {
                             postDetails.likedBy.add(currentUserFirebaseId)
                             likeCount++
                         }
@@ -572,12 +572,12 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.unSavePost(currentUserFirebaseId, postDetails.postFirebaseId) {
                         postDetails.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId, postDetails.id) {
+                    viewModel.savePost(currentUserFirebaseId, postDetails.postFirebaseId) {
                         postDetails.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }

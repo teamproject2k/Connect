@@ -26,15 +26,12 @@ fun mediaPicker(
             if (uri == null) {
                 // do not give any callback as file is not picked
             } else if (
-                getFileSize(context.contentResolver, uri) >
-                maxMediaSize && restrictForMaxFileSize
+                restrictForMaxFileSize && getFileSize(context.contentResolver, uri) > maxMediaSize
             ) {
                 context.showToast(
                     context.getString(
                         R.string.file_size_can_t_be_greater_than_max_allowed,
-                        FunctionHelper.formatFileSize(
-                            ConstantsHelper.MAX_ALLOWED_FILE_SIZE
-                        )
+                        FunctionHelper.formatFileSize(maxMediaSize)
                     )
                 )
             } else {

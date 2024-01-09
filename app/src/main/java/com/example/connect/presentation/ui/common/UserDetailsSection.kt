@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.common
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,8 @@ fun UserDetailsSection(
         AsyncImage(
             modifier = Modifier
                 .size(48.dp)
-                .clip(CircleShape),
+                .clip(CircleShape)
+                .border(1.dp, ColorsHelper.gray(), CircleShape),
             model = user.profilePhoto,
             contentDescription = user.name,
             contentScale = ContentScale.Crop,

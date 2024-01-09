@@ -92,7 +92,7 @@ class PostDetailsViewModel @Inject constructor(
                 //_likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
                     currentUserFirebaseId = currentUserFirebaseId,
-                    postFirebaseId = post.id
+                    postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
@@ -108,7 +108,7 @@ class PostDetailsViewModel @Inject constructor(
                 // _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = removeLikeUseCase.invoke(
                     currentUserFirebaseId = currentUserFirebaseId,
-                    postFirebaseId = post.id
+                    postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
@@ -122,7 +122,8 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = savePostUseCase.invoke(currentUserFirebaseId, post.id)
+                val responseState =
+                    savePostUseCase.invoke(currentUserFirebaseId, post.postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
                 }
@@ -135,7 +136,8 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = unSavePostUseCase.invoke(currentUserFirebaseId, post.id)
+                val responseState =
+                    unSavePostUseCase.invoke(currentUserFirebaseId, post.postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     onUpdate()
                 }
@@ -164,7 +166,7 @@ class PostDetailsViewModel @Inject constructor(
                 parentCommentId = null,
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
-                postId = post.id,
+                postId = post.postFirebaseId,
                 commentMessage = commentTextState.value,
                 whetherDeleted = false,
                 arrayListOf()
@@ -177,7 +179,7 @@ class PostDetailsViewModel @Inject constructor(
                 parentCommentId = commentedOn.parentCommentId ?: commentedOn.commentFirebaseId,
                 repliedOnCommentId = commentedOn.commentFirebaseId,
                 repliedOnUserId = commentedOn.commentedBy,
-                postId = post.id,
+                postId = post.postFirebaseId,
                 commentMessage = commentTextState.value,
                 whetherDeleted = false,
                 arrayListOf()
@@ -207,7 +209,11 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _deleteCommentStateFlow.value = ResponseState.loading()
                 val deleteCommentResponseState =
-                    deleteCommentUseCase.invoke(comment.commentFirebaseId, post.id, deleteCount)
+                    deleteCommentUseCase.invoke(
+                        comment.commentFirebaseId,
+                        post.postFirebaseId,
+                        deleteCount
+                    )
                 if (deleteCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.whetherDeleted = true
                     _deleteCommentStateFlow.value =
@@ -230,7 +236,7 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
                 val getAllCommentResponseState =
-                    getAllCommentsWithUsersUseCase.invoke(post.id, loggedInUserFireId)
+                    getAllCommentsWithUsersUseCase.invoke(post.postFirebaseId, loggedInUserFireId)
                 if (getAllCommentResponseState.status == RequestStatusEnum.Success) {
                     val commentMap = getAllCommentResponseState.data?.first
                     if (!commentMap.isNullOrEmpty()) {

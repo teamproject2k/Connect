@@ -7,13 +7,13 @@ import com.example.connect.domain.models.PostBean
 @Entity
 data class PostDbEntity(
     @PrimaryKey
-    val id: String,
-    val fireBaseUserId: String,
+    val postFirebaseId: String,
+    val createdByUserFirebaseId: String,
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val postScope: String,
-    val postType: String,
+    val postVisibilityScope: String,
+    val postContentType: String,
     val commentCount: Long,
     val isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
@@ -21,13 +21,13 @@ data class PostDbEntity(
 ) {
     fun toPostBean(): PostBean {
         return PostBean(
-            id,
-            fireBaseUserId,
+            postFirebaseId,
+            createdByUserFirebaseId,
             mediaUrl,
             caption,
             createdAt,
-            postScope,
-            postType,
+            postVisibilityScope,
+            postContentType,
             commentCount,
             isSavedByCurrentUser,
             likedBy,
