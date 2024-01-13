@@ -18,7 +18,7 @@ import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,17 +35,17 @@ class SettingsAndPrivacyViewModel @Inject constructor(
     lateinit var dobVisibilityState: MutableState<VisibilityScope>
     lateinit var friendListVisibilityState: MutableState<VisibilityScope>
 
-    private val _updateGenderVisibilityStateFlow: MutableStateFlow<ResponseState<Nothing?>> =
+    private val _updateGenderVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
-    val updateGenderVisibilityStateFlow: StateFlow<ResponseState<Nothing?>> get() = _updateGenderVisibilityStateFlow
+    val updateGenderVisibilityStateFlow = _updateGenderVisibilityStateFlow.asStateFlow()
 
-    private val _updateDobVisibilityStateFlow: MutableStateFlow<ResponseState<Nothing?>> =
+    private val _updateDobVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
-    val updateDobVisibilityStateFlow: StateFlow<ResponseState<Nothing?>> get() = _updateDobVisibilityStateFlow
+    val updateDobVisibilityStateFlow = _updateDobVisibilityStateFlow.asStateFlow()
 
-    private val _updateFriendListVisibilityStateFlow: MutableStateFlow<ResponseState<Nothing?>> =
+    private val _updateFriendListVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
-    val updateFriendListVisibilityStateFlow: StateFlow<ResponseState<Nothing?>> get() = _updateFriendListVisibilityStateFlow
+    val updateFriendListVisibilityStateFlow = _updateFriendListVisibilityStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")
     var isFirstTimeSetup = true
@@ -122,7 +122,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
      *
      * @param firebaseUserId The firebase user id.
      */
-    fun updateGenderVisibility(firebaseUserId: String) {
+    fun updateGenderVisibility(firebaseUserId: String, genderScope: VisibilityScope) {
         // Launch a coroutine to update the gender visibility on the remote and local databases.
         viewModelScope.launch {
             // Perform the update on the remote database.
@@ -134,7 +134,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 val result = updateUserDetailsOnRemoteUseCase.invoke(
                     // Create a map of the gender visibility field and its new value.
                     mutableMapOf(
-                        UserRemoteEntity::genderVisibility.name to genderVisibilityState.value.scopeEnum.name
+                        UserRemoteEntity::genderVisibility.name to genderScope.scopeEnum.name
                     ),
                     // Pass the firebase user id.
                     firebaseUserId
@@ -146,14 +146,17 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     updateUserDetailsOnDbUseCase.invoke(
                         // Create a map of the gender visibility field and its new value.
                         mutableMapOf(
-                            UsersDbEntity::genderVisibility.name to genderVisibilityState.value.scopeEnum.name
+                            UsersDbEntity::genderVisibility.name to genderScope.scopeEnum.name
                         ),
                         // Pass the firebase user id.
                         firebaseUserId
                     )
 
                     // Set the success state.
-                    _updateGenderVisibilityStateFlow.value = result
+                    _updateGenderVisibilityStateFlow.value = ResponseState.success(genderScope)
+                } else {
+                    _updateGenderVisibilityStateFlow.value =
+                        ResponseState.error(result.message ?: "")
                 }
             }
         }
@@ -164,7 +167,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
      *
      * @param firebaseUserId The firebaseUserId of the user.
      */
-    fun updateDobVisibility(firebaseUserId: String) {
+    fun updateDobVisibility(firebaseUserId: String, dobScope: VisibilityScope) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Switch to the IO dispatcher to perform network operations.
@@ -176,7 +179,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     // Create a map of the user's details to be updated.
                     mutableMapOf(
                         // The key is the name of the field to be updated.
-                        UserRemoteEntity::dobVisibility.name to dobVisibilityState.value.scopeEnum.name
+                        UserRemoteEntity::dobVisibility.name to dobScope.scopeEnum.name
                     ),
                     // The firebaseUserId of the user.
                     firebaseUserId
@@ -188,13 +191,15 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                         // Create a map of the user's details to be updated.
                         mutableMapOf(
                             // The key is the name of the field to be updated.
-                            UsersDbEntity::dobVisibility.name to dobVisibilityState.value.scopeEnum.name
+                            UsersDbEntity::dobVisibility.name to dobScope.scopeEnum.name
                         ),
                         // The firebaseUserId of the user.
                         firebaseUserId
                     )
                     // Set the success state.
-                    _updateDobVisibilityStateFlow.value = result
+                    _updateDobVisibilityStateFlow.value = ResponseState.success(dobScope)
+                } else {
+                    _updateDobVisibilityStateFlow.value = ResponseState.error(result.message ?: "")
                 }
             }
         }
@@ -205,7 +210,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
      *
      * @param firebaseUserId The firebase user ID of the current user.
      */
-    fun updateFriendListVisibility(firebaseUserId: String) {
+    fun updateFriendListVisibility(firebaseUserId: String, friendListScope: VisibilityScope) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Switch to the IO dispatcher to perform network operations.
@@ -218,7 +223,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     // Create a map of the user details to be updated.
                     mutableMapOf(
                         // The friend list visibility field.
-                        UserRemoteEntity::friendListVisibility.name to friendListVisibilityState.value.scopeEnum.name
+                        UserRemoteEntity::friendListVisibility.name to friendListScope.scopeEnum.name
                     ),
                     // The firebase user ID.
                     firebaseUserId
@@ -231,14 +236,18 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                         // Create a map of the user details to be updated.
                         mutableMapOf(
                             // The friend list visibility field.
-                            UsersDbEntity::friendListVisibility.name to friendListVisibilityState.value.scopeEnum.name
+                            UsersDbEntity::friendListVisibility.name to friendListScope.scopeEnum.name
                         ),
                         // The firebase user ID.
                         firebaseUserId
                     )
 
                     // Set the success state.
-                    _updateFriendListVisibilityStateFlow.value = result
+                    _updateFriendListVisibilityStateFlow.value =
+                        ResponseState.success(friendListScope)
+                } else {
+                    _updateFriendListVisibilityStateFlow.value =
+                        ResponseState.error(result.message ?: "")
                 }
             }
         }

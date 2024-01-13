@@ -72,10 +72,6 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val genderVisibility = viewModel.genderVisibilityState.value
-    val dobVisibility = viewModel.dobVisibilityState.value
-    val friendListVisibility = viewModel.friendListVisibilityState.value
-
     val snackBarHostState = SnackbarHostState()
 
     var showGenderBottomSheet by remember {
@@ -103,26 +99,26 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
         Column(
             modifier = Modifier.padding(it)
         ) {
-            SettingsAndPrivacyDropdownItem(
+            SettingsAndPrivacySectionWithVisibilityItem(
                 itemNameId = R.string.gender_privacy,
-                drawableId = genderVisibility.drawableId,
-                scopeName = genderVisibility.scopeName
+                drawableId = viewModel.genderVisibilityState.value.drawableId,
+                scopeName = viewModel.genderVisibilityState.value.scopeName
             ) {
                 showGenderBottomSheet = true
             }
             DividerLightGrayAlpha50()
-            SettingsAndPrivacyDropdownItem(
+            SettingsAndPrivacySectionWithVisibilityItem(
                 itemNameId = R.string.date_of_birth_privacy,
-                drawableId = dobVisibility.drawableId,
-                scopeName = dobVisibility.scopeName
+                drawableId = viewModel.dobVisibilityState.value.drawableId,
+                scopeName = viewModel.dobVisibilityState.value.scopeName
             ) {
                 showDobBottomSheet = true
             }
             DividerLightGrayAlpha50()
-            SettingsAndPrivacyDropdownItem(
+            SettingsAndPrivacySectionWithVisibilityItem(
                 itemNameId = R.string.friend_list_privacy,
-                drawableId = friendListVisibility.drawableId,
-                scopeName = friendListVisibility.scopeName
+                drawableId = viewModel.friendListVisibilityState.value.drawableId,
+                scopeName = viewModel.friendListVisibilityState.value.scopeName
             ) {
                 showFriendListBottomSheet = true
             }
@@ -200,13 +196,13 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    HandleUpdateGenderVisibilityStateFlow(viewModel, homeSharedViewModel, context)
-    HandleUpdateDobVisibilityStateFlow(viewModel, homeSharedViewModel, context)
-    HandleUpdateFriendListVisibilityStateFlow(viewModel, homeSharedViewModel, context)
+    HandleUpdateGenderVisibilityState(viewModel, homeSharedViewModel, context)
+    HandleUpdateDobVisibilityState(viewModel, homeSharedViewModel, context)
+    HandleUpdateFriendListVisibilityState(viewModel, homeSharedViewModel, context)
 }
 
 @Composable
-private fun SettingsAndPrivacyDropdownItem(
+private fun SettingsAndPrivacySectionWithVisibilityItem(
     itemNameId: Int,
     drawableId: Int,
     scopeName: String,
@@ -261,9 +257,8 @@ private fun GenderVisibilityScopeBottomSheet(
     Column(modifier = modifier) {
         viewModel.genderVisibilityScopeList.forEach { genderScope ->
             VisibilityScopeBottomSheetItem(genderScope) {
-                viewModel.genderVisibilityState.value = genderScope
-                if (viewModel.genderVisibilityState.value.scopeEnum.name != userDetails.genderVisibility) {
-                    viewModel.updateGenderVisibility(userDetails.firebaseUserId)
+                if (viewModel.genderVisibilityState.value.scopeEnum.name != genderScope.scopeEnum.name) {
+                    viewModel.updateGenderVisibility(userDetails.firebaseUserId, genderScope)
                 }
                 onDismissRequest()
             }
@@ -281,9 +276,8 @@ private fun DobVisibilityScopeBottomSheet(
     Column(modifier = modifier) {
         viewModel.dobVisibilityScopeList.forEach { dobScope ->
             VisibilityScopeBottomSheetItem(dobScope) {
-                viewModel.dobVisibilityState.value = dobScope
-                if (viewModel.dobVisibilityState.value.scopeEnum.name != userDetails.dobVisibility) {
-                    viewModel.updateDobVisibility(userDetails.firebaseUserId)
+                if (viewModel.dobVisibilityState.value.scopeEnum.name != dobScope.scopeEnum.name) {
+                    viewModel.updateDobVisibility(userDetails.firebaseUserId, dobScope)
                 }
                 onDismissRequest()
             }
@@ -301,9 +295,11 @@ private fun FriendListVisibilityScopeBottomSheet(
     Column(modifier = modifier) {
         viewModel.friendListVisibilityScopeList.forEach { friendListScope ->
             VisibilityScopeBottomSheetItem(friendListScope) {
-                viewModel.friendListVisibilityState.value = friendListScope
-                if (viewModel.friendListVisibilityState.value.scopeEnum.name != userDetails.friendListVisibility) {
-                    viewModel.updateFriendListVisibility(userDetails.firebaseUserId)
+                if (viewModel.friendListVisibilityState.value.scopeEnum.name != friendListScope.scopeEnum.name) {
+                    viewModel.updateFriendListVisibility(
+                        userDetails.firebaseUserId,
+                        friendListScope
+                    )
                 }
                 onDismissRequest()
             }
@@ -312,7 +308,7 @@ private fun FriendListVisibilityScopeBottomSheet(
 }
 
 @Composable
-fun HandleUpdateGenderVisibilityStateFlow(
+fun HandleUpdateGenderVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context
@@ -329,9 +325,10 @@ fun HandleUpdateGenderVisibilityStateFlow(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
+                val scopeName = updateUserGenderState.data ?: return
                 context.showToast(stringResource(R.string.visibility_updated_successfully))
-                homeSharedViewModel.usersDetails.genderVisibility =
-                    viewModel.genderVisibilityState.value.scopeEnum.name
+                homeSharedViewModel.usersDetails.genderVisibility = scopeName.scopeEnum.name
+                viewModel.genderVisibilityState.value = scopeName
                 isResponseHandled = true
             }
         }
@@ -358,7 +355,7 @@ fun HandleUpdateGenderVisibilityStateFlow(
 }
 
 @Composable
-fun HandleUpdateDobVisibilityStateFlow(
+fun HandleUpdateDobVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context
@@ -375,8 +372,9 @@ fun HandleUpdateDobVisibilityStateFlow(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                homeSharedViewModel.usersDetails.dobVisibility =
-                    viewModel.dobVisibilityState.value.scopeEnum.name
+                val scopeName = updateDobVisibilityState.data ?: return
+                homeSharedViewModel.usersDetails.dobVisibility = scopeName.scopeEnum.name
+                viewModel.dobVisibilityState.value = scopeName
                 context.showToast(stringResource(R.string.visibility_updated_successfully))
                 isResponseHandled = true
             }
@@ -404,7 +402,7 @@ fun HandleUpdateDobVisibilityStateFlow(
 }
 
 @Composable
-fun HandleUpdateFriendListVisibilityStateFlow(
+fun HandleUpdateFriendListVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context
@@ -422,8 +420,9 @@ fun HandleUpdateFriendListVisibilityStateFlow(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                homeSharedViewModel.usersDetails.friendListVisibility =
-                    viewModel.friendListVisibilityState.value.scopeEnum.name
+                val scopeName = updateFriendListVisibilityState.data ?: return
+                homeSharedViewModel.usersDetails.friendListVisibility = scopeName.scopeEnum.name
+                viewModel.friendListVisibilityState.value = scopeName
                 context.showToast(stringResource(R.string.visibility_updated_successfully))
                 isResponseHandled = true
             }
