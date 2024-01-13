@@ -267,6 +267,7 @@ fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
                 viewModel.isDropdownMenuVisibleState.value = false
             }) {
             viewModel.deletePost(postId = viewModel.post.postFirebaseId)
+            showDeletePostAlertDialog = false
             viewModel.isDropdownMenuVisibleState.value = false
         }
     }
