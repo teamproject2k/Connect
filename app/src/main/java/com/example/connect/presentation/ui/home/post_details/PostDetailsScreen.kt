@@ -16,10 +16,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -77,6 +83,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold13
 import com.example.connect.presentation.ui.common.TextBold14
 import com.example.connect.presentation.ui.common.TextBold18
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.shimmer
@@ -112,32 +119,34 @@ fun PostDetailsScreen(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         modifier = Modifier.fillMaxSize()
     ) {
-        Column {
-            Column(
-                modifier = Modifier
-                    .padding(it)
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                PostDetails(
-                    usersDetails = posterDetails,
-                    loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
-                    viewModel = viewModel,
-                    navigator = navigator
+        if (viewModel.forceRecomposeState.value >= 0) {
+            Column {
+                Column(
+                    modifier = Modifier
+                        .padding(it)
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    PostDetails(
+                        usersDetails = posterDetails,
+                        loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
+                        viewModel = viewModel,
+                        navigator = navigator
+                    )
+                    TextBold18(
+                        text = stringResource(R.string.comments),
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    HandleGetAllCommentsSection(viewModel, loggedInUserFirebaseId, navigator)
+                }
+                DividerLightGrayAlpha50()
+                AddCommentSection(
+                    viewModel,
+                    homeSharedViewModel.usersDetails
                 )
-                TextBold18(
-                    text = stringResource(R.string.comments),
-                    modifier = Modifier.padding(16.dp)
-                )
-                HandleGetAllCommentsSection(viewModel, loggedInUserFirebaseId, navigator)
+                HandleAddCommentSection(viewModel = viewModel)
+                HandleDeleteCommentSection(viewModel = viewModel)
             }
-            DividerLightGrayAlpha50()
-            AddCommentSection(
-                viewModel,
-                homeSharedViewModel.usersDetails
-            )
-            HandleAddCommentSection(viewModel = viewModel)
-            HandleDeleteCommentSection(viewModel = viewModel)
         }
     }
     LaunchedEffect(viewModel.snackBarMessageState.value) {
@@ -160,19 +169,39 @@ private fun PostDetails(
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
-        UserDetailsSection(
-            user = usersDetails,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                .clickable {
-                    if (loggedInUserFirebaseId == usersDetails.firebaseUserId) {
-                        navigator.navigate(CurrentUserProfileScreenDestination)
-                    } else {
-                        navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
+        Row(
+            modifier = Modifier.padding(top = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { navigator.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(id = R.string.go_back)
+                )
+            }
+            UserDetailsSection(
+                user = usersDetails,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clickable {
+                        if (loggedInUserFirebaseId == usersDetails.firebaseUserId) {
+                            navigator.navigate(CurrentUserProfileScreenDestination)
+                        } else {
+                            navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
+                        }
                     }
+            )
+            Box {
+                IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(id = R.string.more_options),
+                    )
                 }
-        )
+                PostDetailsDropDownSection(viewModel)
+            }
+        }
         if (viewModel.post.caption.isNotBlank()) {
             ExpandingText(
                 modifier = Modifier.padding(16.dp),
@@ -194,6 +223,51 @@ private fun PostDetails(
         PostBottomSection(viewModel, loggedInUserFirebaseId)
         SpacerHeight16()
         DividerLightGrayAlpha40()
+    }
+}
+
+@Composable
+fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
+    val postDetailsDropdownList = listOf(stringResource(R.string.delete_post))
+    var showDeletePostAlertDialog by remember {
+        mutableStateOf(false)
+    }
+    if (viewModel.isDropdownMenuVisibleState.value) {
+        DropdownMenu(
+            expanded = true,
+            onDismissRequest = { viewModel.isDropdownMenuVisibleState.value = false }
+        ) {
+            postDetailsDropdownList.forEach { item ->
+                DropdownMenuItem(text = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            modifier = Modifier.size(20.dp),
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = item
+                        )
+                        SpacerWidth16()
+                        Text(text = item)
+                    }
+                }, onClick = {
+                    showDeletePostAlertDialog = true
+                })
+            }
+        }
+    }
+    if (showDeletePostAlertDialog) {
+        TitleMessageIconOkCancelDialog(
+            imageVector = Icons.Default.Warning,
+            iconTint = ColorsHelper.warning(),
+            title = stringResource(id = R.string.delete_post),
+            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_post),
+            positiveButtonText = stringResource(R.string.delete),
+            onCancel = {
+                showDeletePostAlertDialog = false
+                viewModel.isDropdownMenuVisibleState.value = false
+            }) {
+            viewModel.deletePost(postId = viewModel.post.postFirebaseId)
+            viewModel.isDropdownMenuVisibleState.value = false
+        }
     }
 }
 
@@ -336,7 +410,7 @@ fun CommentUi(
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    if (userList.isNullOrEmpty() || viewModel.commentsMapState.isEmpty()) {
+    if (userList.isNullOrEmpty() || viewModel.commentDataMap.isEmpty()) {
         Column {
             TextBold14(
                 text = stringResource(R.string.no_comments_found),
@@ -350,10 +424,10 @@ fun CommentUi(
     }
     Column {
         val parentList =
-            viewModel.commentsMapState.keys.sortedByDescending { it.createdAt }
+            viewModel.commentDataMap.keys.sortedByDescending { it.createdAt }
 
         parentList.forEach { parent ->
-            val childCommentList = viewModel.commentsMapState[parent]
+            val childCommentList = viewModel.commentDataMap[parent]
             if (childCommentList != null) {
                 ParentCommentItem(
                     viewModel,
@@ -600,20 +674,25 @@ fun CommentItem(
                         }
                     }
                 }) {
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        painter = if (comment.likedBy.contains(loggedInUserFirebaseId)) {
-                            painterResource(id = R.drawable.ic_heart_filled)
-                        } else {
-                            painterResource(id = R.drawable.ic_heart)
-                        }, contentDescription = stringResource(R.string.like_comment),
-                        tint = if (comment.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
-
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            painter = if (comment.likedBy.contains(loggedInUserFirebaseId)) {
+                                painterResource(id = R.drawable.ic_heart_filled)
+                            } else {
+                                painterResource(id = R.drawable.ic_heart)
+                            }, contentDescription = stringResource(R.string.like_comment),
+                            tint = if (comment.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                        )
+                        SpacerHeight4()
+                        Text(
+                            text = comment.likedBy.size.toString(),
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
-
     }
 }
 
@@ -726,26 +805,27 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                viewModel.post.commentCount++
                 val comment = addCommentState.data
                 viewModel.commentedOnState.value = null
                 viewModel.commentTextState.value = ""
                 if (comment != null) {
                     if (comment.parentCommentId == null) {
-                        viewModel.commentsMapState[comment] = arrayListOf()
+                        viewModel.commentDataMap[comment] = arrayListOf()
                     } else {
                         val parent =
-                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == comment.parentCommentId }
+                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == comment.parentCommentId }
                         if (parent != null) {
                             val updatedChildList = arrayListOf<CommentBean>()
-                            val currentChildList = viewModel.commentsMapState[parent]
+                            val currentChildList = viewModel.commentDataMap[parent]
                             if (currentChildList != null) {
                                 updatedChildList.addAll(currentChildList)
                                 updatedChildList.add(comment)
-                                viewModel.commentsMapState[parent] = updatedChildList
+                                viewModel.commentDataMap[parent] = updatedChildList
                             }
                         }
                     }
+                    viewModel.post.commentCount++
+                    viewModel.forceRecomposeState.value++
                 }
                 viewModel.isSendingCommentState.value = false
                 isResponseHandled = true
@@ -791,17 +871,17 @@ fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
                 if (commentId != null) {
                     if (parentCommentId == null) {
                         val comment =
-                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == commentId }
+                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == commentId }
                         if (comment != null) {
-                            viewModel.commentsMapState.keys.removeIf { commentId == it.commentFirebaseId }
+                            viewModel.commentDataMap.keys.remove(comment)
                         }
                     } else {
-                        val updatedChildList = arrayListOf<CommentBean>()
                         val parent =
-                            viewModel.commentsMapState.keys.find { it.commentFirebaseId == parentCommentId }
-                        viewModel.commentsMapState[parent]?.removeIf { it.commentFirebaseId == commentId }
+                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == parentCommentId }
+                        viewModel.commentDataMap[parent]?.removeIf { it.commentFirebaseId == commentId }
                     }
-                    viewModel.post.commentCount--
+                    viewModel.post.commentCount -= deleteCommentState.data.third
+                    viewModel.forceRecomposeState.value++
                 }
                 isResponseHandled = true
             }

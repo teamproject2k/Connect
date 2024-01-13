@@ -1,11 +1,8 @@
 package com.example.connect.presentation.ui.home.post_details
 
-import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
@@ -50,6 +47,9 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deletePostStateFlow: StateFlow<ResponseState<Nothing>> get() = _deletePostStateFlow
 
+    var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
+
+    var isDropdownMenuVisibleState = mutableStateOf(false)
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -57,20 +57,18 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
 
-    @SuppressLint("StateNameRule")
-    lateinit var commentsMapState: SnapshotStateMap<CommentBean, ArrayList<CommentBean>>
-
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
 
-    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Pair<String, String?>>> =
+    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Triple<String, String?, Int>>> =
         MutableStateFlow(ResponseState.none())
-    val deleteCommentStateFlow: StateFlow<ResponseState<Pair<String, String?>>> get() = _deleteCommentStateFlow
+    val deleteCommentStateFlow: StateFlow<ResponseState<Triple<String, String?, Int>>> get() = _deleteCommentStateFlow
 
     val commentTextState = mutableStateOf("")
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
 
+    val forceRecomposeState = mutableIntStateOf(0)
     val repliedCommentPosterConnectIdState = mutableStateOf("")
     var isInitialized = false
 
@@ -81,7 +79,6 @@ class PostDetailsViewModel @Inject constructor(
     fun initialize(post: PostBean) {
         if (!isInitialized) {
             this.post = post
-            commentsMapState = mutableStateMapOf()
             isInitialized = true
         }
     }
@@ -218,9 +215,10 @@ class PostDetailsViewModel @Inject constructor(
                     comment.whetherDeleted = true
                     _deleteCommentStateFlow.value =
                         ResponseState.success(
-                            Pair(
+                            Triple(
                                 comment.commentFirebaseId,
-                                comment.parentCommentId
+                                comment.parentCommentId,
+                                deleteCount
                             )
                         )
                 } else {
@@ -240,9 +238,7 @@ class PostDetailsViewModel @Inject constructor(
                 if (getAllCommentResponseState.status == RequestStatusEnum.Success) {
                     val commentMap = getAllCommentResponseState.data?.first
                     if (!commentMap.isNullOrEmpty()) {
-                        commentsMapState.putAll(commentMap)
-                        Log.e("aryan", commentsMapState.toMutableMap().toString())
-                        Log.e("arpit", commentMap.toString())
+                        commentDataMap = commentMap
                     }
                     _getAllCommentsStateFlow.value = getAllCommentResponseState
                 } else {
