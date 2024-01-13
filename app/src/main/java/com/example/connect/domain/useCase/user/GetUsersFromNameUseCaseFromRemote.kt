@@ -8,10 +8,10 @@ class GetUsersFromNameUseCaseFromRemote @Inject constructor(private val reposito
     /**
      * Invokes the repository to get user count from name from remote.
      *
-     * @param name The user name.
+     * @param connectIdFirstPart The user name.
      * @return The response state.
      */
-    suspend fun invoke(name: String): ResponseState<Int> {
-        return repository.getUsersCountFromNameFromRemote(name)
+    suspend fun invoke(connectIdFirstPart: String): ResponseState<Int> {
+        return repository.getUsersCountFromNameFromRemote(connectIdFirstPart)
     }
 }

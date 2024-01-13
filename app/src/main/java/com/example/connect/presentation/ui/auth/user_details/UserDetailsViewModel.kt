@@ -18,7 +18,7 @@ import com.example.connect.presentation.utils.FunctionHelper.getUserId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -38,7 +38,7 @@ class UserDetailsViewModel @Inject constructor(
     val selectedGenderState = mutableStateOf("")
     private val _addUserStateFlow: MutableStateFlow<ResponseState<Int>> =
         MutableStateFlow(ResponseState.none())
-    val addUserStateFlow: StateFlow<ResponseState<Int>> get() = _addUserStateFlow
+    val addUserStateFlow = _addUserStateFlow.asStateFlow()
 
     /**
      * Creates a user profile.
@@ -52,12 +52,16 @@ class UserDetailsViewModel @Inject constructor(
                 _addUserStateFlow.value = ResponseState.loading()
 
                 // Get the formatted user name.
-                val formattedUserName =
+                val lowerCaseUserNameWithoutAnyExtraSpace =
                     FunctionHelper.getLowerCaseTextWithOutExtraSpace(userNameState.value)
 
                 // Get the number of users with the same name to set the user ID.
                 val currentUserByNameResponseState =
-                    getUsersFromNameUseCase.invoke(formattedUserName)
+                    getUsersFromNameUseCase.invoke(
+                        FunctionHelper.getConnectIdFirstPart(
+                            lowerCaseUserNameWithoutAnyExtraSpace
+                        )
+                    )
 
                 // Check if the response is not an exception and the device ID is not null.
                 if (currentUserByNameResponseState.status != RequestStatusEnum.Exception && sharedPreference.deviceId != null) {
@@ -68,10 +72,13 @@ class UserDetailsViewModel @Inject constructor(
                         // Create a user object with the user's information.
                         val user = UsersBean(
                             fireBaseAuth.currentUser!!.uid,
-                            getUserId(formattedUserName, currentUserByNameResponseState.data ?: 0),
+                            getUserId(
+                                lowerCaseUserNameWithoutAnyExtraSpace,
+                                currentUserByNameResponseState.data ?: 0
+                            ),
                             fcmTokenResponseState.data,
                             sharedPreference.mobileNumber,
-                            formattedUserName,
+                            lowerCaseUserNameWithoutAnyExtraSpace,
                             selectedGenderState.value,
                             selectedDOBState.longValue,
                             createdDate,

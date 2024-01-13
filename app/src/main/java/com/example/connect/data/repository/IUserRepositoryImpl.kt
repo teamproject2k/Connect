@@ -42,13 +42,25 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUsersCountFromNameFromRemote(name: String): ResponseState<Int> {
+    override suspend fun getUsersCountFromNameFromRemote(connectIdFirstPart: String): ResponseState<Int> {
         // Try to get the users from the FireStore database whose name matches the given name.
         return try {
-            val result = fireStore.collection(FirebaseConstants.USER_KEY)
-                .whereEqualTo(UserRemoteEntity::name.name, name).get().await()
+            val allUserDocumentResponse =
+                fireStore.collection(FirebaseConstants.USER_KEY).get().await()
+            var maxCount = 0
+            allUserDocumentResponse.forEach { userDocument ->
+                if (userDocument != null && userDocument.exists()) {
+                    val user = userDocument.toObject(UserRemoteEntity::class.java)
+                    if (user.connectUserId.startsWith(connectIdFirstPart)) {
+                        val connectIdSecondPart = user.connectUserId.split("@")[1].toInt()
+                        if (connectIdSecondPart > maxCount) {
+                            maxCount = connectIdSecondPart
+                        }
+                    }
+                }
+            }
             // Return a success response with the number of users found.
-            ResponseState.success(result.size())
+            ResponseState.success(maxCount)
         } catch (exception: Exception) {
             // If there is an exception, return an error response with the exception message.
             ResponseState.error(exception.localizedMessage ?: "")

@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.edit_profile
 
-import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.MutableState
@@ -9,13 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
@@ -32,21 +29,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
-    private val getUsersFromNameUseCaseFromRemote: GetUsersFromNameUseCaseFromRemote,
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
     private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase,
-    private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase
 ) :
     BaseViewModel() {
-    private val _updateUserStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
+    private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
-
     lateinit var userNameState: MutableState<String>
     lateinit var connectUserIdState: MutableState<String>
     lateinit var userBioState: MutableState<String>
@@ -112,94 +104,187 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _updateUserStateFlow.value = ResponseState.loading()
-                val fieldsToUpdate = getFieldsToUpdate()
-                if (fieldsToUpdate.isEmpty()) {
-                    _updateUserStateFlow.value = ResponseState.success(userDetails)
-                } else {
-                    var remoteProfilePhotoUrl: String? = null
-                    var remoteCoverPhotoUrl: String? = null
 
+                // Get the fields to update.
+                val fieldsToUpdate = getFieldsToUpdate()
+
+                // If there are no fields to update, set the success state.
+                if (fieldsToUpdate.isEmpty()) {
+                    _updateUserStateFlow.value = ResponseState.success(null)
+                } else {
+                    // Get the remote profile photo URL.
+                    var remoteProfilePhotoUrl: String? = null
+
+                    // If the profile photo state is not null, upload the profile photo to the remote server.
                     if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name) && profilePhotoState.value != null) {
                         val updateProfilePhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 profilePhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.PROFILE_PHOTO_KEY}"
                             )
-                        if (updateProfilePhotoResponseState.status == RequestStatusEnum.Exception) {
+
+                        // If the upload failed, set the error state.
+                        if (updateProfilePhotoResponseState.status == RequestStatusEnum.Exception || updateProfilePhotoResponseState.data.isNullOrBlank()) {
                             _updateUserStateFlow.value = ResponseState.error(
                                 msg = updateProfilePhotoResponseState.message ?: ""
                             )
                             return@withContext
                         } else {
+                            // Set the remote profile photo URL.
                             remoteProfilePhotoUrl = updateProfilePhotoResponseState.data
                         }
                     }
+
+                    // Get the remote cover photo URL.
+                    var remoteCoverPhotoUrl: String? = null
+
+                    // If the cover photo state is not null, upload the cover photo to the remote server.
                     if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name) && coverPhotoState.value != null) {
                         val updateCoverPhotoResponseState =
                             uploadFileToRemoteUseCase.invoke(
                                 coverPhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.COVER_PHOTO_KEY}"
                             )
-                        if (updateCoverPhotoResponseState.status == RequestStatusEnum.Exception) {
+
+                        // If the upload failed, set the error state.
+                        if (updateCoverPhotoResponseState.status == RequestStatusEnum.Exception || updateCoverPhotoResponseState.data.isNullOrBlank()) {
                             _updateUserStateFlow.value = ResponseState.error(
                                 msg = updateCoverPhotoResponseState.message ?: ""
                             )
                             return@withContext
                         } else {
+                            // Set the remote cover photo URL.
                             remoteCoverPhotoUrl = updateCoverPhotoResponseState.data
                         }
                     }
+
+                    // If the remote profile photo URL is not null, add it to the fields to update.
                     if (!remoteProfilePhotoUrl.isNullOrEmpty()) {
                         fieldsToUpdate[UserRemoteEntity::profilePhoto.name] = remoteProfilePhotoUrl
                     }
+
+                    // If the remote cover photo URL is not null, add it to the fields to update.
                     if (!remoteCoverPhotoUrl.isNullOrEmpty()) {
                         fieldsToUpdate[UserRemoteEntity::coverPhoto.name] = remoteCoverPhotoUrl
                     }
-                    if (fieldsToUpdate.containsKey(UserRemoteEntity::name.name)) {
-                        val userName = fieldsToUpdate[UserRemoteEntity::name.name]
-                        val currentUserByNameResponseState = userName?.let {
-                            getUsersFromNameUseCaseFromRemote.invoke(it.toString())
-                        }
-                        if (userName == null || currentUserByNameResponseState?.status == RequestStatusEnum.Exception) {
-                            _updateUserStateFlow.value =
-                                ResponseState.error(currentUserByNameResponseState?.message ?: "")
-                            return@withContext
-                        } else {
-                            fieldsToUpdate[UserRemoteEntity::connectUserId.name] =
-                                FunctionHelper.getUserId(
-                                    userName.toString(),
-                                    currentUserByNameResponseState?.data ?: 0
-                                )
-                        }
-                    }
+
+                    // Update the user details on the remote server.
                     val updatedUserResponseState =
                         updateUserDetailsOnRemoteUseCase.invoke(
                             fieldsToUpdate,
                             userDetails.firebaseUserId
                         )
 
+                    // If the update was successful, update the user details on the database and in the UI.
                     if (updatedUserResponseState.status != RequestStatusEnum.Exception) {
                         updateUserDetailsOnDbUseCase.invoke(
-                            fieldsToUpdate,
+                            getFieldsToUpdateInDbMap(fieldsToUpdate),
                             userDetails.firebaseUserId
                         )
-                        val getUserDetailsFromRemoteResponse =
-                            getUserDetailsFromRemoteUseCase.invoke(userDetails.firebaseUserId)
-                        if (getUserDetailsFromRemoteResponse.status == RequestStatusEnum.Exception) {
-                            val getUserDetailsFromDbResponse =
-                                getUserDetailsFromDbUseCase.invoke(userDetails.firebaseUserId)
-                            _updateUserStateFlow.value =
-                                ResponseState.success(getUserDetailsFromDbResponse)
-                        }
+                        updateUserDetails(fieldsToUpdate)
                         _updateUserStateFlow.value =
-                            ResponseState.success(getUserDetailsFromRemoteResponse.data)
+                            ResponseState.success(null)
                     } else {
+                        // Set the error state.
                         _updateUserStateFlow.value =
                             ResponseState.error(updatedUserResponseState.message ?: "")
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Updates the user details.
+     *
+     * @param fieldsToUpdate The fields to update.
+     */
+    private fun updateUserDetails(fieldsToUpdate: MutableMap<String, Any>) {
+        // Update the user's name if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::name.name)) {
+            userDetails.name =
+                FunctionHelper.getFormattedDisplayName(fieldsToUpdate[UserRemoteEntity::name.name] as String)
+        }
+        // Update the user's profile photo if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name)) {
+            userDetails.profilePhoto =
+                fieldsToUpdate[UserRemoteEntity::profilePhoto.name] as String
+        }
+        // Update the user's cover photo if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name)) {
+            userDetails.coverPhoto =
+                fieldsToUpdate[UserRemoteEntity::coverPhoto.name] as String
+        }
+        // Update the user's bio if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::bio.name)) {
+            userDetails.bio =
+                fieldsToUpdate[UserRemoteEntity::bio.name] as String
+        }
+        // Update the user's gender if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::gender.name)) {
+            userDetails.gender =
+                fieldsToUpdate[UserRemoteEntity::gender.name] as String
+        }
+        // Update the user's date of birth if it is present in the fields to update.
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::dateOfBirth.name)) {
+            userDetails.dateOfBirth =
+                fieldsToUpdate[UserRemoteEntity::dateOfBirth.name] as Long
+        }
+    }
+
+
+    /**
+     * Gets the fields to update in the database.
+     *
+     * @param fieldsToUpdate The fields to update.
+     * @return The fields to update in the database.
+     */
+    private fun getFieldsToUpdateInDbMap(fieldsToUpdate: MutableMap<String, Any>): MutableMap<String, Any> {
+        val fieldsToUpdateInDb = mutableMapOf<String, Any>()
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::name.name)) {
+            // Get the formatted display name.
+            val formattedDisplayName = FunctionHelper.getFormattedDisplayName(
+                fieldsToUpdate[UserRemoteEntity::name.name] as String
+            )
+            // Add the formatted display name to the map.
+            fieldsToUpdateInDb[UsersDbEntity::name.name] = formattedDisplayName
+        }
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name)) {
+            // Get the profile photo URL.
+            val profilePhotoUrl = fieldsToUpdate[UserRemoteEntity::profilePhoto.name] as String
+
+            // Add the profile photo URL to the map.
+            fieldsToUpdateInDb[UsersDbEntity::profilePhoto.name] = profilePhotoUrl
+        }
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name)) {
+            // Get the cover photo URL.
+            val coverPhotoUrl = fieldsToUpdate[UserRemoteEntity::coverPhoto.name] as String
+
+            // Add the cover photo URL to the map.
+            fieldsToUpdateInDb[UsersDbEntity::coverPhoto.name] = coverPhotoUrl
+        }
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::bio.name)) {
+            // Get the bio.
+            val bio = fieldsToUpdate[UserRemoteEntity::bio.name] as String
+
+            // Add the bio to the map.
+            fieldsToUpdateInDb[UsersDbEntity::bio.name] = bio
+        }
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::gender.name)) {
+            // Get the gender.
+            val gender = fieldsToUpdate[UserRemoteEntity::gender.name] as String
+
+            // Add the gender to the map.
+            fieldsToUpdateInDb[UsersDbEntity::gender.name] = gender
+        }
+        if (fieldsToUpdate.containsKey(UserRemoteEntity::dateOfBirth.name)) {
+            // Get the date of birth.
+            val dateOfBirth = fieldsToUpdate[UserRemoteEntity::dateOfBirth.name] as Long
+
+            // Add the date of birth to the map.
+            fieldsToUpdateInDb[UsersDbEntity::dateOfBirth.name] = dateOfBirth
+        }
+        return fieldsToUpdateInDb
     }
 
     /**

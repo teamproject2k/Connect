@@ -17,10 +17,10 @@ interface IUserRepository {
     /**
      * Gets the number of users with the given name from remote.
      *
-     * @param name The name.
+     * @param connectIdFirstPart The name.
      * @return The response state.
      */
-    suspend fun getUsersCountFromNameFromRemote(name: String): ResponseState<Int>
+    suspend fun getUsersCountFromNameFromRemote(connectIdFirstPart: String): ResponseState<Int>
 
     /**
      * Adds the user to the remote database.

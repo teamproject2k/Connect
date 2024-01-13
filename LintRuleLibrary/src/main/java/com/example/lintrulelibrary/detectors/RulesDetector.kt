@@ -85,7 +85,7 @@ class RulesDetector : Detector(), Detector.UastScanner {
                     }
                 }
                 if (!node.text.contains("fun") && !node.isStatic) {
-                    if (variableType.canonicalText.contains("StateFlow")) {
+                    if (variableType.canonicalText.contains("StateFlow") && node.isPhysical) {
                         if (variableName?.endsWith("StateFlow") == false) {
                             context.report(
                                 StateFlowNameIssue,
@@ -94,7 +94,7 @@ class RulesDetector : Detector(), Detector.UastScanner {
                                 StateFlowNameIssueText
                             )
                         }
-                    } else if (variableType.canonicalText.contains("State")) {
+                    } else if (variableType.canonicalText.contains("State") && node.isPhysical) {
                         if (variableName?.endsWith("State") == false) {
                             context.report(
                                 StateNameIssue,

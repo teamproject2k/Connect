@@ -101,8 +101,6 @@ fun EditProfileScreen(
         viewModel.init(sharedViewModel.usersDetails)
     }
     val context = LocalContext.current
-    HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)
-
     val imageResultLauncher =
         mediaPicker { uri ->
             if (viewModel.isProfileUri) {
@@ -133,12 +131,11 @@ fun EditProfileScreen(
                 SpacerHeight24()
                 EditProfileDOBPicker(viewModel)
                 SpacerHeight24()
-
                 LoaderButton(
                     isEnabled = isButtonEnabled(viewModel),
                     loaderButtonState = viewModel.currentButtonLoadingState,
-                    loadingText = stringResource(R.string.updating_account),
-                    buttonText = stringResource(id = R.string.update_account),
+                    loadingText = stringResource(R.string.updating_details),
+                    buttonText = stringResource(id = R.string.update_details),
                     onClick = {
                         keyboardController?.hide()
                         handleButtonClick(
@@ -148,15 +145,16 @@ fun EditProfileScreen(
                     }
                 )
             }
-            LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
-                if (viewModel.snackBarMessageState.value.isNotBlank()) {
-                    snackBarHostState.showSnackbar(
-                        viewModel.snackBarMessageState.value,
-                        duration = SnackbarDuration.Short
-                    )
-                    viewModel.snackBarMessageState.value = ""
-                }
-            }
+        }
+    }
+    HandleUpdateUserState(viewModel, context, navigator)
+    LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
+        if (viewModel.snackBarMessageState.value.isNotBlank()) {
+            snackBarHostState.showSnackbar(
+                viewModel.snackBarMessageState.value,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.snackBarMessageState.value = ""
         }
     }
 }
@@ -423,34 +421,31 @@ private fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
 private fun HandleUpdateUserState(
     viewModel: EditProfileViewModel,
     context: Context,
-    navigator: DestinationsNavigator,
-    sharedViewModel: HomeSharedViewModel
+    navigator: DestinationsNavigator
 ) {
     val updateUserState = viewModel.updateUserStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
 
     when (updateUserState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.currentButtonLoadingState.value = ButtonStateEnum.Loading
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
-            if (updateUserState.data != null) {
-                sharedViewModel.usersDetails = updateUserState.data
+            if (!isResponseHandled) {
                 context.showToast(stringResource(R.string.user_details_updated_successfully))
                 navigator.popBackStack()
-            } else {
-                context.showToast(stringResource(R.string.error_while_getting_updated_data_please_reopen_app))
-                LocalActivity.current.finish()
+                viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
+                isResponseHandled = true
             }
+
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     if (updateUserState.message.isNullOrBlank()) {
                         context.getString(R.string.something_went_wrong)
@@ -464,7 +459,7 @@ private fun HandleUpdateUserState(
                     ScreenNameEnum.EditProfileScreen.name,
                     updateUserState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 

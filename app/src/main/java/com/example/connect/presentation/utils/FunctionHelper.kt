@@ -11,7 +11,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.ui.graphics.Color
@@ -87,16 +86,33 @@ object FunctionHelper {
     /**
      * Gets the user ID for a given formatted name and current count.
      *
-     * @param formattedName The formatted name of the user.
+     * @param lowerCaseNameWithoutAnyExtraSpace The formatted name of the user.
      * @param currentCount The current count of users.
      * @return The user ID.
      */
-    fun getUserId(formattedName: String, currentCount: Int): String {
+    fun getUserId(lowerCaseNameWithoutAnyExtraSpace: String, currentCount: Int): String {
         // Replace all spaces in the formatted name with an empty string and then converts it to lowercase
-        var userId = formattedName.replace(" ", "").lowercase()
-        userId = "$userId@${currentCount + 1}"
+        var userIdFirstPart = getConnectIdFirstPart(lowerCaseNameWithoutAnyExtraSpace)
+        userIdFirstPart = "$userIdFirstPart@${currentCount + 1}"
+        return userIdFirstPart
+    }
 
-        return userId
+
+    /**
+     * Gets the first part of the connect ID.
+     *
+     * @param lowerCaseNameWithoutAnyExtraSpace The lower case name without any extra space.
+     * @return The first part of the connect ID.
+     */
+    fun getConnectIdFirstPart(lowerCaseNameWithoutAnyExtraSpace: String): String {
+        var userIdFirstPart = ""
+        lowerCaseNameWithoutAnyExtraSpace.split(" ").forEach {
+            // If the word is not blank, add the first letter to the user ID first part.
+            if (it.isNotBlank()) {
+                userIdFirstPart += it[0].lowercase()
+            }
+        }
+        return userIdFirstPart
     }
 
     /**
@@ -366,18 +382,6 @@ object FunctionHelper {
 
 
     /**
-     * Converts a dp value to a pixel value.
-     *
-     * @param dp The dp value to convert.
-     * @param context The context to use to get the display metrics.
-     * @return The pixel value.
-     */
-    fun convertDpToPixel(dp: Float, context: Context): Float {
-        // Convert the dp value to pixels using the device's display metrics.
-        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
-    }
-
-    /**
      * Gets the current time in milliseconds.
      *
      * @return The current time in milliseconds.
@@ -408,6 +412,7 @@ object FunctionHelper {
         }
         return formattedString.trimEnd().lowercase()
     }
+
 
     /**
      * Gets the status of the current user with the requested user.

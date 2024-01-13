@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,11 +54,11 @@ class OtpInputViewModel @Inject constructor(
     val verifyOtpStateFlow: StateFlow<ResponseState<FirebaseUser?>> get() = _verifyOtpStateFlow
     private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
-    val getUserDetailsStateFlow: StateFlow<ResponseState<UsersBean?>> get() = _getUserDetailsStateFlow
+    val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()
 
     private val _resendOtpStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =
         MutableStateFlow(ResponseState.none())
-    val resendOtpStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _resendOtpStateFlow
+    val resendOtpStateFlow = _resendOtpStateFlow.asStateFlow()
 
     /**
      * A flow that emits the remaining time in seconds until the OTP expires.

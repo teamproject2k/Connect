@@ -19,7 +19,7 @@ import com.example.connect.presentation.ui.enums.ButtonStateEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -40,13 +40,14 @@ class MobileNumberInputViewModel @Inject constructor(
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
     val selectedCountryCodeState = mutableStateOf("+91")
+
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =
         MutableStateFlow(ResponseState.none())
-    val sendOtpUIStateFlow: StateFlow<ResponseState<Pair<String, String>>> get() = _sendOtpUIStateFlow
+    val sendOtpUIStateFlow = _sendOtpUIStateFlow.asStateFlow()
 
     private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
-    val getUserDetailsStateFlow: StateFlow<ResponseState<UsersBean?>> get() = _getUserDetailsStateFlow
+    val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()
 
 
     /**
