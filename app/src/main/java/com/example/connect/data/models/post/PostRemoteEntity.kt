@@ -11,7 +11,7 @@ data class PostRemoteEntity(
     val postContentType: String,
     val commentCount: Long,
     val likedBy: ArrayList<String>,
-    val isDeleted: Boolean
+    val whetherDeleted: Boolean
 ) {
     constructor() : this("", "", "", 0, "", "", 0, arrayListOf(), false)
 
@@ -27,7 +27,7 @@ data class PostRemoteEntity(
             commentCount,
             isSavedByCurrentUser,
             likedBy,
-            isDeleted
+            whetherDeleted
         )
     }
 }

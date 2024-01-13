@@ -49,7 +49,7 @@ class IPostRepositoryImpl @Inject constructor(
             }
             response.documents.forEach { document ->
                 val post = document.toObject(PostRemoteEntity::class.java)
-                if (post != null && !post.isDeleted) {
+                if (post != null && !post.whetherDeleted) {
                     postList.add(
                         post.toPostBean(
                             document.id,
@@ -107,7 +107,7 @@ class IPostRepositoryImpl @Inject constructor(
                 postListResponse.documents.forEach { document ->
                     if (document.exists()) {
                         val post = document.toObject(PostRemoteEntity::class.java)
-                        if (post != null && !post.isDeleted) {
+                        if (post != null && !post.whetherDeleted) {
                             postList.add(
                                 post.toPostBean(
                                     document.id,
@@ -208,7 +208,7 @@ class IPostRepositoryImpl @Inject constructor(
                     postListDocument.documents.forEach { document ->
                         document.toObject(PostRemoteEntity::class.java)
                             ?.let {
-                                if (!it.isDeleted) {
+                                if (!it.whetherDeleted) {
                                     postList.add(it.toPostBean(document.id, true))
                                 }
                             }
@@ -268,7 +268,7 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing> {
         return try {
             fireStore.collection(FirebaseConstants.POST_KEY).document(postId)
-                .update(PostRemoteEntity::isDeleted.name, true).await()
+                .update(PostRemoteEntity::whetherDeleted.name, true).await()
             ResponseState.success(null)
         } catch (exception: Exception) {
             // An error occurred while deleting the post from remote.

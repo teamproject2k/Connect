@@ -17,7 +17,7 @@ data class PostDbEntity(
     val commentCount: Long,
     val isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
-    val isDeleted: Boolean
+    val whetherDeleted: Boolean
 ) {
     fun toPostBean(): PostBean {
         return PostBean(
@@ -31,7 +31,7 @@ data class PostDbEntity(
             commentCount,
             isSavedByCurrentUser,
             likedBy,
-            isDeleted
+            whetherDeleted
         )
     }
 }

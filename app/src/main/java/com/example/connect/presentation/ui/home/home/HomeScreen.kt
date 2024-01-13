@@ -448,7 +448,7 @@ private fun PostListUiSection(
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(postWithUser.first, key = {
+            items(postWithUser.first.filter { !it.whetherDeleted }, key = {
                 it.postFirebaseId
             }) { post ->
                 val userDetails =

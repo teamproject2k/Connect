@@ -144,6 +144,7 @@ fun PostDetailsScreen(
                     viewModel,
                     homeSharedViewModel.usersDetails
                 )
+                HandleDeletePostState(viewModel = viewModel, navigator = navigator)
                 HandleAddCommentSection(viewModel = viewModel)
                 HandleDeleteCommentSection(viewModel = viewModel)
             }
@@ -355,6 +356,49 @@ private fun PostBottomSection(
                 text = FunctionHelper.getTimeAgo(viewModel.post.createdAt, context),
                 fontSize = 12.sp
             )
+        }
+    }
+}
+
+@Composable
+fun HandleDeletePostState(
+    viewModel: PostDetailsViewModel,
+    navigator: DestinationsNavigator
+) {
+    val deletePostState = viewModel.deletePostStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (deletePostState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(loadingText = stringResource(R.string.deleting_post))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    deletePostState.message ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.PostDetailsScreen.name,
+                    deletePostState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                viewModel.post.whetherDeleted = true
+                navigator.popBackStack()
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
         }
     }
 }

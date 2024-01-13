@@ -49,7 +49,7 @@ class PostDetailsViewModel @Inject constructor(
 
     var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
 
-    var isDropdownMenuVisibleState = mutableStateOf(false)
+    val isDropdownMenuVisibleState = mutableStateOf(false)
 
     val snackBarMessageState = mutableStateOf("")
 
