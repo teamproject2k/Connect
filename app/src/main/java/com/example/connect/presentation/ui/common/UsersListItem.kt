@@ -26,10 +26,3 @@ fun UsersListItem(usersBean: UsersBean, onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun UsersListItemLoading() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        UserDetailsSectionLoading(modifier = Modifier.padding(16.dp))
-        Divider()
-    }
-}

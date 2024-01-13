@@ -50,7 +50,10 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(topBar = {
-        AppTopAppBar(title = stringResource(R.string.blocked_users))
+        AppTopAppBar(
+            title = stringResource(R.string.blocked_users),
+            showNavigationIcon = true,
+            onNavigationIconClick = { navigator.popBackStack() })
     }) {
         Column(
             modifier = Modifier

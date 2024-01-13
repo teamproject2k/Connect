@@ -50,7 +50,10 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(topBar = {
-        AppTopAppBar(title = stringResource(R.string.requested_users))
+        AppTopAppBar(
+            title = stringResource(R.string.requested_users),
+            showNavigationIcon = true,
+            onNavigationIconClick = { navigator.popBackStack() })
     }) {
         Column(
             modifier = Modifier
