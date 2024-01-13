@@ -98,7 +98,7 @@ fun EditProfileScreen(
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.initializeStates(sharedViewModel.usersDetails)
+        viewModel.init(sharedViewModel.usersDetails)
     }
     val context = LocalContext.current
     HandleUpdateUserState(viewModel, context, navigator, sharedViewModel)
@@ -143,8 +143,7 @@ fun EditProfileScreen(
                         keyboardController?.hide()
                         handleButtonClick(
                             viewModel,
-                            context,
-                            navigator
+                            context
                         )
                     }
                 )
@@ -420,124 +419,6 @@ private fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
     }
 }
 
-private fun handleButtonClick(
-    viewModel: EditProfileViewModel,
-    context: Context,
-    navigator: DestinationsNavigator
-) {
-    when (val userNameValidationResponseCode =
-        Validator.isValidName(viewModel.userNameState.value)) {
-        1 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.please_enter_name)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        2 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.invalid_name)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        3 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(
-                    R.string.name_cannot_be_greater_than_max_characters,
-                    ConstantsHelper.NAME_MAX_CHAR_LIMIT
-                )
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        else -> {
-            if (userNameValidationResponseCode != 0) {
-                return
-            }
-        }
-    }
-    when (val genderValidationResponseCode =
-        Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
-        1 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.please_select_your_gender)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        2 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.invalid_gender)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        else -> {
-            if (genderValidationResponseCode != 0) {
-                return
-            }
-        }
-    }
-    when (val dobValidationResponseCode =
-        Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
-        1 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.please_select_your_date_of_birth)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        2 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.invalid_date_of_birth)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        else -> {
-            if (dobValidationResponseCode != 0) {
-                return
-            }
-        }
-    }
-    when (val bioValidationResponseCode = Validator.isValidBio(viewModel.userBioState.value)) {
-        1 -> {
-            viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_bio)
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        2 -> {
-            viewModel.snackBarMessageState.value =
-                context.getString(
-                    R.string.bio_can_t_be_more_than_limited_characters,
-                    ConstantsHelper.BIO_MAX_CHAR_LIMIT
-                )
-            FunctionHelper.vibrateDevice(context)
-            return
-        }
-
-        else -> {
-            if (bioValidationResponseCode != 0) {
-                return
-            }
-        }
-    }
-
-    if (viewModel.fireBaseAuth.currentUser != null) {
-        if (context.isNetworkAvailable()) {
-            viewModel.updateUserProfile()
-        } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
-        }
-    } else {
-        context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
-        navigator.popBackStack()
-    }
-}
-
 @Composable
 private fun HandleUpdateUserState(
     viewModel: EditProfileViewModel,
@@ -591,16 +472,156 @@ private fun HandleUpdateUserState(
     }
 }
 
+/**
+ * Handles the click event of the edit profile button.
+ *
+ * @param viewModel The view model for the edit profile screen.
+ * @param context The context of the activity.
+ */
+private fun handleButtonClick(
+    viewModel: EditProfileViewModel,
+    context: Context
+) {
+    when (val userNameValidationResponseCode =
+        Validator.isValidName(viewModel.userNameState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_enter_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_name)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        3 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(
+                    R.string.name_cannot_be_greater_than_max_characters,
+                    ConstantsHelper.NAME_MAX_CHAR_LIMIT
+                )
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (userNameValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
+                return
+            }
+        }
+    }
+    when (val genderValidationResponseCode =
+        Validator.isValidGender(viewModel.selectedGenderState.value, context)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_gender)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (genderValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
+                return
+            }
+        }
+    }
+    when (val dobValidationResponseCode =
+        Validator.isValidDob(viewModel.selectedDOBState.longValue)) {
+        1 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.please_select_your_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.invalid_date_of_birth)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (dobValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
+                return
+            }
+        }
+    }
+    when (val bioValidationResponseCode = Validator.isValidBio(viewModel.userBioState.value)) {
+        1 -> {
+            viewModel.snackBarMessageState.value = context.getString(R.string.please_enter_bio)
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        2 -> {
+            viewModel.snackBarMessageState.value =
+                context.getString(
+                    R.string.bio_can_t_be_more_than_limited_characters,
+                    ConstantsHelper.BIO_MAX_CHAR_LIMIT
+                )
+            FunctionHelper.vibrateDevice(context)
+            return
+        }
+
+        else -> {
+            if (bioValidationResponseCode != 0) {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.something_went_wrong)
+                FunctionHelper.vibrateDevice(context)
+                return
+            }
+        }
+    }
+    if (context.isNetworkAvailable()) {
+        viewModel.updateUserProfile()
+    } else {
+        viewModel.snackBarMessageState.value =
+            context.getString(R.string.no_internet_connection)
+    }
+}
+
+
+/**
+ * Checks if the edit profile button should be enabled.
+ *
+ * @param viewModel The view model for the edit profile screen.
+ * @return True if the button should be enabled, false otherwise.
+ */
 private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
     var result = true
+    // Check if any of the required fields are empty.
     if (
         viewModel.userNameState.value.isBlank()
         || viewModel.selectedGenderState.value.isBlank()
         || viewModel.userBioState.value.isBlank()
         || viewModel.selectedDOBState.longValue == -1L
     ) {
+        // If any of the fields are empty, set the result to false.
         result = false
     }
+
+    // If all of the required fields are filled out, check if any of the values have changed.
     if (result) {
         if (
             viewModel.userNameState.value == viewModel.userDetails.name
@@ -608,17 +629,23 @@ private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
             && viewModel.selectedDOBState.longValue == viewModel.userDetails.dateOfBirth
             && viewModel.userBioState.value == viewModel.userDetails.bio
         ) {
+            // If none of the values have changed, set the result to false.
             result = false
         }
     }
+    // Check if the profile photo has changed.
     if (viewModel.profilePhotoState.value?.uri.toString()
             .isNotBlank() && viewModel.profilePhotoState.value?.uri.toString() != viewModel.userDetails.profilePhoto
     ) {
+        // If the profile photo has changed, set the result to true.
         result = true
     }
+    // Check if the cover photo has changed.
+
     if (viewModel.coverPhotoState.value?.uri.toString()
             .isNotBlank() && viewModel.coverPhotoState.value?.uri.toString() != viewModel.userDetails.coverPhoto
     ) {
+        // If the cover photo has changed, set the result to true.
         result = true
     }
 

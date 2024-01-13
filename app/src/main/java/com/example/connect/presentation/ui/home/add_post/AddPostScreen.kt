@@ -89,7 +89,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     if (viewModel.isFirstTimeSetup) {
-        viewModel.setUpData(context)
+        viewModel.init(context)
     }
 
     var showPostVisibilityScopeBottomSheet by remember {

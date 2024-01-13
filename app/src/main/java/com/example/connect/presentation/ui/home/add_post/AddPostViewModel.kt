@@ -28,7 +28,6 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-@SuppressLint("StateNameRule")
 class AddPostViewModel @Inject constructor(
     private val uploadPostToRemoteUseCase: UploadPostToRemoteUseCase,
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
@@ -37,6 +36,8 @@ class AddPostViewModel @Inject constructor(
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
     lateinit var postVisibilityScopeList: List<VisibilityScope>
+
+    @SuppressLint("StateNameRule")
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
     var isFirstTimeSetup = true
     val snackBarMessageState = mutableStateOf("")
@@ -49,7 +50,7 @@ class AddPostViewModel @Inject constructor(
      *
      * @param context The context of the app.
      */
-    fun setUpData(context: Context) {
+    fun init(context: Context) {
         // Get the list of post visibility scopes from the context.
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
 
@@ -73,21 +74,21 @@ class AddPostViewModel @Inject constructor(
                 // Check if the user has selected any media.
                 if (selectedMediaState.value != null) {
                     // Upload the selected media to the remote server.
-                    val uploadFileToRemoteResponse =
+                    val uploadFileToRemoteResponseState =
                         uploadFileToRemoteUseCase.invoke(
                             selectedMediaState.value!!.uri,
                             "${FirebaseConstants.POST_KEY}/$currentUserFirebaseId/${System.currentTimeMillis()}"
                         )
 
                     // Check if the upload operation was successful.
-                    if (uploadFileToRemoteResponse.status == RequestStatusEnum.Exception) {
+                    if (uploadFileToRemoteResponseState.status == RequestStatusEnum.Exception) {
                         // Set the upload post state to error.
                         _uploadPostStateFlow.value =
-                            ResponseState.error(uploadFileToRemoteResponse.message ?: "")
+                            ResponseState.error(uploadFileToRemoteResponseState.message ?: "")
                         return@withContext
                     } else {
                         // Get the file URL from the response.
-                        fileUrl = uploadFileToRemoteResponse.data ?: ""
+                        fileUrl = uploadFileToRemoteResponseState.data ?: ""
                     }
                 }
 
@@ -139,13 +140,13 @@ class AddPostViewModel @Inject constructor(
                 )
 
                 // Upload the post details to the remote server.
-                val serverResponse =
+                val serverResponseState =
                     uploadPostToRemoteUseCase.invoke(postDetails, currentUserFirebaseId)
 
                 // Check if the upload operation was successful.
-                if (serverResponse.status == RequestStatusEnum.Success) {
+                if (serverResponseState.status == RequestStatusEnum.Success) {
                     // Get the post ID from the response.
-                    postDetails.postFirebaseId = serverResponse.data ?: ""
+                    postDetails.postFirebaseId = serverResponseState.data ?: ""
 
                     // Add the post to the local database.
                     addPostToDbUseCase.invoke(postDetails)
@@ -155,7 +156,7 @@ class AddPostViewModel @Inject constructor(
                 } else {
                     // Set the upload post state to error.
                     _uploadPostStateFlow.value =
-                        ResponseState.error(serverResponse.message ?: "")
+                        ResponseState.error(serverResponseState.message ?: "")
                 }
             }
         }

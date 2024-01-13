@@ -65,7 +65,7 @@ class EditProfileViewModel @Inject constructor(
      *
      * @param userDetails The user details to initialize the states with.
      */
-    fun initializeStates(userDetails: UsersBean) {
+    fun init(userDetails: UsersBean) {
         // Initialize the user details.
         this.userDetails = userDetails
 
