@@ -25,6 +25,8 @@ class BlockedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    var isBlockedListFetched = false
+
     /**
      * Gets the blocked users.
      *

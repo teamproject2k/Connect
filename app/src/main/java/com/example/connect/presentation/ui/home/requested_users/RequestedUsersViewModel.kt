@@ -9,7 +9,7 @@ import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class RequestedUsersViewModel @Inject constructor(
 ) : BaseViewModel() {
     private val _getRequestedUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-    val getRequestedUsersStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _getRequestedUsersStateFlow
+    val getRequestedUsersStateFlow = _getRequestedUsersStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")
 

@@ -48,7 +48,7 @@ class SavedPostsViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isSavedListFetched = false
+    var isSavedPostListFetched = false
 
     fun getSavedPosts(loggedInUserFirebaseId: String, savedPosts: ArrayList<String>) {
         viewModelScope.launch {

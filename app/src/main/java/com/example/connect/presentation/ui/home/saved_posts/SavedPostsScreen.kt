@@ -95,7 +95,10 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             refreshing = false
         })
     Scaffold(topBar = {
-        AppTopAppBar(title = stringResource(R.string.saved_posts))
+        AppTopAppBar(
+            title = stringResource(R.string.saved_posts),
+            showNavigationIcon = true,
+            onNavigationIconClick = { navigator.popBackStack() })
     }) {
         Box(
             modifier = Modifier
@@ -123,12 +126,12 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    if (!viewModel.isSavedListFetched) {
+    if (!viewModel.isSavedPostListFetched) {
         viewModel.getSavedPosts(
             homeSharedViewModel.usersDetails.firebaseUserId,
             homeSharedViewModel.usersDetails.savedPosts
         )
-        viewModel.isSavedListFetched = true
+        viewModel.isSavedPostListFetched = true
     }
     HandleLikeUnlikeState(viewModel)
     HandleSaveUnSavePost(viewModel)

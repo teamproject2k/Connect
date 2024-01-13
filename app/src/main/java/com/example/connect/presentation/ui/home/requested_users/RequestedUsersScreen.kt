@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
@@ -35,6 +36,7 @@ import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDe
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -49,6 +51,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
     val viewModel: RequestedUsersViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Scaffold(topBar = {
         AppTopAppBar(
             title = stringResource(R.string.requested_users),
@@ -60,7 +63,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleGetRequestedUsersState(viewModel, navigator)
+            HandleGetRequestedUsersState(viewModel, homeSharedViewModel, navigator)
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -72,7 +75,12 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
+        if (context.isNetworkAvailable()) {
+            viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
     }
 }
 
@@ -80,6 +88,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
 @Composable
 fun HandleGetRequestedUsersState(
     viewModel: RequestedUsersViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val requestedUsersState = viewModel.getRequestedUsersStateFlow.collectAsState().value
@@ -108,7 +117,10 @@ fun HandleGetRequestedUsersState(
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(navigator, requestedUsersState.data ?: emptyList())
+            DisplayUsersList(
+                navigator,
+                requestedUsersState.data?.filter { it.firebaseUserId in homeSharedViewModel.usersDetails.requestedFriendRequestList }
+                    ?: emptyList())
         }
 
         RequestStatusEnum.None -> {
@@ -118,7 +130,10 @@ fun HandleGetRequestedUsersState(
 }
 
 @Composable
-fun DisplayUsersList(navigator: DestinationsNavigator, requestedUsersList: List<UsersBean>) {
+private fun DisplayUsersList(
+    navigator: DestinationsNavigator,
+    requestedUsersList: List<UsersBean>
+) {
     if (requestedUsersList.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(id = R.string.no_user_found))

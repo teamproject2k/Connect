@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
@@ -35,6 +36,7 @@ import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDe
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -48,6 +50,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: BlockedUsersViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     Scaffold(topBar = {
         AppTopAppBar(
@@ -60,7 +63,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HandleGetBlockedUsersState(viewModel, navigator)
+            HandleGetBlockedUsersState(viewModel, homeSharedViewModel, navigator)
         }
     }
 
@@ -72,14 +75,20 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+    if (!viewModel.isBlockedListFetched) {
+        if (context.isNetworkAvailable()) {
+            viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+        } else {
+            viewModel.snackBarMessageState.value = context.getString(R.string.no_user_found)
+        }
+        viewModel.isBlockedListFetched = true
     }
 }
 
 @Composable
 private fun HandleGetBlockedUsersState(
     viewModel: BlockedUsersViewModel,
+    sharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val blockedUsersState = viewModel.getBlockedUsersStateFlow.collectAsState().value
@@ -108,7 +117,10 @@ private fun HandleGetBlockedUsersState(
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(navigator, blockedUsersState.data ?: emptyList())
+            DisplayUsersList(
+                navigator,
+                blockedUsersState.data?.filter { it.firebaseUserId in sharedViewModel.usersDetails.blockedUsersList }
+                    ?: emptyList())
         }
 
         RequestStatusEnum.None -> {

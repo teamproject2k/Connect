@@ -228,9 +228,12 @@ class IPostRepositoryImpl @Inject constructor(
                                 val userDetails = user.toObject(UserRemoteEntity::class.java)
                                 if (userDetails != null) {
                                     val whetherShowPost =
-                                        (post.createdByUserFirebaseId == loggedInUserFirebaseId)
+                                        (
+                                                post.createdByUserFirebaseId == loggedInUserFirebaseId)
                                                 || (post.postVisibilityScope == VisibilityScopeEnum.Public.name)
-                                                || (post.postVisibilityScope == VisibilityScopeEnum.FriendsOnly.name && userDetails.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name)
+                                                || (post.postVisibilityScope == VisibilityScopeEnum.FriendsOnly.name
+                                                && userDetails.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name
+                                                )
                                     if (!whetherShowPost) {
                                         postList.remove(post)
                                     }
@@ -241,6 +244,8 @@ class IPostRepositoryImpl @Inject constructor(
                             } else {
                                 postList.remove(post)
                             }
+                        } else {
+
                         }
                     }
 
