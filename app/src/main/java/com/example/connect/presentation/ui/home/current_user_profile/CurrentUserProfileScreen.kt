@@ -71,7 +71,7 @@ import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
 import com.example.connect.presentation.ui.destinations.EditProfileScreenDestination
-import com.example.connect.presentation.ui.destinations.SettingsScreenDestination
+import com.example.connect.presentation.ui.destinations.SettingsAndPrivacyScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -161,7 +161,7 @@ private fun BottomSheetSection(
             text = stringResource(R.string.settings_and_privacy)
         ) {
             onBottomSheetStateClick()
-            navigator.navigate(SettingsScreenDestination)
+            navigator.navigate(SettingsAndPrivacyScreenDestination)
         }
         BottomSheetItem(
             imageVector = Icons.Default.Logout,
