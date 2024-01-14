@@ -170,16 +170,15 @@ fun HandleGetSavedPostsState(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                viewModel.postListWithUserDetailsListState.addAll(
-                    savedPostsState.data ?: emptyList()
-                )
-                isResponseHandled = true
+                viewModel.postListWithUserDetailsListState.clear()
+                viewModel.postListWithUserDetailsListState.addAll(savedPostsState.data!!)
+            } else {
+                val updatedPostWithUserList = viewModel.postListWithUserDetailsListState.filter {
+                    !loggedInUsersBean.blockedUsersList.contains(it.userDetail.firebaseUserId)
+                }
+                viewModel.postListWithUserDetailsListState.clear()
+                viewModel.postListWithUserDetailsListState.addAll(updatedPostWithUserList)
             }
-            val updatedPostWithUserList = viewModel.postListWithUserDetailsListState.filter {
-                !loggedInUsersBean.blockedUsersList.contains(it.userDetail.firebaseUserId)
-            }
-            viewModel.postListWithUserDetailsListState.clear()
-            viewModel.postListWithUserDetailsListState.addAll(updatedPostWithUserList)
             DisplaySavedPostsList(
                 navigator,
                 loggedInUsersBean,
@@ -205,9 +204,7 @@ fun DisplaySavedPostsList(
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(viewModel.postListWithUserDetailsListState, key = {
-                it.postDetail.postFirebaseId
-            }) { postWithUser ->
+            items(viewModel.postListWithUserDetailsListState) { postWithUser ->
                 PostListItem(
                     usersDetails = postWithUser.userDetail,
                     postDetails = postWithUser.postDetail,
