@@ -75,6 +75,7 @@ import com.example.connect.presentation.ui.destinations.SettingsAndPrivacyScreen
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -90,6 +91,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var showBottomSheet by remember {
         mutableStateOf(false)
     }
@@ -123,15 +125,15 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
                 }
             }
         }
-        if (showLogoutDialog) {
-            TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
-                subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
-                imageVector = Icons.Default.Warning,
-                iconTint = warning(),
-                onCancel = { showLogoutDialog = false }) {
-                currentActivity.logout()
-                showLogoutDialog = false
-            }
+    }
+    if (showLogoutDialog) {
+        TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
+            subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
+            imageVector = Icons.Default.Warning,
+            iconTint = warning(),
+            onCancel = { showLogoutDialog = false }) {
+            currentActivity.logout()
+            showLogoutDialog = false
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -143,8 +145,19 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(key1 = true) {
-        viewModel.getFriendListFromIds(sharedViewModel.usersDetails.friendList)
-        viewModel.getPostDetails(sharedViewModel.usersDetails.firebaseUserId)
+        val whetherGetDataFomRemote = context.isNetworkAvailable()
+        viewModel.getFriendListFromIds(
+            sharedViewModel.usersDetails.friendList,
+            whetherGetDataFomRemote
+        )
+        viewModel.getPostDetails(
+            sharedViewModel.usersDetails.firebaseUserId,
+            whetherGetDataFomRemote
+        )
+        if (!whetherGetDataFomRemote) {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.viewing_in_offline_mode)
+        }
     }
 }
 
@@ -175,7 +188,7 @@ private fun BottomSheetSection(
 
 @Composable
 private fun ProfileScreen(
-    userDetails: UsersBean,
+    loggedInUserDetails: UsersBean,
     viewModel: CurrentUserProfileViewModel,
     navigator: DestinationsNavigator,
     onOptionsMenuClick: () -> Unit
@@ -186,18 +199,18 @@ private fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(userDetails, navigator, onOptionsMenuClick)
+        ImageSection(loggedInUserDetails, navigator, onOptionsMenuClick)
         SpacerHeight12()
-        UserProfileUserInfoSection(userDetails, userDetails.firebaseUserId)
+        UserProfileUserInfoSection(loggedInUserDetails, loggedInUserDetails.firebaseUserId)
         SpacerHeight24()
-        HandleFriendListSection(viewModel = viewModel, userDetails, navigator)
-        HandlePostSection(viewModel, navigator, userDetails)
+        HandleFriendListSectionState(viewModel = viewModel, loggedInUserDetails, navigator)
+        HandlePostListSectionState(viewModel, navigator, loggedInUserDetails)
     }
 }
 
 @Composable
 private fun ImageSection(
-    userDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
+    loggedInUserDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
 ) {
     var isProfilePhotoExpanded by remember {
         mutableStateOf(false)
@@ -207,7 +220,7 @@ private fun ImageSection(
             coverImageRef, profileImageRef, editImageRef, moreOptionsRef
         ) = createRefs()
         AsyncImage(
-            model = userDetails.coverPhoto,
+            model = loggedInUserDetails.coverPhoto,
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
@@ -221,7 +234,7 @@ private fun ImageSection(
             contentScale = ContentScale.Crop,
         )
         AsyncImage(
-            model = userDetails.profilePhoto,
+            model = loggedInUserDetails.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
                 .size(ConstantsHelper.ProfileImageHeight)
@@ -234,7 +247,8 @@ private fun ImageSection(
                     bottom.linkTo(coverImageRef.bottom)
                 }
                 .clickable {
-                    isProfilePhotoExpanded = !isProfilePhotoExpanded
+                    isProfilePhotoExpanded =
+                        loggedInUserDetails.profilePhoto != null && !isProfilePhotoExpanded
                 },
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
@@ -270,8 +284,8 @@ private fun ImageSection(
                 contentDescription = stringResource(R.string.edit_profile)
             )
         }
-        if (isProfilePhotoExpanded && userDetails.profilePhoto != null) {
-            ExpandedImage(imageUrl = userDetails.profilePhoto) {
+        if (isProfilePhotoExpanded) {
+            ExpandedImage(imageUrl = loggedInUserDetails.profilePhoto) {
                 isProfilePhotoExpanded = false
             }
         }
@@ -279,7 +293,7 @@ private fun ImageSection(
 }
 
 @Composable
-private fun HandleFriendListSection(
+private fun HandleFriendListSectionState(
     viewModel: CurrentUserProfileViewModel,
     userDetails: UsersBean,
     navigator: DestinationsNavigator
@@ -325,7 +339,7 @@ private fun HandleFriendListSection(
 }
 
 @Composable
-private fun HandlePostSection(
+private fun HandlePostListSectionState(
     viewModel: CurrentUserProfileViewModel,
     navigator: DestinationsNavigator,
     userDetails: UsersBean,

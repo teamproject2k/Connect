@@ -2,6 +2,7 @@ package com.example.connect.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.connect.data.local_db.AppDatabase
+import com.example.connect.data.local_db.TableNames
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
@@ -146,7 +147,7 @@ class IUserRepositoryImpl @Inject constructor(
 
         // Create the SQL query to update the user details.
         val sql =
-            "UPDATE ${UsersDbEntity::class.simpleName} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
+            "UPDATE ${TableNames.USERS_TABLE_NAME} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
 
         // Create a list of the bind arguments, which are the values of the fields to update.
         val bindArgs = fieldsToUpdate.values.toMutableList()
@@ -835,6 +836,10 @@ class IUserRepositoryImpl @Inject constructor(
 
     override suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray {
         return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserDbEntity() })
+    }
+
+    override suspend fun getAllUsersFromIdFromLocal(userIdList: List<String>): List<UsersBean> {
+        return appDatabase.getUsersDao().getAllUserFromIds(userIdList).map { it.toUserBean() }
     }
 
 

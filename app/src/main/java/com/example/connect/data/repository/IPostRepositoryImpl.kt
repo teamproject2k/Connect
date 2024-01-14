@@ -25,7 +25,7 @@ class IPostRepositoryImpl @Inject constructor(
     private val fireStore: FirebaseFirestore,
     private val appDatabase: AppDatabase
 ) : IPostRepository {
-    override suspend fun getPostDetailsFromDb(fireBaseId: String): List<PostBean> {
+    override suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostBean> {
         // Get the post details from the local database.
         return appDatabase.getPostDao().getPostList(fireBaseId).map { it.toPostBean() }
     }

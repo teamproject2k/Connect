@@ -2,11 +2,12 @@ package com.example.connect.data.models.user
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.connect.data.local_db.TableNames
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
-@Entity(tableName = "users")
+@Entity(tableName = TableNames.USERS_TABLE_NAME)
 data class UsersDbEntity(
     @PrimaryKey
     val firebaseUserId: String,

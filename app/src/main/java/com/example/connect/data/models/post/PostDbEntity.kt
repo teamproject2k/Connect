@@ -2,9 +2,10 @@ package com.example.connect.data.models.post
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.connect.data.local_db.TableNames
 import com.example.connect.domain.models.PostBean
 
-@Entity(tableName = "posts")
+@Entity(tableName = TableNames.POST_TABLE_NAME)
 data class PostDbEntity(
     @PrimaryKey
     val postFirebaseId: String,

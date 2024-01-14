@@ -18,7 +18,7 @@ import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 
 @Composable
-fun UserProfileUserInfoSection(userDetails: UsersBean, currentUserFirebaseId: String) {
+fun UserProfileUserInfoSection(userDetails: UsersBean, loggedInUserFirebaseId: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,10 +34,10 @@ fun UserProfileUserInfoSection(userDetails: UsersBean, currentUserFirebaseId: St
             FontWeight.Medium
         )
         val showDobSection =
-            userDetails.firebaseUserId == currentUserFirebaseId ||
+            userDetails.firebaseUserId == loggedInUserFirebaseId ||
                     userDetails.dobVisibility == VisibilityScopeEnum.Public.name ||
                     (userDetails.dobVisibility == VisibilityScopeEnum.FriendsOnly.name && userDetails.friendList.contains(
-                        currentUserFirebaseId
+                        loggedInUserFirebaseId
                     ))
         if (showDobSection) {
             SpacerHeight8()
@@ -47,10 +47,10 @@ fun UserProfileUserInfoSection(userDetails: UsersBean, currentUserFirebaseId: St
             )
         }
         val showGenderSection =
-            userDetails.firebaseUserId == currentUserFirebaseId ||
+            userDetails.firebaseUserId == loggedInUserFirebaseId ||
                     userDetails.genderVisibility == VisibilityScopeEnum.Public.name ||
                     (userDetails.genderVisibility == VisibilityScopeEnum.FriendsOnly.name && userDetails.friendList.contains(
-                        currentUserFirebaseId
+                        loggedInUserFirebaseId
                     ))
         if (showGenderSection) {
             SpacerHeight8()

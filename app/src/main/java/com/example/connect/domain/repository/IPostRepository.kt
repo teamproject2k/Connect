@@ -13,7 +13,7 @@ interface IPostRepository {
      * @param fireBaseId The post's Firebase ID.
      * @return The post details, or null if the post is not found.
      */
-    suspend fun getPostDetailsFromDb(fireBaseId: String): List<PostBean>
+    suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostBean>
 
     /**
      * Gets post details from remote.
