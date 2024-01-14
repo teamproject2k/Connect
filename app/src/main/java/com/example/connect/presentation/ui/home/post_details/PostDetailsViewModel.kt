@@ -27,7 +27,7 @@ import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -47,9 +47,6 @@ class PostDetailsViewModel @Inject constructor(
     private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase
 ) : BaseViewModel() {
 
-    private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
-        MutableStateFlow(ResponseState.none())
-    val deletePostStateFlow: StateFlow<ResponseState<Nothing>> get() = _deletePostStateFlow
 
     var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
 
@@ -57,21 +54,25 @@ class PostDetailsViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> =
+    private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-    val getAllCommentsStateFlow: StateFlow<ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>> get() = _getAllCommentsStateFlow
+    val deletePostStateFlow = _deletePostStateFlow.asStateFlow()
+
+    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+        MutableStateFlow(ResponseState.none())
+    val getAllCommentsStateFlow = _getAllCommentsStateFlow.asStateFlow()
 
     private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
         MutableStateFlow(ResponseState.none())
-    val addCommentStateFlow: StateFlow<ResponseState<CommentBean>> get() = _addCommentStateFlow
+    val addCommentStateFlow = _addCommentStateFlow.asStateFlow()
 
     private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Triple<String, String?, Int>>> =
         MutableStateFlow(ResponseState.none())
-    val deleteCommentStateFlow: StateFlow<ResponseState<Triple<String, String?, Int>>> get() = _deleteCommentStateFlow
+    val deleteCommentStateFlow = _deleteCommentStateFlow.asStateFlow()
 
     private val _updatePostVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
-    val updatePostVisibilityStateFlow: StateFlow<ResponseState<VisibilityScope>> get() = _updatePostVisibilityStateFlow
+    val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
     val commentTextState = mutableStateOf("")
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
@@ -89,16 +90,15 @@ class PostDetailsViewModel @Inject constructor(
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
 
     fun initialize(context: Context, post: PostBean) {
-        if (!isInitialized) {
-            this.post = post
-            postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
-            val postVisibility =
-                postVisibilityScopeList.find { it.scopeEnum.name == post.postVisibilityScope }
-            if (postVisibility != null) {
-                currentPostVisibilityState = mutableStateOf(postVisibility)
-            }
-            isInitialized = true
+        this.post = post
+        postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
+        val postVisibility =
+            postVisibilityScopeList.find { it.scopeEnum.name == post.postVisibilityScope }
+        if (postVisibility != null) {
+            currentPostVisibilityState = mutableStateOf(postVisibility)
         }
+        isInitialized = true
+
     }
 
     fun addLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
@@ -258,9 +258,11 @@ class PostDetailsViewModel @Inject constructor(
                     if (!commentMap.isNullOrEmpty()) {
                         commentDataMap = commentMap
                     }
-                    _getAllCommentsStateFlow.value = getAllCommentResponseState
+                    _getAllCommentsStateFlow.value =
+                        ResponseState.success(getAllCommentResponseState.data?.second)
                 } else {
-                    _getAllCommentsStateFlow.value = getAllCommentResponseState
+                    _getAllCommentsStateFlow.value =
+                        ResponseState.error(getAllCommentResponseState.message ?: "")
                 }
             }
         }
@@ -317,7 +319,10 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _updatePostVisibilityStateFlow.value = ResponseState.loading()
                 val response =
-                    updatePostVisibilityOnRemoteUseCase.invoke(post.postFirebaseId, postScope.scopeEnum.name)
+                    updatePostVisibilityOnRemoteUseCase.invoke(
+                        post.postFirebaseId,
+                        postScope.scopeEnum.name
+                    )
                 if (response.status == RequestStatusEnum.Success) {
                     _updatePostVisibilityStateFlow.value = ResponseState.success(postScope)
                 } else {
