@@ -4,16 +4,27 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.example.connect.data.models.post.PostDbEntity
+import com.example.connect.data.models.post.PostWithUserDetailsFromLocal
 
 @Dao
 interface IPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPost(postDetails: PostDbEntity): Long
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPostList(postDetailsList: List<PostDbEntity>): LongArray
 
-    @Query("SELECT * FROM PostDbEntity WHERE createdByUserFirebaseId = :createdByUserFirebaseId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM posts WHERE createdByUserFirebaseId = :createdByUserFirebaseId ORDER BY createdAt DESC")
     fun getPostList(createdByUserFirebaseId: String): List<PostDbEntity>
+
+
+    @Transaction
+    @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedPostIds) ORDER BY createdAt DESC")
+    fun getPostsAndUsers(savedPostIds: List<String>): List<PostWithUserDetailsFromLocal>
+
+    @Update
+    fun updatePostDetails(postDetails: PostDbEntity): Int
 }

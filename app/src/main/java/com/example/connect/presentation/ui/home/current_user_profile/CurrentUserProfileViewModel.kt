@@ -6,7 +6,7 @@ import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.posts.AddPostListToDbUseCase
+import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromDbUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class CurrentUserProfileViewModel @Inject constructor(
     private val getPostDetailsFromDbUseCase: GetPostDetailsFromDbUseCase,
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
-    private val addPostListToDbUseCase: AddPostListToDbUseCase,
+    private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val getUserDetailsFromIds: GetUserDetailsFromIdsFromRemoteUseCase
 ) : BaseViewModel() {
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
@@ -61,7 +61,7 @@ class CurrentUserProfileViewModel @Inject constructor(
 
                     if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success) { // If the status of the post details from server response state is success, then we can add the post details to the database and emit the post details.
                         if (postDetailsFromServerResponseState.data != null) {
-                            addPostListToDbUseCase.invoke(postDetailsFromServerResponseState.data) // Add the post details to the database.
+                            addPostListToLocalUseCase.invoke(postDetailsFromServerResponseState.data) // Add the post details to the database.
                         }
                         _postDetailsStateFlow.value =
                             ResponseState.success(postDetailsFromServerResponseState.data) // Set the state of the post details state flow to success and emit the post details.

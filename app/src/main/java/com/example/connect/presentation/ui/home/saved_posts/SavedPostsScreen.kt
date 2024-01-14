@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.saved_posts
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +47,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
@@ -68,6 +71,8 @@ import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -82,16 +87,14 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
     val viewModel: SavedPostsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var refreshing by rememberSaveable { mutableStateOf(false) }
 
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            viewModel.getSavedPosts(
-                homeSharedViewModel.usersDetails.firebaseUserId,
-                homeSharedViewModel.usersDetails.savedPosts
-            )
+            getSavedPosts(viewModel, context, homeSharedViewModel.usersDetails)
             refreshing = false
         })
     Scaffold(topBar = {
@@ -99,7 +102,7 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             title = stringResource(R.string.saved_posts),
             showNavigationIcon = true,
             onNavigationIconClick = { navigator.popBackStack() })
-    }) {
+    }, snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Box(
             modifier = Modifier
                 .padding(it)
@@ -127,15 +130,13 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
         }
     }
     if (!viewModel.isSavedPostListFetched) {
-        viewModel.getSavedPosts(
-            homeSharedViewModel.usersDetails.firebaseUserId,
-            homeSharedViewModel.usersDetails.savedPosts
-        )
+        getSavedPosts(viewModel, context, homeSharedViewModel.usersDetails)
         viewModel.isSavedPostListFetched = true
     }
     HandleLikeUnlikeState(viewModel)
     HandleSaveUnSavePost(viewModel)
 }
+
 
 @Composable
 fun HandleGetSavedPostsState(
@@ -144,17 +145,17 @@ fun HandleGetSavedPostsState(
     loggedInUsersBean: UsersBean
 ) {
     val savedPostsState = viewModel.getSavedPostsWithUsersStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (savedPostsState.status) {
         RequestStatusEnum.Loading -> {
             PostListLoadingSection()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     savedPostsState.message
                         ?: stringResource(id = R.string.some_error_occurred)
@@ -164,14 +165,24 @@ fun HandleGetSavedPostsState(
                     ScreenNameEnum.SavedPostsScreen.name,
                     savedPostsState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                viewModel.postListWithUserDetailsListState.addAll(
+                    savedPostsState.data ?: emptyList()
+                )
+                isResponseHandled = true
+            }
+            val updatedPostWithUserList = viewModel.postListWithUserDetailsListState.filter {
+                !loggedInUsersBean.blockedUsersList.contains(it.userDetail.firebaseUserId)
+            }
+            viewModel.postListWithUserDetailsListState.clear()
+            viewModel.postListWithUserDetailsListState.addAll(updatedPostWithUserList)
             DisplaySavedPostsList(
                 navigator,
-                savedPostsState.data,
                 loggedInUsersBean,
                 viewModel
             )
@@ -186,30 +197,25 @@ fun HandleGetSavedPostsState(
 @Composable
 fun DisplaySavedPostsList(
     navigator: DestinationsNavigator,
-    postWithUsers: Pair<ArrayList<PostBean>, ArrayList<UsersBean>>?,
     loggedInUsersBean: UsersBean,
     viewModel: SavedPostsViewModel
 ) {
-    if (postWithUsers == null || postWithUsers.first.isEmpty() || postWithUsers.second.isEmpty()) {
+    if (viewModel.postListWithUserDetailsListState.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_posts_found))
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(postWithUsers.first.toList(), key = {
-                it.postFirebaseId
-            }) { post ->
-                val userDetails =
-                    postWithUsers.second.find { it.firebaseUserId == post.createdByUserFirebaseId }
-                if (userDetails != null) {
-                    PostListItem(
-                        usersDetails = userDetails,
-                        postDetails = post,
-                        loggedInUsersBean = loggedInUsersBean,
-                        navigator = navigator,
-                        viewModel = viewModel
-                    )
-                }
+            items(viewModel.postListWithUserDetailsListState, key = {
+                it.postDetail.postFirebaseId
+            }) { postWithUser ->
+                PostListItem(
+                    usersDetails = postWithUser.userDetail,
+                    postDetails = postWithUser.postDetail,
+                    loggedInUsersBean = loggedInUsersBean,
+                    navigator = navigator,
+                    viewModel = viewModel
+                )
             }
         }
     }
@@ -281,22 +287,25 @@ private fun PostBottomSection(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 IconButton(onClick = {
-                    if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) {
-                        viewModel.removeLike(
-                            postDetails.postFirebaseId,
-                            loggedInUsersBean.firebaseUserId
-                        ) {
-                            postDetails.likedBy.remove(loggedInUsersBean.firebaseUserId)
-                            likeCount--
+                    if (context.isNetworkAvailable()) {
+                        if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) {
+                            viewModel.removeLike(
+                                postDetails,
+                                loggedInUsersBean.firebaseUserId
+                            ) {
+                                likeCount--
+                            }
+                        } else {
+                            viewModel.addLike(
+                                postDetails,
+                                loggedInUsersBean.firebaseUserId
+                            ) {
+                                likeCount++
+                            }
                         }
                     } else {
-                        viewModel.addLike(
-                            postDetails.postFirebaseId,
-                            loggedInUsersBean.firebaseUserId
-                        ) {
-                            postDetails.likedBy.add(loggedInUsersBean.firebaseUserId)
-                            likeCount++
-                        }
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.no_internet_connection)
                     }
                 }) {
                     Icon(
@@ -325,16 +334,21 @@ private fun PostBottomSection(
                 }
             }
             IconButton(onClick = {
-                if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(loggedInUsersBean, postDetails.postFirebaseId) {
-                        postDetails.isSavedByCurrentUser = false
-                        isSavedByCurrentUser = false
+                if (context.isNetworkAvailable()) {
+                    if (postDetails.isSavedByCurrentUser) {
+                        viewModel.unSavePost(loggedInUsersBean, postDetails.postFirebaseId) {
+                            postDetails.isSavedByCurrentUser = false
+                            isSavedByCurrentUser = false
+                        }
+                    } else {
+                        viewModel.savePost(loggedInUsersBean, postDetails.postFirebaseId) {
+                            postDetails.isSavedByCurrentUser = true
+                            isSavedByCurrentUser = true
+                        }
                     }
                 } else {
-                    viewModel.savePost(loggedInUsersBean, postDetails.postFirebaseId) {
-                        postDetails.isSavedByCurrentUser = true
-                        isSavedByCurrentUser = true
-                    }
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
                 }
             }) {
                 Icon(
@@ -389,8 +403,15 @@ private fun HandleLikeUnlikeState(viewModel: SavedPostsViewModel) {
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                if (likeUnlikeState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.post_not_found)
+                    viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == likeUnlikeState.data }
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                }
+
                 isExceptionHandled = true
             }
         }
@@ -418,10 +439,13 @@ private fun HandleSaveUnSavePost(viewModel: SavedPostsViewModel) {
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (saveUnSavePostState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                viewModel.snackBarMessageState.value =
+                    stringResource(id = R.string.post_not_found)
+                viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == saveUnSavePostState.data }
+            } else {
                 viewModel.snackBarMessageState.value =
                     saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
-                isExceptionHandled = true
             }
         }
 
@@ -432,5 +456,32 @@ private fun HandleSaveUnSavePost(viewModel: SavedPostsViewModel) {
         RequestStatusEnum.None -> {
             // do not handle this
         }
+    }
+}
+
+/**
+ * Gets the saved posts from the database or remote.
+ *
+ * @param viewModel The view model for the saved posts screen.
+ * @param context The context of the activity.
+ * @param loggedInUsersBean The bean that contains the logged in user's information.
+ */
+fun getSavedPosts(viewModel: SavedPostsViewModel, context: Context, loggedInUsersBean: UsersBean) {
+    // Check if the device is connected to the internet.
+    val whetherGetDataFromRemote = context.isNetworkAvailable()
+
+    // Get the saved posts from the database or remote.
+    viewModel.getSavedPosts(
+        loggedInUsersBean.firebaseUserId,
+        loggedInUsersBean.savedPosts,
+        whetherGetDataFromRemote
+    )
+
+    if (!whetherGetDataFromRemote) {
+        // Vibrate the device to get the user's attention.
+        FunctionHelper.vibrateDevice(context)
+
+        // Show a toast message.
+        context.showToast(context.getString(R.string.viewing_in_offline_mode))
     }
 }

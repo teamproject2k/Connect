@@ -2,6 +2,7 @@ package com.example.connect.domain.repository
 
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.PostWithUserDetails
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 
@@ -31,7 +32,7 @@ interface IPostRepository {
      * @param postDetails The post details to add.
      * @return The row ID of the newly added post.
      */
-    suspend fun addPostToDb(postDetails: PostBean): Long
+    suspend fun addPostToLocal(postDetails: PostBean): Long
 
     /**
      * Adds a list of posts to the local database.
@@ -39,7 +40,7 @@ interface IPostRepository {
      * @param postDetailList The list of post details to add.
      * @return An array of row IDs of the newly added posts.
      */
-    suspend fun addPostListToDb(postDetailList: List<PostBean>): LongArray
+    suspend fun addPostListToLocal(postDetailList: List<PostBean>): LongArray
 
     /**
      * Uploads a post to the remote.
@@ -58,19 +59,19 @@ interface IPostRepository {
     ): ResponseState<Pair<List<PostBean>, List<UsersBean>>>
 
     suspend fun addLikeOf(
-        userFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
 
     suspend fun removeLikeOf(
-        userFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
 
     suspend fun getSavedPostsWithUsersFromRemote(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
-    ): ResponseState<Pair<ArrayList<PostBean>, ArrayList<UsersBean>>>
+    ): ResponseState<List<PostWithUserDetails>>
 
     suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing>
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
@@ -97,4 +98,8 @@ interface IPostRepository {
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
+
+    suspend fun getPostWithUserFromLocal(savedPostIds: List<String>): ResponseState<List<PostWithUserDetails>>
+
+    suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 }

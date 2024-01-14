@@ -2,6 +2,7 @@ package com.example.connect.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.connect.data.local_db.AppDatabase
+import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
@@ -714,36 +715,86 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun savePost(
-        currentUserFirebaseId: String,
-        postId: String
+        loggedInUserFirebaseId: String,
+        postFirebaseId: String
     ): ResponseState<Nothing> {
-        return try {
-            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
-                .update(
-                    UserRemoteEntity::savedPosts.name,
-                    FieldValue.arrayUnion(postId)
-                )
-                .await()
-            ResponseState.success(null)
+        try {
+            val currentPostDocument =
+                fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId).get()
+                    .await()
+            if (currentPostDocument.exists()) {
+                val postEntity = currentPostDocument.toObject(PostRemoteEntity::class.java)
+                if (postEntity != null && !postEntity.whetherDeleted) {
+                    val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(postEntity.createdByUserFirebaseId).get().await()
+                    if (postedByUserDocument.exists()) {
+                        val postedByUserEntity =
+                            postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                            fireStore.collection(FirebaseConstants.USER_KEY)
+                                .document(loggedInUserFirebaseId)
+                                .update(
+                                    UserRemoteEntity::savedPosts.name,
+                                    FieldValue.arrayUnion(postFirebaseId)
+                                )
+                                .await()
+                            return ResponseState.success(null)
+                        } else {
+                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                        }
+                    } else {
+                        return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                    }
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                }
+            } else {
+                return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+            }
         } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
+            return ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun unSavePost(
-        currentUserFirebaseId: String,
-        postId: String
+        loggedInUserFirebaseId: String,
+        postFirebaseId: String
     ): ResponseState<Nothing> {
-        return try {
-            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
-                .update(
-                    UserRemoteEntity::savedPosts.name,
-                    FieldValue.arrayRemove(postId)
-                )
-                .await()
-            ResponseState.success(null)
+        try {
+            val currentPostDocument =
+                fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId).get()
+                    .await()
+            if (currentPostDocument.exists()) {
+                val postEntity = currentPostDocument.toObject(PostRemoteEntity::class.java)
+                if (postEntity != null && !postEntity.whetherDeleted) {
+                    val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(postEntity.createdByUserFirebaseId).get().await()
+                    if (postedByUserDocument.exists()) {
+                        val postedByUserEntity =
+                            postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                            fireStore.collection(FirebaseConstants.USER_KEY)
+                                .document(loggedInUserFirebaseId)
+                                .update(
+                                    UserRemoteEntity::savedPosts.name,
+                                    FieldValue.arrayRemove(postFirebaseId)
+                                )
+                                .await()
+                            return ResponseState.success(null)
+                        } else {
+                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                        }
+                    } else {
+                        return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                    }
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                }
+            } else {
+                return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+            }
         } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
+            return ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
@@ -776,6 +827,14 @@ class IUserRepositoryImpl @Inject constructor(
             savedPostList = savedPost,
             currentUserFirebaseId = loggedInUserFirebaseId
         )
+    }
+
+    override suspend fun updateUserOnLocal(userDetails: UsersBean): Int {
+        return appDatabase.getUsersDao().updateUsersDetails(userDetails.toUserDbEntity())
+    }
+
+    override suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray {
+        return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserDbEntity() })
     }
 
 

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.Update
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.connect.data.models.user.UsersDbEntity
 
@@ -14,14 +15,14 @@ interface IUsersDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(userDetails: UsersDbEntity): Long
 
-    @Query("UPDATE UsersDbEntity SET currentLoggedInDeviceId = :updatedDeviceId WHERE firebaseUserId = :fireBaseId")
+    @Query("UPDATE users SET currentLoggedInDeviceId = :updatedDeviceId WHERE firebaseUserId = :fireBaseId")
     fun updateDeviceId(fireBaseId: String, updatedDeviceId: String): Int
 
-    @Query("SELECT * FROM UsersDbEntity WHERE firebaseUserId = :fireBaseId")
+    @Query("SELECT * FROM users WHERE firebaseUserId = :fireBaseId")
     fun getUserDetails(fireBaseId: String): UsersDbEntity?
 
 
-    @Query("UPDATE UsersDbEntity SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :currentUserFirebaseId")
+    @Query("UPDATE users SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :currentUserFirebaseId")
     fun updateOtherUsersStatus(
         currentUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
@@ -30,13 +31,21 @@ interface IUsersDao {
     @RawQuery
     fun updateUserDetails(queryToExecute: SimpleSQLiteQuery): Long
 
-    @Query("UPDATE UsersDbEntity SET fcmToken = :fcmToken WHERE firebaseUserId = :currentUserFirebaseId")
+    @Query("UPDATE users SET fcmToken = :fcmToken WHERE firebaseUserId = :currentUserFirebaseId")
     fun updateFCMTokenOnLocal(currentUserFirebaseId: String, fcmToken: String): Int
 
-    @Query("UPDATE UsersDbEntity SET savedPosts = :savedPostList WHERE firebaseUserId = :currentUserFirebaseId")
+    @Query("UPDATE users SET savedPosts = :savedPostList WHERE firebaseUserId = :currentUserFirebaseId")
     fun updateSavedPostOnLocal(
         savedPostList: List<String>,
         currentUserFirebaseId: String
     ): Int
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertUserList(userList: List<UsersDbEntity>): LongArray
+
+
+    @Update
+    fun updateUsersDetails(userDetails: UsersDbEntity): Int
 
 }

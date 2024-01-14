@@ -24,6 +24,8 @@ class RequestedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
+    var isRequestedListFetched = false
+
     /**
      * Gets the details of the requested users.
      *

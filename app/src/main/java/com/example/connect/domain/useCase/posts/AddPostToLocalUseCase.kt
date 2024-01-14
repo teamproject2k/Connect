@@ -4,7 +4,7 @@ import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
-class AddPostToDbUseCase @Inject constructor(private val repository: IPostRepository) {
+class AddPostToLocalUseCase @Inject constructor(private val repository: IPostRepository) {
     /**
      * Adds a list of posts to the local database.
      *
@@ -12,6 +12,6 @@ class AddPostToDbUseCase @Inject constructor(private val repository: IPostReposi
      * @return The IDs of the posts that were added.
      */
     suspend fun invoke(postDetailList: PostBean): Long {
-        return repository.addPostToDb(postDetailList)
+        return repository.addPostToLocal(postDetailList)
     }
 }

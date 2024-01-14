@@ -36,7 +36,9 @@ import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDe
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -74,13 +76,14 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    LaunchedEffect(Unit) {
+    if (!viewModel.isRequestedListFetched) {
         if (context.isNetworkAvailable()) {
             viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
         } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
+            context.showToast(context.getString(R.string.no_internet_connection))
+            FunctionHelper.vibrateDevice(context)
         }
+        viewModel.isRequestedListFetched = true
     }
 }
 

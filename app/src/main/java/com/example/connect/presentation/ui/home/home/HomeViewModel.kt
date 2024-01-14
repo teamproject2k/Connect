@@ -79,7 +79,7 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
-                    currentUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = currentUserFirebaseId,
                     postFirebaseId = postId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {

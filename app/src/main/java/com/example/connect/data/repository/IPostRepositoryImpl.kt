@@ -7,6 +7,7 @@ import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.PostWithUserDetails
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
@@ -66,12 +67,12 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addPostToDb(postDetails: PostBean): Long {
+    override suspend fun addPostToLocal(postDetails: PostBean): Long {
         // Add the post details to the local database.
         return appDatabase.getPostDao().insertPost(postDetails.toPostDbEntity())
     }
 
-    override suspend fun addPostListToDb(postDetailList: List<PostBean>): LongArray {
+    override suspend fun addPostListToLocal(postDetailList: List<PostBean>): LongArray {
         // Add the post details to the local database.
         return appDatabase.getPostDao().insertPostList(postDetailList.map { it.toPostDbEntity() })
     }
@@ -162,110 +163,144 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addLikeOf(
-        userFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return try {
-            fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId)
-                .update(PostRemoteEntity::likedBy.name, FieldValue.arrayUnion(userFirebaseId))
-                .await()
-            ResponseState.success(null)
+        try {
+            val currentPostDocument =
+                fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId).get()
+                    .await()
+            if (currentPostDocument.exists()) {
+                val postEntity = currentPostDocument.toObject(PostRemoteEntity::class.java)
+                if (postEntity != null && !postEntity.whetherDeleted) {
+                    val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(postEntity.createdByUserFirebaseId).get().await()
+                    if (postedByUserDocument.exists()) {
+                        val postedByUserEntity =
+                            postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                            fireStore.collection(FirebaseConstants.POST_KEY)
+                                .document(postFirebaseId)
+                                .update(
+                                    PostRemoteEntity::likedBy.name,
+                                    FieldValue.arrayUnion(loggedInUserFirebaseId)
+                                )
+                                .await()
+                            return ResponseState.success(null)
+                        } else {
+                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                        }
+                    } else {
+                        return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                    }
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                }
+            } else {
+                return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+            }
         } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
+            return ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun removeLikeOf(
-        userFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return try {
-            fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId)
-                .update(PostRemoteEntity::likedBy.name, FieldValue.arrayRemove(userFirebaseId))
-                .await()
-            ResponseState.success(null)
+        try {
+            val currentPostDocument =
+                fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId).get()
+                    .await()
+            if (currentPostDocument.exists()) {
+                val postEntity = currentPostDocument.toObject(PostRemoteEntity::class.java)
+                if (postEntity != null && !postEntity.whetherDeleted) {
+                    val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(postEntity.createdByUserFirebaseId).get().await()
+                    if (postedByUserDocument.exists()) {
+                        val postedByUserEntity =
+                            postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                            fireStore.collection(FirebaseConstants.POST_KEY)
+                                .document(postFirebaseId)
+                                .update(
+                                    PostRemoteEntity::likedBy.name,
+                                    FieldValue.arrayRemove(loggedInUserFirebaseId)
+                                )
+                                .await()
+                            return ResponseState.success(null)
+                        } else {
+                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                        }
+                    } else {
+                        return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                    }
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                }
+            } else {
+                return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+            }
         } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
+            return ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 
     override suspend fun getSavedPostsWithUsersFromRemote(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
-    ): ResponseState<Pair<ArrayList<PostBean>, ArrayList<UsersBean>>> {
-        // Get the post details from the server for the given list of IDs.
+    ): ResponseState<List<PostWithUserDetails>> {
+        val savedPostWithUserList = arrayListOf<PostWithUserDetails>()
+        val postList = arrayListOf<PostBean>()
+        val usersList = arrayListOf<UsersBean>()
+        var currentUser: UserRemoteEntity? = null
         return try {
-            val response =
+            val currentUserDocument =
                 fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
                     .get().await()
-            if (response != null && response.exists()) {
-                val loggedInUser = response.toObject(UserRemoteEntity::class.java)
-                if (loggedInUser != null) {
-                    val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY).whereIn(
-                        FieldPath.documentId(), loggedInUser.savedPosts
-                    ).get().await()
-                    val postList = arrayListOf<PostBean>()
-                    postListDocument.documents.forEach { document ->
-                        document.toObject(PostRemoteEntity::class.java)
-                            ?.let {
-                                if (!it.whetherDeleted) {
-                                    postList.add(it.toPostBean(document.id, true))
-                                }
-                            }
-                    }
-                    postList.sortByDescending { it.createdAt }
-
-                    val userList = arrayListOf<UsersBean>()
-                    postList.forEach { post ->
-                        val isUserPresent =
-                            userList.find { it.firebaseUserId == post.createdByUserFirebaseId } != null
-                        if (!isUserPresent) {
-                            val user = fireStore.collection(FirebaseConstants.USER_KEY)
-                                .document(post.createdByUserFirebaseId)
-                                .get()
-                                .await()
-                            if (user.exists()) {
-                                val userDetails = user.toObject(UserRemoteEntity::class.java)
-                                if (userDetails != null) {
-                                    val whetherShowPost =
-                                        (
-                                                post.createdByUserFirebaseId == loggedInUserFirebaseId)
-                                                || (post.postVisibilityScope == VisibilityScopeEnum.Public.name)
-                                                || (post.postVisibilityScope == VisibilityScopeEnum.FriendsOnly.name
-                                                && userDetails.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name
-                                                )
-                                    if (!whetherShowPost) {
-                                        postList.remove(post)
-                                    }
-                                    userList.add(userDetails.toUserBean())
-                                } else {
-                                    postList.remove(post)
-                                }
-                            } else {
-                                postList.remove(post)
-                            }
-                        } else {
-
-                        }
-                    }
-
-                    userList.forEach { user ->
-                        val isPostPresentForUser =
-                            postList.find { it.createdByUserFirebaseId == user.firebaseUserId } != null
-                        if (!isPostPresentForUser) {
-                            userList.remove(user)
-                        }
-                    }
-
-                    ResponseState.success(Pair(postList, userList))
-                } else {
-                    ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+            if (currentUserDocument != null && currentUserDocument.exists()) {
+                currentUser =
+                    currentUserDocument.toObject(UserRemoteEntity::class.java)
+                if (currentUser != null) {
+                    usersList.add(currentUser.toUserBean())
                 }
-            } else {
-                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
+            val savedPostListResponse = fireStore.collection(FirebaseConstants.POST_KEY).whereIn(
+                FieldPath.documentId(), savedPosts
+            ).get().await()
+            savedPostListResponse.forEach { savedPostDocument ->
+                if (savedPostDocument != null && savedPostDocument.exists()) {
+                    val savedPost = savedPostDocument.toObject(PostRemoteEntity::class.java)
+                    if (!savedPost.whetherDeleted && currentUser?.otherUsersStatus?.get(savedPost.createdByUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        postList.add(savedPost.toPostBean(savedPostDocument.id, true))
+                    }
+                }
+            }
+            postList.sortByDescending { it.createdAt }
+            postList.forEach { savedPost ->
+                var postedByUser =
+                    usersList.find { it.firebaseUserId == savedPost.createdByUserFirebaseId }
+                if (postedByUser == null) {
+                    val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(savedPost.createdByUserFirebaseId)
+                        .get().await()
+                    if (postedByUserDocument != null && postedByUserDocument.exists()) {
+                        postedByUser = postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                            ?.toUserBean()
+                        if (postedByUser != null) {
+                            usersList.add(postedByUser)
+                        }
+                    }
+                }
+                if (postedByUser != null && !postedByUser.blockedUsersList.contains(
+                        loggedInUserFirebaseId
+                    )
+                ) {
+                    savedPostWithUserList.add(PostWithUserDetails(savedPost, postedByUser))
+                }
+            }
+            ResponseState.success(savedPostWithUserList)
         } catch (exception: Exception) {
-            // An error occurred while getting the post details from the server.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
@@ -356,8 +391,9 @@ class IPostRepositoryImpl @Inject constructor(
                             val isUserDetailsAlreadyFetched =
                                 userList.find { user -> user.firebaseUserId == comment.commentedBy } != null
                             if (!isUserDetailsAlreadyFetched) {
-                                val userDocument = fireStore.collection(FirebaseConstants.USER_KEY)
-                                    .document(comment.commentedBy).get().await()
+                                val userDocument =
+                                    fireStore.collection(FirebaseConstants.USER_KEY)
+                                        .document(comment.commentedBy).get().await()
                                 val user = userDocument.toObject(UserRemoteEntity::class.java)
                                 if (user != null) {
                                     userList.add(user.toUserBean())
@@ -430,4 +466,28 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getPostWithUserFromLocal(savedPostIds: List<String>): ResponseState<List<PostWithUserDetails>> {
+        val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
+        return try {
+            val postWithUsersList = appDatabase.getPostDao().getPostsAndUsers(savedPostIds)
+            postWithUsersList.forEach { postWithUser ->
+                if (postWithUser.userDetail != null) {
+                    postWithUsersDetailList.add(
+                        PostWithUserDetails(
+                            postWithUser.postDetail.toPostBean(),
+                            postWithUser.userDetail.toUserBean()
+                        )
+                    )
+                }
+            }
+            ResponseState.success(postWithUsersDetailList)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+
+    }
+
+    override suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int {
+        return appDatabase.getPostDao().updatePostDetails(postDetails.toPostDbEntity())
+    }
 }

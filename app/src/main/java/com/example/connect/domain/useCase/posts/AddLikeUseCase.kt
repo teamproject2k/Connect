@@ -7,9 +7,9 @@ import javax.inject.Inject
 class AddLikeUseCase @Inject constructor(private val repository: IPostRepository) {
 
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.addLikeOf(currentUserFirebaseId, postFirebaseId)
+        return repository.addLikeOf(loggedInUserFirebaseId, postFirebaseId)
     }
 }

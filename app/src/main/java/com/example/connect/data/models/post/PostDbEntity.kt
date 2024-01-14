@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.connect.domain.models.PostBean
 
-@Entity
+@Entity(tableName = "posts")
 data class PostDbEntity(
     @PrimaryKey
     val postFirebaseId: String,

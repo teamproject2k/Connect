@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.posts.AddPostToDbUseCase
+import com.example.connect.domain.useCase.posts.AddPostToLocalUseCase
 import com.example.connect.domain.useCase.posts.UploadPostToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
@@ -31,7 +31,7 @@ import javax.inject.Inject
 class AddPostViewModel @Inject constructor(
     private val uploadPostToRemoteUseCase: UploadPostToRemoteUseCase,
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
-    private val addPostToDbUseCase: AddPostToDbUseCase
+    private val addPostToLocalUseCase: AddPostToLocalUseCase
 ) : BaseViewModel() {
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
@@ -149,7 +149,7 @@ class AddPostViewModel @Inject constructor(
                     postDetails.postFirebaseId = serverResponseState.data ?: ""
 
                     // Add the post to the local database.
-                    addPostToDbUseCase.invoke(postDetails)
+                    addPostToLocalUseCase.invoke(postDetails)
 
                     // Set the upload post state to success.
                     _uploadPostStateFlow.value = ResponseState.success(null)

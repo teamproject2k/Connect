@@ -88,7 +88,7 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 //_likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
-                    currentUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = currentUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {

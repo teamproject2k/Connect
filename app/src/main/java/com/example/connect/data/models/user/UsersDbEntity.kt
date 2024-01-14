@@ -6,7 +6,7 @@ import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
-@Entity
+@Entity(tableName = "users")
 data class UsersDbEntity(
     @PrimaryKey
     val firebaseUserId: String,

@@ -211,9 +211,15 @@ interface IUserRepository {
     ): ListenerRegistration
 
 
-    suspend fun savePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
+    suspend fun savePost(
+        loggedInUserFirebaseId: String,
+        postFirebaseId: String
+    ): ResponseState<Nothing>
 
-    suspend fun unSavePost(currentUserFirebaseId: String, postId: String): ResponseState<Nothing>
+    suspend fun unSavePost(
+        loggedInUserFirebaseId: String,
+        postFirebaseId: String
+    ): ResponseState<Nothing>
 
 
     suspend fun updateFCMTokenOnRemote(
@@ -225,4 +231,9 @@ interface IUserRepository {
 
 
     suspend fun updateSavedPost(loggedInUserFirebaseId: String, savedPost: List<String>): Int
+
+    suspend fun updateUserOnLocal(userDetails: UsersBean): Int
+
+
+    suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray
 }
