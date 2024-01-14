@@ -178,7 +178,7 @@ class IPostRepositoryImpl @Inject constructor(
                     if (postedByUserDocument.exists()) {
                         val postedByUserEntity =
                             postedByUserDocument.toObject(UserRemoteEntity::class.java)
-                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        return if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             fireStore.collection(FirebaseConstants.POST_KEY)
                                 .document(postFirebaseId)
                                 .update(
@@ -186,9 +186,9 @@ class IPostRepositoryImpl @Inject constructor(
                                     FieldValue.arrayUnion(loggedInUserFirebaseId)
                                 )
                                 .await()
-                            return ResponseState.success(null)
+                            ResponseState.success(null)
                         } else {
-                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                            ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
                         }
                     } else {
                         return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
@@ -220,7 +220,7 @@ class IPostRepositoryImpl @Inject constructor(
                     if (postedByUserDocument.exists()) {
                         val postedByUserEntity =
                             postedByUserDocument.toObject(UserRemoteEntity::class.java)
-                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        return if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             fireStore.collection(FirebaseConstants.POST_KEY)
                                 .document(postFirebaseId)
                                 .update(
@@ -228,9 +228,9 @@ class IPostRepositoryImpl @Inject constructor(
                                     FieldValue.arrayRemove(loggedInUserFirebaseId)
                                 )
                                 .await()
-                            return ResponseState.success(null)
+                            ResponseState.success(null)
                         } else {
-                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                            ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
                         }
                     } else {
                         return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
@@ -484,10 +484,23 @@ class IPostRepositoryImpl @Inject constructor(
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
-
     }
 
     override suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int {
         return appDatabase.getPostDao().updatePostDetails(postDetails.toPostDbEntity())
+    }
+
+    override suspend fun updatePostVisibilityOnRemote(
+        postFirebaseId: String,
+        postScopeName: String
+    ): ResponseState<Nothing> {
+        return try {
+            fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId).update(
+                PostRemoteEntity::postVisibilityScope.name, postScopeName
+            ).await()
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
     }
 }

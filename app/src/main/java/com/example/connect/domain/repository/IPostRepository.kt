@@ -102,4 +102,9 @@ interface IPostRepository {
     suspend fun getPostWithUserFromLocal(savedPostIds: List<String>): ResponseState<List<PostWithUserDetails>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
+
+    suspend fun updatePostVisibilityOnRemote(
+        postFirebaseId: String,
+        postScopeName: String
+    ): ResponseState<Nothing>
 }

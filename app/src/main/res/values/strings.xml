@@ -224,4 +224,5 @@
     <string name="deleting_post">Deleting Post...</string>
     <string name="viewing_in_offline_mode">Viewing in offline mode</string>
     <string name="post_not_found">Post not found</string>
+    <string name="updating_post_visibility">Updating Post Visibility...</string>
 </resources>

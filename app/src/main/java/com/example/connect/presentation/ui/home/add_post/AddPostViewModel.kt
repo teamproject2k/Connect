@@ -37,7 +37,6 @@ class AddPostViewModel @Inject constructor(
     val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
     lateinit var postVisibilityScopeList: List<VisibilityScope>
 
-    @SuppressLint("StateNameRule")
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
     var isFirstTimeSetup = true
     val snackBarMessageState = mutableStateOf("")

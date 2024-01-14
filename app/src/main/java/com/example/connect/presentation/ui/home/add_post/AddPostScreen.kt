@@ -311,7 +311,6 @@ private fun TopDetailsSection(
     sharedViewModel: HomeSharedViewModel,
     onVisibilityScopeClick: () -> Unit
 ) {
-    val currentSelectedPostVisibility = viewModel.currentPostVisibilityState.value
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -323,8 +322,8 @@ private fun TopDetailsSection(
             modifier = Modifier.weight(1f)
         )
         VisibilityItem(
-            drawableId = currentSelectedPostVisibility.drawableId,
-            scopeName = currentSelectedPostVisibility.scopeName
+            drawableId = viewModel.currentPostVisibilityState.value.drawableId,
+            scopeName = viewModel.currentPostVisibilityState.value.scopeName
         ) {
             onVisibilityScopeClick()
         }

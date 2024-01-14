@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.post_details
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +20,9 @@ import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
+import com.example.connect.domain.useCase.posts.UpdatePostVisibilityOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.ui.models.VisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +43,8 @@ class PostDetailsViewModel @Inject constructor(
     private val deleteCommentUseCase: DeleteCommentUseCase,
     private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
     private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase,
-    private val deletePostUseCase: DeletePostUseCase
+    private val deletePostUseCase: DeletePostUseCase,
+    private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase
 ) : BaseViewModel() {
 
     private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
@@ -65,6 +69,10 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteCommentStateFlow: StateFlow<ResponseState<Triple<String, String?, Int>>> get() = _deleteCommentStateFlow
 
+    private val _updatePostVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
+        MutableStateFlow(ResponseState.none())
+    val updatePostVisibilityStateFlow: StateFlow<ResponseState<VisibilityScope>> get() = _updatePostVisibilityStateFlow
+
     val commentTextState = mutableStateOf("")
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
 
@@ -76,9 +84,19 @@ class PostDetailsViewModel @Inject constructor(
 
     val isSendingCommentState = mutableStateOf(false)
 
-    fun initialize(post: PostBean) {
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
+
+    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
+
+    fun initialize(context: Context, post: PostBean) {
         if (!isInitialized) {
             this.post = post
+            postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
+            val postVisibility =
+                postVisibilityScopeList.find { it.scopeEnum.name == post.postVisibilityScope }
+            if (postVisibility != null) {
+                currentPostVisibilityState = mutableStateOf(postVisibility)
+            }
             isInitialized = true
         }
     }
@@ -289,6 +307,22 @@ class PostDetailsViewModel @Inject constructor(
                     onSuccess()
                 } else {
                     onError(removeLikeForCommentResponseState.message)
+                }
+            }
+        }
+    }
+
+    fun updatePostVisibility(postScope: VisibilityScope) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _updatePostVisibilityStateFlow.value = ResponseState.loading()
+                val response =
+                    updatePostVisibilityOnRemoteUseCase.invoke(post.postFirebaseId, postScope.scopeEnum.name)
+                if (response.status == RequestStatusEnum.Success) {
+                    _updatePostVisibilityStateFlow.value = ResponseState.success(postScope)
+                } else {
+                    _updatePostVisibilityStateFlow.value =
+                        ResponseState.error(response.message ?: "")
                 }
             }
         }

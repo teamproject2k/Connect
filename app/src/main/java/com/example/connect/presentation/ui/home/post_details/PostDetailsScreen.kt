@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -26,9 +28,11 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -86,6 +90,8 @@ import com.example.connect.presentation.ui.common.TextBold18
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.VisibilityItem
+import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -98,6 +104,7 @@ import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
@@ -109,9 +116,14 @@ fun PostDetailsScreen(
 ) {
     val viewModel: PostDetailsViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+    val context = LocalContext.current
+
+    var showPostVisibilityScopeBottomSheet by remember {
+        mutableStateOf(false)
+    }
 
     if (!viewModel.isInitialized) {
-        viewModel.initialize(post)
+        viewModel.initialize(context, post)
     }
 
     val snackBarHostState = SnackbarHostState()
@@ -132,7 +144,9 @@ fun PostDetailsScreen(
                         loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
                         viewModel = viewModel,
                         navigator = navigator
-                    )
+                    ) {
+                        showPostVisibilityScopeBottomSheet = true
+                    }
                     TextBold18(
                         text = stringResource(R.string.comments),
                         modifier = Modifier.padding(16.dp)
@@ -147,6 +161,24 @@ fun PostDetailsScreen(
                 HandleDeletePostState(viewModel = viewModel, navigator = navigator)
                 HandleAddCommentSection(viewModel = viewModel)
                 HandleDeleteCommentSection(viewModel = viewModel)
+                HandleUpdatePostVisibilityState(viewModel = viewModel)
+            }
+        }
+
+        if (showPostVisibilityScopeBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showPostVisibilityScopeBottomSheet = false },
+                shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                )
+            ) {
+                PostVisibilityScopeBottomSheet(
+                    modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    viewModel = viewModel
+                ) {
+                    showPostVisibilityScopeBottomSheet = false
+                }
             }
         }
     }
@@ -166,7 +198,8 @@ private fun PostDetails(
     usersDetails: UsersBean,
     loggedInUserFirebaseId: String,
     viewModel: PostDetailsViewModel,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    onBottomSheetItemClick: () -> Unit
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -193,14 +226,16 @@ private fun PostDetails(
                         }
                     }
             )
-            Box {
-                IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(id = R.string.more_options),
-                    )
+            if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+                Box {
+                    IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(id = R.string.more_options),
+                        )
+                    }
+                    PostDetailsDropDownSection(viewModel)
                 }
-                PostDetailsDropDownSection(viewModel)
             }
         }
         if (viewModel.post.caption.isNotBlank()) {
@@ -221,7 +256,7 @@ private fun PostDetails(
         ) {
             PostCaptionMediaSection(postDetails = viewModel.post)
         }
-        PostBottomSection(viewModel, loggedInUserFirebaseId)
+        PostBottomSection(viewModel, loggedInUserFirebaseId, onBottomSheetItemClick)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -276,7 +311,8 @@ fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
 @Composable
 private fun PostBottomSection(
     viewModel: PostDetailsViewModel,
-    currentUserFirebaseId: String,
+    loggedInUserFirebaseId: String,
+    onBottomSheetItemClick: () -> Unit
 ) {
     val context = LocalContext.current
     var likeCount by remember {
@@ -286,38 +322,51 @@ private fun PostBottomSection(
         mutableStateOf(viewModel.post.isSavedByCurrentUser)
     }
     Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = {
-                if (viewModel.post.likedBy.contains(currentUserFirebaseId)) {
-                    viewModel.removeLike(currentUserFirebaseId) {
-                        viewModel.post.likedBy.remove(currentUserFirebaseId)
+                if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) {
+                    viewModel.removeLike(loggedInUserFirebaseId) {
+                        viewModel.post.likedBy.remove(loggedInUserFirebaseId)
                         likeCount--
                     }
                 } else {
-                    viewModel.addLike(currentUserFirebaseId) {
-                        viewModel.post.likedBy.add(currentUserFirebaseId)
+                    viewModel.addLike(loggedInUserFirebaseId) {
+                        viewModel.post.likedBy.add(loggedInUserFirebaseId)
                         likeCount++
                     }
                 }
             }) {
                 Icon(
-                    painter = if (viewModel.post.likedBy.contains(currentUserFirebaseId)) painterResource(
+                    painter = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) painterResource(
                         id = R.drawable.ic_heart_filled
                     ) else painterResource(id = R.drawable.ic_heart),
                     contentDescription = stringResource(
                         id = R.string.like_post
                     ),
-                    tint = if (viewModel.post.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                    tint = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
                 )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+                VisibilityItem(
+                    drawableId = viewModel.currentPostVisibilityState.value.drawableId,
+                    scopeName = viewModel.currentPostVisibilityState.value.scopeName
+                ) {
+                    onBottomSheetItemClick()
+                }
             }
             IconButton(onClick = {
                 if (viewModel.post.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId) {
+                    viewModel.unSavePost(loggedInUserFirebaseId) {
                         viewModel.post.isSavedByCurrentUser = false
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId) {
+                    viewModel.savePost(loggedInUserFirebaseId) {
                         viewModel.post.isSavedByCurrentUser = true
                         isSavedByCurrentUser = true
                     }
@@ -357,6 +406,66 @@ private fun PostBottomSection(
                 text = FunctionHelper.getTimeAgo(viewModel.post.createdAt, context),
                 fontSize = 12.sp
             )
+        }
+    }
+}
+
+@Composable
+private fun PostVisibilityScopeBottomSheet(
+    modifier: Modifier,
+    viewModel: PostDetailsViewModel,
+    onDismissRequest: () -> Unit
+) {
+    Column(modifier = modifier) {
+        viewModel.postVisibilityScopeList.forEach { postScope ->
+            VisibilityScopeBottomSheetItem(postScope) {
+                viewModel.updatePostVisibility(postScope)
+                onDismissRequest()
+            }
+        }
+    }
+}
+
+@Composable
+fun HandleUpdatePostVisibilityState(
+    viewModel: PostDetailsViewModel
+) {
+    val updatePostVisibilityState = viewModel.updatePostVisibilityStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (updatePostVisibilityState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(loadingText = stringResource(R.string.updating_post_visibility))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    updatePostVisibilityState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.PostDetailsScreen.name,
+                    updatePostVisibilityState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                if (updatePostVisibilityState.data != null) {
+                    viewModel.currentPostVisibilityState.value = updatePostVisibilityState.data
+                }
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
         }
     }
 }
