@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -158,10 +157,6 @@ fun PostDetailsScreen(
                     viewModel,
                     homeSharedViewModel.usersDetails
                 )
-                HandleDeletePostState(viewModel = viewModel, navigator = navigator)
-                HandleAddCommentSection(viewModel = viewModel)
-                HandleDeleteCommentSection(viewModel = viewModel)
-                HandleUpdatePostVisibilityState(viewModel = viewModel)
             }
         }
 
@@ -182,6 +177,10 @@ fun PostDetailsScreen(
             }
         }
     }
+    HandleDeletePostState(viewModel = viewModel, navigator = navigator)
+    HandleAddCommentSectionState(viewModel = viewModel)
+    HandleDeleteCommentSectionState(viewModel = viewModel)
+    HandleUpdatePostVisibilityState(viewModel = viewModel)
     LaunchedEffect(viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
@@ -327,36 +326,39 @@ private fun PostBottomSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {
-                if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) {
-                    viewModel.removeLike(loggedInUserFirebaseId) {
-                        viewModel.post.likedBy.remove(loggedInUserFirebaseId)
-                        likeCount--
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                IconButton(onClick = {
+                    if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) {
+                        viewModel.removeLike(loggedInUserFirebaseId) {
+                            viewModel.post.likedBy.remove(loggedInUserFirebaseId)
+                            likeCount--
+                        }
+                    } else {
+                        viewModel.addLike(loggedInUserFirebaseId) {
+                            viewModel.post.likedBy.add(loggedInUserFirebaseId)
+                            likeCount++
+                        }
                     }
-                } else {
-                    viewModel.addLike(loggedInUserFirebaseId) {
-                        viewModel.post.likedBy.add(loggedInUserFirebaseId)
-                        likeCount++
-                    }
+                }) {
+                    Icon(
+                        painter = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) painterResource(
+                            id = R.drawable.ic_heart_filled
+                        ) else painterResource(id = R.drawable.ic_heart),
+                        contentDescription = stringResource(
+                            id = R.string.like_post
+                        ),
+                        tint = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                    )
                 }
-            }) {
-                Icon(
-                    painter = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) painterResource(
-                        id = R.drawable.ic_heart_filled
-                    ) else painterResource(id = R.drawable.ic_heart),
-                    contentDescription = stringResource(
-                        id = R.string.like_post
-                    ),
-                    tint = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
-                VisibilityItem(
-                    drawableId = viewModel.currentPostVisibilityState.value.drawableId,
-                    scopeName = viewModel.currentPostVisibilityState.value.scopeName
-                ) {
-                    onBottomSheetItemClick()
+                if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+                    SpacerWidth8()
+                    VisibilityItem(
+                        drawableId = viewModel.currentPostVisibilityState.value.drawableId,
+                        scopeName = viewModel.currentPostVisibilityState.value.scopeName
+                    ) {
+                        onBottomSheetItemClick()
+                    }
                 }
             }
             IconButton(onClick = {
@@ -545,7 +547,7 @@ fun HandleGetAllCommentsSection(
 
         RequestStatusEnum.Success -> {
             CommentUi(
-                getAllCommentsState.data?.second,
+                getAllCommentsState.data,
                 viewModel,
                 loggedInUserFirebaseId, navigator
             )
@@ -577,10 +579,7 @@ fun CommentUi(
         return
     }
     Column {
-        val parentList =
-            viewModel.commentDataMap.keys.sortedByDescending { it.createdAt }
-
-        parentList.forEach { parent ->
+        viewModel.commentDataMap.keys.forEach { parent ->
             val childCommentList = viewModel.commentDataMap[parent]
             if (childCommentList != null) {
                 ParentCommentItem(
@@ -619,7 +618,6 @@ fun ParentCommentItem(
                 if (!parentComment.whetherDeleted) {
                     val deleteCount = childCommentList.count { !it.whetherDeleted } + 1
                     viewModel.deleteComment(parentComment, deleteCount)
-
                 }
             }
         }
@@ -929,7 +927,7 @@ fun AddCommentSection(
 }
 
 @Composable
-fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
+fun HandleAddCommentSectionState(viewModel: PostDetailsViewModel) {
     val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
@@ -993,7 +991,7 @@ fun HandleAddCommentSection(viewModel: PostDetailsViewModel) {
 }
 
 @Composable
-fun HandleDeleteCommentSection(viewModel: PostDetailsViewModel) {
+fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
     val deleteCommentState = viewModel.deleteCommentStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
