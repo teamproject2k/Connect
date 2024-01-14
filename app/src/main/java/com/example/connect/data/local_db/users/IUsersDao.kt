@@ -48,4 +48,8 @@ interface IUsersDao {
     @Update
     fun updateUsersDetails(userDetails: UsersDbEntity): Int
 
+
+    @Query("SELECT * FROM users WHERE firebaseUserId IN (:userIdList) ORDER BY createdAt DESC")
+    fun getAllUserFromIds(userIdList: List<String>): List<UsersDbEntity>
+
 }

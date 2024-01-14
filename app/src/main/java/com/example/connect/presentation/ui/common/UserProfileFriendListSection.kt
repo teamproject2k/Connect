@@ -53,7 +53,7 @@ fun UserProfileFriendsListSection(
                         getHeightToMaintainAspectRatio(
                             horizontalPadding = 16.dp,
                             verticalPadding = 0.dp,
-                            itemsRequiredPerRow = 4,
+                            itemsRequiredPerRow = ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT,
                             itemsHorizontalPadding = 8.dp,
                             noOfRows = 1,
                             itemsVerticalPadding = 0.dp
