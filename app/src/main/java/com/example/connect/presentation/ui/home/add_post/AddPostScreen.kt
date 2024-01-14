@@ -113,6 +113,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
                 Button(
                     enabled = viewModel.captionTextState.value.isNotBlank() || viewModel.selectedMediaState.value != null,
                     onClick = {
+                        keyboardController?.hide()
                         handleButtonClick(
                             viewModel,
                             context,
