@@ -236,4 +236,6 @@ interface IUserRepository {
 
 
     suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray
+
+    suspend fun getAllUsersFromIdFromLocal(userIdList: List<String>): List<UsersBean>
 }
