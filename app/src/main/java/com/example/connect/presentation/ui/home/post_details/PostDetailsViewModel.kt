@@ -20,7 +20,9 @@ import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostUseCase
+import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostVisibilityOnRemoteUseCase
+import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.models.VisibilityScope
 import com.example.connect.presentation.utils.FunctionHelper
@@ -44,9 +46,20 @@ class PostDetailsViewModel @Inject constructor(
     private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
     private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase,
     private val deletePostUseCase: DeletePostUseCase,
-    private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase
+    private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase,
+    private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
+    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal
 ) : BaseViewModel() {
 
+    private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
+        MutableStateFlow(ResponseState.none())
+
+    val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
+
+    private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<String>> =
+        MutableStateFlow(ResponseState.none())
+
+    val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
     var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
 
@@ -98,21 +111,25 @@ class PostDetailsViewModel @Inject constructor(
             currentPostVisibilityState = mutableStateOf(postVisibility)
         }
         isInitialized = true
-
     }
 
     fun addLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                //_likeUnlikePostStateFlow.value = ResponseState.loading()
+                _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
                     loggedInUserFirebaseId = currentUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
+                    post.likedBy.add(currentUserFirebaseId)
+                    updatePostDetailsOnLocalUseCase.invoke(post)
                     onUpdate()
+                    _likeUnlikePostStateFlow.value = ResponseState.success(null)
+                } else {
+                    _likeUnlikePostStateFlow.value =
+                        ResponseState.error(responseState.message ?: "", post.postFirebaseId)
                 }
-                //   _likeUnlikePostStateFlow.value = responseState
             }
         }
     }
@@ -120,43 +137,57 @@ class PostDetailsViewModel @Inject constructor(
     fun removeLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // _likeUnlikePostStateFlow.value = ResponseState.loading()
+                _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = removeLikeUseCase.invoke(
                     currentUserFirebaseId = currentUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
+                    post.likedBy.remove(currentUserFirebaseId)
+                    updatePostDetailsOnLocalUseCase.invoke(post)
                     onUpdate()
+                    _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 }
-                // _likeUnlikePostStateFlow.value = responseState
+                _likeUnlikePostStateFlow.value =
+                    ResponseState.error(responseState.message ?: "", post.postFirebaseId)
             }
         }
     }
 
-    fun savePost(currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun savePost(loggedInUser: UsersBean, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // _saveUnSavePostStateFlow.value = ResponseState.loading()
+                _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostUseCase.invoke(currentUserFirebaseId, post.postFirebaseId)
+                    savePostUseCase.invoke(loggedInUser.firebaseUserId, post.postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
+                    loggedInUser.savedPosts.add(post.postFirebaseId)
+                    updateUserDetailsOnLocal.invoke(loggedInUser)
                     onUpdate()
+                    _saveUnSavePostStateFlow.value = ResponseState.success(null)
+                } else {
+                    _saveUnSavePostStateFlow.value =
+                        ResponseState.error(responseState.message ?: "", post.postFirebaseId)
                 }
-                // _saveUnSavePostStateFlow.value = responseState
             }
         }
     }
 
-    fun unSavePost(currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun unSavePost(loggedInUser: UsersBean, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // _saveUnSavePostStateFlow.value = ResponseState.loading()
+                _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostUseCase.invoke(currentUserFirebaseId, post.postFirebaseId)
+                    unSavePostUseCase.invoke(loggedInUser.firebaseUserId, post.postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
+                    loggedInUser.savedPosts.remove(post.postFirebaseId)
+                    updateUserDetailsOnLocal.invoke(loggedInUser)
                     onUpdate()
+                    _saveUnSavePostStateFlow.value = ResponseState.success(null)
+                } else {
+                    _saveUnSavePostStateFlow.value =
+                        ResponseState.error(responseState.message ?: "", post.postFirebaseId)
                 }
-                //  _saveUnSavePostStateFlow.value = responseState
             }
         }
     }
@@ -283,7 +314,6 @@ class PostDetailsViewModel @Inject constructor(
                         comment.likedBy.add(loggedInUserFireId)
                     }
                     onSuccess()
-                    // Log.e("aryan",commentsMapState.toString())
                 } else {
                     onError(addLikeForCommentResponseState.message)
                 }

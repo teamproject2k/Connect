@@ -407,7 +407,6 @@ private fun HandleLikeUnlikeState(viewModel: SavedPostsViewModel) {
                     viewModel.snackBarMessageState.value =
                         likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
                 }
-
                 isExceptionHandled = true
             }
         }

@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.post_details
 
+import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -68,6 +69,7 @@ import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
@@ -99,6 +101,7 @@ import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -140,7 +143,7 @@ fun PostDetailsScreen(
                 ) {
                     PostDetails(
                         usersDetails = posterDetails,
-                        loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
+                        loggedInUser = homeSharedViewModel.usersDetails,
                         viewModel = viewModel,
                         navigator = navigator
                     ) {
@@ -181,6 +184,8 @@ fun PostDetailsScreen(
     HandleAddCommentSectionState(viewModel = viewModel)
     HandleDeleteCommentSectionState(viewModel = viewModel)
     HandleUpdatePostVisibilityState(viewModel = viewModel)
+    HandleLikeUnlikeState(viewModel, navigator)
+    HandleSaveUnSavePost(viewModel, navigator)
     LaunchedEffect(viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
@@ -195,7 +200,7 @@ fun PostDetailsScreen(
 @Composable
 private fun PostDetails(
     usersDetails: UsersBean,
-    loggedInUserFirebaseId: String,
+    loggedInUser: UsersBean,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator,
     onBottomSheetItemClick: () -> Unit
@@ -218,14 +223,14 @@ private fun PostDetails(
                     .fillMaxWidth()
                     .weight(1f)
                     .clickable {
-                        if (loggedInUserFirebaseId == usersDetails.firebaseUserId) {
+                        if (loggedInUser.firebaseUserId == usersDetails.firebaseUserId) {
                             navigator.navigate(CurrentUserProfileScreenDestination)
                         } else {
                             navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
                         }
                     }
             )
-            if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+            if (viewModel.post.createdByUserFirebaseId == loggedInUser.firebaseUserId) {
                 Box {
                     IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
                         Icon(
@@ -255,7 +260,7 @@ private fun PostDetails(
         ) {
             PostCaptionMediaSection(postDetails = viewModel.post)
         }
-        PostBottomSection(viewModel, loggedInUserFirebaseId, onBottomSheetItemClick)
+        PostBottomSection(viewModel, loggedInUser, context, onBottomSheetItemClick)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -310,7 +315,8 @@ fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
 @Composable
 private fun PostBottomSection(
     viewModel: PostDetailsViewModel,
-    loggedInUserFirebaseId: String,
+    loggedInUser: UsersBean,
+    context: Context,
     onBottomSheetItemClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -327,31 +333,33 @@ private fun PostBottomSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-
                 IconButton(onClick = {
-                    if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) {
-                        viewModel.removeLike(loggedInUserFirebaseId) {
-                            viewModel.post.likedBy.remove(loggedInUserFirebaseId)
-                            likeCount--
+                    if (context.isNetworkAvailable()) {
+                        if (viewModel.post.likedBy.contains(loggedInUser.firebaseUserId)) {
+                            viewModel.removeLike(loggedInUser.firebaseUserId) {
+                                likeCount--
+                            }
+                        } else {
+                            viewModel.addLike(loggedInUser.firebaseUserId) {
+                                likeCount++
+                            }
                         }
                     } else {
-                        viewModel.addLike(loggedInUserFirebaseId) {
-                            viewModel.post.likedBy.add(loggedInUserFirebaseId)
-                            likeCount++
-                        }
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.no_internet_connection)
                     }
                 }) {
                     Icon(
-                        painter = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) painterResource(
+                        painter = if (viewModel.post.likedBy.contains(loggedInUser.firebaseUserId)) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
                             id = R.string.like_post
                         ),
-                        tint = if (viewModel.post.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                        tint = if (viewModel.post.likedBy.contains(loggedInUser.firebaseUserId)) ColorsHelper.red() else LocalContentColor.current
                     )
                 }
-                if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+                if (viewModel.post.createdByUserFirebaseId == loggedInUser.firebaseUserId) {
                     SpacerWidth8()
                     VisibilityItem(
                         drawableId = viewModel.currentPostVisibilityState.value.drawableId,
@@ -362,16 +370,21 @@ private fun PostBottomSection(
                 }
             }
             IconButton(onClick = {
-                if (viewModel.post.isSavedByCurrentUser) {
-                    viewModel.unSavePost(loggedInUserFirebaseId) {
-                        viewModel.post.isSavedByCurrentUser = false
-                        isSavedByCurrentUser = false
+                if (context.isNetworkAvailable()) {
+                    if (viewModel.post.isSavedByCurrentUser) {
+                        viewModel.unSavePost(loggedInUser) {
+                            viewModel.post.isSavedByCurrentUser = false
+                            isSavedByCurrentUser = false
+                        }
+                    } else {
+                        viewModel.savePost(loggedInUser) {
+                            viewModel.post.isSavedByCurrentUser = true
+                            isSavedByCurrentUser = true
+                        }
                     }
                 } else {
-                    viewModel.savePost(loggedInUserFirebaseId) {
-                        viewModel.post.isSavedByCurrentUser = true
-                        isSavedByCurrentUser = true
-                    }
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
                 }
             }) {
                 Icon(
@@ -1037,6 +1050,81 @@ fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
                 }
                 isResponseHandled = true
             }
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
+}
+
+@Composable
+private fun HandleLikeUnlikeState(
+    viewModel: PostDetailsViewModel,
+    navigator: DestinationsNavigator
+) {
+    val likeUnlikeState = viewModel.likeUnlikePostStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (likeUnlikeState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(stringResource(id = R.string.please_wait))
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                if (likeUnlikeState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.post_not_found)
+                    navigator.popBackStack()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                }
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            // do not handle this
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
+}
+
+@Composable
+private fun HandleSaveUnSavePost(
+    viewModel: PostDetailsViewModel,
+    navigator: DestinationsNavigator
+) {
+    val saveUnSavePostState = viewModel.saveUnSavePostStateFlow.collectAsState().value
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+    when (saveUnSavePostState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(stringResource(id = R.string.please_wait))
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (saveUnSavePostState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                viewModel.snackBarMessageState.value =
+                    stringResource(id = R.string.post_not_found)
+                navigator.popBackStack()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            // do not handle this
         }
 
         RequestStatusEnum.None -> {
