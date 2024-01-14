@@ -21,10 +21,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,11 +72,10 @@ import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
-import com.example.connect.presentation.ui.enums.ScreenNameEnum
-import com.example.connect.presentation.ui.models.StoryActions
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
@@ -77,6 +85,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
@@ -90,6 +99,11 @@ fun ShowStoryScreen(
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
+
+    var showStorySeenListBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
     if (!viewModel.areDetailsInitialized) {
         viewModel.init(allStoriesString, allStoryPosters, currentStoryPosterFirebaseId)
     }
@@ -107,6 +121,22 @@ fun ShowStoryScreen(
                 loggedInUserFirebaseId
             )
         }
+        if (showStorySeenListBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showStorySeenListBottomSheet = false },
+                shape = RoundedCornerShape(
+                    topEnd = ConstantsHelper.BottomSheetRoundness,
+                    topStart = ConstantsHelper.BottomSheetRoundness
+                )
+            ) {
+                ShowStoryBottomSheet(
+                    modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
+                    viewModel = viewModel
+                ) {
+                    showStorySeenListBottomSheet = false
+                }
+            }
+        }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
@@ -115,6 +145,22 @@ fun ShowStoryScreen(
                 viewModel.snackBarMessageState.value = ""
             }
         }
+    }
+}
+
+@Composable
+fun ShowStoryBottomSheet(
+    modifier: Modifier,
+    viewModel: ShowStoryViewModel,
+    onDismissRequest: () -> Unit
+) {
+    Column(modifier = modifier) {
+//        viewModel.postVisibilityScopeList.forEach { postScope ->
+//            VisibilityScopeBottomSheetItem(postScope) {
+//                viewModel.updatePostVisibility(postScope)
+//                onDismissRequest()
+//            }
+//        }
     }
 }
 
@@ -236,6 +282,7 @@ fun UserStories(
             context = context,
             navigator = navigator,
             loggedInUserFirebaseId = loggedInUserFirebaseId,
+            viewModel = viewModel
         )
         StoryUi(
             viewModel = viewModel,
@@ -267,7 +314,6 @@ fun StoryUi(
     }
 }
 
-
 @Composable
 private fun StoryTopSection(
     storyPoster: UsersBean,
@@ -276,6 +322,7 @@ private fun StoryTopSection(
     modifier: Modifier = Modifier,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String,
+    viewModel: ShowStoryViewModel
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -329,10 +376,80 @@ private fun StoryTopSection(
                 )
             }
         }
-
+        if (storyPoster.firebaseUserId == loggedInUserFirebaseId) {
+            Box {
+                IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(id = R.string.more_options),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                ShowStoryDropDownSection(viewModel)
+            }
+        }
     }
 }
 
+@Composable
+fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
+    val postDetailsDropdownList =
+        listOf(stringResource(id = R.string.seen_list), stringResource(R.string.delete_post))
+
+    var showDeletePostAlertDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (viewModel.isDropdownMenuVisibleState.value) {
+        DropdownMenu(
+            expanded = true,
+            onDismissRequest = { viewModel.isDropdownMenuVisibleState.value = false }
+        ) {
+            DropdownMenuItem(text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Default.RemoveRedEye,
+                        contentDescription = postDetailsDropdownList[0]
+                    )
+                    SpacerWidth16()
+                    Text(text = postDetailsDropdownList[0])
+                }
+            }, onClick = {
+
+            })
+            DropdownMenuItem(text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = postDetailsDropdownList[1]
+                    )
+                    SpacerWidth16()
+                    Text(text = postDetailsDropdownList[1])
+                }
+            }, onClick = {
+                  showDeletePostAlertDialog = true
+            })
+        }
+    }
+    if (showDeletePostAlertDialog) {
+        TitleMessageIconOkCancelDialog(
+            imageVector = Icons.Default.Warning,
+            iconTint = ColorsHelper.warning(),
+            title = stringResource(id = R.string.delete_story),
+            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_story),
+            positiveButtonText = stringResource(R.string.delete),
+            onCancel = {
+                showDeletePostAlertDialog = false
+                viewModel.isDropdownMenuVisibleState.value = false
+            }) {
+            viewModel.deleteStory(storyId = "")
+            showDeletePostAlertDialog = false
+            viewModel.isDropdownMenuVisibleState.value = false
+        }
+    }
+}
 
 @Composable
 private fun MediaSection(
@@ -418,7 +535,7 @@ private fun ShowStoryVideo(
             context = context,
             uri = videoUrl,
             loadingColorRes = R.color.white,
-            onStateChange = {isError->
+            onStateChange = { isError ->
                 if (isError) {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.some_error_occurred)
