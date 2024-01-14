@@ -72,7 +72,6 @@ import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -482,6 +481,6 @@ fun getSavedPosts(viewModel: SavedPostsViewModel, context: Context, loggedInUser
         FunctionHelper.vibrateDevice(context)
 
         // Show a toast message.
-        context.showToast(context.getString(R.string.viewing_in_offline_mode))
+        viewModel.snackBarMessageState.value = context.getString(R.string.viewing_in_offline_mode)
     }
 }

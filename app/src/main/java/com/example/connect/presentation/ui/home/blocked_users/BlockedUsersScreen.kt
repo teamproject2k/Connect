@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,6 @@ import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -59,7 +59,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
             title = stringResource(R.string.blocked_users),
             showNavigationIcon = true,
             onNavigationIconClick = { navigator.popBackStack() })
-    }) {
+    }, snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .padding(it)
@@ -81,7 +81,8 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
         if (context.isNetworkAvailable()) {
             viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
         } else {
-            context.showToast(context.getString(R.string.no_internet_connection))
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
             FunctionHelper.vibrateDevice(context)
         }
         viewModel.isBlockedListFetched = true
