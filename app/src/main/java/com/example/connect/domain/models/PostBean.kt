@@ -16,7 +16,6 @@ data class PostBean(
     var postVisibilityScope: String,
     val postContentType: String,
     var commentCount: Long,
-    var isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
     var whetherDeleted: Boolean
 ) : Parcelable {
@@ -44,7 +43,6 @@ data class PostBean(
             postVisibilityScope,
             postContentType,
             commentCount,
-            isSavedByCurrentUser,
             likedBy,
             whetherDeleted
         )

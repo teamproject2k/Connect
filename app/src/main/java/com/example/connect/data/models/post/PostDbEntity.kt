@@ -16,7 +16,6 @@ data class PostDbEntity(
     val postVisibilityScope: String,
     val postContentType: String,
     val commentCount: Long,
-    val isSavedByCurrentUser: Boolean,
     val likedBy: ArrayList<String>,
     val whetherDeleted: Boolean
 ) {
@@ -30,7 +29,6 @@ data class PostDbEntity(
             postVisibilityScope,
             postContentType,
             commentCount,
-            isSavedByCurrentUser,
             likedBy,
             whetherDeleted
         )

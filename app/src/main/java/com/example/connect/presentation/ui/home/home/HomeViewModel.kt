@@ -88,11 +88,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getPostDetailsWithUserDetails(loggedInUserFirebaseId: String) {
+    fun getPostDetailsWithUserDetails(loggedInUserFirebaseId: String, isNetworkAvailable: Boolean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
-                if (!isPostListFromRemoteFetched) {
+                if (!isPostListFromRemoteFetched && isNetworkAvailable) {
                     val postListWithUserDetailsResponse =
                         postDetailsWithUserDetailsUseCase.invoke(loggedInUserFirebaseId)
                     if (postListWithUserDetailsResponse.status == RequestStatusEnum.Success) {

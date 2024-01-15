@@ -15,7 +15,7 @@ data class PostRemoteEntity(
 ) {
     constructor() : this("", "", "", 0, "", "", 0, arrayListOf(), false)
 
-    fun toPostBean(id: String, isSavedByCurrentUser: Boolean): PostBean {
+    fun toPostBean(id: String): PostBean {
         return PostBean(
             id,
             createdByUserFirebaseId,
@@ -25,7 +25,6 @@ data class PostRemoteEntity(
             postVisibilityScope,
             postContentType,
             commentCount,
-            isSavedByCurrentUser,
             likedBy,
             whetherDeleted
         )

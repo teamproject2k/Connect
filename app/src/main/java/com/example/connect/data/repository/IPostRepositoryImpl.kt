@@ -58,22 +58,11 @@ class IPostRepositoryImpl @Inject constructor(
                 .whereEqualTo(PostRemoteEntity::createdByUserFirebaseId.name, fireBaseId).get()
                 .await()
             val postList = arrayListOf<PostBean>()
-            val currentUserDocument =
-                fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
-                    .get().await()
-            val currentUser = if (currentUserDocument != null && currentUserDocument.exists()) {
-                currentUserDocument.toObject(UserRemoteEntity::class.java)
-            } else {
-                null
-            }
             response.documents.forEach { document ->
                 val post = document.toObject(PostRemoteEntity::class.java)
                 if (post != null && !post.whetherDeleted) {
                     postList.add(
-                        post.toPostBean(
-                            document.id,
-                            currentUser?.savedPosts?.contains(document.id) ?: false
-                        )
+                        post.toPostBean(document.id)
                     )
                 }
             }
@@ -143,12 +132,7 @@ class IPostRepositoryImpl @Inject constructor(
                 if (postDocument != null && postDocument.exists()) {
                     val post = postDocument.toObject(PostRemoteEntity::class.java)
                     if (!post.whetherDeleted && currentUser?.otherUsersStatus?.get(post.createdByUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
-                        postList.add(
-                            post.toPostBean(
-                                postDocument.id,
-                                currentUser?.savedPosts?.contains(postDocument.id) ?: false
-                            )
-                        )
+                        postList.add(post.toPostBean(postDocument.id))
                     }
                 }
             }

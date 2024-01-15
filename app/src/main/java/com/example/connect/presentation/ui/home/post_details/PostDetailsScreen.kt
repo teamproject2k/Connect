@@ -376,7 +376,7 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (context.isNetworkAvailable()) {
-                    if (viewModel.post.isSavedByCurrentUser) {
+                    if (loggedInUser.savedPosts.contains(viewModel.post.postFirebaseId)) {
                         viewModel.unSavePost(loggedInUser)
                     } else {
                         viewModel.savePost(loggedInUser)
@@ -611,7 +611,7 @@ fun CommentUi(
         viewModel.commentDataMap.keys.forEach { parent ->
             val childCommentList = viewModel.commentDataMap[parent]
             if (childCommentList != null) {
-                ParentCommentItem(
+                ParentChildCommentItem(
                     viewModel,
                     parent,
                     childCommentList,
@@ -625,7 +625,7 @@ fun CommentUi(
 }
 
 @Composable
-fun ParentCommentItem(
+fun ParentChildCommentItem(
     viewModel: PostDetailsViewModel,
     parentComment: CommentBean,
     childCommentList: List<CommentBean>,

@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.saved_posts
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,7 +92,16 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            getSavedPosts(viewModel, context, homeSharedViewModel.usersDetails)
+            if (context.isNetworkAvailable()) {
+                viewModel.getSavedPosts(
+                    homeSharedViewModel.usersDetails.firebaseUserId,
+                    homeSharedViewModel.usersDetails.savedPosts,
+                    true
+                )
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+            }
             refreshing = false
         })
     Scaffold(topBar = {
@@ -128,9 +136,12 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    if (!viewModel.isSavedPostListFetched) {
-        getSavedPosts(viewModel, context, homeSharedViewModel.usersDetails)
-        viewModel.isSavedPostListFetched = true
+    LaunchedEffect(Unit) {
+        viewModel.getSavedPosts(
+            homeSharedViewModel.usersDetails.firebaseUserId,
+            homeSharedViewModel.usersDetails.savedPosts,
+            false
+        )
     }
     HandleLikeUnlikeState(viewModel)
     HandleSaveUnSavePost(viewModel)
@@ -155,9 +166,14 @@ fun HandleGetSavedPostsState(
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    savedPostsState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                if (savedPostsState.message == FirebaseErrorCodes.UNKNOWN_ERROR) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.something_went_wrong)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        savedPostsState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -171,13 +187,10 @@ fun HandleGetSavedPostsState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 viewModel.postListWithUserDetailsListState.clear()
-                viewModel.postListWithUserDetailsListState.addAll(savedPostsState.data!!)
-            } else {
-                val updatedPostWithUserList = viewModel.postListWithUserDetailsListState.filter {
-                    !loggedInUsersBean.blockedUsersList.contains(it.userDetail.firebaseUserId)
-                }
-                viewModel.postListWithUserDetailsListState.clear()
-                viewModel.postListWithUserDetailsListState.addAll(updatedPostWithUserList)
+                viewModel.postListWithUserDetailsListState.addAll(
+                    savedPostsState.data ?: emptyList()
+                )
+                isResponseHandled = true
             }
             DisplaySavedPostsList(
                 navigator,
@@ -277,7 +290,7 @@ private fun PostBottomSection(
         mutableIntStateOf(postDetails.likedBy.size)
     }
     var isSavedByCurrentUser by remember {
-        mutableStateOf(postDetails.isSavedByCurrentUser)
+        mutableStateOf(loggedInUsersBean.savedPosts.contains(postDetails.postFirebaseId))
     }
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -285,14 +298,14 @@ private fun PostBottomSection(
                 IconButton(onClick = {
                     if (context.isNetworkAvailable()) {
                         if (postDetails.likedBy.contains(loggedInUsersBean.firebaseUserId)) {
-                            viewModel.removeLike(
+                            viewModel.removeLikeForPost(
                                 postDetails,
                                 loggedInUsersBean.firebaseUserId
                             ) {
                                 likeCount--
                             }
                         } else {
-                            viewModel.addLike(
+                            viewModel.addLikeOnPost(
                                 postDetails,
                                 loggedInUsersBean.firebaseUserId
                             ) {
@@ -330,14 +343,12 @@ private fun PostBottomSection(
             }
             IconButton(onClick = {
                 if (context.isNetworkAvailable()) {
-                    if (postDetails.isSavedByCurrentUser) {
+                    if (loggedInUsersBean.savedPosts.contains(postDetails.postFirebaseId)) {
                         viewModel.unSavePost(loggedInUsersBean, postDetails.postFirebaseId) {
-                            postDetails.isSavedByCurrentUser = false
                             isSavedByCurrentUser = false
                         }
                     } else {
                         viewModel.savePost(loggedInUsersBean, postDetails.postFirebaseId) {
-                            postDetails.isSavedByCurrentUser = true
                             isSavedByCurrentUser = true
                         }
                     }
@@ -399,9 +410,9 @@ private fun HandleLikeUnlikeState(viewModel: SavedPostsViewModel) {
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (likeUnlikeState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == likeUnlikeState.data }
                     viewModel.snackBarMessageState.value =
                         stringResource(id = R.string.post_not_found)
-                    viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == likeUnlikeState.data }
                 } else {
                     viewModel.snackBarMessageState.value =
                         likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
@@ -433,13 +444,17 @@ private fun HandleSaveUnSavePost(viewModel: SavedPostsViewModel) {
         }
 
         RequestStatusEnum.Exception -> {
-            if (saveUnSavePostState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                viewModel.snackBarMessageState.value =
-                    stringResource(id = R.string.post_not_found)
-                viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == saveUnSavePostState.data }
-            } else {
-                viewModel.snackBarMessageState.value =
-                    saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
+            if (!isExceptionHandled) {
+                if (saveUnSavePostState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    viewModel.postListWithUserDetailsListState.removeIf { it.postDetail.postFirebaseId == saveUnSavePostState.data }
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.post_not_found)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        saveUnSavePostState.message
+                            ?: stringResource(id = R.string.some_error_occurred)
+                }
+                isExceptionHandled = true
             }
         }
 
@@ -450,32 +465,5 @@ private fun HandleSaveUnSavePost(viewModel: SavedPostsViewModel) {
         RequestStatusEnum.None -> {
             // do not handle this
         }
-    }
-}
-
-/**
- * Gets the saved posts from the database or remote.
- *
- * @param viewModel The view model for the saved posts screen.
- * @param context The context of the activity.
- * @param loggedInUsersBean The bean that contains the logged in user's information.
- */
-fun getSavedPosts(viewModel: SavedPostsViewModel, context: Context, loggedInUsersBean: UsersBean) {
-    // Check if the device is connected to the internet.
-    val whetherGetDataFromRemote = context.isNetworkAvailable()
-
-    // Get the saved posts from the database or remote.
-    viewModel.getSavedPosts(
-        loggedInUsersBean.firebaseUserId,
-        loggedInUsersBean.savedPosts,
-        whetherGetDataFromRemote
-    )
-
-    if (!whetherGetDataFromRemote) {
-        // Vibrate the device to get the user's attention.
-        FunctionHelper.vibrateDevice(context)
-
-        // Show a toast message.
-        viewModel.snackBarMessageState.value = context.getString(R.string.viewing_in_offline_mode)
     }
 }

@@ -155,8 +155,17 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+        val isNetworkAvailable = context.isNetworkAvailable()
+        viewModel.getPostDetailsWithUserDetails(
+            homeSharedViewModel.usersDetails.firebaseUserId,
+            isNetworkAvailable
+        )
+        // TODO: 16/01/24 cd-user  handle is network available
         viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+        if (!isNetworkAvailable) {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.viewing_in_offline_mode)
+        }
     }
     HandleLikeUnlikePostState(viewModel = viewModel)
     HandleSaveUnSavePost(viewModel)

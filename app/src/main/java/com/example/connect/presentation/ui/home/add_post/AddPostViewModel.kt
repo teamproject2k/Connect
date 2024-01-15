@@ -132,7 +132,6 @@ class AddPostViewModel @Inject constructor(
                     currentPostVisibilityState.value.scopeEnum.name,
                     postType,
                     0,
-                    false,
                     arrayListOf(),
                     false
                 )

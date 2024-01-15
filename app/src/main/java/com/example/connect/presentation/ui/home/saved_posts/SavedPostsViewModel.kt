@@ -10,6 +10,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
+import com.example.connect.domain.useCase.posts.DeletePostFromLocalUseCase
 import com.example.connect.domain.useCase.posts.GetSavedPostDetailsWithUserFromLocal
 import com.example.connect.domain.useCase.posts.GetSavedPostsWithUsersFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
@@ -18,6 +19,7 @@ import com.example.connect.domain.useCase.posts.UnSavePostUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +40,8 @@ class SavedPostsViewModel @Inject constructor(
     private val getSavedPostDetailsWithUserFromLocal: GetSavedPostDetailsWithUserFromLocal,
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
-    private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase
+    private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
+    private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase
 ) : BaseViewModel() {
 
     private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
@@ -57,19 +60,18 @@ class SavedPostsViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isSavedPostListFetched = false
 
     var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetails>()
 
     fun getSavedPosts(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>,
-        whetherGetDataFromRemote: Boolean
+        isForceRefresh: Boolean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getSavedPostsWithUsersStateFlow.value = ResponseState.loading()
-                if (whetherGetDataFromRemote) {
+                if (isForceRefresh) {
                     if (savedPosts.isEmpty()) {
                         _getSavedPostsWithUsersStateFlow.value = ResponseState.success(emptyList())
                     } else {
@@ -85,7 +87,15 @@ class SavedPostsViewModel @Inject constructor(
                                     addPostListToLocalUseCase.invoke(postList)
                                 if (addPostToLocalResult.size == postList.size) {
                                     addUserListToLocalUseCase.invoke(userList)
+                                    _getSavedPostsWithUsersStateFlow.value =
+                                        getSavedPostDetailsWithUserFromLocal.invoke(savedPosts)
+                                } else {
+                                    _getSavedPostsWithUsersStateFlow.value =
+                                        ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
                                 }
+                            } else {
+                                _getSavedPostsWithUsersStateFlow.value =
+                                    ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
                             }
                         }
                         _getSavedPostsWithUsersStateFlow.value = savedPostResponse
@@ -98,79 +108,102 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
-    fun addLike(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun addLikeOnPost(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val responseState = addLikeUseCase.invoke(
+                val addLikeResponse = addLikeUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
-                if (responseState.status == RequestStatusEnum.Success) {
+                if (addLikeResponse.status == RequestStatusEnum.Success) {
                     postDetails.likedBy.add(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 } else {
+                    if (addLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                        deletePostFromLocalUseCase.invoke(postDetails.postFirebaseId)
+                    }
                     _likeUnlikePostStateFlow.value =
-                        ResponseState.error(responseState.message ?: "", postDetails.postFirebaseId)
+                        ResponseState.error(
+                            addLikeResponse.message ?: "",
+                            postDetails.postFirebaseId
+                        )
                 }
             }
         }
     }
 
-    fun removeLike(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun removeLikeForPost(
+        postDetails: PostBean,
+        loggedInUserFirebaseId: String,
+        onUpdate: () -> Unit
+    ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val responseState = removeLikeUseCase.invoke(
+                val removeLikeResponse = removeLikeUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
-                if (responseState.status == RequestStatusEnum.Success) {
+                if (removeLikeResponse.status == RequestStatusEnum.Success) {
                     postDetails.likedBy.remove(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 }
+                if (removeLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    deletePostFromLocalUseCase.invoke(postDetails.postFirebaseId)
+                }
                 _likeUnlikePostStateFlow.value =
-                    ResponseState.error(responseState.message ?: "", postDetails.postFirebaseId)
+                    ResponseState.error(
+                        removeLikeResponse.message ?: "",
+                        postDetails.postFirebaseId
+                    )
             }
         }
     }
 
-    fun savePost(loggedInUsersBean: UsersBean, postId: String, onUpdate: () -> Unit) {
+    fun savePost(loggedInUsersBean: UsersBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
-                val responseState = savePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postId)
+                val responseState =
+                    savePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.add(postId)
+                    loggedInUsersBean.savedPosts.add(postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
+                    if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                        deletePostFromLocalUseCase.invoke(postFirebaseId)
+                    }
                     _saveUnSavePostStateFlow.value =
-                        ResponseState.error(responseState.message ?: "", postId)
+                        ResponseState.error(responseState.message ?: "", postFirebaseId)
                 }
             }
         }
     }
 
-    fun unSavePost(loggedInUsersBean: UsersBean, postId: String, onUpdate: () -> Unit) {
+    fun unSavePost(loggedInUsersBean: UsersBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postId)
+                    unSavePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.remove(postId)
+                    loggedInUsersBean.savedPosts.remove(postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
+                    if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                        deletePostFromLocalUseCase.invoke(postFirebaseId)
+                    }
                     _saveUnSavePostStateFlow.value =
-                        ResponseState.error(responseState.message ?: "", postId)
+                        ResponseState.error(responseState.message ?: "", postFirebaseId)
                 }
             }
         }
