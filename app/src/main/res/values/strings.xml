@@ -225,4 +225,5 @@
     <string name="viewing_in_offline_mode">Viewing in offline mode</string>
     <string name="post_not_found">Post not found</string>
     <string name="updating_post_visibility">Updating Post Visibility...</string>
+    <string name="post_deleted_successfully">Post deleted successfully</string>
 </resources>

@@ -154,10 +154,9 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
-    }
-    LaunchedEffect(Unit) {
         viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+
     }
     HandleLikeUnlikePostState(viewModel = viewModel)
     HandleSaveUnSavePost(viewModel)

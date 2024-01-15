@@ -41,7 +41,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -102,6 +101,7 @@ import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -125,7 +125,7 @@ fun PostDetailsScreen(
     }
 
     if (!viewModel.isInitialized) {
-        viewModel.initialize(context, post)
+        viewModel.initialize(context, post, homeSharedViewModel.usersDetails)
     }
 
     val snackBarHostState = SnackbarHostState()
@@ -305,7 +305,7 @@ fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
                 showDeletePostAlertDialog = false
                 viewModel.isDropdownMenuVisibleState.value = false
             }) {
-            viewModel.deletePost(postId = viewModel.post.postFirebaseId)
+            viewModel.deletePost()
             showDeletePostAlertDialog = false
             viewModel.isDropdownMenuVisibleState.value = false
         }
@@ -319,12 +319,6 @@ private fun PostBottomSection(
     context: Context,
     onBottomSheetItemClick: () -> Unit
 ) {
-    var likeCount by remember {
-        mutableIntStateOf(viewModel.post.likedBy.size)
-    }
-    var isSavedByCurrentUser by remember {
-        mutableStateOf(viewModel.post.isSavedByCurrentUser)
-    }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -335,13 +329,9 @@ private fun PostBottomSection(
                 IconButton(onClick = {
                     if (context.isNetworkAvailable()) {
                         if (viewModel.post.likedBy.contains(loggedInUser.firebaseUserId)) {
-                            viewModel.removeLike(loggedInUser.firebaseUserId) {
-                                likeCount--
-                            }
+                            viewModel.removeLikeForPost(loggedInUser.firebaseUserId)
                         } else {
-                            viewModel.addLike(loggedInUser.firebaseUserId) {
-                                likeCount++
-                            }
+                            viewModel.addLikeOnPost(loggedInUser.firebaseUserId)
                         }
                     } else {
                         viewModel.snackBarMessageState.value =
@@ -349,7 +339,7 @@ private fun PostBottomSection(
                     }
                 }) {
                     Icon(
-                        painter = if (viewModel.post.likedBy.contains(loggedInUser.firebaseUserId)) painterResource(
+                        painter = if (viewModel.isPostLikedByLoggedInUser.value) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
@@ -371,15 +361,9 @@ private fun PostBottomSection(
             IconButton(onClick = {
                 if (context.isNetworkAvailable()) {
                     if (viewModel.post.isSavedByCurrentUser) {
-                        viewModel.unSavePost(loggedInUser) {
-                            viewModel.post.isSavedByCurrentUser = false
-                            isSavedByCurrentUser = false
-                        }
+                        viewModel.unSavePost(loggedInUser)
                     } else {
-                        viewModel.savePost(loggedInUser) {
-                            viewModel.post.isSavedByCurrentUser = true
-                            isSavedByCurrentUser = true
-                        }
+                        viewModel.savePost(loggedInUser)
                     }
                 } else {
                     viewModel.snackBarMessageState.value =
@@ -387,11 +371,12 @@ private fun PostBottomSection(
                 }
             }) {
                 Icon(
-                    imageVector = if (isSavedByCurrentUser) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
+                    imageVector = if (viewModel.isPostSavedByLoggedInUser.value) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
                     contentDescription = stringResource(R.string.save_post)
                 )
             }
         }
+        val likeCount = viewModel.post.likedBy.size
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = if (likeCount == 1) stringResource(R.string._1_like) else stringResource(
@@ -489,6 +474,7 @@ fun HandleDeletePostState(
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator
 ) {
+    val context = LocalContext.current
     val deletePostState = viewModel.deletePostStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
@@ -515,6 +501,7 @@ fun HandleDeletePostState(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
+                context.showToast(stringResource(R.string.post_deleted_successfully))
                 viewModel.post.whetherDeleted = true
                 navigator.popBackStack()
                 isResponseHandled = true
