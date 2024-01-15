@@ -8,14 +8,14 @@ class RemoveFriendRequestUseCase @Inject constructor(private val repository: IUs
     /**
      * Removes a friend request from the database.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] object that indicates the success or failure of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.removeFriendRequest(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.removeFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

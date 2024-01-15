@@ -10,7 +10,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
-import com.example.connect.domain.useCase.posts.GetPostDetailsWithUserFromLocal
+import com.example.connect.domain.useCase.posts.GetSavedPostDetailsWithUserFromLocal
 import com.example.connect.domain.useCase.posts.GetSavedPostsWithUsersFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
 import com.example.connect.domain.useCase.posts.SavePostUseCase
@@ -35,7 +35,7 @@ class SavedPostsViewModel @Inject constructor(
     private val savePostUseCase: SavePostUseCase,
     private val unSavePostUseCase: UnSavePostUseCase,
     private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
-    private val getPostDetailsWithUserFromLocal: GetPostDetailsWithUserFromLocal,
+    private val getSavedPostDetailsWithUserFromLocal: GetSavedPostDetailsWithUserFromLocal,
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase
@@ -92,23 +92,22 @@ class SavedPostsViewModel @Inject constructor(
                     }
                 } else {
                     _getSavedPostsWithUsersStateFlow.value =
-                        getPostDetailsWithUserFromLocal.invoke(savedPosts)
-
+                        getSavedPostDetailsWithUserFromLocal.invoke(savedPosts)
                 }
             }
         }
     }
 
-    fun addLike(postDetails: PostBean, currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun addLike(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
-                    loggedInUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    postDetails.likedBy.add(currentUserFirebaseId)
+                    postDetails.likedBy.add(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
@@ -120,16 +119,16 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
-    fun removeLike(postDetails: PostBean, currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun removeLike(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = removeLikeUseCase.invoke(
-                    currentUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    postDetails.likedBy.remove(currentUserFirebaseId)
+                    postDetails.likedBy.remove(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)

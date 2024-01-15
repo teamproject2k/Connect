@@ -8,14 +8,14 @@ class WithdrawFriendRequestUseCase @Inject constructor(private val repository: I
     /**
      * Invokes the withdrawFriendRequest method in the repository.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A ResponseState object containing the result of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.withdrawFriendRequest(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.withdrawFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

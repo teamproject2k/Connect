@@ -66,7 +66,7 @@ class AddStoryViewModel @Inject constructor(
         isDataInitialized = true
     }
 
-    fun uploadUserStory(currentUserFirebaseId: String) {
+    fun uploadUserStory(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Perform the upload operation in the IO dispatcher.
@@ -81,7 +81,7 @@ class AddStoryViewModel @Inject constructor(
                     val uploadFileToRemoteResponse =
                         uploadFileToRemoteUseCase.invoke(
                             selectedMediaState.value!!.uri,
-                            "${FirebaseConstants.STORY_KEY}/$currentUserFirebaseId/${System.currentTimeMillis()}"
+                            "${FirebaseConstants.STORY_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
                         )
 
                     // Check if the upload operation was successful.
@@ -138,7 +138,7 @@ class AddStoryViewModel @Inject constructor(
                 // Create a StoryBean object with the story details.
                 val storyDetails = StoryBean(
                     "",
-                    currentUserFirebaseId,
+                    loggedInUserFirebaseId,
                     fileUrl,
                     captionTextState.value,
                     FunctionHelper.getCurrentTimeInMillis(),

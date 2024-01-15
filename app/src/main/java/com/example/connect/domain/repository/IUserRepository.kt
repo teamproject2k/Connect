@@ -87,115 +87,115 @@ interface IUserRepository {
      */
     suspend fun getAllUsersNotInList(
         excludeUserIdList: List<String>,
-        currentUserFirebaseId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>>
 
     /**
      * Sends a friend request to the specified user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to send the request to.
      *
      * @return A [ResponseState] containing either a success or failure message.
      */
     suspend fun sendFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Withdraws a friend request from the current user to the requested user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A [ResponseState] containing either a success or failure message.
      */
     suspend fun withdrawFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Accepts a friend request.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing either a success or error message.
      */
     suspend fun acceptFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Removes a friend request from the database.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing either a success message or an error message.
      */
     suspend fun removeFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Blocks a user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to be blocked.
      * @return A [ResponseState] containing either a success or error message.
      */
     suspend fun blockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Unblocks a user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to unblock.
      * @return A [ResponseState] containing either a success or failure message.
      */
     suspend fun unBlockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Unfriends the requested user from the current user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A [ResponseState] containing either a success or error message.
      */
     suspend fun unFriendUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Unfriends and blocks a user.
      *
-     * @param currentUserFirebaseId The current user's Firebase ID.
+     * @param loggedInUserFirebaseId The current user's Firebase ID.
      * @param requestedUserFirebaseId The requested user's Firebase ID.
      * @return A [ResponseState] containing either a success or failure message.
      */
     suspend fun unFriendAndBlockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
 
     /**
      * Updates the status with other users on the database.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param otherUsersStatus A map of other users' Firebase IDs to their statuses.
      * @return The number of rows affected.
      */
     suspend fun updateOtherUsersStatusOnDb(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int
 
@@ -223,11 +223,11 @@ interface IUserRepository {
 
 
     suspend fun updateFCMTokenOnRemote(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         fcmToken: String
     ): ResponseState<Nothing>
 
-    suspend fun updateFCMTokenOnLocal(currentUserFirebaseId: String, updatedToken: String): Int
+    suspend fun updateFCMTokenOnLocal(loggedInUserFirebaseId: String, updatedToken: String): Int
 
 
     suspend fun updateSavedPost(loggedInUserFirebaseId: String, savedPost: List<String>): Int

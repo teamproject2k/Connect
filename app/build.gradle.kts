@@ -122,11 +122,6 @@ dependencies {
     //chucker
     debugImplementation("com.github.chuckerteam.chucker:library:4.0.0")
     releaseImplementation("com.github.chuckerteam.chucker:library-no-op:4.0.0")
-//    //accompanist
-//    implementation ("com.google.accompanist:accompanist-pager:0.17.0")
-
-
-
 }
 tasks {
     // Configure the test task to use JUnit Platform

@@ -8,14 +8,14 @@ class BlockUserUseCase @Inject constructor(private val repository: IUserReposito
     /**
      * Blocks a user.
      *
-     * @param currentUserFirebaseId The ID of the current user.
+     * @param loggedInUserFirebaseId The ID of the current user.
      * @param requestedUserFirebaseId The ID of the user to block.
      * @return A [ResponseState] containing the result of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.blockUser(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.blockUser(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

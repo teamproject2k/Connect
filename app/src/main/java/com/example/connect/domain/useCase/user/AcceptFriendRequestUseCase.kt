@@ -8,14 +8,14 @@ class AcceptFriendRequestUseCase @Inject constructor(private val repository: IUs
     /**
      * Accepts a friend request.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing the result of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.acceptFriendRequest(currentUserFirebaseId, requestUserFirebaseId)
+        return repository.acceptFriendRequest(loggedInUserFirebaseId, requestUserFirebaseId)
     }
 }

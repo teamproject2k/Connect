@@ -35,7 +35,7 @@ class IStoryRepositoryImpl @Inject constructor(
         return elapsedTimeInMillis < twentyFourHoursInMillis
     }
 
-    override suspend fun getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
+    override suspend fun getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
         return try {
             val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
                 .whereEqualTo(StoryRemoteEntity::whetherDeleted.name, false).get().await()
@@ -67,20 +67,20 @@ class IStoryRepositoryImpl @Inject constructor(
                 storyList.removeIf { story ->
                     val user = userList.find { it.firebaseUserId == story.fireBaseUserId }
                     val whetherShowStory =
-                        story.fireBaseUserId == currentUserFirebaseId ||
-                                (user?.friendList?.contains(currentUserFirebaseId) == true)
+                        story.fireBaseUserId == loggedInUserFirebaseId ||
+                                (user?.friendList?.contains(loggedInUserFirebaseId) == true)
                     if (!whetherShowStory) {
                         userList.remove(user)
                     }
                     !whetherShowStory || user == null
                 }
                 val currentUserStories =
-                    storyList.filter { it.fireBaseUserId == currentUserFirebaseId } as ArrayList
+                    storyList.filter { it.fireBaseUserId == loggedInUserFirebaseId } as ArrayList
                 if (currentUserStories.isNotEmpty()) {
-                    storiesPerUser[currentUserFirebaseId] = currentUserStories
+                    storiesPerUser[loggedInUserFirebaseId] = currentUserStories
                 }
                 storyList.forEach { story ->
-                    if (story.fireBaseUserId != currentUserFirebaseId) {
+                    if (story.fireBaseUserId != loggedInUserFirebaseId) {
                         val storyPoster =
                             userList.find { it.firebaseUserId == story.fireBaseUserId }
                         if (storyPoster != null) {

@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.add_post
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +59,7 @@ class AddPostViewModel @Inject constructor(
         isFirstTimeSetup = false
     }
 
-    fun uploadUserPost(currentUserFirebaseId: String) {
+    fun uploadUserPost(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Perform the upload operation in the IO dispatcher.
@@ -76,7 +75,7 @@ class AddPostViewModel @Inject constructor(
                     val uploadFileToRemoteResponseState =
                         uploadFileToRemoteUseCase.invoke(
                             selectedMediaState.value!!.uri,
-                            "${FirebaseConstants.POST_KEY}/$currentUserFirebaseId/${System.currentTimeMillis()}"
+                            "${FirebaseConstants.POST_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
                         )
 
                     // Check if the upload operation was successful.
@@ -126,7 +125,7 @@ class AddPostViewModel @Inject constructor(
                 // Create a PostBean object with the post details.
                 val postDetails = PostBean(
                     "",
-                    currentUserFirebaseId,
+                    loggedInUserFirebaseId,
                     fileUrl,
                     captionTextState.value,
                     FunctionHelper.getCurrentTimeInMillis(),
@@ -140,7 +139,7 @@ class AddPostViewModel @Inject constructor(
 
                 // Upload the post details to the remote server.
                 val serverResponseState =
-                    uploadPostToRemoteUseCase.invoke(postDetails, currentUserFirebaseId)
+                    uploadPostToRemoteUseCase.invoke(postDetails, loggedInUserFirebaseId)
 
                 // Check if the upload operation was successful.
                 if (serverResponseState.status == RequestStatusEnum.Success) {

@@ -8,14 +8,14 @@ class UnBlockUserUseCase @Inject constructor(private val repository: IUserReposi
     /**
      * Unblocks a user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to unblock.
      * @return A [ResponseState] containing either [Nothing] if the user was successfully unblocked or an error message if the unblocking failed.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.unBlockUser(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.unBlockUser(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

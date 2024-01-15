@@ -8,14 +8,14 @@ class UnfriendUserUseCase @Inject constructor(private val repository: IUserRepos
     /**
      * Unfriends a user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to unfriend.
      * @return A [ResponseState] containing either a success or failure message.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.unFriendUser(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.unFriendUser(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

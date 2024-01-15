@@ -46,15 +46,15 @@ class CurrentUserProfileViewModel @Inject constructor(
     /**
      * Gets the details of the post.
      */
-    fun getPostDetails(currentUserFirebaseId: String, whetherGetDataFomRemote: Boolean) {
+    fun getPostDetails(loggedInUserFirebaseId: String, whetherGetDataFomRemote: Boolean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
                 if (whetherGetDataFomRemote) {
                     val postDetailsFromServerResponseState =
                         getPostDetailsFromRemoteUseCase.invoke(
-                            currentUserFirebaseId,
-                            currentUserFirebaseId
+                            loggedInUserFirebaseId,
+                            loggedInUserFirebaseId
                         )
 
                     if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success && postDetailsFromServerResponseState.data != null) {
@@ -63,7 +63,7 @@ class CurrentUserProfileViewModel @Inject constructor(
                     _postDetailsStateFlow.value = postDetailsFromServerResponseState
                 } else {
                     _postDetailsStateFlow.value = ResponseState.success(
-                        getPostDetailsFromLocalUseCase.invoke(currentUserFirebaseId)
+                        getPostDetailsFromLocalUseCase.invoke(loggedInUserFirebaseId)
                     )
                 }
             }

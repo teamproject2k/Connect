@@ -8,14 +8,14 @@ class UnfriendAndBlockUserUseCase @Inject constructor(private val repository: IU
     /**
      * Unfriends and blocks a user.
      *
-     * @param currentUserFirebaseId The ID of the current user.
+     * @param loggedInUserFirebaseId The ID of the current user.
      * @param requestedUserFirebaseId The ID of the user to unfriend and block.
      * @return A response state indicating the success or failure of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.unFriendAndBlockUser(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.unFriendAndBlockUser(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

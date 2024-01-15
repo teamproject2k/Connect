@@ -236,7 +236,7 @@ private fun ProfileScreen(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     userDetails: UsersBean,
-    currentUserFirebaseId: String,
+    loggedInUserFirebaseId: String,
     onOptionsMenuClick: () -> Unit
 ) {
     if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentUserUiEnum.BlockedByOtherUser.name) {
@@ -260,7 +260,7 @@ private fun ProfileScreen(
             ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
-            HandlePostSection(viewModel, navigator, userDetails, currentUserFirebaseId)
+            HandlePostSection(viewModel, navigator, userDetails, loggedInUserFirebaseId)
         }
     }
 }
@@ -511,7 +511,7 @@ private fun HandlePostSection(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     usersBean: UsersBean,
-    currentUserFirebaseId: String
+    loggedInUserFirebaseId: String
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -535,7 +535,7 @@ private fun HandlePostSection(
                 navigator,
                 postDetailsList = updatedPostList,
                 false,
-                currentUserFirebaseId,
+                loggedInUserFirebaseId,
                 usersBean
             )
         }

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class UnSavePostUseCase @Inject constructor(private val repository: IUserRepository) {
 
-    suspend fun invoke(currentUserFirebaseId: String, postId: String): ResponseState<Nothing> {
-        return repository.unSavePost(currentUserFirebaseId, postId)
+    suspend fun invoke(loggedInUserFirebaseId: String, postId: String): ResponseState<Nothing> {
+        return repository.unSavePost(loggedInUserFirebaseId, postId)
     }
 }

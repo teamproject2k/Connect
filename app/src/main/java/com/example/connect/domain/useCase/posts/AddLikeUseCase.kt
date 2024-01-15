@@ -10,6 +10,6 @@ class AddLikeUseCase @Inject constructor(private val repository: IPostRepository
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.addLikeOf(loggedInUserFirebaseId, postFirebaseId)
+        return repository.addLikeOnPost(loggedInUserFirebaseId, postFirebaseId)
     }
 }

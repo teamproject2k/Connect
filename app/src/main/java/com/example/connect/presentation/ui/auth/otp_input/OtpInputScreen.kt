@@ -59,7 +59,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.ui.common.ColorsHelper.warning
+import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderButton
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.OutlinedTextFieldNoLabel
@@ -467,7 +467,7 @@ private fun HandleBackPressed(navigator: DestinationsNavigator) {
     if (showLogoutDialog) {
         TitleMessageIconOkCancelDialog(
             title = stringResource(id = R.string.go_back),
-            iconTint = warning(),
+            iconTint = ColorsHelper.warning(),
             imageVector = Icons.Default.Warning,
             subTitle = stringResource(id = R.string.do_you_want_to_edit_your_phone_number),
             onCancel = { showLogoutDialog = false }) {

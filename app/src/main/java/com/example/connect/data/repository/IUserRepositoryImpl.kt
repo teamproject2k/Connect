@@ -162,7 +162,7 @@ class IUserRepositoryImpl @Inject constructor(
 
     override suspend fun getAllUsersNotInList(
         excludeUserIdList: List<String>,
-        currentUserFirebaseId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>> {
         // Try to get the users from the FireStore database whose id is not in excludeUserIdList.
         return try {
@@ -174,7 +174,7 @@ class IUserRepositoryImpl @Inject constructor(
             result.documents.forEach { document ->
                 val user = document.toObject(UserRemoteEntity::class.java)
                 if (user != null) {
-                    val statusWithCurrentUser = user.otherUsersStatus[currentUserFirebaseId]
+                    val statusWithCurrentUser = user.otherUsersStatus[loggedInUserFirebaseId]
                     if (statusWithCurrentUser != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                         usersList.add(user.toUserBean())
                     }
@@ -190,14 +190,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun sendFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // Get the documents for the current user and the requested user.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.USER_KEY)
                     .document(requestedUserFirebaseId)
                 val currentUser =
@@ -213,7 +214,7 @@ class IUserRepositoryImpl @Inject constructor(
                             StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
@@ -226,7 +227,7 @@ class IUserRepositoryImpl @Inject constructor(
                             UserRemoteEntity::otherUsersStatus.name,
                             currentUser.otherUsersStatus
                         )
-                        requestUser.otherUsersStatus[currentUserFirebaseId] =
+                        requestUser.otherUsersStatus[loggedInUserFirebaseId] =
                             StatusWithCurrentUserRemoteEnum.RequestedByOtherUser.name
                         transaction.update(
                             requestedUserDocumentPath,
@@ -251,13 +252,14 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun withdrawFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.USER_KEY)
                     .document(requestedUserFirebaseId)
                 val currentUser =
@@ -273,7 +275,7 @@ class IUserRepositoryImpl @Inject constructor(
                         )
                     // Get the requested user's status with the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
                     // Check if the current user has requested the requested user and the requested user has requested the current user.
@@ -287,7 +289,7 @@ class IUserRepositoryImpl @Inject constructor(
                             currentUser.otherUsersStatus
                         )
                         // Remove the current user from the requested user's other users status map.
-                        requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                        requestUser.otherUsersStatus.remove(loggedInUserFirebaseId)
                         // Update the requested user's document with the updated other users status map.
                         transaction.update(
                             requestedUserDocumentPath,
@@ -312,7 +314,7 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun acceptFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
@@ -320,7 +322,8 @@ class IUserRepositoryImpl @Inject constructor(
             fireStore.runTransaction { transaction ->
                 // Get the documents for the current user and the requested user.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.USER_KEY)
                     .document(requestedUserFirebaseId)
                 val currentUser =
@@ -337,7 +340,7 @@ class IUserRepositoryImpl @Inject constructor(
                             StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
@@ -351,7 +354,7 @@ class IUserRepositoryImpl @Inject constructor(
                             UserRemoteEntity::otherUsersStatus.name,
                             currentUser.otherUsersStatus
                         )
-                        requestUser.otherUsersStatus[currentUserFirebaseId] =
+                        requestUser.otherUsersStatus[loggedInUserFirebaseId] =
                             StatusWithCurrentUserRemoteEnum.Friends.name
                         transaction.update(
                             requestedUserDocumentPath,
@@ -377,14 +380,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun removeFriendRequest(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // We get the documents for the current user and the requested user.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.USER_KEY)
                     .document(requestedUserFirebaseId)
                 // We get the UserRemoteEntity objects for the current user and the requested user.
@@ -402,7 +406,7 @@ class IUserRepositoryImpl @Inject constructor(
                         )
                     // We get the status of the requested user for the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
                     // If the current user status is "RequestedByOtherUser" and the requested user status is "RequestedByCurrentUser", we continue.
@@ -416,7 +420,7 @@ class IUserRepositoryImpl @Inject constructor(
                             currentUser.otherUsersStatus
                         )
                         // We remove the current user from the requested user's other users status map.
-                        requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                        requestUser.otherUsersStatus.remove(loggedInUserFirebaseId)
                         // We update the requested user document in the database.
                         transaction.update(
                             requestedUserDocumentPath,
@@ -441,14 +445,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun blockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // We get the current user's document from the database.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val currentUser =
                     transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
 
@@ -467,7 +472,7 @@ class IUserRepositoryImpl @Inject constructor(
                         UserRemoteEntity::otherUsersStatus.name,
                         currentUser.otherUsersStatus
                     )
-                    requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                    requestUser.otherUsersStatus.remove(loggedInUserFirebaseId)
                     transaction.update(
                         requestedUserDocumentPath,
                         UserRemoteEntity::otherUsersStatus.name,
@@ -488,14 +493,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unBlockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // Get the current user's document from the database.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val currentUser =
                     transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
 
@@ -516,7 +522,7 @@ class IUserRepositoryImpl @Inject constructor(
 
                     // Get the requested user's status for the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
@@ -550,14 +556,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unFriendUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // We get the documents of the two users from the database.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val currentUser =
                     transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
                 val requestedUserDocumentPath = fireStore.collection(FirebaseConstants.USER_KEY)
@@ -573,7 +580,7 @@ class IUserRepositoryImpl @Inject constructor(
                             StatusWithCurrentUserRemoteEnum.NotFriends.name
                         )
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
@@ -585,7 +592,7 @@ class IUserRepositoryImpl @Inject constructor(
                             UserRemoteEntity::otherUsersStatus.name,
                             currentUser.otherUsersStatus
                         )
-                        requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                        requestUser.otherUsersStatus.remove(loggedInUserFirebaseId)
                         transaction.update(
                             requestedUserDocumentPath,
                             UserRemoteEntity::otherUsersStatus.name,
@@ -609,14 +616,15 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unFriendAndBlockUser(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 // Get the current user document from the database.
                 val currentUserDocumentPath =
-                    fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+                    fireStore.collection(FirebaseConstants.USER_KEY)
+                        .document(loggedInUserFirebaseId)
                 val currentUser =
                     transaction.get(currentUserDocumentPath).toObject(UserRemoteEntity::class.java)
 
@@ -637,7 +645,7 @@ class IUserRepositoryImpl @Inject constructor(
 
                     // Get the requested user's status with the current user.
                     val requestUserStatus = requestUser.otherUsersStatus.getOrDefault(
-                        currentUserFirebaseId,
+                        loggedInUserFirebaseId,
                         StatusWithCurrentUserRemoteEnum.NotFriends.name
                     )
 
@@ -655,7 +663,7 @@ class IUserRepositoryImpl @Inject constructor(
                         )
 
                         // Remove the current user from the requested user's otherUsersStatus map.
-                        requestUser.otherUsersStatus.remove(currentUserFirebaseId)
+                        requestUser.otherUsersStatus.remove(loggedInUserFirebaseId)
 
                         // Update the requested user document in the database.
                         transaction.update(
@@ -682,14 +690,14 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateOtherUsersStatusOnDb(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {
         // Get the UsersDao object from the AppDatabase object.
         val usersDao = appDatabase.getUsersDao()
 
         // Call the updateOtherUsersStatus() method on the UsersDao object.
-        return usersDao.updateOtherUsersStatus(currentUserFirebaseId, otherUsersStatus)
+        return usersDao.updateOtherUsersStatus(loggedInUserFirebaseId, otherUsersStatus)
     }
 
     override suspend fun liveObserveUserFromRemote(
@@ -800,11 +808,11 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateFCMTokenOnRemote(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         fcmToken: String
     ): ResponseState<Nothing> {
         return try {
-            fireStore.collection(FirebaseConstants.USER_KEY).document(currentUserFirebaseId)
+            fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
                 .update(UserRemoteEntity::fcmToken.name, fcmToken).await()
             ResponseState.success(null)
         } catch (exception: Exception) {
@@ -813,11 +821,11 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateFCMTokenOnLocal(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         updatedToken: String
     ): Int {
         return appDatabase.getUsersDao()
-            .updateFCMTokenOnLocal(currentUserFirebaseId, fcmToken = updatedToken)
+            .updateFCMTokenOnLocal(loggedInUserFirebaseId, fcmToken = updatedToken)
     }
 
     override suspend fun updateSavedPost(
@@ -826,7 +834,7 @@ class IUserRepositoryImpl @Inject constructor(
     ): Int {
         return appDatabase.getUsersDao().updateSavedPostOnLocal(
             savedPostList = savedPost,
-            currentUserFirebaseId = loggedInUserFirebaseId
+            loggedInUserFirebaseId = loggedInUserFirebaseId
         )
     }
 

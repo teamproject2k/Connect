@@ -6,9 +6,9 @@ import javax.inject.Inject
 
 class RemoveLikeUseCase @Inject constructor(private val repository: IPostRepository) {
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.removeLikeOf(currentUserFirebaseId, postFirebaseId)
+        return repository.removeLikeOf(loggedInUserFirebaseId, postFirebaseId)
     }
 }

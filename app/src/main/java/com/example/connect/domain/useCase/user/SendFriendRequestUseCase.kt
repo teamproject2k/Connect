@@ -8,14 +8,14 @@ class SendFriendRequestUseCase @Inject constructor(private val repository: IUser
     /**
      * Sends a friend request to the specified user.
      *
-     * @param currentUserFirebaseId The Firebase ID of the current user.
+     * @param loggedInUserFirebaseId The Firebase ID of the current user.
      * @param requestedUserFirebaseId The Firebase ID of the user to send the friend request to.
      * @return A [ResponseState] containing the result of the operation.
      */
     suspend fun invoke(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.sendFriendRequest(currentUserFirebaseId, requestedUserFirebaseId)
+        return repository.sendFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

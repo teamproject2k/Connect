@@ -23,8 +23,20 @@ interface IPostDao {
 
     @Transaction
     @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedPostIds) ORDER BY createdAt DESC")
-    fun getPostsAndUsers(savedPostIds: List<String>): List<PostWithUserDetailsFromLocal>
+    fun getSavedPostsAndUsers(savedPostIds: List<String>): List<PostWithUserDetailsFromLocal>
+
+    @Transaction
+    @Query("SELECT * FROM posts WHERE whetherDeleted=0 ORDER BY createdAt DESC")
+    fun getPostDetailsWithUsers(): List<PostWithUserDetailsFromLocal>
 
     @Update
     fun updatePostDetails(postDetails: PostDbEntity): Int
+
+
+    @Query("DELETE FROM posts WHERE postFirebaseId = :postFirebaseId")
+    fun deletePost(postFirebaseId: String): Int
+
+
+    @Query("DELETE FROM posts")
+    fun deleteAllPosts(): Int
 }

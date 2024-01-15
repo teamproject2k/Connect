@@ -14,8 +14,8 @@ class GetPostDetailsFromRemoteUseCase @Inject constructor(private val repository
      */
     suspend fun invoke(
         fireBaseId: String,
-        currentUserFirebaseId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {
-        return repository.getPostDetailsFromRemote(fireBaseId, currentUserFirebaseId)
+        return repository.getPostDetailsFromRemote(fireBaseId, loggedInUserFirebaseId)
     }
 }

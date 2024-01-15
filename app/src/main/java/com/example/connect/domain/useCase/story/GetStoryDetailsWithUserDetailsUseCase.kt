@@ -7,7 +7,7 @@ import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
 class GetStoryDetailsWithUserDetailsUseCase @Inject constructor(private val repository: IStoryRepository) {
-    suspend fun invoke(currentUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
-        return repository.getAllStoriesWithUserDetailsFromRemote(currentUserFirebaseId)
+    suspend fun invoke(loggedInUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
+        return repository.getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId)
     }
 }

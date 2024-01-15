@@ -7,7 +7,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 interface IStoryRepository {
     suspend fun addStoryToRemote(story: StoryBean): ResponseState<String>
     suspend fun getAllStoriesWithUserDetailsFromRemote(
-        currentUserFirebaseId: String
+        loggedInUserFirebaseId: String
     ): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>>
 
     suspend fun addUserToSeenListInRemote(

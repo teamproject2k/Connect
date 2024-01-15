@@ -9,11 +9,11 @@ class UpdateFCMTokenOnRemoteUseCase @Inject constructor(private val repository: 
     /**
      * Updates the user's FCM token on the remote server.
      *
-     * @param currentUserFirebaseId The user's Firebase ID.
+     * @param loggedInUserFirebaseId The user's Firebase ID.
      * @param fcmToken The user's FCM token.
      * @return A [ResponseState] containing the result of the operation i.e success or failure.
      */
-    suspend fun invoke(currentUserFirebaseId: String, fcmToken: String): ResponseState<Nothing> {
-        return repository.updateFCMTokenOnRemote(currentUserFirebaseId, fcmToken)
+    suspend fun invoke(loggedInUserFirebaseId: String, fcmToken: String): ResponseState<Nothing> {
+        return repository.updateFCMTokenOnRemote(loggedInUserFirebaseId, fcmToken)
     }
 }

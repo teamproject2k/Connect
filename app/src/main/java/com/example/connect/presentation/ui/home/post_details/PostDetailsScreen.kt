@@ -319,7 +319,6 @@ private fun PostBottomSection(
     context: Context,
     onBottomSheetItemClick: () -> Unit
 ) {
-    val context = LocalContext.current
     var likeCount by remember {
         mutableIntStateOf(viewModel.post.likedBy.size)
     }

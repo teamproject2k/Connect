@@ -64,6 +64,7 @@ import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.ui.chat.ChatActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
@@ -158,7 +159,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     LaunchedEffect(Unit) {
         viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
     }
-    HandleLikeUnlikeState(viewModel = viewModel)
+    HandleLikeUnlikePostState(viewModel = viewModel)
     HandleSaveUnSavePost(viewModel)
 }
 
@@ -395,37 +396,48 @@ private fun HandlePostDetailsWithUserDetails(
     navigator: DestinationsNavigator
 ) {
     val postDetailsWithUserDetailsState = viewModel.postDetailsStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (postDetailsWithUserDetailsState.status) {
         RequestStatusEnum.Loading -> {
             PostListLoadingSection()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                viewModel.postListWithUsersState.clear()
+                viewModel.postListWithUsersState.addAll(
+                    postDetailsWithUserDetailsState.data ?: emptyList()
+                )
+                isResponseHandled = true
+            }
             PostListUiSection(
-                postWithUser = postDetailsWithUserDetailsState.data,
-                currentUsersBean = currentUsersBean,
+                loggedInUserBean = currentUsersBean,
                 navigator = navigator,
                 viewModel = viewModel
             )
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    postDetailsWithUserDetailsState.message ?: stringResource(
-                        id = R.string.some_error_occurred
-                    )
+            if (!isResponseHandled) {
+                if (postDetailsWithUserDetailsState.message == FirebaseErrorCodes.UNKNOWN_ERROR) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.something_went_wrong)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        postDetailsWithUserDetailsState.message ?: stringResource(
+                            id = R.string.something_went_wrong
+                        )
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
                     ScreenNameEnum.HomeScreen.name,
                     postDetailsWithUserDetailsState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
@@ -437,31 +449,24 @@ private fun HandlePostDetailsWithUserDetails(
 
 @Composable
 private fun PostListUiSection(
-    postWithUser: Pair<List<PostBean>, List<UsersBean>>?,
-    currentUsersBean: UsersBean,
+    loggedInUserBean: UsersBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
-    if (postWithUser == null || postWithUser.first.isEmpty()) {
+    if (viewModel.postListWithUsersState.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_posts_found))
         }
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(postWithUser.first.filter { !it.whetherDeleted }, key = {
-                it.postFirebaseId
-            }) { post ->
-                val userDetails =
-                    postWithUser.second.find { it.firebaseUserId == post.createdByUserFirebaseId }
-                if (userDetails != null) {
-                    PostListItem(
-                        usersDetails = userDetails,
-                        postDetails = post,
-                        currentUserFirebaseId = currentUsersBean.firebaseUserId,
-                        navigator = navigator,
-                        viewModel = viewModel
-                    )
-                }
+            items(viewModel.postListWithUsersState) { postWithUser ->
+                PostListItem(
+                    usersDetails = postWithUser.userDetail,
+                    postDetails = postWithUser.postDetail,
+                    loggedInUserBean = loggedInUserBean,
+                    navigator = navigator,
+                    viewModel = viewModel
+                )
             }
         }
     }
@@ -471,7 +476,7 @@ private fun PostListUiSection(
 private fun PostListItem(
     usersDetails: UsersBean,
     postDetails: PostBean,
-    currentUserFirebaseId: String,
+    loggedInUserBean: UsersBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -483,7 +488,7 @@ private fun PostListItem(
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                 .clickable {
-                    if (currentUserFirebaseId == usersDetails.firebaseUserId) {
+                    if (loggedInUserBean.firebaseUserId == usersDetails.firebaseUserId) {
                         navigator.navigate(CurrentUserProfileScreenDestination)
                     } else {
                         navigator.navigate(OtherUserProfileScreenDestination(usersDetails))
@@ -508,7 +513,7 @@ private fun PostListItem(
         ) {
             PostCaptionMediaSection(postDetails = postDetails)
         }
-        PostBottomSection(postDetails, viewModel, usersDetails, currentUserFirebaseId, navigator)
+        PostBottomSection(postDetails, viewModel, usersDetails, loggedInUserBean, navigator)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -519,7 +524,7 @@ private fun PostBottomSection(
     postDetails: PostBean,
     viewModel: HomeViewModel,
     userDetails: UsersBean,
-    currentUserFirebaseId: String,
+    loggedInUserBean: UsersBean,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -527,32 +532,33 @@ private fun PostBottomSection(
         mutableIntStateOf(postDetails.likedBy.size)
     }
     var isSavedByCurrentUser by remember {
-        mutableStateOf(postDetails.isSavedByCurrentUser)
+        mutableStateOf(loggedInUserBean.savedPosts.contains(postDetails.postFirebaseId))
     }
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 IconButton(onClick = {
-                    if (postDetails.likedBy.contains(currentUserFirebaseId)) {
-                        viewModel.removeLike(postDetails.postFirebaseId, currentUserFirebaseId) {
-                            postDetails.likedBy.remove(currentUserFirebaseId)
+                    if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) {
+                        viewModel.removeLikeForPost(
+                            postDetails,
+                            loggedInUserBean.firebaseUserId
+                        ) {
                             likeCount--
                         }
                     } else {
-                        viewModel.addLike(postDetails.postFirebaseId, currentUserFirebaseId) {
-                            postDetails.likedBy.add(currentUserFirebaseId)
+                        viewModel.addLikeOnPost(postDetails, loggedInUserBean.firebaseUserId) {
                             likeCount++
                         }
                     }
                 }) {
                     Icon(
-                        painter = if (postDetails.likedBy.contains(currentUserFirebaseId)) painterResource(
+                        painter = if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
                             id = R.string.like_post
                         ),
-                        tint = if (postDetails.likedBy.contains(currentUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
+                        tint = if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) ColorsHelper.red() else LocalContentColor.current
                     )
                 }
                 IconButton(onClick = {
@@ -560,7 +566,7 @@ private fun PostBottomSection(
                         PostDetailsScreenDestination(
                             postDetails,
                             userDetails,
-                            currentUserFirebaseId
+                            loggedInUserBean.firebaseUserId
                         )
                     )
                 }) {
@@ -571,14 +577,12 @@ private fun PostBottomSection(
                 }
             }
             IconButton(onClick = {
-                if (postDetails.isSavedByCurrentUser) {
-                    viewModel.unSavePost(currentUserFirebaseId, postDetails.postFirebaseId) {
-                        postDetails.isSavedByCurrentUser = false
+                if (loggedInUserBean.savedPosts.contains(postDetails.postFirebaseId)) {
+                    viewModel.unSavePost(loggedInUserBean, postDetails.postFirebaseId) {
                         isSavedByCurrentUser = false
                     }
                 } else {
-                    viewModel.savePost(currentUserFirebaseId, postDetails.postFirebaseId) {
-                        postDetails.isSavedByCurrentUser = true
+                    viewModel.savePost(loggedInUserBean, postDetails.postFirebaseId) {
                         isSavedByCurrentUser = true
                     }
                 }
@@ -622,7 +626,7 @@ private fun PostBottomSection(
 }
 
 @Composable
-private fun HandleLikeUnlikeState(viewModel: HomeViewModel) {
+private fun HandleLikeUnlikePostState(viewModel: HomeViewModel) {
     val likeUnlikeState = viewModel.likeUnlikePostStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -635,8 +639,15 @@ private fun HandleLikeUnlikeState(viewModel: HomeViewModel) {
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                if (likeUnlikeState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    val postFirebaseId = likeUnlikeState.data
+                    viewModel.postListWithUsersState.removeIf { it.postDetail.postFirebaseId == postFirebaseId }
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.post_not_found)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

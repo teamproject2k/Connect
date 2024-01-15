@@ -383,19 +383,19 @@ private fun BottomButtons(onSelectMedia: (mediaType: ActivityResultContracts.Pic
  *
  * @param viewModel The view model for the add post screen.
  * @param context The context of the activity.
- * @param currentUserFirebaseId The Firebase ID of the current user.
+ * @param loggedInUserFirebaseId The Firebase ID of the current user.
  */
 private fun handleButtonClick(
     viewModel: AddPostViewModel,
     context: Context,
-    currentUserFirebaseId: String
+    loggedInUserFirebaseId: String
 ) {
     if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
         if (context.isNetworkAvailable()) {
-            viewModel.uploadUserPost(currentUserFirebaseId)
+            viewModel.uploadUserPost(loggedInUserFirebaseId)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)

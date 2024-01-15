@@ -22,22 +22,22 @@ interface IUsersDao {
     fun getUserDetails(fireBaseId: String): UsersDbEntity?
 
 
-    @Query("UPDATE users SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :currentUserFirebaseId")
+    @Query("UPDATE users SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :loggedInUserFirebaseId")
     fun updateOtherUsersStatus(
-        currentUserFirebaseId: String,
+        loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int
 
     @RawQuery
     fun updateUserDetails(queryToExecute: SimpleSQLiteQuery): Long
 
-    @Query("UPDATE users SET fcmToken = :fcmToken WHERE firebaseUserId = :currentUserFirebaseId")
-    fun updateFCMTokenOnLocal(currentUserFirebaseId: String, fcmToken: String): Int
+    @Query("UPDATE users SET fcmToken = :fcmToken WHERE firebaseUserId = :loggedInUserFirebaseId")
+    fun updateFCMTokenOnLocal(loggedInUserFirebaseId: String, fcmToken: String): Int
 
-    @Query("UPDATE users SET savedPosts = :savedPostList WHERE firebaseUserId = :currentUserFirebaseId")
+    @Query("UPDATE users SET savedPosts = :savedPostList WHERE firebaseUserId = :loggedInUserFirebaseId")
     fun updateSavedPostOnLocal(
         savedPostList: List<String>,
-        currentUserFirebaseId: String
+        loggedInUserFirebaseId: String
     ): Int
 
 

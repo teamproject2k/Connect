@@ -348,7 +348,7 @@ private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
 
 @Composable
 private fun BottomSection(
-    currentUserFirebaseId: String,
+    loggedInUserFirebaseId: String,
     viewModel: AddStoryViewModel,
     onMediaSelect: () -> Unit
 ) {
@@ -426,7 +426,7 @@ private fun BottomSection(
                         .size(38.dp)
                         .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
                         .clickable {
-                            handleButtonClick(viewModel, context, currentUserFirebaseId)
+                            handleButtonClick(viewModel, context, loggedInUserFirebaseId)
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -443,14 +443,14 @@ private fun BottomSection(
 private fun handleButtonClick(
     viewModel: AddStoryViewModel,
     context: Context,
-    currentUserFirebaseId: String
+    loggedInUserFirebaseId: String
 ) {
     if (viewModel.captionTextState.value.isBlank() && viewModel.selectedMediaState.value == null) {
         viewModel.snackBarMessageState.value =
             context.getString(R.string.please_either_attach_image_video_or_add_some_description)
     } else {
         if (context.isNetworkAvailable()) {
-            viewModel.uploadUserStory(currentUserFirebaseId)
+            viewModel.uploadUserStory(loggedInUserFirebaseId)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)

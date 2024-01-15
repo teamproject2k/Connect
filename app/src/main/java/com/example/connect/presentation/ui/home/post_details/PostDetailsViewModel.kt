@@ -113,16 +113,16 @@ class PostDetailsViewModel @Inject constructor(
         isInitialized = true
     }
 
-    fun addLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun addLike(loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = addLikeUseCase.invoke(
-                    loggedInUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    post.likedBy.add(currentUserFirebaseId)
+                    post.likedBy.add(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(post)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
@@ -134,16 +134,16 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun removeLike(currentUserFirebaseId: String, onUpdate: () -> Unit) {
+    fun removeLike(loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
                 val responseState = removeLikeUseCase.invoke(
-                    currentUserFirebaseId = currentUserFirebaseId,
+                    loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    post.likedBy.remove(currentUserFirebaseId)
+                    post.likedBy.remove(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(post)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
