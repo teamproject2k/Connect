@@ -66,7 +66,6 @@ class PostDetailsViewModel @Inject constructor(
 
     var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
 
-    val isDropdownMenuVisibleState = mutableStateOf(false)
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -105,9 +104,11 @@ class PostDetailsViewModel @Inject constructor(
 
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
 
-    lateinit var isPostLikedByLoggedInUser: MutableState<Boolean>
+    lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
 
-    lateinit var isPostSavedByLoggedInUser: MutableState<Boolean>
+    lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
+
+    var isCommentDataFetched: Boolean = false
 
     fun initialize(context: Context, post: PostBean, loggedInUsersBean: UsersBean) {
         this.post = post
@@ -117,9 +118,9 @@ class PostDetailsViewModel @Inject constructor(
         if (postVisibility != null) {
             currentPostVisibilityState = mutableStateOf(postVisibility)
         }
-        isPostLikedByLoggedInUser =
+        isPostLikedByLoggedInUserState =
             mutableStateOf(post.likedBy.contains(loggedInUsersBean.firebaseUserId))
-        isPostSavedByLoggedInUser =
+        isPostSavedByLoggedInUserState =
             mutableStateOf(loggedInUsersBean.savedPosts.contains(post.postFirebaseId))
         isInitialized = true
     }
@@ -136,7 +137,7 @@ class PostDetailsViewModel @Inject constructor(
                     post.likedBy.add(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(post)
                     withContext(Dispatchers.Main) {
-                        isPostLikedByLoggedInUser.value = true
+                        isPostLikedByLoggedInUserState.value = true
                     }
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -162,7 +163,7 @@ class PostDetailsViewModel @Inject constructor(
                     post.likedBy.remove(loggedInUserFirebaseId)
                     updatePostDetailsOnLocalUseCase.invoke(post)
                     withContext(Dispatchers.Main) {
-                        isPostLikedByLoggedInUser.value = false
+                        isPostLikedByLoggedInUserState.value = false
                     }
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 }
@@ -185,7 +186,7 @@ class PostDetailsViewModel @Inject constructor(
                     loggedInUsersBean.savedPosts.add(post.postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
-                        isPostSavedByLoggedInUser.value = true
+                        isPostSavedByLoggedInUserState.value = true
                     }
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -209,7 +210,7 @@ class PostDetailsViewModel @Inject constructor(
                     loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
-                        isPostSavedByLoggedInUser.value = false
+                        isPostSavedByLoggedInUserState.value = false
                     }
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -223,15 +224,20 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun deletePost() {
+    fun deletePost(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _deletePostStateFlow.value = ResponseState.loading()
-                val deletePostResponse = deletePostFromRemoteUseCase.invoke(post.postFirebaseId)
-                if (deletePostResponse.status == RequestStatusEnum.Success) {
-                    deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                if (loggedInUserFirebaseId == post.createdByUserFirebaseId) {
+                    val deletePostResponse = deletePostFromRemoteUseCase.invoke(post.postFirebaseId)
+                    if (deletePostResponse.status == RequestStatusEnum.Success) {
+                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                    }
+                    _deletePostStateFlow.value = deletePostResponse
+                } else {
+                    _deletePostStateFlow.value =
+                        ResponseState.error(FirebaseErrorCodes.UNAUTHORIZED_ACCESS)
                 }
-                _deletePostStateFlow.value = deletePostResponse
             }
         }
     }
@@ -379,20 +385,27 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updatePostVisibility(postScope: VisibilityScope) {
+    fun updatePostVisibility(postScope: VisibilityScope, loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _updatePostVisibilityStateFlow.value = ResponseState.loading()
-                val response =
-                    updatePostVisibilityOnRemoteUseCase.invoke(
-                        post.postFirebaseId,
-                        postScope.scopeEnum.name
-                    )
-                if (response.status == RequestStatusEnum.Success) {
-                    _updatePostVisibilityStateFlow.value = ResponseState.success(postScope)
+                if (post.createdByUserFirebaseId == loggedInUserFirebaseId) {
+                    val response =
+                        updatePostVisibilityOnRemoteUseCase.invoke(
+                            post.postFirebaseId,
+                            postScope.scopeEnum.name
+                        )
+                    if (response.status == RequestStatusEnum.Success) {
+                        post.postVisibilityScope = postScope.scopeEnum.name
+                        updatePostDetailsOnLocalUseCase.invoke(post)
+                        _updatePostVisibilityStateFlow.value = ResponseState.success(postScope)
+                    } else {
+                        _updatePostVisibilityStateFlow.value =
+                            ResponseState.error(response.message ?: "")
+                    }
                 } else {
                     _updatePostVisibilityStateFlow.value =
-                        ResponseState.error(response.message ?: "")
+                        ResponseState.error(FirebaseErrorCodes.UNAUTHORIZED_ACCESS)
                 }
             }
         }

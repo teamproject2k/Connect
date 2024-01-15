@@ -13,7 +13,7 @@ data class PostBean(
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
-    val postVisibilityScope: String,
+    var postVisibilityScope: String,
     val postContentType: String,
     var commentCount: Long,
     var isSavedByCurrentUser: Boolean,

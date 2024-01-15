@@ -7,4 +7,5 @@ object FirebaseErrorCodes {
     const val FCM_TOKEN_NOT_GENERATED = "4"
     const val POST_NOT_FOUND = "5"
     const val UNKNOWN_ERROR = "6"
+    const val UNAUTHORIZED_ACCESS = "7"
 }

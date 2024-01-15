@@ -111,7 +111,6 @@ fun UserProfilePostSection(
                             PostDetailsScreenDestination(
                                 details,
                                 userDetails,
-                                loggedInUserFirebaseId
                             )
                         )
                     }

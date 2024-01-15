@@ -91,6 +91,7 @@ import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.google.gson.Gson
 import com.ramcosta.composedestinations.annotation.Destination
@@ -156,7 +157,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     LaunchedEffect(Unit) {
         viewModel.getPostDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
         viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
-
     }
     HandleLikeUnlikePostState(viewModel = viewModel)
     HandleSaveUnSavePost(viewModel)
@@ -537,18 +537,24 @@ private fun PostBottomSection(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 IconButton(onClick = {
-                    if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) {
-                        viewModel.removeLikeForPost(
-                            postDetails,
-                            loggedInUserBean.firebaseUserId
-                        ) {
-                            likeCount--
+                    if (context.isNetworkAvailable()) {
+                        if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) {
+                            viewModel.removeLikeForPost(
+                                postDetails,
+                                loggedInUserBean.firebaseUserId
+                            ) {
+                                likeCount--
+                            }
+                        } else {
+                            viewModel.addLikeOnPost(postDetails, loggedInUserBean.firebaseUserId) {
+                                likeCount++
+                            }
                         }
                     } else {
-                        viewModel.addLikeOnPost(postDetails, loggedInUserBean.firebaseUserId) {
-                            likeCount++
-                        }
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.no_internet_connection)
                     }
+
                 }) {
                     Icon(
                         painter = if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) painterResource(
@@ -565,7 +571,6 @@ private fun PostBottomSection(
                         PostDetailsScreenDestination(
                             postDetails,
                             userDetails,
-                            loggedInUserBean.firebaseUserId
                         )
                     )
                 }) {
@@ -576,15 +581,21 @@ private fun PostBottomSection(
                 }
             }
             IconButton(onClick = {
-                if (loggedInUserBean.savedPosts.contains(postDetails.postFirebaseId)) {
-                    viewModel.unSavePost(loggedInUserBean, postDetails.postFirebaseId) {
-                        isSavedByCurrentUser = false
+                if (context.isNetworkAvailable()) {
+                    if (loggedInUserBean.savedPosts.contains(postDetails.postFirebaseId)) {
+                        viewModel.unSavePost(loggedInUserBean, postDetails.postFirebaseId) {
+                            isSavedByCurrentUser = false
+                        }
+                    } else {
+                        viewModel.savePost(loggedInUserBean, postDetails.postFirebaseId) {
+                            isSavedByCurrentUser = true
+                        }
                     }
                 } else {
-                    viewModel.savePost(loggedInUserBean, postDetails.postFirebaseId) {
-                        isSavedByCurrentUser = true
-                    }
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
                 }
+
             }) {
                 Icon(
                     imageVector = if (isSavedByCurrentUser) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
@@ -681,8 +692,16 @@ private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                viewModel.snackBarMessageState.value =
-                    saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
+                if (saveUnSavePostState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    val postFirebaseId = saveUnSavePostState.data
+                    viewModel.postListWithUsersState.removeIf { it.postDetail.postFirebaseId == postFirebaseId }
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.post_not_found)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        saveUnSavePostState.message
+                            ?: stringResource(id = R.string.some_error_occurred)
+                }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

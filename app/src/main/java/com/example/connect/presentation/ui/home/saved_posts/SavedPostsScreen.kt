@@ -319,7 +319,6 @@ private fun PostBottomSection(
                         PostDetailsScreenDestination(
                             postDetails,
                             userDetails,
-                            loggedInUsersBean.firebaseUserId
                         )
                     )
                 }) {

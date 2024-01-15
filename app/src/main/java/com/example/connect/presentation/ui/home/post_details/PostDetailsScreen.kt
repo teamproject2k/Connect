@@ -112,9 +112,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun PostDetailsScreen(
     navigator: DestinationsNavigator,
-    post: PostBean,
-    posterDetails: UsersBean,
-    loggedInUserFirebaseId: String
+    postDetails: PostBean,
+    postedByDetails: UsersBean
 ) {
     val viewModel: PostDetailsViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
@@ -125,7 +124,7 @@ fun PostDetailsScreen(
     }
 
     if (!viewModel.isInitialized) {
-        viewModel.initialize(context, post, homeSharedViewModel.usersDetails)
+        viewModel.initialize(context, postDetails, homeSharedViewModel.usersDetails)
     }
 
     val snackBarHostState = SnackbarHostState()
@@ -142,7 +141,7 @@ fun PostDetailsScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
                     PostDetails(
-                        usersDetails = posterDetails,
+                        usersDetails = postedByDetails,
                         loggedInUser = homeSharedViewModel.usersDetails,
                         viewModel = viewModel,
                         navigator = navigator
@@ -153,7 +152,11 @@ fun PostDetailsScreen(
                         text = stringResource(R.string.comments),
                         modifier = Modifier.padding(16.dp)
                     )
-                    HandleGetAllCommentsSection(viewModel, loggedInUserFirebaseId, navigator)
+                    HandleGetAllCommentsSection(
+                        viewModel,
+                        homeSharedViewModel.usersDetails.firebaseUserId,
+                        navigator
+                    )
                 }
                 DividerLightGrayAlpha50()
                 AddCommentSection(
@@ -173,7 +176,8 @@ fun PostDetailsScreen(
             ) {
                 PostVisibilityScopeBottomSheet(
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    homeSharedViewModel.usersDetails.firebaseUserId
                 ) {
                     showPostVisibilityScopeBottomSheet = false
                 }
@@ -192,8 +196,14 @@ fun PostDetailsScreen(
             viewModel.snackBarMessageState.value = ""
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.getAllCommentsWithUsers(homeSharedViewModel.usersDetails.firebaseUserId)
+    if (!viewModel.isCommentDataFetched) {
+        if (context.isNetworkAvailable()) {
+            viewModel.getAllCommentsWithUsers(homeSharedViewModel.usersDetails.firebaseUserId)
+            viewModel.isCommentDataFetched = true
+        } else {
+            viewModel.snackBarMessageState.value =
+                stringResource(id = R.string.no_internet_connection)
+        }
     }
 }
 
@@ -206,6 +216,9 @@ private fun PostDetails(
     onBottomSheetItemClick: () -> Unit
 ) {
     val context = LocalContext.current
+    var isDropDownMenuVisible by remember {
+        mutableStateOf(false)
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(top = 16.dp),
@@ -232,13 +245,17 @@ private fun PostDetails(
             )
             if (viewModel.post.createdByUserFirebaseId == loggedInUser.firebaseUserId) {
                 Box {
-                    IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
+                    IconButton(onClick = { isDropDownMenuVisible = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = stringResource(id = R.string.more_options),
                         )
                     }
-                    PostDetailsDropDownSection(viewModel)
+                    if (isDropDownMenuVisible) {
+                        PostDetailsDropDownSection(viewModel, loggedInUser.firebaseUserId) {
+                            isDropDownMenuVisible = false
+                        }
+                    }
                 }
             }
         }
@@ -267,32 +284,33 @@ private fun PostDetails(
 }
 
 @Composable
-fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
-    val postDetailsDropdownList = listOf(stringResource(R.string.delete_post))
+fun PostDetailsDropDownSection(
+    viewModel: PostDetailsViewModel,
+    loggedInUserFirebaseId: String,
+    onDropDownMenuDismiss: () -> Unit
+) {
     var showDeletePostAlertDialog by remember {
         mutableStateOf(false)
     }
-    if (viewModel.isDropdownMenuVisibleState.value) {
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = { viewModel.isDropdownMenuVisibleState.value = false }
-        ) {
-            postDetailsDropdownList.forEach { item ->
-                DropdownMenuItem(text = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = item
-                        )
-                        SpacerWidth16()
-                        Text(text = item)
-                    }
-                }, onClick = {
-                    showDeletePostAlertDialog = true
-                })
+    DropdownMenu(
+        expanded = true,
+        onDismissRequest = { onDropDownMenuDismiss() }
+    ) {
+        DropdownMenuItem(text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.delete_post)
+                )
+                SpacerWidth16()
+                Text(text = stringResource(id = R.string.delete_post))
             }
-        }
+        }, onClick = {
+            showDeletePostAlertDialog = true
+            onDropDownMenuDismiss()
+        })
+
     }
     if (showDeletePostAlertDialog) {
         TitleMessageIconOkCancelDialog(
@@ -303,11 +321,9 @@ fun PostDetailsDropDownSection(viewModel: PostDetailsViewModel) {
             positiveButtonText = stringResource(R.string.delete),
             onCancel = {
                 showDeletePostAlertDialog = false
-                viewModel.isDropdownMenuVisibleState.value = false
             }) {
-            viewModel.deletePost()
+            viewModel.deletePost(loggedInUserFirebaseId)
             showDeletePostAlertDialog = false
-            viewModel.isDropdownMenuVisibleState.value = false
         }
     }
 }
@@ -339,7 +355,7 @@ private fun PostBottomSection(
                     }
                 }) {
                     Icon(
-                        painter = if (viewModel.isPostLikedByLoggedInUser.value) painterResource(
+                        painter = if (viewModel.isPostLikedByLoggedInUserState.value) painterResource(
                             id = R.drawable.ic_heart_filled
                         ) else painterResource(id = R.drawable.ic_heart),
                         contentDescription = stringResource(
@@ -371,7 +387,7 @@ private fun PostBottomSection(
                 }
             }) {
                 Icon(
-                    imageVector = if (viewModel.isPostSavedByLoggedInUser.value) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
+                    imageVector = if (viewModel.isPostSavedByLoggedInUserState.value) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
                     contentDescription = stringResource(R.string.save_post)
                 )
             }
@@ -413,12 +429,13 @@ private fun PostBottomSection(
 private fun PostVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: PostDetailsViewModel,
+    loggedInUserFirebaseId: String,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.postVisibilityScopeList.forEach { postScope ->
             VisibilityScopeBottomSheetItem(postScope) {
-                viewModel.updatePostVisibility(postScope)
+                viewModel.updatePostVisibility(postScope, loggedInUserFirebaseId)
                 onDismissRequest()
             }
         }
@@ -441,9 +458,15 @@ fun HandleUpdatePostVisibilityState(
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    updatePostVisibilityState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                if (updatePostVisibilityState.message == FirebaseErrorCodes.UNAUTHORIZED_ACCESS) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.something_went_wrong)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        updatePostVisibilityState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
+
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -487,8 +510,15 @@ fun HandleDeletePostState(
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    deletePostState.message ?: stringResource(id = R.string.some_error_occurred)
+                if (deletePostState.message == FirebaseErrorCodes.UNAUTHORIZED_ACCESS) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.something_went_wrong)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        deletePostState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
+
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
