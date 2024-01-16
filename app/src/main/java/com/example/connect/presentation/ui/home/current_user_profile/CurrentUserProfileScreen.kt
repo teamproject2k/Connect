@@ -1,10 +1,10 @@
 package com.example.connect.presentation.ui.home.current_user_profile
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,11 +56,11 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
-import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.ExpandedImage
+import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
@@ -74,9 +74,12 @@ import com.example.connect.presentation.ui.destinations.EditProfileScreenDestina
 import com.example.connect.presentation.ui.destinations.SettingsAndPrivacyScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
+import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
+import com.example.connect.presentation.ui.pull_refresh.pullRefresh
+import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -99,15 +102,39 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     var showLogoutDialog by rememberSaveable {
         mutableStateOf(false)
     }
+
+    if (!viewModel.isDataInitialized) {
+        viewModel.init(sharedViewModel.usersDetails)
+    }
+    var refreshing by rememberSaveable { mutableStateOf(false) }
+
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            if (context.isNetworkAvailable()) {
+                viewModel.getUserDetails()
+                refreshing = false
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
+        })
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-        Column(
+        Box(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
-            ProfileScreen(sharedViewModel.usersDetails, viewModel, navigator) {
+            ProfileScreen(viewModel.loggedInUserDetails.value, viewModel, navigator) {
                 showBottomSheet = true
             }
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                refreshState = pullRefreshState
+            )
         }
         if (showBottomSheet) {
             ModalBottomSheet(
@@ -145,20 +172,17 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(key1 = true) {
-        val whetherGetDataFomRemote = context.isNetworkAvailable()
-        viewModel.getFriendListFromIds(
-            sharedViewModel.usersDetails.friendList,
-            whetherGetDataFomRemote
-        )
-        viewModel.getPostDetails(
-            sharedViewModel.usersDetails.firebaseUserId,
-            whetherGetDataFomRemote
-        )
-        if (!whetherGetDataFomRemote) {
+        if (context.isNetworkAvailable()) {
+            viewModel.getFriendListFromIds()
+        } else {
             viewModel.snackBarMessageState.value =
-                context.getString(R.string.viewing_in_offline_mode)
+                context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
         }
+
+        viewModel.getPostDetails(false)
     }
+    HandleUserDetailsState(viewModel = viewModel, homeSharedViewModel = sharedViewModel)
 }
 
 @Composable
@@ -348,7 +372,6 @@ private fun HandlePostListSectionState(
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
-    val context = LocalContext.current
     when (postDetailState.status) {
         RequestStatusEnum.Loading -> {
             UserProfilePostLoadingSection()
@@ -368,11 +391,8 @@ private fun HandlePostListSectionState(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    viewModel.sharedPreference.isUserDetailsEntered = false
-                    context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
-                    val intent = Intent(context, AuthenticationActivity::class.java)
-                    context.startActivity(intent)
-                    LocalActivity.current.finish()
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.something_went_wrong_while_getting_post_details)
                 } else {
                     viewModel.snackBarMessageState.value =
                         postDetailState.message
@@ -390,6 +410,60 @@ private fun HandlePostListSectionState(
 
         RequestStatusEnum.None -> {
             //no need to handle it
+        }
+    }
+}
+
+
+@Composable
+fun HandleUserDetailsState(
+    viewModel: CurrentUserProfileViewModel,
+    homeSharedViewModel: HomeSharedViewModel
+) {
+    val userDetailsState = viewModel.loggedInUserDetailsStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    val context = LocalContext.current
+    when (userDetailsState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(stringResource(id = R.string.getting_user_details))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                homeSharedViewModel.usersDetails = userDetailsState.data ?: return
+                viewModel.loggedInUserDetails.value = homeSharedViewModel.usersDetails
+                if (context.isNetworkAvailable()) {
+                    viewModel.getPostDetails(true)
+                    viewModel.getFriendListFromIds()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
+                }
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                if (userDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
+                    viewModel.snackBarMessageState.value =
+                        stringResource(R.string.some_error_occurred_please_login_again)
+                    (LocalActivity.current as BaseActivity).logout()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        userDetailsState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
         }
     }
 }

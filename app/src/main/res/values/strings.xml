@@ -226,4 +226,5 @@
     <string name="post_not_found">Post not found</string>
     <string name="updating_post_visibility">Updating Post Visibility...</string>
     <string name="post_deleted_successfully">Post deleted successfully</string>
+    <string name="something_went_wrong_while_getting_post_details">Something went wrong while getting post details</string>
 </resources>

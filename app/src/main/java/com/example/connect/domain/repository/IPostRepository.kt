@@ -21,11 +21,11 @@ interface IPostRepository {
     /**
      * Gets post details from remote.
      *
-     * @param fireBaseId The post's Firebase ID.
+     * @param userFirebaseId The post's Firebase ID.
      * @return A response state containing the post details, or an error if the request failed.
      */
     suspend fun getPostDetailsFromRemote(
-        fireBaseId: String,
+        userFirebaseId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>>
 

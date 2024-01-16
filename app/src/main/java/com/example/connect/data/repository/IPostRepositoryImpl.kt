@@ -50,28 +50,69 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPostDetailsFromRemote(
-        fireBaseId: String,
+        userFirebaseId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {
         // Get the post details from the server.
-        return try {
-            val response = fireStore.collection(FirebaseConstants.POST_KEY)
-                .whereEqualTo(PostRemoteEntity::createdByUserFirebaseId.name, fireBaseId).get()
-                .await()
-            val postList = arrayListOf<PostBean>()
-            response.documents.forEach { document ->
-                val post = document.toObject(PostRemoteEntity::class.java)
-                if (post != null && !post.whetherDeleted) {
-                    postList.add(
-                        post.toPostBean(document.id)
-                    )
+        val postsWithUsersList = arrayListOf<PostWithUserDetails>()
+        val postList = arrayListOf<PostBean>()
+        val usersList = arrayListOf<UsersBean>()
+        var currentUser: UserRemoteEntity? = null
+        try {
+            if (userFirebaseId == loggedInUserFirebaseId) {
+                val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY)
+                    .whereEqualTo(PostRemoteEntity::createdByUserFirebaseId.name, userFirebaseId)
+                    .get()
+                    .await()
+                val loggedInUserPostList = arrayListOf<PostBean>()
+                postListDocument.forEach { postDocument ->
+                    if (postDocument != null && postDocument.exists()) {
+                        val postBean = postDocument.toObject(PostRemoteEntity::class.java)
+                            .toPostBean(postDocument.id)
+                        if (!postBean.whetherDeleted) {
+                            loggedInUserPostList.add(postBean)
+                        }
+                    }
+                }
+                return ResponseState.success(postList)
+            } else {
+                val loggedInUserAndOtherUserDocument =
+                    fireStore.collection(FirebaseConstants.USER_KEY).whereIn(
+                        UserRemoteEntity::firebaseUserId.name,
+                        listOf(userFirebaseId, loggedInUserFirebaseId)
+                    ).get().await().map { userDocument ->
+                        userDocument.toObject(UserRemoteEntity::class.java)
+                    }
+
+                if (loggedInUserAndOtherUserDocument.size == 2) {
+                    val otherUserPostList = arrayListOf<PostBean>()
+                    val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY)
+                        .whereEqualTo(
+                            PostRemoteEntity::createdByUserFirebaseId.name,
+                            userFirebaseId
+                        )
+                        .get()
+                        .await()
+                    postListDocument.forEach { postDocument ->
+                        if (postDocument != null && postDocument.exists()) {
+                            val postBean = postDocument.toObject(PostRemoteEntity::class.java)
+                                .toPostBean(postDocument.id)
+                            if (
+                                !postBean.whetherDeleted &&
+                                loggedInUserAndOtherUserDocument[0].otherUsersStatus[loggedInUserAndOtherUserDocument[1].firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name &&
+                                loggedInUserAndOtherUserDocument[1].otherUsersStatus[loggedInUserAndOtherUserDocument[0].firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name
+                            ) {
+                                otherUserPostList.add(postBean)
+                            }
+                        }
+                    }
+                    return ResponseState.success(otherUserPostList)
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
-            postList.sortByDescending { it.createdAt }
-            ResponseState.success(postList)
         } catch (exception: Exception) {
-            // An error occurred while getting the post details from the server.
-            ResponseState.error(exception.localizedMessage ?: "")
+            return ResponseState.error(exception.localizedMessage ?: "")
         }
     }
 

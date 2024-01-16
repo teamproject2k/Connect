@@ -8,10 +8,10 @@ class GetPostDetailsFromLocalUseCase @Inject constructor(private val repository:
     /**
      * Gets the post details from the database.
      *
-     * @param fireBaseId The fire base id of the post.
+     * @param userFirebaseId The fire base id of the post.
      * @return The post details.
      */
-    suspend fun invoke(fireBaseId: String): List<PostBean> {
-        return repository.getPostDetailsFromLocal(fireBaseId)
+    suspend fun invoke(userFirebaseId: String): List<PostBean> {
+        return repository.getPostDetailsFromLocal(userFirebaseId)
     }
 }
