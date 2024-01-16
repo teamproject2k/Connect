@@ -84,7 +84,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleGetRequestedUsersState(viewModel, homeSharedViewModel, navigator)
+            HandleGetRequestedUsersState(viewModel, navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -115,7 +115,6 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
 @Composable
 fun HandleGetRequestedUsersState(
     viewModel: RequestedUsersViewModel,
-    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val requestedUsersState = viewModel.getRequestedUsersStateFlow.collectAsState().value
@@ -144,10 +143,7 @@ fun HandleGetRequestedUsersState(
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(
-                navigator,
-                requestedUsersState.data?.filter { it.firebaseUserId in homeSharedViewModel.usersDetails.requestedFriendRequestList }
-                    ?: emptyList())
+            DisplayUsersList(navigator, requestedUsersState.data ?: emptyList())
         }
 
         RequestStatusEnum.None -> {

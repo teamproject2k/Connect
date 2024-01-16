@@ -18,10 +18,11 @@ import javax.inject.Inject
 @HiltViewModel
 class BlockedUsersViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
+
     private val _getBlockedUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
+
     val getBlockedUsersStateFlow = _getBlockedUsersStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")

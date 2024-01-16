@@ -47,6 +47,7 @@ class SavedPostsViewModel @Inject constructor(
 
     private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
         MutableStateFlow(ResponseState.none())
+
     val getSavedPostsWithUsersStateFlow = _getSavedPostsWithUsersStateFlow.asStateFlow()
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
@@ -60,7 +61,6 @@ class SavedPostsViewModel @Inject constructor(
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")
-
 
     var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetails>()
 
