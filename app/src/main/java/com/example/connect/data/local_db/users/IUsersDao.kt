@@ -52,4 +52,8 @@ interface IUsersDao {
     @Query("SELECT * FROM users WHERE firebaseUserId IN (:userIdList) ORDER BY createdAt DESC")
     fun getAllUserFromIds(userIdList: List<String>): List<UsersDbEntity>
 
+
+    @Query("DELETE FROM users WHERE firebaseUserId NOT IN (:exceptList)")
+    fun deleteAllUsersExcept(exceptList: List<String>): Int
+
 }

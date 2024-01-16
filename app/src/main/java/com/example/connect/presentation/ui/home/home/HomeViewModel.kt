@@ -21,6 +21,7 @@ import com.example.connect.domain.useCase.posts.UnSavePostUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserDetailsUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
+import com.example.connect.domain.useCase.user.DeleteAllUserFromLocalExceptInList
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
@@ -48,7 +49,8 @@ class HomeViewModel @Inject constructor(
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
     private val deleteAllPostsFromLocal: DeleteAllPostFromLocal,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
-    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal
+    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
+    private val deleteAllUserFromLocalExceptInList: DeleteAllUserFromLocalExceptInList
 ) : BaseViewModel() {
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
@@ -100,6 +102,7 @@ class HomeViewModel @Inject constructor(
                         val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
                         val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
                         if (postList != null && userList != null) {
+                            deleteAllUserFromLocalExceptInList.invoke(listOf(loggedInUserFirebaseId))
                             deleteAllPostsFromLocal.invoke()
                             val addPostToLocalResult =
                                 addPostListToLocalUseCase.invoke(postList)

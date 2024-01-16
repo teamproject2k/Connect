@@ -128,7 +128,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            ProfileScreen(viewModel.loggedInUserDetails.value, viewModel, navigator) {
+            ProfileScreen(viewModel.loggedInUserDetailsState.value, viewModel, navigator) {
                 showBottomSheet = true
             }
             PullRefreshIndicator(
@@ -434,7 +434,7 @@ fun HandleUserDetailsState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 homeSharedViewModel.usersDetails = userDetailsState.data ?: return
-                viewModel.loggedInUserDetails.value = homeSharedViewModel.usersDetails
+                viewModel.loggedInUserDetailsState.value = homeSharedViewModel.usersDetails
                 if (context.isNetworkAvailable()) {
                     viewModel.getPostDetails(true)
                     viewModel.getFriendListFromIds()

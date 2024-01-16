@@ -850,5 +850,9 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().getAllUserFromIds(userIdList).map { it.toUserBean() }
     }
 
+    override suspend fun deleteAllUsersExcept(exceptList: List<String>): Int {
+        return appDatabase.getUsersDao().deleteAllUsersExcept(exceptList)
+    }
+
 
 }

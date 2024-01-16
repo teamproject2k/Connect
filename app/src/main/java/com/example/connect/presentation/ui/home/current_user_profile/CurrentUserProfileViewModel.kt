@@ -53,12 +53,12 @@ class CurrentUserProfileViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    lateinit var loggedInUserDetails: MutableState<UsersBean>
+    lateinit var loggedInUserDetailsState: MutableState<UsersBean>
 
     var isDataInitialized = false
 
     fun init(loggedInUserDetails: UsersBean) {
-        this.loggedInUserDetails = mutableStateOf(loggedInUserDetails)
+        this.loggedInUserDetailsState = mutableStateOf(loggedInUserDetails)
         isDataInitialized = true
     }
 
@@ -72,18 +72,18 @@ class CurrentUserProfileViewModel @Inject constructor(
                 if (isForceRefresh) {
                     val postDetailsFromServerResponseState =
                         getPostDetailsFromRemoteUseCase.invoke(
-                            loggedInUserDetails.value.firebaseUserId,
-                            loggedInUserDetails.value.firebaseUserId
+                            loggedInUserDetailsState.value.firebaseUserId,
+                            loggedInUserDetailsState.value.firebaseUserId
                         )
                     if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success && postDetailsFromServerResponseState.data != null) {
                         addPostListToLocalUseCase.invoke(postDetailsFromServerResponseState.data)
                     }
                     _postDetailsStateFlow.value = ResponseState.success(
-                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetails.value.firebaseUserId)
+                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                     )
                 } else {
                     _postDetailsStateFlow.value = ResponseState.success(
-                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetails.value.firebaseUserId)
+                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                     )
                 }
             }
@@ -99,12 +99,12 @@ class CurrentUserProfileViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _friendsDetailsStateFlow.value = ResponseState.loading()
-                if (loggedInUserDetails.value.friendList.isEmpty()) {
+                if (loggedInUserDetailsState.value.friendList.isEmpty()) {
                     delay(500)
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     _friendsDetailsStateFlow.value =
-                        getUserDetailsFromIds.invoke(loggedInUserDetails.value.friendList)
+                        getUserDetailsFromIds.invoke(loggedInUserDetailsState.value.friendList)
                 }
             }
         }
@@ -116,11 +116,11 @@ class CurrentUserProfileViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _loggedInUserDetailsStateFlow.value = ResponseState.loading()
                 val getUserDetailsResponse =
-                    getUserDetailsFromRemoteUseCase.invoke(loggedInUserDetails.value.firebaseUserId)
+                    getUserDetailsFromRemoteUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                 if (getUserDetailsResponse.status == RequestStatusEnum.Success && getUserDetailsResponse.data != null) {
                     addUserToDbUseCase.invoke(getUserDetailsResponse.data)
                     val userDetails =
-                        getUserDetailsFromLocalUseCase.invoke(loggedInUserDetails.value.firebaseUserId)
+                        getUserDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                     if (userDetails != null) {
                         _loggedInUserDetailsStateFlow.value = ResponseState.success(userDetails)
                     } else {

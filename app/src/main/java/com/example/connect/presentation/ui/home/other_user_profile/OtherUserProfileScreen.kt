@@ -91,6 +91,7 @@ import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -104,13 +105,13 @@ import kotlinx.coroutines.launch
 fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: UsersBean) {
     val viewModel: OtherUserProfileViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(homeSharedViewModel.usersDetails, requestedUser)
     }
-
     var showBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
@@ -119,9 +120,15 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            viewModel.getUserDetails()
-            viewModel.getFriendListFromIds(requestedUser.friendList)
-            viewModel.getPostDetails(requestedUser.firebaseUserId)
+            if (context.isNetworkAvailable()) {
+                viewModel.getUserDetails()
+                viewModel.getFriendListFromIds(requestedUser.friendList)
+                viewModel.getPostDetails(requestedUser.firebaseUserId)
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
             refreshing = false
         })
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {

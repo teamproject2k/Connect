@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.other_user_profile
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +37,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class OtherUserProfileViewModel @Inject constructor(
     private val getPostDetailsFromRemoteUseCase: GetPostDetailsFromRemoteUseCase,
