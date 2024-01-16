@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,8 +32,6 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
@@ -43,8 +43,9 @@ import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
 import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWithOutExtraSpace
-import com.example.connect.presentation.utils.FunctionHelper.showToast
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -58,11 +59,18 @@ fun SearchScreen(navigator: DestinationsNavigator) {
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var refreshing by rememberSaveable { mutableStateOf(false) }
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            viewModel.getAllUsers(sharedViewModel.usersDetails)
+            if (context.isNetworkAvailable()) {
+                viewModel.getAllUsers(sharedViewModel.usersDetails)
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
             refreshing = false
         })
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
@@ -89,7 +97,13 @@ fun SearchScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getAllUsers(sharedViewModel.usersDetails)
+        if (context.isNetworkAvailable()) {
+            viewModel.getAllUsers(sharedViewModel.usersDetails)
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
+        }
     }
 }
 
@@ -111,13 +125,8 @@ private fun HandleSearchUserState(
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                if (searchUserState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                    (LocalActivity.current as BaseActivity).logout()
-                } else {
-                    viewModel.snackBarMessageState.value =
-                        searchUserState.message ?: stringResource(id = R.string.some_error_occurred)
-                }
+                viewModel.snackBarMessageState.value =
+                    searchUserState.message ?: stringResource(id = R.string.some_error_occurred)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -167,7 +176,9 @@ private fun CreateUi(
         }
         if (filteredUserList.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

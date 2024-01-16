@@ -8,7 +8,7 @@ data class CommentRemoteEntity(
     val parentCommentId: String?,
     val repliedOnCommentId: String?,
     val repliedOnUserId: String?,
-    val postId: String,
+    val postFirebaseId: String,
     val commentMessage: String,
     val whetherDeleted: Boolean,
     val likedBy: ArrayList<String>
@@ -23,7 +23,7 @@ data class CommentRemoteEntity(
             parentCommentId,
             repliedOnCommentId,
             repliedOnUserId,
-            postId,
+            postFirebaseId,
             commentMessage,
             whetherDeleted,
             likedBy

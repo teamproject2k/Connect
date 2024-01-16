@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,8 +35,6 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
@@ -48,7 +48,7 @@ import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper.ERROR_TAG
 import com.example.connect.presentation.utils.FunctionHelper
-import com.example.connect.presentation.utils.FunctionHelper.showToast
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -68,6 +68,7 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
         )
     }
     val viewModel: FriendsAndPendingViewModel = hiltViewModel()
+    val context = LocalContext.current
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(defaultSelectedTab)
@@ -81,12 +82,18 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            if (viewModel.selectedTabIndexState.intValue == 0) {
-                viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
+            if (context.isNetworkAvailable()) {
+                if (viewModel.selectedTabIndexState.intValue == 0) {
+                    viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
+                } else {
+                    viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+                }
+                refreshing = false
             } else {
-                viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
             }
-            refreshing = false
         })
 
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
@@ -113,8 +120,15 @@ fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int 
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
-        viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+        if (context.isNetworkAvailable()) {
+            viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
+            viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
+        }
+
     }
 }
 
@@ -147,7 +161,6 @@ private fun HandleGetFriendsListStateFlow(
     viewModel: FriendsAndPendingViewModel,
     navigator: DestinationsNavigator
 ) {
-    val context = LocalContext.current
     val getFriendsListAsUsersState =
         viewModel.getFriendsListStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -161,14 +174,9 @@ private fun HandleGetFriendsListStateFlow(
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                if (getFriendsListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                    (LocalActivity.current as BaseActivity).logout()
-                } else {
-                    viewModel.snackBarMessageState.value =
-                        getFriendsListAsUsersState.message
-                            ?: stringResource(id = R.string.some_error_occurred)
-                }
+                viewModel.snackBarMessageState.value =
+                    getFriendsListAsUsersState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ERROR_TAG,
@@ -217,7 +225,9 @@ private fun FriendsListUI(
         }
         if (filteredUserList.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -243,7 +253,6 @@ private fun HandleGetPendingFriendRequestListStateFlow(
     viewModel: FriendsAndPendingViewModel,
     navigator: DestinationsNavigator
 ) {
-    val context = LocalContext.current
     val getPendingFriendRequestListAsUsersState =
         viewModel.getPendingFriendRequestListStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -257,14 +266,9 @@ private fun HandleGetPendingFriendRequestListStateFlow(
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
-                if (getPendingFriendRequestListAsUsersState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
-                    (LocalActivity.current as BaseActivity).logout()
-                } else {
-                    viewModel.snackBarMessageState.value =
-                        getPendingFriendRequestListAsUsersState.message
-                            ?: stringResource(id = R.string.some_error_occurred)
-                }
+                viewModel.snackBarMessageState.value =
+                    getPendingFriendRequestListAsUsersState.message
+                        ?: stringResource(id = R.string.some_error_occurred)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ERROR_TAG,
@@ -315,7 +319,9 @@ private fun PendingListUI(
         }
         if (filteredUserList.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

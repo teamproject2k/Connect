@@ -414,6 +414,7 @@ private fun handleButtonClick(
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
         }
     } else {
         context.showToast(context.getString(R.string.some_error_occurred_please_login_again))

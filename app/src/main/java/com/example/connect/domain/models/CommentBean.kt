@@ -9,7 +9,7 @@ data class CommentBean(
     val parentCommentId: String?,
     val repliedOnCommentId: String?,
     val repliedOnUserId: String?,
-    val postId: String,
+    val postFirebaseId: String,
     val commentMessage: String,
     var whetherDeleted: Boolean,
     val likedBy: ArrayList<String>
@@ -21,7 +21,7 @@ data class CommentBean(
             parentCommentId,
             repliedOnCommentId,
             repliedOnUserId,
-            postId,
+            postFirebaseId,
             commentMessage,
             whetherDeleted,
             likedBy

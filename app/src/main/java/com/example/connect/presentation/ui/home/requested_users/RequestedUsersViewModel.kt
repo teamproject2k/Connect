@@ -8,6 +8,7 @@ import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUs
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -24,8 +25,6 @@ class RequestedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isRequestedListFetched = false
-
     /**
      * Gets the details of the requested users.
      *
@@ -41,6 +40,7 @@ class RequestedUsersViewModel @Inject constructor(
                 // Check if the list of requested users is empty
                 if (requestedUsersList.isEmpty()) {
                     // If the list is empty, set the state to success with an empty list
+                    delay(500)
                     _getRequestedUsersStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     // If the list is not empty, get the user details from the remote use case

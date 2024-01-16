@@ -6,11 +6,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
+import com.example.connect.domain.models.CommentWithUser
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.posts.AddCommentUseCase
+import com.example.connect.domain.useCase.posts.AddCommentOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.AddLikeForCommentUseCase
 import com.example.connect.domain.useCase.posts.AddLikeUseCase
 import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
@@ -42,7 +43,7 @@ class PostDetailsViewModel @Inject constructor(
     private val removeLikeUseCase: RemoveLikeUseCase,
     private val savePostUseCase: SavePostUseCase,
     private val unSavePostUseCase: UnSavePostUseCase,
-    private val addCommentUseCase: AddCommentUseCase,
+    private val addCommentOnRemoteUseCase: AddCommentOnRemoteUseCase,
     private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase,
     private val deleteCommentUseCase: DeleteCommentUseCase,
     private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
@@ -64,7 +65,7 @@ class PostDetailsViewModel @Inject constructor(
 
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
-    var commentDataMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
+    var commentDataMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
 
 
     val snackBarMessageState = mutableStateOf("")
@@ -81,7 +82,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow = _addCommentStateFlow.asStateFlow()
 
-    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Triple<String, String?, Int>>> =
+    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Pair<String, String?>>> =
         MutableStateFlow(ResponseState.none())
     val deleteCommentStateFlow = _deleteCommentStateFlow.asStateFlow()
 
@@ -253,10 +254,10 @@ class PostDetailsViewModel @Inject constructor(
                 parentCommentId = null,
                 repliedOnCommentId = null,
                 repliedOnUserId = null,
-                postId = post.postFirebaseId,
+                postFirebaseId = post.postFirebaseId,
                 commentMessage = commentTextState.value,
                 whetherDeleted = false,
-                arrayListOf()
+                likedBy = arrayListOf()
             )
         } else {  // Child comment
             comment = CommentBean(
@@ -266,16 +267,16 @@ class PostDetailsViewModel @Inject constructor(
                 parentCommentId = commentedOn.parentCommentId ?: commentedOn.commentFirebaseId,
                 repliedOnCommentId = commentedOn.commentFirebaseId,
                 repliedOnUserId = commentedOn.commentedBy,
-                postId = post.postFirebaseId,
+                postFirebaseId = post.postFirebaseId,
                 commentMessage = commentTextState.value,
                 whetherDeleted = false,
-                arrayListOf()
+                likedBy = arrayListOf()
             )
         }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()
-                val addCommentResponseState = addCommentUseCase.invoke(comment)
+                val addCommentResponseState = addCommentOnRemoteUseCase.invoke(comment)
                 if (addCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
@@ -284,6 +285,9 @@ class PostDetailsViewModel @Inject constructor(
                         _addCommentStateFlow.value = ResponseState.error("")
                     }
                 } else {
+                    if (addCommentResponseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                    }
                     _addCommentStateFlow.value =
                         ResponseState.error(addCommentResponseState.message ?: "")
                 }
@@ -303,18 +307,20 @@ class PostDetailsViewModel @Inject constructor(
                     )
                 if (deleteCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.whetherDeleted = true
+                    post.commentCount -= deleteCount
+                    updatePostDetailsOnLocalUseCase.invoke(post)
                     _deleteCommentStateFlow.value =
                         ResponseState.success(
-                            Triple(
+                            Pair(
                                 comment.commentFirebaseId,
-                                comment.parentCommentId,
-                                deleteCount
+                                comment.parentCommentId
                             )
                         )
                 } else {
                     _deleteCommentStateFlow.value =
                         ResponseState.error(deleteCommentResponseState.message ?: "")
                 }
+
             }
         }
     }
@@ -323,18 +329,14 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
-                val getAllCommentResponseState =
+                val getAllCommentsResponse =
                     getAllCommentsWithUsersUseCase.invoke(post.postFirebaseId, loggedInUserFireId)
-                if (getAllCommentResponseState.status == RequestStatusEnum.Success) {
-                    val commentMap = getAllCommentResponseState.data?.first
-                    if (!commentMap.isNullOrEmpty()) {
-                        commentDataMap = commentMap
-                    }
-                    _getAllCommentsStateFlow.value =
-                        ResponseState.success(getAllCommentResponseState.data?.second)
+                if (getAllCommentsResponse.status == RequestStatusEnum.Success && getAllCommentsResponse.data != null) {
+                    commentDataMap = getAllCommentsResponse.data
+                    _getAllCommentsStateFlow.value = ResponseState.success(null)
                 } else {
                     _getAllCommentsStateFlow.value =
-                        ResponseState.error(getAllCommentResponseState.message ?: "")
+                        ResponseState.error(getAllCommentsResponse.message ?: "")
                 }
             }
         }

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -101,6 +103,7 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
             }
             refreshing = false
         })
@@ -158,6 +161,7 @@ fun HandleGetSavedPostsState(
     var isResponseHandled by remember {
         mutableStateOf(false)
     }
+
     when (savedPostsState.status) {
         RequestStatusEnum.Loading -> {
             PostListLoadingSection()
@@ -212,7 +216,11 @@ fun DisplaySavedPostsList(
     viewModel: SavedPostsViewModel
 ) {
     if (viewModel.postListWithUserDetailsListState.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center
+        ) {
             Text(text = stringResource(R.string.no_posts_found))
         }
     } else {
@@ -315,6 +323,7 @@ private fun PostBottomSection(
                     } else {
                         viewModel.snackBarMessageState.value =
                             context.getString(R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 }) {
                     Icon(
@@ -355,6 +364,7 @@ private fun PostBottomSection(
                 } else {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
             }) {
                 Icon(

@@ -8,6 +8,7 @@ import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUs
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -25,8 +26,6 @@ class BlockedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var isBlockedListFetched = false
-
     /**
      * Gets the blocked users.
      *
@@ -41,6 +40,7 @@ class BlockedUsersViewModel @Inject constructor(
                 _getBlockedUsersStateFlow.value = ResponseState.loading()
                 // If the blocked user list is empty, set the state to success with an empty list.
                 if (blockedUsersList.isEmpty()) {
+                    delay(500)
                     _getBlockedUsersStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     // Otherwise, get the user details from the remote use case and set the state to success with the result.

@@ -65,6 +65,7 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.CommentBean
+import com.example.connect.domain.models.CommentWithUser
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -185,7 +186,7 @@ fun PostDetailsScreen(
         }
     }
     HandleDeletePostState(viewModel = viewModel, navigator = navigator)
-    HandleAddCommentSectionState(viewModel = viewModel)
+    HandleAddCommentSectionState(viewModel = viewModel, homeSharedViewModel.usersDetails, navigator)
     HandleDeleteCommentSectionState(viewModel = viewModel)
     HandleUpdatePostVisibilityState(viewModel = viewModel)
     HandleLikeUnlikeState(viewModel, navigator)
@@ -203,6 +204,7 @@ fun PostDetailsScreen(
         } else {
             viewModel.snackBarMessageState.value =
                 stringResource(id = R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
         }
     }
 }
@@ -352,6 +354,7 @@ private fun PostBottomSection(
                     } else {
                         viewModel.snackBarMessageState.value =
                             context.getString(R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 }) {
                     Icon(
@@ -384,6 +387,7 @@ private fun PostBottomSection(
                 } else {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
             }) {
                 Icon(
@@ -576,9 +580,9 @@ fun HandleGetAllCommentsSection(
 
         RequestStatusEnum.Success -> {
             CommentUi(
-                getAllCommentsState.data,
                 viewModel,
-                loggedInUserFirebaseId, navigator
+                loggedInUserFirebaseId,
+                navigator
             )
         }
 
@@ -590,12 +594,11 @@ fun HandleGetAllCommentsSection(
 
 @Composable
 fun CommentUi(
-    userList: List<UsersBean>?,
     viewModel: PostDetailsViewModel,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    if (userList.isNullOrEmpty() || viewModel.commentDataMap.isEmpty()) {
+    if (viewModel.commentDataMap.isEmpty()) {
         Column {
             TextBold14(
                 text = stringResource(R.string.no_comments_found),
@@ -615,7 +618,6 @@ fun CommentUi(
                     viewModel,
                     parent,
                     childCommentList,
-                    userList,
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     navigator = navigator
                 )
@@ -627,46 +629,50 @@ fun CommentUi(
 @Composable
 fun ParentChildCommentItem(
     viewModel: PostDetailsViewModel,
-    parentComment: CommentBean,
-    childCommentList: List<CommentBean>,
-    userList: List<UsersBean>,
+    parentCommentWithUser: CommentWithUser,
+    childCommentList: List<CommentWithUser>,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator,
 ) {
+    val context = LocalContext.current
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        val parentCommentPoster =
-            userList.find { user -> user.firebaseUserId == parentComment.commentedBy }
-        if (parentCommentPoster != null) {
-            CommentItem(
-                comment = parentComment,
-                commentPoster = parentCommentPoster,
-                viewModel = viewModel,
-                loggedInUserFirebaseId = loggedInUserFirebaseId,
-                navigator = navigator
-            ) {
-                if (!parentComment.whetherDeleted) {
-                    val deleteCount = childCommentList.count { !it.whetherDeleted } + 1
-                    viewModel.deleteComment(parentComment, deleteCount)
-                }
+        CommentItem(
+            comment = parentCommentWithUser.comment,
+            commentPoster = parentCommentWithUser.userDetails,
+            viewModel = viewModel,
+            loggedInUserFirebaseId = loggedInUserFirebaseId,
+            navigator = navigator
+        ) {
+            if (context.isNetworkAvailable()) {
+                val deleteCount = childCommentList.count { !it.comment.whetherDeleted } + 1
+                viewModel.deleteComment(parentCommentWithUser.comment, deleteCount)
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
             }
+
+
         }
         Column(modifier = Modifier.padding(start = 32.dp)) {
-            childCommentList.forEach { comment ->
-                val childCommentPoster =
-                    userList.find { user -> user.firebaseUserId == comment.commentedBy }
-                if (childCommentPoster != null) {
-                    CommentItem(
-                        comment = comment,
-                        commentPoster = childCommentPoster,
-                        viewModel = viewModel,
-                        loggedInUserFirebaseId = loggedInUserFirebaseId,
-                        navigator = navigator
-                    ) {
-                        if (!comment.whetherDeleted) {
-                            viewModel.deleteComment(comment, 1)
-                        }
+            childCommentList.forEach { commentWithUser ->
+                CommentItem(
+                    comment = commentWithUser.comment,
+                    commentPoster = commentWithUser.userDetails,
+                    viewModel = viewModel,
+                    loggedInUserFirebaseId = loggedInUserFirebaseId,
+                    navigator = navigator
+                ) {
+                    viewModel.deleteComment(commentWithUser.comment, 1)
+                    if (context.isNetworkAvailable()) {
+                        viewModel.deleteComment(commentWithUser.comment, 1)
+                    } else {
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 }
+
             }
         }
         if (childCommentList.isNotEmpty()) {
@@ -773,7 +779,7 @@ fun CommentItem(
             SpacerHeight4()
             Text(
                 buildAnnotatedString {
-                    if (comment.postId != comment.repliedOnCommentId) {
+                    if (comment.postFirebaseId != comment.repliedOnCommentId) {
                         withStyle(
                             SpanStyle(
                                 fontWeight = FontWeight.Bold,
@@ -826,34 +832,41 @@ fun CommentItem(
                 )
             } else {
                 IconButton(onClick = {
-                    isLoading = true
-                    if (comment.likedBy.contains(loggedInUserFirebaseId)) {
-                        viewModel.removeLikeForComment(
-                            comment,
-                            loggedInUserFirebaseId,
-                            onSuccess = {
+                    if (context.isNetworkAvailable()) {
+                        isLoading = true
+                        if (comment.likedBy.contains(loggedInUserFirebaseId)) {
+                            viewModel.removeLikeForComment(
+                                comment,
+                                loggedInUserFirebaseId,
+                                onSuccess = {
+                                    isLoading = false
+                                }) { errorMessage ->
+                                viewModel.snackBarMessageState.value =
+                                    if (errorMessage.isNullOrBlank()) context.getString(
+                                        R.string.some_error_occurred
+                                    ) else errorMessage
                                 isLoading = false
-                            }) { errorMessage ->
-                            viewModel.snackBarMessageState.value =
-                                if (errorMessage.isNullOrBlank()) context.getString(
-                                    R.string.some_error_occurred
-                                ) else errorMessage
-                            isLoading = false
+                            }
+                        } else {
+                            viewModel.addLikeForComment(
+                                comment,
+                                loggedInUserFirebaseId,
+                                onSuccess = {
+                                    isLoading = false
+                                }) { errorMessage ->
+                                viewModel.snackBarMessageState.value =
+                                    if (errorMessage.isNullOrBlank()) context.getString(
+                                        R.string.some_error_occurred
+                                    ) else errorMessage
+                                isLoading = false
+                            }
                         }
                     } else {
-                        viewModel.addLikeForComment(
-                            comment,
-                            loggedInUserFirebaseId,
-                            onSuccess = {
-                                isLoading = false
-                            }) { errorMessage ->
-                            viewModel.snackBarMessageState.value =
-                                if (errorMessage.isNullOrBlank()) context.getString(
-                                    R.string.some_error_occurred
-                                ) else errorMessage
-                            isLoading = false
-                        }
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
+
                 }) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
@@ -937,7 +950,13 @@ fun AddCommentSection(
         }
         if (viewModel.commentTextState.value.isNotBlank() && !viewModel.isSendingCommentState.value) {
             IconButton(onClick = {
-                viewModel.addComment(loggedInUser.firebaseUserId)
+                if (context.isNetworkAvailable()) {
+                    viewModel.addComment(loggedInUser.firebaseUserId)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
+                }
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_send),
@@ -956,7 +975,11 @@ fun AddCommentSection(
 }
 
 @Composable
-fun HandleAddCommentSectionState(viewModel: PostDetailsViewModel) {
+fun HandleAddCommentSectionState(
+    viewModel: PostDetailsViewModel,
+    loggedInUser: UsersBean,
+    navigator: DestinationsNavigator
+) {
     val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
@@ -969,10 +992,17 @@ fun HandleAddCommentSectionState(viewModel: PostDetailsViewModel) {
 
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    if (addCommentState.message.isNullOrBlank()) stringResource(
+                if (addCommentState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                    viewModel.snackBarMessageState.value = stringResource(
                         id = R.string.some_error_occurred
-                    ) else addCommentState.message
+                    )
+                    navigator.popBackStack()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        if (addCommentState.message.isNullOrBlank()) stringResource(
+                            id = R.string.some_error_occurred
+                        ) else addCommentState.message
+                }
                 viewModel.isSendingCommentState.value = false
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
@@ -991,16 +1021,19 @@ fun HandleAddCommentSectionState(viewModel: PostDetailsViewModel) {
                 viewModel.commentTextState.value = ""
                 if (comment != null) {
                     if (comment.parentCommentId == null) {
-                        viewModel.commentDataMap[comment] = arrayListOf()
+                        val updatedMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
+                        updatedMap[CommentWithUser(comment, loggedInUser)] = arrayListOf()
+                        updatedMap.putAll(viewModel.commentDataMap)
+                        viewModel.commentDataMap = updatedMap
                     } else {
                         val parent =
-                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == comment.parentCommentId }
+                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == comment.parentCommentId }
                         if (parent != null) {
-                            val updatedChildList = arrayListOf<CommentBean>()
+                            val updatedChildList = arrayListOf<CommentWithUser>()
                             val currentChildList = viewModel.commentDataMap[parent]
                             if (currentChildList != null) {
                                 updatedChildList.addAll(currentChildList)
-                                updatedChildList.add(comment)
+                                updatedChildList.add(0, CommentWithUser(comment, loggedInUser))
                                 viewModel.commentDataMap[parent] = updatedChildList
                             }
                         }
@@ -1051,17 +1084,17 @@ fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
                 val parentCommentId = deleteCommentState.data?.second
                 if (commentId != null) {
                     if (parentCommentId == null) {
-                        val comment =
-                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == commentId }
-                        if (comment != null) {
-                            viewModel.commentDataMap.keys.remove(comment)
+                        //parent comment
+                        val parentCommentWithUser =
+                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == commentId }
+                        if (parentCommentWithUser != null) {
+                            viewModel.commentDataMap.keys.remove(parentCommentWithUser)
                         }
                     } else {
                         val parent =
-                            viewModel.commentDataMap.keys.find { it.commentFirebaseId == parentCommentId }
-                        viewModel.commentDataMap[parent]?.removeIf { it.commentFirebaseId == commentId }
+                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == parentCommentId }
+                        viewModel.commentDataMap[parent]?.removeIf { it.comment.commentFirebaseId == commentId }
                     }
-                    viewModel.post.commentCount -= deleteCommentState.data.third
                     viewModel.forceRecomposeState.value++
                 }
                 isResponseHandled = true

@@ -1,11 +1,12 @@
 package com.example.connect.presentation.ui.home.blocked_users
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +38,9 @@ import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
+import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
+import com.example.connect.presentation.ui.pull_refresh.pullRefresh
+import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
@@ -54,19 +59,40 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = SnackbarHostState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var refreshing by rememberSaveable { mutableStateOf(false) }
+
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            if (context.isNetworkAvailable()) {
+                viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
+            refreshing = false
+        })
     Scaffold(topBar = {
         AppTopAppBar(
             title = stringResource(R.string.blocked_users),
             showNavigationIcon = true,
             onNavigationIconClick = { navigator.popBackStack() })
     }, snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
-        Column(
+        Box(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
             HandleGetBlockedUsersState(viewModel, homeSharedViewModel, navigator)
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                refreshState = pullRefreshState
+            )
         }
+
     }
 
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -77,7 +103,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
             }
         }
     }
-    if (!viewModel.isBlockedListFetched) {
+    LaunchedEffect(Unit) {
         if (context.isNetworkAvailable()) {
             viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
         } else {
@@ -85,7 +111,6 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 context.getString(R.string.no_internet_connection)
             FunctionHelper.vibrateDevice(context)
         }
-        viewModel.isBlockedListFetched = true
     }
 }
 
@@ -136,7 +161,11 @@ private fun HandleGetBlockedUsersState(
 @Composable
 private fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList: List<UsersBean>) {
     if (blockedUsersList.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center
+        ) {
             Text(text = stringResource(id = R.string.no_user_found))
         }
     } else {

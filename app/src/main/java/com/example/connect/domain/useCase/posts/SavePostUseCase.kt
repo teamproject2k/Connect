@@ -6,7 +6,10 @@ import javax.inject.Inject
 
 class SavePostUseCase @Inject constructor(private val repository: IUserRepository) {
 
-    suspend fun invoke(loggedInUserFirebaseId: String, postId: String): ResponseState<Nothing> {
-        return repository.savePost(loggedInUserFirebaseId, postId)
+    suspend fun invoke(
+        loggedInUserFirebaseId: String,
+        postFirebaseId: String
+    ): ResponseState<Nothing> {
+        return repository.savePost(loggedInUserFirebaseId, postFirebaseId)
     }
 }

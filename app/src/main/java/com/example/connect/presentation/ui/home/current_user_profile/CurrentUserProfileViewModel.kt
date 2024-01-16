@@ -15,6 +15,7 @@ import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUs
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -83,6 +84,7 @@ class CurrentUserProfileViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _friendsDetailsStateFlow.value = ResponseState.loading()
                 if (friendIdList.isEmpty()) {
+                    delay(500)
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     if (whetherGetFriendsListFromRemote) {

@@ -194,6 +194,7 @@ private fun HandleSendOTPState(
                     } else {
                         viewModel.snackBarMessageState.value =
                             stringResource(id = R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 } else {
                     navigator.navigate(

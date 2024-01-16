@@ -11,6 +11,7 @@ import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUs
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -49,6 +50,7 @@ class FriendsAndPendingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getFriendsListStateFlow.value = ResponseState.loading()
                 if (friendsList.isEmpty()) {
+                    delay(500)
                     _getFriendsListStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     _getFriendsListStateFlow.value =
@@ -63,6 +65,7 @@ class FriendsAndPendingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getPendingFriendRequestListStateFlow.value = ResponseState.loading()
                 if (pendingList.isEmpty()) {
+                    delay(500)
                     _getPendingFriendRequestListStateFlow.value =
                         ResponseState.success(emptyList())
                 } else {

@@ -364,6 +364,7 @@ private fun HandleVerifyOTPState(
                     } else {
                         viewModel.snackBarMessageState.value =
                             stringResource(id = R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 } else {
                     context.showToast(context.getString(R.string.some_error_occurred_please_login_again))
@@ -421,6 +422,7 @@ private fun HandleResendOTPState(
                     } else {
                         viewModel.snackBarMessageState.value =
                             stringResource(id = R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
                 } else {
                     viewModel.snackBarMessageState.value =

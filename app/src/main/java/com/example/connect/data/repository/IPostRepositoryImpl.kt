@@ -6,6 +6,7 @@ import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.CommentBean
+import com.example.connect.domain.models.CommentWithUser
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.PostWithUserDetails
 import com.example.connect.domain.models.UsersBean
@@ -260,9 +261,9 @@ class IPostRepositoryImpl @Inject constructor(
         return getPostDetailsWithUserDetailsFromRemote(loggedInUserFirebaseId, savedPosts)
     }
 
-    override suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing> {
+    override suspend fun deletePostFromRemote(postFirebaseId: String): ResponseState<Nothing> {
         return try {
-            fireStore.collection(FirebaseConstants.POST_KEY).document(postId)
+            fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId)
                 .update(PostRemoteEntity::whetherDeleted.name, true).await()
             ResponseState.success(null)
         } catch (exception: Exception) {
@@ -272,37 +273,58 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String> {
-        return try {
-            fireStore.runTransaction { transaction ->
-                val postDocument =
-                    fireStore.collection(FirebaseConstants.POST_KEY).document(comment.postId)
-                transaction.update(
-                    postDocument,
-                    PostRemoteEntity::commentCount.name,
-                    FieldValue.increment(1)
-                )
-                val addCommentDocumentRef =
-                    fireStore.collection(FirebaseConstants.COMMENT_KEY).document()
-                transaction.set(
-                    addCommentDocumentRef,
-                    comment.toCommentRemoteEntity()
-                )
-                ResponseState.success(addCommentDocumentRef.id)
-            }.await()
-        } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
+        val currentPostDocument =
+            fireStore.collection(FirebaseConstants.POST_KEY).document(comment.postFirebaseId).get()
+                .await()
+        if (currentPostDocument.exists()) {
+            val postEntity = currentPostDocument.toObject(PostRemoteEntity::class.java)
+            if (postEntity != null && !postEntity.whetherDeleted) {
+                val postedByUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                    .document(postEntity.createdByUserFirebaseId).get().await()
+                if (postedByUserDocument.exists()) {
+                    val postedByUserEntity =
+                        postedByUserDocument.toObject(UserRemoteEntity::class.java)
+                    return if (postedByUserEntity?.otherUsersStatus?.get(comment.commentedBy) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        fireStore.runTransaction { transaction ->
+                            val postDocument =
+                                fireStore.collection(FirebaseConstants.POST_KEY)
+                                    .document(comment.postFirebaseId)
+                            transaction.update(
+                                postDocument,
+                                PostRemoteEntity::commentCount.name,
+                                FieldValue.increment(1)
+                            )
+                            val addCommentDocumentRef =
+                                fireStore.collection(FirebaseConstants.COMMENT_KEY).document()
+                            transaction.set(
+                                addCommentDocumentRef,
+                                comment.toCommentRemoteEntity()
+                            )
+                            ResponseState.success(addCommentDocumentRef.id)
+                        }.await()
+                    } else {
+                        ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                    }
+                } else {
+                    return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                }
+            } else {
+                return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+            }
+        } else {
+            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
         }
     }
 
     override suspend fun deleteCommentOnRemote(
         commentId: String,
-        postId: String,
+        postFirebaseId: String,
         deleteCount: Int
     ): ResponseState<Nothing> {
         return try {
             fireStore.runTransaction { transaction ->
                 val postDocument =
-                    fireStore.collection(FirebaseConstants.POST_KEY).document(postId)
+                    fireStore.collection(FirebaseConstants.POST_KEY).document(postFirebaseId)
                 transaction.update(
                     postDocument,
                     PostRemoteEntity::commentCount.name,
@@ -323,29 +345,29 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllCommentsWithUsersFromRemote(
-        postId: String,
+        postFirebaseId: String,
         loggedInUserFirebaseId: String
-    ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>> {
+    ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>> {
         return try {
             val commentListResponse = fireStore.collection(FirebaseConstants.COMMENT_KEY)
-                .whereEqualTo(CommentRemoteEntity::postId.name, postId)
+                .whereEqualTo(CommentRemoteEntity::postFirebaseId.name, postFirebaseId)
                 .get()
                 .await()
+            val parentChildMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
             val commentList = arrayListOf<CommentBean>()
             val userList = arrayListOf<UsersBean>()
             val loggedInUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
                 .document(loggedInUserFirebaseId).get().await()
             val loggedInUser = loggedInUserDocument.toObject(UserRemoteEntity::class.java)
-            val usersToRemoveFromList = arrayListOf<String>()
             if (loggedInUserDocument != null && loggedInUserDocument.exists() && loggedInUser != null) {
                 userList.add(loggedInUser.toUserBean())
                 commentListResponse.documents.forEach { document ->
                     if (document.exists()) {
                         val comment = document.toObject(CommentRemoteEntity::class.java)
                         if (comment != null && !comment.whetherDeleted && loggedInUser.otherUsersStatus[comment.commentedBy] != StatusWithCurrentUserRemoteEnum.Blocked.name) {
-                            val isUserDetailsAlreadyFetched =
-                                userList.find { user -> user.firebaseUserId == comment.commentedBy } != null
-                            if (!isUserDetailsAlreadyFetched) {
+                            val commentedByUserDetails =
+                                userList.find { user -> user.firebaseUserId == comment.commentedBy }
+                            if (commentedByUserDetails != null) {
                                 val userDocument =
                                     fireStore.collection(FirebaseConstants.USER_KEY)
                                         .document(comment.commentedBy).get().await()
@@ -354,8 +376,6 @@ class IPostRepositoryImpl @Inject constructor(
                                     userList.add(user.toUserBean())
                                     if (user.otherUsersStatus[loggedInUserFirebaseId] != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                                         commentList.add(comment.toCommentBean(document.id))
-                                    } else {
-                                        usersToRemoveFromList.add(user.firebaseUserId)
                                     }
                                 }
                             } else {
@@ -364,8 +384,6 @@ class IPostRepositoryImpl @Inject constructor(
                                 if (user != null) {
                                     if (!user.blockedUsersList.contains(loggedInUserFirebaseId)) {
                                         commentList.add(comment.toCommentBean(document.id))
-                                    } else {
-                                        usersToRemoveFromList.add(user.firebaseUserId)
                                     }
                                 }
                             }
@@ -375,14 +393,30 @@ class IPostRepositoryImpl @Inject constructor(
                 commentList.sortBy { it.createdAt }
                 val parentCommentList =
                     commentList.filter { comment -> comment.parentCommentId == null }
-                val parentChildMap = mutableMapOf<CommentBean, ArrayList<CommentBean>>()
                 parentCommentList.forEach { parentComment ->
+                    val parentUser =
+                        userList.find { user -> user.firebaseUserId == parentComment.commentedBy }
                     val childCommentsList =
                         commentList.filter { comment -> comment.parentCommentId == parentComment.commentFirebaseId } as ArrayList
-                    parentChildMap[parentComment] = childCommentsList
+                    if (parentUser != null) {
+                        val childCommentListWithUsers = arrayListOf<CommentWithUser>()
+                        childCommentsList.forEach { comment ->
+                            val childCommentUser =
+                                userList.find { user -> user.firebaseUserId == comment.commentedBy }
+                            if (childCommentUser != null) {
+                                childCommentListWithUsers.add(
+                                    CommentWithUser(
+                                        comment,
+                                        childCommentUser
+                                    )
+                                )
+                            }
+                        }
+                        parentChildMap[CommentWithUser(parentComment, parentUser)] =
+                            childCommentListWithUsers
+                    }
                 }
-                userList.removeAll { user -> usersToRemoveFromList.contains(user.firebaseUserId) }
-                ResponseState.success(Pair(parentChildMap, userList))
+                ResponseState.success(parentChildMap)
             } else {
                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
@@ -390,6 +424,7 @@ class IPostRepositoryImpl @Inject constructor(
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
+
 
     override suspend fun addLikeForComment(
         commentId: String,
@@ -421,10 +456,11 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPostWithUserFromLocal(savedPostIds: List<String>): ResponseState<List<PostWithUserDetails>> {
+    override suspend fun getPostWithUserFromLocal(savedpostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
         val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
         return try {
-            val postWithUsersList = appDatabase.getPostDao().getSavedPostsAndUsers(savedPostIds)
+            val postWithUsersList =
+                appDatabase.getPostDao().getSavedPostsAndUsers(savedpostFirebaseIds)
             postWithUsersList.forEach { postWithUser ->
                 if (postWithUser.userDetail != null) {
                     postWithUsersDetailList.add(

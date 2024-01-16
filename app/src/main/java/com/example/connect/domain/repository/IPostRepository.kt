@@ -1,9 +1,9 @@
 package com.example.connect.domain.repository
 
 import com.example.connect.domain.models.CommentBean
+import com.example.connect.domain.models.CommentWithUser
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.PostWithUserDetails
-import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 
 interface IPostRepository {
@@ -76,19 +76,19 @@ interface IPostRepository {
         savedPosts: ArrayList<String>
     ): ResponseState<List<PostWithUserDetails>>
 
-    suspend fun deletePostFromRemote(postId: String): ResponseState<Nothing>
+    suspend fun deletePostFromRemote(postFirebaseId: String): ResponseState<Nothing>
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
 
     suspend fun deleteCommentOnRemote(
         commentId: String,
-        postId: String,
+        postFirebaseId: String,
         deleteCount: Int
     ): ResponseState<Nothing>
 
     suspend fun getAllCommentsWithUsersFromRemote(
-        postId: String,
+        postFirebaseId: String,
         loggedInUserFirebaseId: String
-    ): ResponseState<Pair<MutableMap<CommentBean, ArrayList<CommentBean>>, List<UsersBean>>>
+    ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>>
 
 
     suspend fun addLikeForComment(
@@ -102,7 +102,7 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun getPostWithUserFromLocal(savedPostIds: List<String>): ResponseState<List<PostWithUserDetails>>
+    suspend fun getPostWithUserFromLocal(savedpostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 

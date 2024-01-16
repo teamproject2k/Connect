@@ -562,6 +562,7 @@ private fun PostBottomSection(
                     } else {
                         viewModel.snackBarMessageState.value =
                             context.getString(R.string.no_internet_connection)
+                        FunctionHelper.vibrateDevice(context)
                     }
 
                 }) {
@@ -603,6 +604,7 @@ private fun PostBottomSection(
                 } else {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
 
             }) {

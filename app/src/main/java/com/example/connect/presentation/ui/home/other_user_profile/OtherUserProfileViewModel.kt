@@ -31,6 +31,7 @@ import com.example.connect.presentation.utils.NotificationsConstantHelper
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -172,6 +173,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 // Check if the friendIdList is empty.
                 _friendsDetailsStateFlow.value = ResponseState.loading()
                 if (friendIdList.isEmpty()) {
+                    delay(500)
                     // If the friendIdList is empty, emit an empty list as the response.
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
