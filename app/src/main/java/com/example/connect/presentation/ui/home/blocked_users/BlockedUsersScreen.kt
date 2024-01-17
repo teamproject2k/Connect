@@ -86,7 +86,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleGetBlockedUsersState(viewModel, homeSharedViewModel, navigator)
+            HandleGetBlockedUsersState(viewModel, navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -117,7 +117,6 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
 @Composable
 private fun HandleGetBlockedUsersState(
     viewModel: BlockedUsersViewModel,
-    sharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val blockedUsersState = viewModel.getBlockedUsersStateFlow.collectAsState().value
@@ -146,10 +145,7 @@ private fun HandleGetBlockedUsersState(
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(
-                navigator,
-                blockedUsersState.data?.filter { it.firebaseUserId in sharedViewModel.usersDetails.blockedUsersList }
-                    ?: emptyList())
+            DisplayUsersList(navigator, blockedUsersState.data ?: emptyList())
         }
 
         RequestStatusEnum.None -> {

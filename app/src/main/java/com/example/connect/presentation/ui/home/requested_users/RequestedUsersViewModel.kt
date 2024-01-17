@@ -19,8 +19,10 @@ import javax.inject.Inject
 class RequestedUsersViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
 ) : BaseViewModel() {
+
     private val _getRequestedUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
+
     val getRequestedUsersStateFlow = _getRequestedUsersStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")
