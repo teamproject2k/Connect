@@ -6,6 +6,6 @@ import javax.inject.Inject
 class DeleteAllUserFromLocalExceptInList @Inject constructor(private val repository: IUserRepository) {
 
     suspend fun invoke(exceptList: List<String>): Int {
-        return repository.deleteAllUsersExcept(exceptList)
+        return repository.deleteAllUsersFromLocalExcept(exceptList)
     }
 }

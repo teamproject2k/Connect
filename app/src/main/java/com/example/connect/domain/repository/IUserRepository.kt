@@ -240,5 +240,5 @@ interface IUserRepository {
     suspend fun getAllUsersFromIdFromLocal(userIdList: List<String>): List<UsersBean>
 
 
-    suspend fun deleteAllUsersExcept(exceptList: List<String>): Int
+    suspend fun deleteAllUsersFromLocalExcept(exceptList: List<String>): Int
 }

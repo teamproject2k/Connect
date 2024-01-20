@@ -54,10 +54,7 @@ class IPostRepositoryImpl @Inject constructor(
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {
         // Get the post details from the server.
-        val postsWithUsersList = arrayListOf<PostWithUserDetails>()
         val postList = arrayListOf<PostBean>()
-        val usersList = arrayListOf<UsersBean>()
-        var currentUser: UserRemoteEntity? = null
         try {
             if (userFirebaseId == loggedInUserFirebaseId) {
                 val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY)

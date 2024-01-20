@@ -94,7 +94,6 @@ class CurrentUserProfileViewModel @Inject constructor(
     /**
      * Gets the friend list from the given list of friend IDs.
      *
-     * @param friendIdList The list of friend IDs.
      */
     fun getFriendListFromIds() {
         viewModelScope.launch {
