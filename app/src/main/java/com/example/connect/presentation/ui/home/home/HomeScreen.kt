@@ -63,7 +63,7 @@ import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.ui.chat.ChatActivity
+import com.example.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
@@ -119,6 +119,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 }
                 IconButton(onClick = {
                     val intent = Intent(context, ChatActivity::class.java)
+                    intent.putExtra("userDetails",homeSharedViewModel.usersDetails)
                     activity.startActivity(intent)
                 }) {
                     Icon(

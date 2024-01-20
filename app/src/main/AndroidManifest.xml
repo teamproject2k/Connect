@@ -34,7 +34,7 @@
             android:screenOrientation="portrait"
              />
         <activity
-            android:name=".presentation.ui.chat.ChatActivity"
+            android:name=".presentation.ui.chat.base_screen.ChatActivity"
             android:screenOrientation="portrait" />
 
         <service
