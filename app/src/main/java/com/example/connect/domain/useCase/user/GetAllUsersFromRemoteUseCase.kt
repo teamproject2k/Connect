@@ -18,6 +18,6 @@ class GetAllUsersNotInListFromRemoteUseCase @Inject constructor(private val repo
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>> {
-        return repository.getAllUsersNotInList(excludeUserIdList, loggedInUserFirebaseId)
+        return repository.getAllUsersNotInListFromRemote(excludeUserIdList, loggedInUserFirebaseId)
     }
 }

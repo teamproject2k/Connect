@@ -12,6 +12,6 @@ class GetUserDetailsFromDbUseCase @Inject constructor(private val repository: IU
      * @return The user details, or null if the user does not exist.
      */
     suspend fun invoke(fireBaseId: String): UsersBean? {
-        return repository.getUserDetailsFromDb(fireBaseId)
+        return repository.getUserDetailsFromLocal(fireBaseId)
     }
 }

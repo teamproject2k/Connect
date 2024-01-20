@@ -16,6 +16,6 @@ class BlockUserUseCase @Inject constructor(private val repository: IUserReposito
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.blockUser(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.blockUserOnRemote(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

@@ -3,7 +3,7 @@ package com.example.connect.domain.useCase.device
 import com.example.connect.domain.repository.IDeviceIdRepository
 import javax.inject.Inject
 
-class UpdateDeviceIdOnDbUseCase @Inject constructor(private val repository: IDeviceIdRepository) {
+class UpdateDeviceIdOnLocalUseCase @Inject constructor(private val repository: IDeviceIdRepository) {
     /**
      * Updates the device ID on the local database.
      *
@@ -12,6 +12,6 @@ class UpdateDeviceIdOnDbUseCase @Inject constructor(private val repository: IDev
      * @return The number of rows affected.
      */
     suspend fun invoke(fireBaseId: String, updatedDeviceId: String): Int {
-        return repository.updateDeviceIdOnDb(fireBaseId, updatedDeviceId)
+        return repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
     }
 }

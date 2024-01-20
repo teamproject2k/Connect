@@ -15,6 +15,6 @@ class UpdateUserDetailsOnDbUseCase @Inject constructor(private val repository: I
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long {
-        return repository.updateUserDetailsOnDb(fieldsToUpdate, firebaseUserId)
+        return repository.updateUserDetailsOnLocal(fieldsToUpdate, firebaseUserId)
     }
 }

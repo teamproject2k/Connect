@@ -16,6 +16,6 @@ class UnfriendUserUseCase @Inject constructor(private val repository: IUserRepos
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.unFriendUser(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.unFriendUserOnRemote(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

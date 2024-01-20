@@ -38,7 +38,7 @@ class IDeviceIdRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int {
+    override suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int {
         // Get the UsersDao object from the AppDatabase object.
         val usersDao = appDatabase.getUsersDao()
 

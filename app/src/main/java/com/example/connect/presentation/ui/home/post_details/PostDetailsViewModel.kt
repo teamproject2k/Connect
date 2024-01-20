@@ -12,16 +12,16 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddCommentOnRemoteUseCase
-import com.example.connect.domain.useCase.posts.AddLikeForCommentUseCase
-import com.example.connect.domain.useCase.posts.AddLikeUseCase
-import com.example.connect.domain.useCase.posts.DeleteCommentUseCase
+import com.example.connect.domain.useCase.posts.AddLikeForCommentOnRemoteUseCase
+import com.example.connect.domain.useCase.posts.AddLikeOnRemoteUseCase
+import com.example.connect.domain.useCase.posts.DeleteCommentOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.DeletePostFromLocalUseCase
 import com.example.connect.domain.useCase.posts.DeletePostFromRemoteUseCase
-import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersUseCase
-import com.example.connect.domain.useCase.posts.RemoveLikeForCommentUseCase
-import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
-import com.example.connect.domain.useCase.posts.SavePostUseCase
-import com.example.connect.domain.useCase.posts.UnSavePostUseCase
+import com.example.connect.domain.useCase.posts.GetAllCommentsWithUsersFromRemoteUseCase
+import com.example.connect.domain.useCase.posts.RemoveLikeForCommentFromRemoteUseCase
+import com.example.connect.domain.useCase.posts.RemoveLikeOfPostFromRemoteUseCase
+import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
+import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostVisibilityOnRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
@@ -39,15 +39,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
-    private val addLikeUseCase: AddLikeUseCase,
-    private val removeLikeUseCase: RemoveLikeUseCase,
-    private val savePostUseCase: SavePostUseCase,
-    private val unSavePostUseCase: UnSavePostUseCase,
+    private val addLikeOnRemoteUseCase: AddLikeOnRemoteUseCase,
+    private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
+    private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
+    private val unSavePostFromRemoteUseCase: UnSavePostFromRemoteUseCase,
     private val addCommentOnRemoteUseCase: AddCommentOnRemoteUseCase,
-    private val getAllCommentsWithUsersUseCase: GetAllCommentsWithUsersUseCase,
-    private val deleteCommentUseCase: DeleteCommentUseCase,
-    private val addLikeForCommentUseCase: AddLikeForCommentUseCase,
-    private val removeLikeForCommentUseCase: RemoveLikeForCommentUseCase,
+    private val getAllCommentsWithUsersFromRemoteUseCase: GetAllCommentsWithUsersFromRemoteUseCase,
+    private val deleteCommentOnRemoteUseCase: DeleteCommentOnRemoteUseCase,
+    private val addLikeForCommentOnRemoteUseCase: AddLikeForCommentOnRemoteUseCase,
+    private val removeLikeForCommentFromRemoteUseCase: RemoveLikeForCommentFromRemoteUseCase,
     private val deletePostFromRemoteUseCase: DeletePostFromRemoteUseCase,
     private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase,
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
@@ -130,7 +130,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val addLikeResponse = addLikeUseCase.invoke(
+                val addLikeResponse = addLikeOnRemoteUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
@@ -156,7 +156,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val removeLikeResponse = removeLikeUseCase.invoke(
+                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
@@ -182,7 +182,10 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostUseCase.invoke(loggedInUsersBean.firebaseUserId, post.postFirebaseId)
+                    savePostOnRemoteUseCase.invoke(
+                        loggedInUsersBean.firebaseUserId,
+                        post.postFirebaseId
+                    )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(post.postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
@@ -206,7 +209,10 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostUseCase.invoke(loggedInUsersBean.firebaseUserId, post.postFirebaseId)
+                    unSavePostFromRemoteUseCase.invoke(
+                        loggedInUsersBean.firebaseUserId,
+                        post.postFirebaseId
+                    )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
@@ -300,7 +306,7 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _deleteCommentStateFlow.value = ResponseState.loading()
                 val deleteCommentResponseState =
-                    deleteCommentUseCase.invoke(
+                    deleteCommentOnRemoteUseCase.invoke(
                         comment.commentFirebaseId,
                         post.postFirebaseId,
                         deleteCount
@@ -330,7 +336,10 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
                 val getAllCommentsResponse =
-                    getAllCommentsWithUsersUseCase.invoke(post.postFirebaseId, loggedInUserFireId)
+                    getAllCommentsWithUsersFromRemoteUseCase.invoke(
+                        post.postFirebaseId,
+                        loggedInUserFireId
+                    )
                 if (getAllCommentsResponse.status == RequestStatusEnum.Success && getAllCommentsResponse.data != null) {
                     commentDataMap = getAllCommentsResponse.data
                     _getAllCommentsStateFlow.value = ResponseState.success(null)
@@ -351,7 +360,10 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val addLikeForCommentResponseState =
-                    addLikeForCommentUseCase.invoke(comment.commentFirebaseId, loggedInUserFireId)
+                    addLikeForCommentOnRemoteUseCase.invoke(
+                        comment.commentFirebaseId,
+                        loggedInUserFireId
+                    )
                 if (addLikeForCommentResponseState.status == RequestStatusEnum.Success) {
                     if (!comment.likedBy.contains(loggedInUserFireId)) {
                         comment.likedBy.add(loggedInUserFireId)
@@ -373,7 +385,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val removeLikeForCommentResponseState =
-                    removeLikeForCommentUseCase.invoke(
+                    removeLikeForCommentFromRemoteUseCase.invoke(
                         comment.commentFirebaseId,
                         loggedInUserFireId
                     )

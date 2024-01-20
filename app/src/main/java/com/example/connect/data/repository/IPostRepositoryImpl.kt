@@ -208,7 +208,7 @@ class IPostRepositoryImpl @Inject constructor(
         return getPostDetailsWithUserDetailsFromRemote(loggedInUserFirebaseId, null)
     }
 
-    override suspend fun addLikeOnPost(
+    override suspend fun addLikeOnPostOnRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
@@ -250,7 +250,7 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeLikeOf(
+    override suspend fun removeLikeOfPostFromRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
@@ -464,7 +464,7 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun addLikeForComment(
+    override suspend fun addLikeForCommentOnRemote(
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -479,7 +479,7 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeLikeForComment(
+    override suspend fun removeLikeForCommentFromRemote(
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing> {

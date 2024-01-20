@@ -16,6 +16,6 @@ class AcceptFriendRequestUseCase @Inject constructor(private val repository: IUs
         loggedInUserFirebaseId: String,
         requestUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.acceptFriendRequest(loggedInUserFirebaseId, requestUserFirebaseId)
+        return repository.acceptFriendRequestOnRemote(loggedInUserFirebaseId, requestUserFirebaseId)
     }
 }

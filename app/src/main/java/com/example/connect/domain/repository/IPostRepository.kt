@@ -61,12 +61,12 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostWithUserDetails>>
 
-    suspend fun addLikeOnPost(
+    suspend fun addLikeOnPostOnRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun removeLikeOf(
+    suspend fun removeLikeOfPostFromRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
@@ -91,13 +91,13 @@ interface IPostRepository {
     ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>>
 
 
-    suspend fun addLikeForComment(
+    suspend fun addLikeForCommentOnRemote(
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
 
 
-    suspend fun removeLikeForComment(
+    suspend fun removeLikeForCommentFromRemote(
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>

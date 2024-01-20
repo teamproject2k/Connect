@@ -9,8 +9,8 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.fcm.SendFCMUseCase
-import com.example.connect.domain.useCase.posts.DeleteAllPostOfUserFromLocal
-import com.example.connect.domain.useCase.posts.DeleteOnlyFriendsOnlyPostOfUserFromLocal
+import com.example.connect.domain.useCase.posts.DeleteAllPostOfUserFromLocalUseCase
+import com.example.connect.domain.useCase.posts.DeleteOnlyFriendsOnlyPostOfUserFromLocalUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.AcceptFriendRequestUseCase
 import com.example.connect.domain.useCase.user.AddUserToDbUseCase
@@ -56,8 +56,8 @@ class OtherUserProfileViewModel @Inject constructor(
     private val addUserToDbUseCase: AddUserToDbUseCase,
     private val liveUserObserverFromRemoteUseCase: LiveUserObserverFromRemoteUseCase,
     private val sendFCMUseCase: SendFCMUseCase,
-    private val deleteOnlyFriendsOnlyPostOfUserFromLocal: DeleteOnlyFriendsOnlyPostOfUserFromLocal,
-    private val deleteAllPostOfUserFromLocal: DeleteAllPostOfUserFromLocal,
+    private val deleteOnlyFriendsOnlyPostOfUserFromLocalUseCase: DeleteOnlyFriendsOnlyPostOfUserFromLocalUseCase,
+    private val deleteAllPostOfUserFromLocalUseCase: DeleteAllPostOfUserFromLocalUseCase,
     private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal
 ) : BaseViewModel() {
 
@@ -495,7 +495,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
 
-                    deleteAllPostOfUserFromLocal.invoke(otherUserState.value.firebaseUserId)
+                    deleteAllPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
 
                     // Set the blockUserStateFlow to the responseState.
                     _blockUserStateFlow.value = responseState
@@ -538,7 +538,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's other users status.
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
-                    deleteOnlyFriendsOnlyPostOfUserFromLocal.invoke(otherUserState.value.firebaseUserId)
+                    deleteOnlyFriendsOnlyPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
 
                     // Set the unfriendUserStateFlow to the response state.
                     _unfriendUserStateFlow.value = responseState
@@ -583,7 +583,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's other users status.
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
-                    deleteAllPostOfUserFromLocal.invoke(otherUserState.value.firebaseUserId)
+                    deleteAllPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
                     // Set the unfriend and block user state flow to the response state.
                     _unfriendAndBlockUserStateFlow.value = responseState
                 } else {

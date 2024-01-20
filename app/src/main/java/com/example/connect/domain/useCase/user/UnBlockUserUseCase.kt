@@ -16,6 +16,6 @@ class UnBlockUserUseCase @Inject constructor(private val repository: IUserReposi
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.unBlockUser(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.unBlockUserOnRemote(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

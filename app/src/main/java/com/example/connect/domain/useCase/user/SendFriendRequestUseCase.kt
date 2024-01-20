@@ -16,6 +16,6 @@ class SendFriendRequestUseCase @Inject constructor(private val repository: IUser
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.sendFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.sendFriendRequestOnRemote(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

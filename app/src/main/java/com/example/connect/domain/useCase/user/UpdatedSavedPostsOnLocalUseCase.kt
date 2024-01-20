@@ -5,6 +5,6 @@ import javax.inject.Inject
 
 class UpdatedSavedPostsOnLocalUseCase @Inject constructor(private val repository: IUserRepository) {
     suspend fun invoke(loggedInUserFireBaseId: String, savedPostList: List<String>): Int {
-        return repository.updateSavedPost(loggedInUserFireBaseId, savedPostList)
+        return repository.updateSavedPostOnLocal(loggedInUserFireBaseId, savedPostList)
     }
 }

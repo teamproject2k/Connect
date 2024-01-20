@@ -16,6 +16,9 @@ class WithdrawFriendRequestUseCase @Inject constructor(private val repository: I
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.withdrawFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.withdrawFriendRequestOnRemote(
+            loggedInUserFirebaseId,
+            requestedUserFirebaseId
+        )
     }
 }

@@ -7,7 +7,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.auth.SendOtpUseCase
 import com.example.connect.domain.useCase.auth.VerifyOtpUseCase
-import com.example.connect.domain.useCase.device.UpdateDeviceIdOnDbUseCase
+import com.example.connect.domain.useCase.device.UpdateDeviceIdOnLocalUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
 import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
 import com.example.connect.domain.useCase.fcm.UpdateFCMTokenOnRemoteUseCase
@@ -34,7 +34,7 @@ class OtpInputViewModel @Inject constructor(
     private val sendOtpUseCase: SendOtpUseCase,
     private val verifyOtpUseCase: VerifyOtpUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val updateDeviceIdOnDbUseCase: UpdateDeviceIdOnDbUseCase,
+    private val updateDeviceIdOnLocalUseCase: UpdateDeviceIdOnLocalUseCase,
     private val updateDeviceIdOnRemoteUseCase: UpdateDeviceIdOnRemoteUseCase,
     private val addUserToDbUseCase: AddUserToDbUseCase,
     private val getFCMTokenUseCase: GetFCMTokenUseCase,
@@ -133,7 +133,7 @@ class OtpInputViewModel @Inject constructor(
                         // Check if the response is successful.
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             // Update the device ID on the database.
-                            updateDeviceIdOnDbUseCase.invoke(
+                            updateDeviceIdOnLocalUseCase.invoke(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )

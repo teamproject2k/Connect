@@ -16,6 +16,9 @@ class RemoveFriendRequestUseCase @Inject constructor(private val repository: IUs
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.removeFriendRequest(loggedInUserFirebaseId, requestedUserFirebaseId)
+        return repository.removeFriendRequestOnRemote(
+            loggedInUserFirebaseId,
+            requestedUserFirebaseId
+        )
     }
 }

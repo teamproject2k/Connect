@@ -9,17 +9,17 @@ import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.posts.AddLikeUseCase
+import com.example.connect.domain.useCase.posts.AddLikeOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
-import com.example.connect.domain.useCase.posts.DeleteAllPostFromLocal
+import com.example.connect.domain.useCase.posts.DeleteAllPostFromLocalUseCase
 import com.example.connect.domain.useCase.posts.DeletePostFromLocalUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsWithUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsWithUsersFromLocalUseCase
-import com.example.connect.domain.useCase.posts.RemoveLikeUseCase
-import com.example.connect.domain.useCase.posts.SavePostUseCase
-import com.example.connect.domain.useCase.posts.UnSavePostUseCase
+import com.example.connect.domain.useCase.posts.RemoveLikeOfPostFromRemoteUseCase
+import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
+import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
-import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserDetailsUseCase
+import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserFromRemoteDetailsUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
 import com.example.connect.domain.useCase.user.DeleteAllUserFromLocalExceptInList
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
@@ -38,16 +38,16 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val postDetailsWithUserDetailsUseCase: GetPostDetailsWithUserDetailsFromRemoteUseCase,
-    private val storyDetailsWithUserDetailsUseCase: GetStoryDetailsWithUserDetailsUseCase,
-    private val addLikeUseCase: AddLikeUseCase,
-    private val removeLikeUseCase: RemoveLikeUseCase,
-    private val savePostUseCase: SavePostUseCase,
-    private val unSavePostUseCase: UnSavePostUseCase,
+    private val storyDetailsWithUserDetailsUseCase: GetStoryDetailsWithUserFromRemoteDetailsUseCase,
+    private val addLikeOnRemoteUseCase: AddLikeOnRemoteUseCase,
+    private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
+    private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
+    private val unSavePostFromRemoteUseCase: UnSavePostFromRemoteUseCase,
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
     private val getPostDetailsWithUsersFromLocalUseCase: GetPostDetailsWithUsersFromLocalUseCase,
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
-    private val deleteAllPostsFromLocal: DeleteAllPostFromLocal,
+    private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
     private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
     private val deleteAllUserFromLocalExceptInList: DeleteAllUserFromLocalExceptInList
@@ -133,7 +133,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val addLikeResponse = addLikeUseCase.invoke(
+                val addLikeResponse = addLikeOnRemoteUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
@@ -164,7 +164,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val removeLikeResponse = removeLikeUseCase.invoke(
+                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase.invoke(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
@@ -191,7 +191,7 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
+                    savePostOnRemoteUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)
@@ -213,7 +213,10 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
+                    unSavePostFromRemoteUseCase.invoke(
+                        loggedInUsersBean.firebaseUserId,
+                        postFirebaseId
+                    )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(postFirebaseId)
                     updateUserDetailsOnLocal.invoke(loggedInUsersBean)

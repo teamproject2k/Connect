@@ -36,7 +36,7 @@ interface IUserRepository {
      * @param userDetails The user details.
      * @return The row ID of the inserted row.
      */
-    suspend fun addUserToDb(userDetails: UsersBean): Long
+    suspend fun addUserToLocal(userDetails: UsersBean): Long
 
 
     /**
@@ -45,7 +45,7 @@ interface IUserRepository {
      * @param fireBaseId The user's Firebase ID.
      * @return The user details, or null if the user is not found.
      */
-    suspend fun getUserDetailsFromDb(fireBaseId: String): UsersBean?
+    suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean?
 
     /**
      * Gets user details from local database by ids from remote.
@@ -74,7 +74,7 @@ interface IUserRepository {
      * @param firebaseUserId The user's Firebase ID.
      * @return The number of rows affected.
      */
-    suspend fun updateUserDetailsOnDb(
+    suspend fun updateUserDetailsOnLocal(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long
@@ -85,7 +85,7 @@ interface IUserRepository {
      * @param excludeUserIdList The list of user IDs to exclude.
      * @return A response state containing the list of users not in the given list.
      */
-    suspend fun getAllUsersNotInList(
+    suspend fun getAllUsersNotInListFromRemote(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>>
@@ -98,7 +98,7 @@ interface IUserRepository {
      *
      * @return A [ResponseState] containing either a success or failure message.
      */
-    suspend fun sendFriendRequest(
+    suspend fun sendFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -110,7 +110,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A [ResponseState] containing either a success or failure message.
      */
-    suspend fun withdrawFriendRequest(
+    suspend fun withdrawFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -122,7 +122,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing either a success or error message.
      */
-    suspend fun acceptFriendRequest(
+    suspend fun acceptFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -134,7 +134,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing either a success message or an error message.
      */
-    suspend fun removeFriendRequest(
+    suspend fun removeFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -146,7 +146,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the user to be blocked.
      * @return A [ResponseState] containing either a success or error message.
      */
-    suspend fun blockUser(
+    suspend fun blockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -158,7 +158,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the user to unblock.
      * @return A [ResponseState] containing either a success or failure message.
      */
-    suspend fun unBlockUser(
+    suspend fun unBlockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -170,7 +170,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A [ResponseState] containing either a success or error message.
      */
-    suspend fun unFriendUser(
+    suspend fun unFriendUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -182,7 +182,7 @@ interface IUserRepository {
      * @param requestedUserFirebaseId The requested user's Firebase ID.
      * @return A [ResponseState] containing either a success or failure message.
      */
-    suspend fun unFriendAndBlockUser(
+    suspend fun unFriendAndBlockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing>
@@ -194,7 +194,7 @@ interface IUserRepository {
      * @param otherUsersStatus A map of other users' Firebase IDs to their statuses.
      * @return The number of rows affected.
      */
-    suspend fun updateOtherUsersStatusOnDb(
+    suspend fun updateOtherUsersStatusOnLocal(
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int
@@ -211,12 +211,12 @@ interface IUserRepository {
     ): ListenerRegistration
 
 
-    suspend fun savePost(
+    suspend fun savePostOnRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun unSavePost(
+    suspend fun unSavePostFromRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing>
@@ -230,7 +230,7 @@ interface IUserRepository {
     suspend fun updateFCMTokenOnLocal(loggedInUserFirebaseId: String, updatedToken: String): Int
 
 
-    suspend fun updateSavedPost(loggedInUserFirebaseId: String, savedPost: List<String>): Int
+    suspend fun updateSavedPostOnLocal(loggedInUserFirebaseId: String, savedPost: List<String>): Int
 
     suspend fun updateUserOnLocal(userDetails: UsersBean): Int
 

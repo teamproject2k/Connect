@@ -1,15 +1,15 @@
 package com.example.connect.domain.useCase.posts
 
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.repository.IUserRepository
+import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
-class SavePostUseCase @Inject constructor(private val repository: IUserRepository) {
+class AddLikeOnRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
 
     suspend fun invoke(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.savePost(loggedInUserFirebaseId, postFirebaseId)
+        return repository.addLikeOnPostOnRemote(loggedInUserFirebaseId, postFirebaseId)
     }
 }

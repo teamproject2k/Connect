@@ -88,12 +88,12 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToDb(userDetails: UsersBean): Long {
+    override suspend fun addUserToLocal(userDetails: UsersBean): Long {
         // Add the user to the local database.
         return appDatabase.getUsersDao().insertUser(userDetails.toUserDbEntity())
     }
 
-    override suspend fun getUserDetailsFromDb(fireBaseId: String): UsersBean? {
+    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean? {
         // Get the user details from the local database.
         return appDatabase.getUsersDao().getUserDetails(fireBaseId)?.toUserBean()
     }
@@ -137,7 +137,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateUserDetailsOnDb(
+    override suspend fun updateUserDetailsOnLocal(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long {
@@ -160,7 +160,7 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().updateUserDetails(queryToExecute)
     }
 
-    override suspend fun getAllUsersNotInList(
+    override suspend fun getAllUsersNotInListFromRemote(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>> {
@@ -189,7 +189,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun sendFriendRequest(
+    override suspend fun sendFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -251,7 +251,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun withdrawFriendRequest(
+    override suspend fun withdrawFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -313,7 +313,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun acceptFriendRequest(
+    override suspend fun acceptFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -379,7 +379,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeFriendRequest(
+    override suspend fun removeFriendRequestOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -444,7 +444,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun blockUser(
+    override suspend fun blockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -492,7 +492,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun unBlockUser(
+    override suspend fun unBlockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -555,7 +555,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun unFriendUser(
+    override suspend fun unFriendUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -615,7 +615,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun unFriendAndBlockUser(
+    override suspend fun unFriendAndBlockUserOnRemote(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
@@ -689,7 +689,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateOtherUsersStatusOnDb(
+    override suspend fun updateOtherUsersStatusOnLocal(
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {
@@ -722,7 +722,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun savePost(
+    override suspend fun savePostOnRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
@@ -764,7 +764,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun unSavePost(
+    override suspend fun unSavePostFromRemote(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {
@@ -827,7 +827,7 @@ class IUserRepositoryImpl @Inject constructor(
             .updateFCMTokenOnLocal(loggedInUserFirebaseId, fcmToken = updatedToken)
     }
 
-    override suspend fun updateSavedPost(
+    override suspend fun updateSavedPostOnLocal(
         loggedInUserFirebaseId: String,
         savedPost: List<String>
     ): Int {

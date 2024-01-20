@@ -12,6 +12,6 @@ class AddUserToDbUseCase @Inject constructor(private val repository: IUserReposi
      * @return The ID of the user that was added to the local database.
      */
     suspend fun invoke(userDetails: UsersBean): Long {
-        return repository.addUserToDb(userDetails)
+        return repository.addUserToLocal(userDetails)
     }
 }

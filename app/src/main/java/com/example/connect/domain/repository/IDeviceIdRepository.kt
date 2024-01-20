@@ -22,7 +22,7 @@ interface IDeviceIdRepository {
      * @param updatedDeviceId The updated device ID.
      * @return The number of rows affected.
      */
-    suspend fun updateDeviceIdOnDb(fireBaseId: String, updatedDeviceId: String): Int
+    suspend fun updateDeviceIdOnLocal(fireBaseId: String, updatedDeviceId: String): Int
 
     /**
      * Gets the device ID from the remote server.
