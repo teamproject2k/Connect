@@ -36,6 +36,7 @@ class CurrentUserProfileViewModel @Inject constructor(
     private val addUserToDbUseCase: AddUserToDbUseCase,
     private val getUserDetailsFromLocalUseCase: GetUserDetailsFromDbUseCase
 ) : BaseViewModel() {
+
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
 

@@ -2,7 +2,6 @@ package com.example.connect.presentation.ui.home.home
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -258,7 +256,7 @@ private fun StoryUiSection(
 @Composable
 fun StoryLoaderItem() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+        Row {
             repeat(5) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Box(
@@ -645,6 +643,7 @@ private fun PostBottomSection(
         }
     }
 }
+
 
 @Composable
 private fun HandleLikeUnlikePostState(viewModel: HomeViewModel) {
