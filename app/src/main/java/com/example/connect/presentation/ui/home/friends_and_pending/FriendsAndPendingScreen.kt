@@ -37,7 +37,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
+import com.example.connect.presentation.ui.common.SearchBarAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 @HomeNavGraph
 @Destination
 @Composable
-fun UserRequestScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int = 0) {
+fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab: Int = 0) {
     if (defaultSelectedTab !in 0..1) {
         navigator.popBackStack()
         LoggingHelper.logData(
@@ -168,7 +168,7 @@ private fun HandleGetFriendsListStateFlow(
     }
     when (getFriendsListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
-            SearchAndUserListUiLoading()
+            SearchBarAndUserListUiLoading()
             isExceptionHandled = false
         }
 
@@ -260,7 +260,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
     }
     when (getPendingFriendRequestListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
-            SearchAndUserListUiLoading()
+            SearchBarAndUserListUiLoading()
             isExceptionHandled = false
         }
 

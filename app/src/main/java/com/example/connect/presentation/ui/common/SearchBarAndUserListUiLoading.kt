@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun SearchAndUserListUiLoading() {
+fun SearchBarAndUserListUiLoading() {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier

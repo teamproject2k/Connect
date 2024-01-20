@@ -33,7 +33,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.SearchAndUserListUiLoading
+import com.example.connect.presentation.ui.common.SearchBarAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
 import com.example.connect.presentation.ui.common.UsersListItem
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -112,14 +112,13 @@ private fun HandleSearchUserState(
     viewModel: SearchUserViewModel,
     navigator: DestinationsNavigator
 ) {
-    val context = LocalContext.current
     val searchUserState = viewModel.searchUserStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
     when (searchUserState.status) {
         RequestStatusEnum.Loading -> {
-            SearchAndUserListUiLoading()
+            SearchBarAndUserListUiLoading()
             isExceptionHandled = false
         }
 
@@ -164,8 +163,7 @@ private fun CreateUi(
         val modifiedQuery = getLowerCaseTextWithOutExtraSpace(searchQuery)
         usersList.forEach {
             val lowerCaseName = getLowerCaseTextWithOutExtraSpace(it.name)
-            if (lowerCaseName.contains(modifiedQuery) || it.connectUserId.contains(modifiedQuery)
-            ) {
+            if (lowerCaseName.contains(modifiedQuery) || it.connectUserId.contains(modifiedQuery)) {
                 filteredUserList.add(it)
             }
         }
