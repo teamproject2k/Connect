@@ -203,7 +203,7 @@ private fun HandleAddPostState(
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    addPostState.message ?: stringResource(id = R.string.some_error_occurred)
+                    addPostState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -254,7 +254,7 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
                 ShowSelectedImage(selectedMediaData = selectedMedia) {
                     viewModel.selectedMediaState.value = null
                     viewModel.snackBarMessageState.value =
-                        context.getString(R.string.some_error_occurred)
+                        context.getString(R.string.something_went_wrong)
                 }
             } else {
                 ShowSelectedVideo(selectedMediaData = selectedMedia, context = context)

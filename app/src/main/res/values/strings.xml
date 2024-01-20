@@ -76,7 +76,6 @@
     <string name="this_post_will_be_visible_to_every_connect_user">This post will be visible to every Connect user</string>
     <string name="this_post_will_only_be_visible_to_your_friends">This post will only be visible to your friends</string>
     <string name="post_image">Post Image</string>
-    <string name="some_error_occurred">Some error occurred</string>
     <string name="add_image">Add Image</string>
     <string name="add_video">Add Video</string>
     <string name="an_otp_will_be_send_to_the_below_entered_mobile_number">An OTP will be send to the below entered mobile number.</string>

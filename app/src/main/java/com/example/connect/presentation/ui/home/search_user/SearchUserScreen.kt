@@ -126,7 +126,7 @@ private fun HandleSearchUserState(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    searchUserState.message ?: stringResource(id = R.string.some_error_occurred)
+                    searchUserState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

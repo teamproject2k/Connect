@@ -462,7 +462,7 @@ private fun MediaSection(
         if (story.mediaType == MediaTypeEnum.Image.name || story.mediaType == MediaTypeEnum.TextImage.name) {
             ShowStoryImage(imageUrl = story.mediaUrl, onError = {
                 viewModel.snackBarMessageState.value =
-                    context.getString(R.string.some_error_occurred)
+                    context.getString(R.string.something_went_wrong)
             }) {
                 onMediaLoaded()
             }
@@ -538,7 +538,7 @@ private fun ShowStoryVideo(
             onStateChange = { isError ->
                 if (isError) {
                     viewModel.snackBarMessageState.value =
-                        context.getString(R.string.some_error_occurred)
+                        context.getString(R.string.something_went_wrong)
                 } else {
                     onMediaLoaded()
                 }

@@ -92,7 +92,6 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 refreshState = pullRefreshState
             )
         }
-
     }
 
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -133,7 +132,7 @@ private fun HandleGetBlockedUsersState(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     blockedUsersState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

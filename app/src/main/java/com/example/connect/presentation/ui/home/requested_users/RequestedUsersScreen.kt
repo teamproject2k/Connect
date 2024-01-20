@@ -131,7 +131,7 @@ fun HandleGetRequestedUsersState(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     requestedUsersState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,

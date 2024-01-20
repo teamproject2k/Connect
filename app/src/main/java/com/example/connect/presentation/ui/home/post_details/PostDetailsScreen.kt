@@ -567,7 +567,7 @@ fun HandleGetAllCommentsSection(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    getAllCommentsState.message ?: stringResource(id = R.string.some_error_occurred)
+                    getAllCommentsState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -843,7 +843,7 @@ fun CommentItem(
                                 }) { errorMessage ->
                                 viewModel.snackBarMessageState.value =
                                     if (errorMessage.isNullOrBlank()) context.getString(
-                                        R.string.some_error_occurred
+                                        R.string.something_went_wrong
                                     ) else errorMessage
                                 isLoading = false
                             }
@@ -856,7 +856,7 @@ fun CommentItem(
                                 }) { errorMessage ->
                                 viewModel.snackBarMessageState.value =
                                     if (errorMessage.isNullOrBlank()) context.getString(
-                                        R.string.some_error_occurred
+                                        R.string.something_went_wrong
                                     ) else errorMessage
                                 isLoading = false
                             }
@@ -994,13 +994,13 @@ fun HandleAddCommentSectionState(
             if (!isResponseHandled) {
                 if (addCommentState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
                     viewModel.snackBarMessageState.value = stringResource(
-                        id = R.string.some_error_occurred
+                        id = R.string.something_went_wrong
                     )
                     navigator.popBackStack()
                 } else {
                     viewModel.snackBarMessageState.value =
                         if (addCommentState.message.isNullOrBlank()) stringResource(
-                            id = R.string.some_error_occurred
+                            id = R.string.something_went_wrong
                         ) else addCommentState.message
                 }
                 viewModel.isSendingCommentState.value = false
@@ -1067,7 +1067,7 @@ fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
         RequestStatusEnum.Exception -> {
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
-                    deleteCommentState.message ?: stringResource(id = R.string.some_error_occurred)
+                    deleteCommentState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -1130,7 +1130,7 @@ private fun HandleLikeUnlikeState(
                     navigator.popBackStack()
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
             }
@@ -1168,7 +1168,7 @@ private fun HandleSaveUnSavePost(
                 navigator.popBackStack()
             } else {
                 viewModel.snackBarMessageState.value =
-                    saveUnSavePostState.message ?: stringResource(id = R.string.some_error_occurred)
+                    saveUnSavePostState.message ?: stringResource(id = R.string.something_went_wrong)
             }
         }
 

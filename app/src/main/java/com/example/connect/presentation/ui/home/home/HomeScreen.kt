@@ -198,7 +198,7 @@ private fun HandleStoryDetailsWithUserDetails(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     storyDetailsWithUserDetailsState.message ?: stringResource(
-                        id = R.string.some_error_occurred
+                        id = R.string.something_went_wrong
                     )
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
@@ -667,7 +667,7 @@ private fun HandleLikeUnlikePostState(viewModel: HomeViewModel) {
                         stringResource(id = R.string.post_not_found)
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
@@ -711,7 +711,7 @@ private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {
                 } else {
                     viewModel.snackBarMessageState.value =
                         saveUnSavePostState.message
-                            ?: stringResource(id = R.string.some_error_occurred)
+                            ?: stringResource(id = R.string.something_went_wrong)
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,

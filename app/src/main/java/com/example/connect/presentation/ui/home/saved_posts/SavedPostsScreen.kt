@@ -425,7 +425,7 @@ private fun HandleLikeUnlikeState(viewModel: SavedPostsViewModel) {
                         stringResource(id = R.string.post_not_found)
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.some_error_occurred)
+                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
             }
@@ -462,7 +462,7 @@ private fun HandleSaveUnSavePost(viewModel: SavedPostsViewModel) {
                 } else {
                     viewModel.snackBarMessageState.value =
                         saveUnSavePostState.message
-                            ?: stringResource(id = R.string.some_error_occurred)
+                            ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
             }

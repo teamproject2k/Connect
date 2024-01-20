@@ -44,7 +44,7 @@ fun ExpandedImage(imageUrl: String?, onDismiss: () -> Unit) {
                 isImageLoading = true
             },
             onError = {
-                context.showToast(context.getString(R.string.some_error_occurred))
+                context.showToast(context.getString(R.string.something_went_wrong))
                 isImageLoading = false
             },
             onSuccess = {

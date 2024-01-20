@@ -176,7 +176,7 @@ private fun HandleGetFriendsListStateFlow(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     getFriendsListAsUsersState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ERROR_TAG,
@@ -268,7 +268,7 @@ private fun HandleGetPendingFriendRequestListStateFlow(
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
                     getPendingFriendRequestListAsUsersState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ERROR_TAG,

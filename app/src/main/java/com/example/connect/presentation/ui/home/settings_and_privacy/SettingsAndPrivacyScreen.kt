@@ -329,7 +329,7 @@ fun HandleUpdateGenderVisibilityState(
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateUserGenderState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -376,7 +376,7 @@ fun HandleUpdateDobVisibilityState(
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateDobVisibilityState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -424,7 +424,7 @@ fun HandleUpdateFriendListVisibilityState(
             if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     updateFriendListVisibilityState.message
-                        ?: stringResource(id = R.string.some_error_occurred)
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
