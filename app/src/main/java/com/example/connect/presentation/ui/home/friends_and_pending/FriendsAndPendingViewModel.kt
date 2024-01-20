@@ -20,8 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FriendsAndPendingViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
 
     lateinit var selectedTabIndexState: MutableIntState
 

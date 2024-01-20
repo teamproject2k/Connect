@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.example.connect.data.models.post.PostDbEntity
 import com.example.connect.data.models.post.PostWithUserDetailsFromLocal
+import com.example.connect.domain.utils.VisibilityScopeEnum
 
 @Dao
 interface IPostDao {
@@ -22,8 +23,8 @@ interface IPostDao {
 
 
     @Transaction
-    @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedpostFirebaseIds) ORDER BY createdAt DESC")
-    fun getSavedPostsAndUsers(savedpostFirebaseIds: List<String>): List<PostWithUserDetailsFromLocal>
+    @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedPostFirebaseIds) ORDER BY createdAt DESC")
+    fun getSavedPostsAndUsers(savedPostFirebaseIds: List<String>): List<PostWithUserDetailsFromLocal>
 
     @Transaction
     @Query("SELECT * FROM posts WHERE whetherDeleted=0 ORDER BY createdAt DESC")
@@ -39,4 +40,14 @@ interface IPostDao {
 
     @Query("DELETE FROM posts")
     fun deleteAllPosts(): Int
+
+
+    @Query("DELETE FROM posts WHERE createdByUserFirebaseId= :userFirebaseId")
+    fun deleteAllPostOfUser(userFirebaseId: String): Int
+
+    @Query("DELETE FROM posts WHERE createdByUserFirebaseId = :userFirebaseId AND postVisibilityScope = :visibilityScope")
+    fun deleteOnlyFriendsOnlyPostOfUser(
+        userFirebaseId: String,
+        visibilityScope: String = VisibilityScopeEnum.FriendsOnly.name
+    ): Int
 }

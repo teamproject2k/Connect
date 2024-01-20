@@ -113,12 +113,12 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
             refreshing = true
             if (context.isNetworkAvailable()) {
                 viewModel.getUserDetails()
-                refreshing = false
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
                 FunctionHelper.vibrateDevice(context)
             }
+            refreshing = false
         })
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Box(
@@ -382,7 +382,6 @@ private fun HandlePostListSectionState(
                 navigator,
                 postDetailsList = postDetailState.data,
                 true,
-                userDetails.firebaseUserId,
                 userDetails
             )
         }

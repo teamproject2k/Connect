@@ -494,11 +494,11 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPostWithUserFromLocal(savedpostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
+    override suspend fun getPostWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
         val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
         return try {
             val postWithUsersList =
-                appDatabase.getPostDao().getSavedPostsAndUsers(savedpostFirebaseIds)
+                appDatabase.getPostDao().getSavedPostsAndUsers(savedPostFirebaseIds)
             postWithUsersList.forEach { postWithUser ->
                 if (postWithUser.userDetail != null) {
                     postWithUsersDetailList.add(
@@ -539,5 +539,13 @@ class IPostRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAllPostFomLocal(): Int {
         return appDatabase.getPostDao().deleteAllPosts()
+    }
+
+    override suspend fun deleteAllPostOfUserFromLocal(userFirebaseId: String): Int {
+        return appDatabase.getPostDao().deleteAllPostOfUser(userFirebaseId)
+    }
+
+    override suspend fun deleteAllPostOfUserWithFriendsOnlyVisibilityFromLocal(userFirebaseId: String): Int {
+        return appDatabase.getPostDao().deleteOnlyFriendsOnlyPostOfUser(userFirebaseId)
     }
 }

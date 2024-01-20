@@ -102,7 +102,7 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun getPostWithUserFromLocal(savedpostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
+    suspend fun getPostWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 
@@ -114,4 +114,10 @@ interface IPostRepository {
     suspend fun deletePostFromLocal(postFirebaseId: String): Int
 
     suspend fun deleteAllPostFomLocal(): Int
+
+
+    suspend fun deleteAllPostOfUserFromLocal(userFirebaseId: String): Int
+
+
+    suspend fun deleteAllPostOfUserWithFriendsOnlyVisibilityFromLocal(userFirebaseId: String): Int
 }

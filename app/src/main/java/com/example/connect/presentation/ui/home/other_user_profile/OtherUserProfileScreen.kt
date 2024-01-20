@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.other_user_profile
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -68,8 +67,6 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.domain.utils.VisibilityScopeEnum
-import com.example.connect.presentation.ui.auth.AuthenticationActivity
 import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.ExpandedImage
@@ -92,7 +89,6 @@ import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -122,8 +118,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             refreshing = true
             if (context.isNetworkAvailable()) {
                 viewModel.getUserDetails()
-                viewModel.getFriendListFromIds(requestedUser.friendList)
-                viewModel.getPostDetails(requestedUser.firebaseUserId)
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -143,7 +137,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
                 viewModel = viewModel,
                 navigator,
                 requestedUser,
-                homeSharedViewModel.usersDetails.firebaseUserId
             ) {
                 showBottomSheet = true
             }
@@ -178,10 +171,17 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
         }
     }
     LaunchedEffect(key1 = true) {
-        viewModel.getFriendListFromIds(requestedUser.friendList)
-        viewModel.getPostDetails(requestedUser.firebaseUserId)
-        viewModel.liveObserveRequiredUsers()
-        viewModel.liveObserveCurrentUsers()
+        if (context.isNetworkAvailable()) {
+            viewModel.getFriendListFromIds()
+            viewModel.getPostDetails()
+            viewModel.liveObserveOtherUsers()
+            viewModel.liveObserveLoggedInUsers()
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
+        }
+
     }
 
     HandleSendFriendRequestStateFlow(viewModel = viewModel)
@@ -192,9 +192,9 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     HandleBlockUserStateFlow(viewModel = viewModel)
     HandleUnfriendUserStateFlow(viewModel = viewModel)
     HandleUnfriendAndBlockUserStateFlow(viewModel = viewModel)
-    HandleLiveObserveRequiredUsersStateFlow(viewModel)
+    HandleLiveObserveOtherUsersStateFlow(viewModel)
     HandleLiveObserveCurrentUsersStateFlow(viewModel, homeSharedViewModel)
-    HandleGetCurrentUserDetailsStateFlow(
+    HandleUserDetailsState(
         viewModel = viewModel,
         homeSharedViewModel = homeSharedViewModel,
     )
@@ -210,7 +210,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
         RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data
             if (updatedDetails != null) {
-                viewModel.updateCurrentUser(updatedDetails)
+                viewModel.updateLoggedInUser(updatedDetails)
                 homeSharedViewModel.usersDetails = updatedDetails
             }
         }
@@ -222,13 +222,13 @@ fun HandleLiveObserveCurrentUsersStateFlow(
 }
 
 @Composable
-fun HandleLiveObserveRequiredUsersStateFlow(viewModel: OtherUserProfileViewModel) {
+fun HandleLiveObserveOtherUsersStateFlow(viewModel: OtherUserProfileViewModel) {
     val liveObserverState = viewModel.liveObserveRequiredUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
         RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data
             if (updatedDetails != null) {
-                viewModel.updateRequiredUser(updatedDetails)
+                viewModel.updateOtherUser(updatedDetails)
             }
         }
 
@@ -243,7 +243,6 @@ private fun ProfileScreen(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     userDetails: UsersBean,
-    loggedInUserFirebaseId: String,
     onOptionsMenuClick: () -> Unit
 ) {
     if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentUserUiEnum.BlockedByOtherUser.name) {
@@ -260,14 +259,14 @@ private fun ProfileScreen(
             ImageSection(viewModel, onOptionsMenuClick)
             SpacerHeight12()
             UserProfileUserInfoSection(
-                viewModel.requiredUserState.value,
-                viewModel.currentUserState.value.firebaseUserId
+                viewModel.otherUserState.value,
+                viewModel.loggedInUserState.value.firebaseUserId
             )
             SpacerHeight24()
             ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
-            HandlePostSection(viewModel, navigator, userDetails, loggedInUserFirebaseId)
+            HandlePostSection(viewModel, navigator, userDetails)
         }
     }
 }
@@ -288,7 +287,7 @@ private fun ImageSection(
             coverImageRef, profileImageRef, moreOptionsRef
         ) = createRefs()
         AsyncImage(
-            model = viewModel.requiredUserState.value.coverPhoto,
+            model = viewModel.otherUserState.value.coverPhoto,
             contentDescription = stringResource(R.string.cover_photo),
             modifier = Modifier
                 .fillMaxWidth()
@@ -302,7 +301,7 @@ private fun ImageSection(
             contentScale = ContentScale.Crop,
         )
         AsyncImage(
-            model = viewModel.requiredUserState.value.profilePhoto,
+            model = viewModel.otherUserState.value.profilePhoto,
             contentDescription = stringResource(R.string.profile_image),
             modifier = Modifier
                 .size(ConstantsHelper.ProfileImageHeight)
@@ -338,8 +337,8 @@ private fun ImageSection(
                 )
             }
         }
-        if (isProfilePhotoExpanded && viewModel.requiredUserState.value.profilePhoto != null) {
-            ExpandedImage(imageUrl = viewModel.requiredUserState.value.profilePhoto) {
+        if (isProfilePhotoExpanded && viewModel.otherUserState.value.profilePhoto != null) {
+            ExpandedImage(imageUrl = viewModel.otherUserState.value.profilePhoto) {
                 isProfilePhotoExpanded = false
             }
         }
@@ -378,7 +377,13 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.LockReset,
                     buttonText = stringResource(R.string.unblock_user),
                     onButtonClick = {
-                        viewModel.unBlockUser()
+                        if (context.isNetworkAvailable()) {
+                            viewModel.unBlockUser()
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
                     }
                 )
             }
@@ -390,7 +395,13 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Outlined.ArrowCircleLeft,
                     buttonText = stringResource(R.string.withdraw_request),
                     onButtonClick = {
-                        viewModel.withdrawFriendRequest()
+                        if (context.isNetworkAvailable()) {
+                            viewModel.withdrawFriendRequest()
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
                     }
                 )
             }
@@ -402,7 +413,13 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.CheckCircleOutline,
                     buttonText = stringResource(R.string.accept),
                     onButtonClick = {
-                        viewModel.acceptFriendRequest(context = context)
+                        if (context.isNetworkAvailable()) {
+                            viewModel.acceptFriendRequest(context = context)
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
                     }
                 )
                 SpacerWidth16()
@@ -414,7 +431,13 @@ private fun ActionButtonsSection(
                     textColor = ColorsHelper.black(),
                     buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
                     onButtonClick = {
-                        viewModel.removeFriendRequest()
+                        if (context.isNetworkAvailable()) {
+                            viewModel.removeFriendRequest()
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
                     }
                 )
             }
@@ -426,7 +449,13 @@ private fun ActionButtonsSection(
                     buttonImage = Icons.Default.PersonAddAlt1,
                     buttonText = stringResource(R.string.add_friend),
                     onButtonClick = {
-                        viewModel.sendFriendRequest(context)
+                        if (context.isNetworkAvailable()) {
+                            viewModel.sendFriendRequest(context)
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
                     }
                 )
             }
@@ -479,17 +508,11 @@ private fun HandleFriendListSection(
         }
 
         RequestStatusEnum.Success -> {
-            val isFriendListVisible =
-                viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.Public.name
-                        || (viewModel.requiredUserState.value.friendListVisibility == VisibilityScopeEnum.FriendsOnly.name
-                        && viewModel.requiredUserState.value.friendList.contains(viewModel.currentUserState.value.firebaseUserId))
-            if (isFriendListVisible) {
-                UserProfileFriendsListSection(
-                    navigator = navigator,
-                    friendsList = friendsDetailsState.data!!,
-                    loggedInUserFirebaseId = viewModel.currentUserState.value.firebaseUserId
-                )
-            }
+            UserProfileFriendsListSection(
+                navigator = navigator,
+                friendsList = friendsDetailsState.data!!,
+                loggedInUserFirebaseId = viewModel.loggedInUserState.value.firebaseUserId
+            )
         }
 
         RequestStatusEnum.Exception -> {
@@ -518,13 +541,11 @@ private fun HandlePostSection(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     usersBean: UsersBean,
-    loggedInUserFirebaseId: String
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
-    val context = LocalContext.current
     when (postDetailState.status) {
         RequestStatusEnum.Loading -> {
             UserProfilePostLoadingSection()
@@ -532,17 +553,10 @@ private fun HandlePostSection(
         }
 
         RequestStatusEnum.Success -> {
-            val postDetailsList = postDetailState.data?.reversed() ?: emptyList()
-            val updatedPostList = postDetailsList.filter { post ->
-                post.postVisibilityScope == VisibilityScopeEnum.Public.name || (post.postVisibilityScope == VisibilityScopeEnum.FriendsOnly.name && viewModel.requiredUserState.value.friendList.contains(
-                    viewModel.currentUserState.value.firebaseUserId
-                ))
-            }
             UserProfilePostSection(
                 navigator,
-                postDetailsList = updatedPostList,
+                postDetailsList = postDetailState.data,
                 false,
-                loggedInUserFirebaseId,
                 usersBean
             )
         }
@@ -550,11 +564,8 @@ private fun HandlePostSection(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 if (postDetailState.message == FirebaseErrorCodes.NO_USER_FOUND) {
-                    viewModel.sharedPreference.isUserDetailsEntered = false
-                    context.showToast(stringResource(R.string.no_user_found_please_reenter_details))
-                    val intent = Intent(context, AuthenticationActivity::class.java)
-                    context.startActivity(intent)
-                    LocalActivity.current.finish()
+                    viewModel.snackBarMessageState.value =
+                        stringResource(id = R.string.something_went_wrong_while_getting_post_details)
                 } else {
                     viewModel.snackBarMessageState.value =
                         postDetailState.message
@@ -629,9 +640,9 @@ private fun HandleSendFriendRequestStateFlow(
             if (!isResponseHandled) {
                 viewModel.statusWithCurrentUserState.value =
                     StatusWithCurrentUserUiEnum.RequestedByCurrentUser.name
-                isResponseHandled = true
                 viewModel.snackBarMessageState.value =
                     stringResource(id = R.string.friend_request_sent_successfully)
+                isResponseHandled = true
             }
         }
 
@@ -1013,7 +1024,7 @@ private fun HandleUnfriendAndBlockUserStateFlow(
 }
 
 @Composable
-private fun HandleGetCurrentUserDetailsStateFlow(
+private fun HandleUserDetailsState(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel,
 ) {
@@ -1029,12 +1040,21 @@ private fun HandleGetCurrentUserDetailsStateFlow(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                homeSharedViewModel.usersDetails = viewModel.currentUserState.value
+                val loggedInUser = getCurrentUserDetailsState.data?.first ?: return
+                val otherUser = getCurrentUserDetailsState.data.second
+                viewModel.loggedInUserState.value = loggedInUser
+                viewModel.otherUserState.value = otherUser
+                homeSharedViewModel.usersDetails = viewModel.loggedInUserState.value
                 viewModel.statusWithCurrentUserState.value =
                     FunctionHelper.getStatusWithCurrentUser(
                         homeSharedViewModel.usersDetails,
-                        viewModel.requiredUserState.value
+                        viewModel.otherUserState.value
                     )
+                // Get the post details of the required user
+                viewModel.getPostDetails()
+                // Get the friend list of the required user
+                viewModel.getFriendListFromIds()
+
                 isResponseHandled = true
             }
         }

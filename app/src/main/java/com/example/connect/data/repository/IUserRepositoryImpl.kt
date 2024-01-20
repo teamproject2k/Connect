@@ -704,7 +704,7 @@ class IUserRepositoryImpl @Inject constructor(
         firebaseUserId: String,
         userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration {
-        // Get a reference to the user document in the Firestore database.
+        // Get a reference to the user document in the FireStore database.
         val userDocumentReference = fireStore.collection(FirebaseConstants.USER_KEY)
             .document(firebaseUserId)
 
@@ -713,7 +713,6 @@ class IUserRepositoryImpl @Inject constructor(
             // If there is no error and the document exists, get the user data from the document.
             if (error == null && document != null && document.exists()) {
                 val requiredUser = document.toObject(UserRemoteEntity::class.java)
-
                 // If the user data is not null, convert it to a UsersBean object and emit it to the user observer state flow.
                 if (requiredUser != null) {
                     userObserverStateFlow.value =

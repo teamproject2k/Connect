@@ -3,7 +3,7 @@ package com.example.connect.domain.useCase.user
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class UpdateOtherUserStatusOnDbUseCase @Inject constructor(private val repository: IUserRepository) {
+class UpdateUserStatusOnDbUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Invokes the repository to update the other users' status on the database.
      *

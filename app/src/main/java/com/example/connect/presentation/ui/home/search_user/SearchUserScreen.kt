@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -32,6 +33,7 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SearchBarAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
@@ -51,6 +53,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
@@ -73,7 +76,9 @@ fun SearchScreen(navigator: DestinationsNavigator) {
             }
             refreshing = false
         })
-    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackBarHostState) },
+        topBar = { AppTopAppBar(title = stringResource(R.string.search_users)) }) {
         Box(
             modifier = Modifier
                 .padding(it)

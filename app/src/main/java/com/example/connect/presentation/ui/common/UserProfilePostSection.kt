@@ -33,7 +33,6 @@ fun UserProfilePostSection(
     navigator: DestinationsNavigator,
     postDetailsList: List<PostBean>?,
     isLoggedInUser: Boolean = false,
-    loggedInUserFirebaseId: String,
     userDetails: UsersBean
 ) {
     Column(
