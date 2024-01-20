@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.friends_and_pending
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,12 +12,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class FriendsAndPendingViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase
@@ -29,11 +27,13 @@ class FriendsAndPendingViewModel @Inject constructor(
 
     private val _getFriendsListStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-    val getFriendsListStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _getFriendsListStateFlow
+
+    val getFriendsListStateFlow = _getFriendsListStateFlow.asStateFlow()
 
     private val _getPendingFriendRequestListStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-    val getPendingFriendRequestListStateFlow: StateFlow<ResponseState<List<UsersBean>>> get() = _getPendingFriendRequestListStateFlow
+
+    val getPendingFriendRequestListStateFlow = _getPendingFriendRequestListStateFlow.asStateFlow()
 
     val snackBarMessageState = mutableStateOf("")
 
