@@ -1,4 +1,4 @@
-package com.example.connect.presentation.ui.home.search_user
+package com.example.connect.presentation.ui.home.liked_by
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -32,10 +33,12 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.LocalActivity
-import com.example.connect.presentation.ui.common.SearchBarAndUserListUiLoading
 import com.example.connect.presentation.ui.common.SearchUi
+import com.example.connect.presentation.ui.common.UserListLoading
 import com.example.connect.presentation.ui.common.UsersListItem
+import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -44,28 +47,32 @@ import com.example.connect.presentation.ui.pull_refresh.pullRefresh
 import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
-import com.example.connect.presentation.utils.FunctionHelper.getLowerCaseTextWithOutExtraSpace
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
-fun SearchScreen(navigator: DestinationsNavigator) {
-    val viewModel: SearchUserViewModel = hiltViewModel()
-    val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-    val snackBarHostState = SnackbarHostState()
-    val coroutineScope = rememberCoroutineScope()
+fun LikedByScreen(
+    navigator: DestinationsNavigator,
+    likedByUsersList: ArrayList<String>
+) {
+    val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
+    val viewModel: LikedByViewModel = hiltViewModel()
+    val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var refreshing by rememberSaveable { mutableStateOf(false) }
+
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
             if (context.isNetworkAvailable()) {
-                viewModel.getAllUsers(sharedViewModel.usersDetails)
+                viewModel.getLikedByUsers(likedByUsersList)
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -73,7 +80,12 @@ fun SearchScreen(navigator: DestinationsNavigator) {
             }
             refreshing = false
         })
-    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
+    Scaffold(topBar = {
+        AppTopAppBar(
+            title = stringResource(R.string.liked_by),
+            showNavigationIcon = true,
+            onNavigationIconClick = { navigator.popBackStack() })
+    }, snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Box(
             modifier = Modifier
                 .padding(it)
@@ -81,13 +93,18 @@ fun SearchScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleSearchUserState(viewModel, navigator)
+            HandleGetLikedByUsersState(
+                viewModel,
+                navigator,
+                homeSharedViewModel.usersDetails.firebaseUserId
+            )
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
             )
         }
     }
+
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -98,7 +115,7 @@ fun SearchScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(Unit) {
         if (context.isNetworkAvailable()) {
-            viewModel.getAllUsers(sharedViewModel.usersDetails)
+            viewModel.getLikedByUsers(likedByUsersList)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)
@@ -108,60 +125,66 @@ fun SearchScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-private fun HandleSearchUserState(
-    viewModel: SearchUserViewModel,
-    navigator: DestinationsNavigator
+private fun HandleGetLikedByUsersState(
+    viewModel: LikedByViewModel,
+    navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String
 ) {
-    val searchUserState = viewModel.searchUserStateFlow.collectAsState().value
+    val likedByUsersState = viewModel.getLikedByUsersStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
-    when (searchUserState.status) {
+    when (likedByUsersState.status) {
         RequestStatusEnum.Loading -> {
-            SearchBarAndUserListUiLoading()
+            UserListLoading()
             isExceptionHandled = false
         }
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    searchUserState.message ?: stringResource(id = R.string.something_went_wrong)
+                    likedByUsersState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
-                    ScreenNameEnum.SearchUserScreen.name,
-                    searchUserState.message.toString()
+                    ScreenNameEnum.LikedByScreen.name,
+                    likedByUsersState.message.toString()
                 )
                 isExceptionHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            CreateUi(searchUserState.data ?: emptyList(), navigator)
+            DisplayUsersList(
+                navigator,
+                likedByUsersState.data ?: emptyList(),
+                loggedInUserFirebaseId
+            )
         }
 
         RequestStatusEnum.None -> {
-            //no need to handle it
+            // no need to handle this
         }
     }
 }
 
-
 @Composable
-private fun CreateUi(
-    usersList: List<UsersBean>,
-    navigator: DestinationsNavigator
+private fun DisplayUsersList(
+    navigator: DestinationsNavigator,
+    likedByUsersList: List<UsersBean>,
+    loggedInUserFirebaseId: String
 ) {
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
     val filteredUserList = mutableListOf<UsersBean>()
     if (searchQuery.isBlank()) {
-        filteredUserList.addAll(usersList)
+        filteredUserList.addAll(likedByUsersList)
     } else {
-        val modifiedQuery = getLowerCaseTextWithOutExtraSpace(searchQuery)
-        usersList.forEach {
-            val lowerCaseName = getLowerCaseTextWithOutExtraSpace(it.name)
+        val modifiedQuery = FunctionHelper.getLowerCaseTextWithOutExtraSpace(searchQuery)
+        likedByUsersList.forEach {
+            val lowerCaseName = FunctionHelper.getLowerCaseTextWithOutExtraSpace(it.name)
             if (lowerCaseName.contains(modifiedQuery) || it.connectUserId.contains(modifiedQuery)) {
                 filteredUserList.add(it)
             }
@@ -186,13 +209,15 @@ private fun CreateUi(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(filteredUserList, key = {
                 it.firebaseUserId
-            }) { user ->
-                UsersListItem(usersBean = user) {
-                    navigator.navigate(OtherUserProfileScreenDestination(user))
+            }) { likedByUser ->
+                UsersListItem(likedByUser) {
+                    if (likedByUser.firebaseUserId == loggedInUserFirebaseId) {
+                        navigator.navigate(CurrentUserProfileScreenDestination)
+                    } else {
+                        navigator.navigate(OtherUserProfileScreenDestination(likedByUser))
+                    }
                 }
             }
         }
     }
 }
-
-

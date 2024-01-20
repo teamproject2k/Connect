@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.FriendsAndPendingScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
-import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -42,7 +42,7 @@ fun UserProfileFriendsListSection(
             count = friendsList?.size ?: 0,
             showSeeAll = (friendsList?.size ?: 0) > ConstantsHelper.PROFILE_FRIENDS_COLUMN_COUNT
         ) {
-            navigator.navigate(UserRequestScreenDestination())
+            navigator.navigate(FriendsAndPendingScreenDestination())
         }
         SpacerHeight12()
         if (friendsList.isNullOrEmpty()) {

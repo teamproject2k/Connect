@@ -64,9 +64,9 @@ import com.example.connect.presentation.ui.common.getAnimatedNavHostEngine
 import com.example.connect.presentation.ui.common.getHeightToMaintainAspectRatio
 import com.example.connect.presentation.ui.destinations.AddPostScreenDestination
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.FriendsAndPendingScreenDestination
 import com.example.connect.presentation.ui.destinations.HomeScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchScreenDestination
-import com.example.connect.presentation.ui.destinations.UserRequestScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.BottomAppBarItemData
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -317,11 +317,11 @@ private fun CreateUi(context: Context, viewModel: HomeSharedViewModel, screenToN
                 navController = navController,
                 startRoute = when (screenToNavigate) {
                     NotificationTypesEnum.FriendRequestReceived.name -> {
-                        UserRequestScreenDestination
+                        FriendsAndPendingScreenDestination
                     }
 
                     NotificationTypesEnum.FriendRequestAccepted.name -> {
-                        UserRequestScreenDestination
+                        FriendsAndPendingScreenDestination
                     }
 
                     else -> {
@@ -371,7 +371,7 @@ private fun getHomeBottomNavBarItemList(context: Context): ArrayList<BottomAppBa
             context.getString(R.string.requests),
             Icons.Filled.Handshake,
             Icons.Outlined.Handshake,
-            UserRequestScreenDestination.route
+            FriendsAndPendingScreenDestination.route
         )
     )
     bottomNavList.add(

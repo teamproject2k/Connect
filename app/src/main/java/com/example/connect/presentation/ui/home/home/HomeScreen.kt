@@ -81,6 +81,7 @@ import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.AddStoryScreenDestination
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.LikedByScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
 import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
@@ -119,7 +120,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 }
                 IconButton(onClick = {
                     val intent = Intent(context, ChatActivity::class.java)
-                    intent.putExtra("userDetails",homeSharedViewModel.usersDetails)
+                    intent.putExtra("userDetails", homeSharedViewModel.usersDetails)
                     activity.startActivity(intent)
                 }) {
                     Icon(
@@ -563,7 +564,6 @@ private fun PostBottomSection(
                             context.getString(R.string.no_internet_connection)
                         FunctionHelper.vibrateDevice(context)
                     }
-
                 }) {
                     Icon(
                         painter = if (postDetails.likedBy.contains(loggedInUserBean.firebaseUserId)) painterResource(
@@ -605,7 +605,6 @@ private fun PostBottomSection(
                         context.getString(R.string.no_internet_connection)
                     FunctionHelper.vibrateDevice(context)
                 }
-
             }) {
                 Icon(
                     imageVector = if (isSavedByCurrentUser) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
@@ -619,7 +618,11 @@ private fun PostBottomSection(
                     R.string.like_count_likes,
                     likeCount
                 ),
-                modifier = Modifier.padding(start = 16.dp),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable {
+                        navigator.navigate(LikedByScreenDestination(postDetails.likedBy))
+                    },
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp
             )
@@ -667,7 +670,8 @@ private fun HandleLikeUnlikePostState(viewModel: HomeViewModel) {
                         stringResource(id = R.string.post_not_found)
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
+                        likeUnlikeState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
                 }
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,

@@ -227,4 +227,5 @@
     <string name="post_deleted_successfully">Post deleted successfully</string>
     <string name="something_went_wrong_while_getting_post_details">Something went wrong while getting post details</string>
     <string name="chats">Chats</string>
+    <string name="liked_by">Liked by</string>
 </resources>

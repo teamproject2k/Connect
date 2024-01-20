@@ -95,6 +95,7 @@ import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.LikedByScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
@@ -279,7 +280,7 @@ private fun PostDetails(
         ) {
             PostCaptionMediaSection(postDetails = viewModel.post)
         }
-        PostBottomSection(viewModel, loggedInUser, context, onBottomSheetItemClick)
+        PostBottomSection(viewModel, loggedInUser, context, navigator, onBottomSheetItemClick)
         SpacerHeight16()
         DividerLightGrayAlpha40()
     }
@@ -335,6 +336,7 @@ private fun PostBottomSection(
     viewModel: PostDetailsViewModel,
     loggedInUser: UsersBean,
     context: Context,
+    navigator: DestinationsNavigator,
     onBottomSheetItemClick: () -> Unit
 ) {
     Column {
@@ -403,7 +405,11 @@ private fun PostBottomSection(
                     R.string.like_count_likes,
                     likeCount
                 ),
-                modifier = Modifier.padding(start = 16.dp),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable {
+                        navigator.navigate(LikedByScreenDestination(viewModel.post.likedBy))
+                    },
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp
             )
@@ -567,7 +573,8 @@ fun HandleGetAllCommentsSection(
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    getAllCommentsState.message ?: stringResource(id = R.string.something_went_wrong)
+                    getAllCommentsState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -1130,7 +1137,8 @@ private fun HandleLikeUnlikeState(
                     navigator.popBackStack()
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
+                        likeUnlikeState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
             }
@@ -1168,7 +1176,8 @@ private fun HandleSaveUnSavePost(
                 navigator.popBackStack()
             } else {
                 viewModel.snackBarMessageState.value =
-                    saveUnSavePostState.message ?: stringResource(id = R.string.something_went_wrong)
+                    saveUnSavePostState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
             }
         }
 

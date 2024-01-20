@@ -62,6 +62,7 @@ import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
+import com.example.connect.presentation.ui.destinations.LikedByScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -379,7 +380,11 @@ private fun PostBottomSection(
                     R.string.like_count_likes,
                     likeCount
                 ),
-                modifier = Modifier.padding(start = 16.dp),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .clickable {
+                        navigator.navigate(LikedByScreenDestination(postDetails.likedBy))
+                    },
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp
             )
@@ -425,7 +430,8 @@ private fun HandleLikeUnlikeState(viewModel: SavedPostsViewModel) {
                         stringResource(id = R.string.post_not_found)
                 } else {
                     viewModel.snackBarMessageState.value =
-                        likeUnlikeState.message ?: stringResource(id = R.string.something_went_wrong)
+                        likeUnlikeState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
                 }
                 isExceptionHandled = true
             }
