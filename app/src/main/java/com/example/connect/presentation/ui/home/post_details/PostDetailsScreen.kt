@@ -179,7 +179,8 @@ fun PostDetailsScreen(
                 PostVisibilityScopeBottomSheet(
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     viewModel = viewModel,
-                    homeSharedViewModel.usersDetails.firebaseUserId
+                    homeSharedViewModel.usersDetails.firebaseUserId,
+                    context
                 ) {
                     showPostVisibilityScopeBottomSheet = false
                 }
@@ -255,8 +256,22 @@ private fun PostDetails(
                         )
                     }
                     if (isDropDownMenuVisible) {
-                        PostDetailsDropDownSection(viewModel, loggedInUser.firebaseUserId) {
+                        PostDetailsDropDownSection(viewModel) {
                             isDropDownMenuVisible = false
+                        }
+                    }
+                    if (viewModel.showDeletePostAlertDialogState.value) {
+                        TitleMessageIconOkCancelDialog(
+                            imageVector = Icons.Default.Warning,
+                            iconTint = ColorsHelper.warning(),
+                            title = stringResource(id = R.string.delete_post),
+                            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_post),
+                            positiveButtonText = stringResource(R.string.delete),
+                            onCancel = {
+                                viewModel.showDeletePostAlertDialogState.value = false
+                            }) {
+                            viewModel.deletePost(loggedInUser.firebaseUserId)
+                            viewModel.showDeletePostAlertDialogState.value = false
                         }
                     }
                 }
@@ -289,12 +304,9 @@ private fun PostDetails(
 @Composable
 fun PostDetailsDropDownSection(
     viewModel: PostDetailsViewModel,
-    loggedInUserFirebaseId: String,
     onDropDownMenuDismiss: () -> Unit
 ) {
-    var showDeletePostAlertDialog by remember {
-        mutableStateOf(false)
-    }
+
     DropdownMenu(
         expanded = true,
         onDismissRequest = { onDropDownMenuDismiss() }
@@ -310,25 +322,11 @@ fun PostDetailsDropDownSection(
                 Text(text = stringResource(id = R.string.delete_post))
             }
         }, onClick = {
-            showDeletePostAlertDialog = true
+            viewModel.showDeletePostAlertDialogState.value = true
             onDropDownMenuDismiss()
         })
+    }
 
-    }
-    if (showDeletePostAlertDialog) {
-        TitleMessageIconOkCancelDialog(
-            imageVector = Icons.Default.Warning,
-            iconTint = ColorsHelper.warning(),
-            title = stringResource(id = R.string.delete_post),
-            subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_post),
-            positiveButtonText = stringResource(R.string.delete),
-            onCancel = {
-                showDeletePostAlertDialog = false
-            }) {
-            viewModel.deletePost(loggedInUserFirebaseId)
-            showDeletePostAlertDialog = false
-        }
-    }
 }
 
 @Composable
@@ -440,12 +438,19 @@ private fun PostVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: PostDetailsViewModel,
     loggedInUserFirebaseId: String,
+    context: Context,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.postVisibilityScopeList.forEach { postScope ->
             VisibilityScopeBottomSheetItem(postScope) {
-                viewModel.updatePostVisibility(postScope, loggedInUserFirebaseId)
+                if (context.isNetworkAvailable()) {
+                    viewModel.updatePostVisibility(postScope, loggedInUserFirebaseId)
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
+                }
                 onDismissRequest()
             }
         }
