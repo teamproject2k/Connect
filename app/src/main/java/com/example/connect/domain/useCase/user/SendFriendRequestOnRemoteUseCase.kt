@@ -4,18 +4,18 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class AcceptFriendRequestUseCase @Inject constructor(private val repository: IUserRepository) {
+class SendFriendRequestOnRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
-     * Accepts a friend request.
+     * Sends a friend request to the specified user.
      *
      * @param loggedInUserFirebaseId The Firebase ID of the current user.
-     * @param requestUserFirebaseId The Firebase ID of the user who sent the friend request.
+     * @param requestedUserFirebaseId The Firebase ID of the user to send the friend request to.
      * @return A [ResponseState] containing the result of the operation.
      */
     suspend fun invoke(
         loggedInUserFirebaseId: String,
-        requestUserFirebaseId: String
+        requestedUserFirebaseId: String
     ): ResponseState<Nothing> {
-        return repository.acceptFriendRequestOnRemote(loggedInUserFirebaseId, requestUserFirebaseId)
+        return repository.sendFriendRequestOnRemote(loggedInUserFirebaseId, requestedUserFirebaseId)
     }
 }

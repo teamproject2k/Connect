@@ -7,8 +7,8 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToLocalUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromLocalUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
@@ -24,9 +24,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeSharedViewModel @Inject constructor(
-    private val getUserDetailsFromDbUseCase: GetUserDetailsFromDbUseCase,
+    private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val addUserToLocalUseCase: AddUserToLocalUseCase,
     private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
 ) :
     BaseViewModel() {
@@ -107,7 +107,7 @@ class HomeSharedViewModel @Inject constructor(
                         // Check if the response state is successful
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the database
-                            addUserToDbUseCase.invoke(userDetailsFromServerResponseState.data!!)
+                            addUserToLocalUseCase.invoke(userDetailsFromServerResponseState.data!!)
 
                             // Update the usersDetails variable
                             usersDetails = userDetailsFromServerResponseState.data
@@ -122,7 +122,7 @@ class HomeSharedViewModel @Inject constructor(
                         }
                     } else {
                         // Get the user details from the database
-                        val userDetails = getUserDetailsFromDbUseCase.invoke(fireBaseId)
+                        val userDetails = getUserDetailsFromLocalUseCase.invoke(fireBaseId)
 
                         // Check if the user details are not null
                         if (userDetails != null) {

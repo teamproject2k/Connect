@@ -6,6 +6,6 @@ import javax.inject.Inject
 
 class AddUserListToLocalUseCase @Inject constructor(private val repository: IUserRepository) {
     suspend fun invoke(userList: List<UsersBean>): LongArray {
-        return repository.addUserListTLocal(userList)
+        return repository.addUserListToLocal(userList)
     }
 }

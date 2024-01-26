@@ -4,9 +4,9 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class GetAllUserFromIdsFromLocal @Inject constructor(private val repository: IUserRepository) {
+class GetAllUsersFromIdsFromLocalUseCase @Inject constructor(private val repository: IUserRepository) {
 
     suspend fun invoke(userIdList: List<String>): List<UsersBean> {
-        return repository.getAllUsersFromIdFromLocal(userIdList)
+        return repository.getAllUsersFromIdsFromLocal(userIdList)
     }
 }

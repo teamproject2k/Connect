@@ -2,11 +2,8 @@ package com.example.connect.presentation.ui.home.post_details
 
 import android.content.Context
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.CommentWithUser
@@ -27,7 +24,7 @@ import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostVisibilityOnRemoteUseCase
-import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
+import com.example.connect.domain.useCase.user.UpdateUserOnLocalUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.models.VisibilityScope
@@ -54,7 +51,7 @@ class PostDetailsViewModel @Inject constructor(
     private val deletePostFromRemoteUseCase: DeletePostFromRemoteUseCase,
     private val updatePostVisibilityOnRemoteUseCase: UpdatePostVisibilityOnRemoteUseCase,
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
-    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
+    private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase
 ) : BaseViewModel() {
 
@@ -193,7 +190,7 @@ class PostDetailsViewModel @Inject constructor(
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(post.postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = true
                     }
@@ -220,7 +217,7 @@ class PostDetailsViewModel @Inject constructor(
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = false
                     }

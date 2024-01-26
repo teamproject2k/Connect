@@ -10,8 +10,8 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromLocalUseCase
 import com.example.connect.domain.useCase.posts.GetPostDetailsFromRemoteUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
-import com.example.connect.domain.useCase.user.GetUserDetailsFromDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToLocalUseCase
+import com.example.connect.domain.useCase.user.GetUserDetailsFromLocalUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromIdsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
@@ -33,8 +33,8 @@ class CurrentUserProfileViewModel @Inject constructor(
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val getUserDetailsFromIds: GetUserDetailsFromIdsFromRemoteUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getUserDetailsFromLocalUseCase: GetUserDetailsFromDbUseCase
+    private val addUserToLocalUseCase: AddUserToLocalUseCase,
+    private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase
 ) : BaseViewModel() {
 
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
@@ -118,7 +118,7 @@ class CurrentUserProfileViewModel @Inject constructor(
                 val getUserDetailsResponse =
                     getUserDetailsFromRemoteUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                 if (getUserDetailsResponse.status == RequestStatusEnum.Success && getUserDetailsResponse.data != null) {
-                    addUserToDbUseCase.invoke(getUserDetailsResponse.data)
+                    addUserToLocalUseCase.invoke(getUserDetailsResponse.data)
                     val userDetails =
                         getUserDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
                     if (userDetails != null) {

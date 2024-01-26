@@ -11,7 +11,7 @@ import com.example.connect.domain.useCase.device.UpdateDeviceIdOnLocalUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
 import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
 import com.example.connect.domain.useCase.fcm.UpdateFCMTokenOnRemoteUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToLocalUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateFcmTokenOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
@@ -36,7 +36,7 @@ class OtpInputViewModel @Inject constructor(
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val updateDeviceIdOnLocalUseCase: UpdateDeviceIdOnLocalUseCase,
     private val updateDeviceIdOnRemoteUseCase: UpdateDeviceIdOnRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val addUserToLocalUseCase: AddUserToLocalUseCase,
     private val getFCMTokenUseCase: GetFCMTokenUseCase,
     private val updateFCMTokenOnRemoteUseCase: UpdateFCMTokenOnRemoteUseCase,
     private val updateFcmTokenOnLocalUseCase: UpdateFcmTokenOnLocalUseCase
@@ -117,7 +117,7 @@ class OtpInputViewModel @Inject constructor(
                 // Check if the response is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     // Add the user to the database.
-                    addUserToDbUseCase.invoke(userDetailsResponseState.data)
+                    addUserToLocalUseCase.invoke(userDetailsResponseState.data)
 
                     // Check if the current logged in device ID is different from the shared preference device ID.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId

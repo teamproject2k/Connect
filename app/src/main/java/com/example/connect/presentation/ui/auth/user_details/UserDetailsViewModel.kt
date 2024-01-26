@@ -7,9 +7,9 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserToRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUsersFromNameUseCaseFromRemote
+import com.example.connect.domain.useCase.user.GetUsersCountFromNameInitialsFromRemoteUseCase
 import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ButtonStateEnum
@@ -26,8 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
     private val addUserToRemoteUseCase: AddUserToRemoteUseCase,
-    private val addUserToDbUseCase: AddUserToDbUseCase,
-    private val getUsersFromNameUseCase: GetUsersFromNameUseCaseFromRemote,
+    private val addUserToLocalUseCase: AddUserToLocalUseCase,
+    private val getUsersFromNameUseCase: GetUsersCountFromNameInitialsFromRemoteUseCase,
     private val getFCMTokenUseCase: GetFCMTokenUseCase
 ) :
     BaseViewModel() {
@@ -96,7 +96,7 @@ class UserDetailsViewModel @Inject constructor(
                         // Check if the response is successful.
                         if (userDetailsResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the local database.
-                            addUserToDbUseCase.invoke(user)
+                            addUserToLocalUseCase.invoke(user)
                         }
 
                         // Set the response state of the user profile creation process.

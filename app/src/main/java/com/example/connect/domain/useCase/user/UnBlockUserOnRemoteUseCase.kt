@@ -4,7 +4,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class UnBlockUserUseCase @Inject constructor(private val repository: IUserRepository) {
+class UnBlockUserOnRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Unblocks a user.
      *

@@ -24,8 +24,8 @@ import com.example.connect.domain.useCase.story.DeleteAllStoriesFromLocalUseCase
 import com.example.connect.domain.useCase.story.GetAllStoriesWithUserFormRemoteUseCase
 import com.example.connect.domain.useCase.story.GetAllStoriesWithUserFromLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
-import com.example.connect.domain.useCase.user.DeleteAllUserFromLocalExceptInList
-import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
+import com.example.connect.domain.useCase.user.DeleteAllUsersExceptInListFromLocalUseCase
+import com.example.connect.domain.useCase.user.UpdateUserOnLocalUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,8 +51,8 @@ class HomeViewModel @Inject constructor(
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
     private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
-    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
-    private val deleteAllUserFromLocalExceptInList: DeleteAllUserFromLocalExceptInList,
+    private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase,
+    private val deleteAllUsersExceptInListFromLocalUseCase: DeleteAllUsersExceptInListFromLocalUseCase,
     private val getAllStoriesWithUserFromLocalUseCase: GetAllStoriesWithUserFromLocalUseCase,
     private val addAllStoriesToLocalUseCase: AddAllStoriesToLocalUseCase,
     private val deleteAllStoriesFromLocalUseCase: DeleteAllStoriesFromLocalUseCase
@@ -141,7 +141,7 @@ class HomeViewModel @Inject constructor(
                         val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
                         val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
                         if (postList != null && userList != null) {
-                            deleteAllUserFromLocalExceptInList.invoke(listOf(loggedInUserFirebaseId))
+                            deleteAllUsersExceptInListFromLocalUseCase.invoke(listOf(loggedInUserFirebaseId))
                             deleteAllPostsFromLocal.invoke()
                             val addPostToLocalResult =
                                 addPostListToLocalUseCase.invoke(postList)
@@ -233,7 +233,7 @@ class HomeViewModel @Inject constructor(
                     savePostOnRemoteUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -258,7 +258,7 @@ class HomeViewModel @Inject constructor(
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {

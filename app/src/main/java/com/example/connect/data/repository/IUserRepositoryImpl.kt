@@ -44,7 +44,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUsersCountFromNameFromRemote(connectIdFirstPart: String): ResponseState<Int> {
+    override suspend fun getUsersCountFromNameInitialsFromRemote(connectIdFirstPart: String): ResponseState<Int> {
         // Try to get the users from the FireStore database whose name matches the given name.
         return try {
             val allUserDocumentResponse =
@@ -689,7 +689,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateOtherUsersStatusOnLocal(
+    override suspend fun updateUsersStatusOnLocal(
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {
@@ -841,15 +841,15 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().updateUsersDetails(userDetails.toUserDbEntity())
     }
 
-    override suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray {
+    override suspend fun addUserListToLocal(userList: List<UsersBean>): LongArray {
         return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserDbEntity() })
     }
 
-    override suspend fun getAllUsersFromIdFromLocal(userIdList: List<String>): List<UsersBean> {
+    override suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UsersBean> {
         return appDatabase.getUsersDao().getAllUserFromIds(userIdList).map { it.toUserBean() }
     }
 
-    override suspend fun deleteAllUsersFromLocalExcept(exceptList: List<String>): Int {
+    override suspend fun deleteAllUsersFromLocalExceptInList(exceptList: List<String>): Int {
         return appDatabase.getUsersDao().deleteAllUsersExcept(exceptList)
     }
 

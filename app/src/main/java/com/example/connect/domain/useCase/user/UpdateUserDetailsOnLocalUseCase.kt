@@ -3,7 +3,7 @@ package com.example.connect.domain.useCase.user
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class UpdateUserDetailsOnDbUseCase @Inject constructor(private val repository: IUserRepository) {
+class UpdateUserDetailsOnLocalUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Updates the user details on the local database.
      *

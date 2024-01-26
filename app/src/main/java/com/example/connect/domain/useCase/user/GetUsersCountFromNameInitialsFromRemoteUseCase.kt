@@ -4,7 +4,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class GetUsersFromNameUseCaseFromRemote @Inject constructor(private val repository: IUserRepository) {
+class GetUsersCountFromNameInitialsFromRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Invokes the repository to get user count from name from remote.
      *
@@ -12,6 +12,6 @@ class GetUsersFromNameUseCaseFromRemote @Inject constructor(private val reposito
      * @return The response state.
      */
     suspend fun invoke(connectIdFirstPart: String): ResponseState<Int> {
-        return repository.getUsersCountFromNameFromRemote(connectIdFirstPart)
+        return repository.getUsersCountFromNameInitialsFromRemote(connectIdFirstPart)
     }
 }

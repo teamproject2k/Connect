@@ -3,7 +3,7 @@ package com.example.connect.domain.useCase.user
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class UpdateUserStatusOnDbUseCase @Inject constructor(private val repository: IUserRepository) {
+class UpdateUsersStatusOnLocalUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Invokes the repository to update the other users' status on the database.
      *
@@ -15,6 +15,6 @@ class UpdateUserStatusOnDbUseCase @Inject constructor(private val repository: IU
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {
-        return repository.updateOtherUsersStatusOnLocal(loggedInUserFirebaseId, otherUsersStatus)
+        return repository.updateUsersStatusOnLocal(loggedInUserFirebaseId, otherUsersStatus)
     }
 }
