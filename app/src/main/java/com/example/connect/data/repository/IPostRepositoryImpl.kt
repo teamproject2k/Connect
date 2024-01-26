@@ -174,7 +174,7 @@ class IPostRepositoryImpl @Inject constructor(
                     val whetherPostVisibleToLoggedInUser =
                         post.postVisibilityScope == VisibilityScopeEnum.Public.name || (currentUser?.otherUsersStatus?.get(
                             post.createdByUserFirebaseId
-                        ) == StatusWithCurrentUserRemoteEnum.Friends.name)
+                        ) == StatusWithCurrentUserRemoteEnum.Friends.name) || post.createdByUserFirebaseId == currentUser?.firebaseUserId
                     if (!post.whetherDeleted && currentUser?.otherUsersStatus?.get(post.createdByUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name && whetherPostVisibleToLoggedInUser) {
                         postList.add(post.toPostBean(postDocument.id))
                     }
