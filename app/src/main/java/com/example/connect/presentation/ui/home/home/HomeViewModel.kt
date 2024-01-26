@@ -92,41 +92,41 @@ class HomeViewModel @Inject constructor(
         loggedInUserFirebaseId: String,
         isNetworkAvailable: Boolean
     ) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                _storyDetailsStateFlow.value = ResponseState.loading()
-                if (!isStoryListFetchedFromRemote && isNetworkAvailable) {
-                    val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
-                    if (response.status == RequestStatusEnum.Success) {
-                        val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
-                        val usersList = response.data?.map { it.usersBean } ?: emptyList()
-                        deleteAllStoriesFromLocalUseCase()
-                        if (addAllStoriesToLocalUseCase(storyList).size == storyList.size) {
-                            addUserListToLocalUseCase(usersList)
-                            isStoryListFetchedFromRemote = true
-                            _storyDetailsStateFlow.value =
-                                ResponseState.success(
-                                    getAllStoriesWithUserFromLocalUseCase(
-                                        loggedInUserFirebaseId
-                                    )
-                                )
-                        } else {
-                            _storyDetailsStateFlow.value =
-                                ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
-                        }
-                    } else {
-                        _storyDetailsStateFlow.value = ResponseState.error(response.message ?: "")
-                    }
-                } else {
-                    _storyDetailsStateFlow.value =
-                        ResponseState.success(
-                            getAllStoriesWithUserFromLocalUseCase(
-                                loggedInUserFirebaseId
-                            )
-                        )
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                _storyDetailsStateFlow.value = ResponseState.loading()
+//                if (!isStoryListFetchedFromRemote && isNetworkAvailable) {
+//                    val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
+//                    if (response.status == RequestStatusEnum.Success) {
+//                        val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
+//                        val usersList = response.data?.map { it.usersBean } ?: emptyList()
+//                        deleteAllStoriesFromLocalUseCase()
+//                        if (addAllStoriesToLocalUseCase(storyList).size == storyList.size) {
+//                            addUserListToLocalUseCase(usersList)
+//                            isStoryListFetchedFromRemote = true
+//                            _storyDetailsStateFlow.value =
+//                                ResponseState.success(
+//                                    getAllStoriesWithUserFromLocalUseCase(
+//                                        loggedInUserFirebaseId
+//                                    )
+//                                )
+//                        } else {
+//                            _storyDetailsStateFlow.value =
+//                                ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
+//                        }
+//                    } else {
+//                        _storyDetailsStateFlow.value = ResponseState.error(response.message ?: "")
+//                    }
+//                } else {
+//                    _storyDetailsStateFlow.value =
+//                        ResponseState.success(
+//                            getAllStoriesWithUserFromLocalUseCase(
+//                                loggedInUserFirebaseId
+//                            )
+//                        )
+//                }
+//            }
+//        }
     }
 
     fun getPostDetailsWithUserDetails(loggedInUserFirebaseId: String, isNetworkAvailable: Boolean) {
