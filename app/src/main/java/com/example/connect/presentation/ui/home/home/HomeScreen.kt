@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -85,6 +86,7 @@ import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreen
 import com.example.connect.presentation.ui.destinations.LikedByScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
+import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -236,9 +238,9 @@ private fun StoryUiSection(
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(allStoriesWithUserList) { storiesWithUser ->
+            itemsIndexed(allStoriesWithUserList) { index, storiesWithUser ->
                 StoryItem(
-                    storiesWithUser,
+                    index,
                     allStoriesWithUserList,
                     loggedInUserFirebaseId,
                     navigator
@@ -277,22 +279,21 @@ fun StoryLoaderItem() {
 
 @Composable
 private fun StoryItem(
-    storiesWithUser: StoriesWithUser,
+    currentStoryIndex: Int,
     allStoriesList: ArrayList<StoriesWithUser>,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
+    val storiesWithUser = allStoriesList[currentStoryIndex]
     val isLoggedInUser = loggedInUserFirebaseId == storiesWithUser.usersBean.firebaseUserId
     Column(modifier = Modifier.clickable {
-//        val gsonString: String = Gson().toJson(allStories)
-//        navigator.navigate(
-//            ShowStoryScreenDestination(
-//                storyPoster.firebaseUserId,
-//                gsonString,
-//                allStoryPosters,
-//                loggedInUserFirebaseId
-//            )
-//        )
+        navigator.navigate(
+            ShowStoryScreenDestination(
+                allStoriesList,
+                currentStoryIndex,
+                loggedInUserFirebaseId
+            )
+        )
     }, horizontalAlignment = Alignment.CenterHorizontally) {
         BreakCircularBorder(
             storiesWithUser.usersBean.profilePhoto,
