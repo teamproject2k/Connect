@@ -48,6 +48,8 @@ import com.example.connect.presentation.ui.destinations.SavedPostsScreenDestinat
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -138,7 +140,8 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
                     GenderVisibilityScopeBottomSheet(
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                         viewModel = viewModel,
-                        homeSharedViewModel.usersDetails
+                        homeSharedViewModel.usersDetails,
+                        context
                     ) {
                         showGenderBottomSheet = false
                     }
@@ -156,6 +159,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                         viewModel = viewModel,
                         homeSharedViewModel.usersDetails,
+                        context
                     ) {
                         showDobBottomSheet = false
                     }
@@ -173,6 +177,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
                         modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                         viewModel = viewModel,
                         homeSharedViewModel.usersDetails,
+                        context
                     ) {
                         showFriendListBottomSheet = false
                     }
@@ -225,10 +230,15 @@ private fun SettingsAndPrivacySectionWithVisibilityItem(
 }
 
 @Composable
-private fun SettingsAndPrivacyClickableItem(itemNameId: Int, onItemClick: () -> (Unit)) {
+private fun SettingsAndPrivacyClickableItem(
+    itemNameId: Int,
+    onItemClick: () -> (Unit)
+) {
     Box(modifier = Modifier
         .fillMaxWidth()
-        .clickable { onItemClick() }) {
+        .clickable {
+            onItemClick()
+        }) {
         Text(
             text = stringResource(itemNameId),
             fontWeight = FontWeight.Medium,
@@ -244,13 +254,20 @@ private fun GenderVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
     userDetails: UsersBean,
+    context: Context,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.genderVisibilityScopeList.forEach { genderScope ->
             VisibilityScopeBottomSheetItem(genderScope) {
-                if (viewModel.genderVisibilityState.value.scopeEnum.name != genderScope.scopeEnum.name) {
-                    viewModel.updateGenderVisibility(userDetails.firebaseUserId, genderScope)
+                if (context.isNetworkAvailable()) {
+                    if (viewModel.genderVisibilityState.value.scopeEnum.name != genderScope.scopeEnum.name) {
+                        viewModel.updateGenderVisibility(userDetails.firebaseUserId, genderScope)
+                    }
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
                 onDismissRequest()
             }
@@ -263,13 +280,20 @@ private fun DobVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
     userDetails: UsersBean,
+    context: Context,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.dobVisibilityScopeList.forEach { dobScope ->
             VisibilityScopeBottomSheetItem(dobScope) {
-                if (viewModel.dobVisibilityState.value.scopeEnum.name != dobScope.scopeEnum.name) {
-                    viewModel.updateDobVisibility(userDetails.firebaseUserId, dobScope)
+                if (context.isNetworkAvailable()) {
+                    if (viewModel.dobVisibilityState.value.scopeEnum.name != dobScope.scopeEnum.name) {
+                        viewModel.updateDobVisibility(userDetails.firebaseUserId, dobScope)
+                    }
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
                 onDismissRequest()
             }
@@ -282,16 +306,23 @@ private fun FriendListVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
     userDetails: UsersBean,
+    context: Context,
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
         viewModel.friendListVisibilityScopeList.forEach { friendListScope ->
             VisibilityScopeBottomSheetItem(friendListScope) {
-                if (viewModel.friendListVisibilityState.value.scopeEnum.name != friendListScope.scopeEnum.name) {
-                    viewModel.updateFriendListVisibility(
-                        userDetails.firebaseUserId,
-                        friendListScope
-                    )
+                if (context.isNetworkAvailable()) {
+                    if (viewModel.friendListVisibilityState.value.scopeEnum.name != friendListScope.scopeEnum.name) {
+                        viewModel.updateFriendListVisibility(
+                            userDetails.firebaseUserId,
+                            friendListScope
+                        )
+                    }
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                    FunctionHelper.vibrateDevice(context)
                 }
                 onDismissRequest()
             }

@@ -2,8 +2,11 @@ package com.example.connect.presentation.ui.home.post_details
 
 import android.content.Context
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.CommentWithUser
@@ -110,6 +113,8 @@ class PostDetailsViewModel @Inject constructor(
     lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
 
     var isCommentDataFetched: Boolean = false
+
+    var showDeletePostAlertDialogState = mutableStateOf(false)
 
     fun initialize(context: Context, post: PostBean, loggedInUsersBean: UsersBean) {
         this.post = post
