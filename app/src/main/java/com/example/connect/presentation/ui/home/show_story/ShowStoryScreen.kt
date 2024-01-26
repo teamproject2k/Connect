@@ -65,6 +65,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.models.StoriesWithUser
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.ui.common.ColorsHelper
@@ -76,7 +79,9 @@ import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.ConstantsHelper.ERROR_TAG
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
@@ -91,9 +96,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShowStoryScreen(
     navigator: DestinationsNavigator,
-    currentStoryPosterFirebaseId: String,
-    allStoriesString: String,
-    allStoryPosters: ArrayList<UsersBean>,
+    allStoriesWithUsersList: ArrayList<StoriesWithUser>,
+    currentStoryIndex: Int,
     loggedInUserFirebaseId: String
 ) {
     val viewModel: ShowStoryViewModel = hiltViewModel()
@@ -105,7 +109,7 @@ fun ShowStoryScreen(
     }
 
     if (!viewModel.areDetailsInitialized) {
-        viewModel.init(allStoriesString, allStoryPosters, currentStoryPosterFirebaseId)
+        viewModel.init(allStoriesWithUsersList, currentStoryIndex)
     }
 
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
@@ -116,7 +120,6 @@ fun ShowStoryScreen(
         ) {
             StoryMainSection(
                 viewModel = viewModel,
-                initialPage = viewModel.mapKeyList.indexOf(viewModel.storyVisibleForUserId.value),
                 navigator = navigator,
                 loggedInUserFirebaseId
             )
@@ -168,26 +171,30 @@ fun ShowStoryBottomSheet(
 @Composable
 fun StoryMainSection(
     viewModel: ShowStoryViewModel,
-    initialPage: Int,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
 ) {
-    val pageState = rememberPagerState(initialPage) {
-        viewModel.allUsersStories.size
+    val pageState = rememberPagerState(viewModel.currentUserStoriesIndex.intValue) {
+        viewModel.allStoriesWithUsersList.size
     }
     HorizontalPager(state = pageState, modifier = Modifier.fillMaxSize()) { index ->
-        val key = viewModel.mapKeyList[index]
-        viewModel.storyVisibleForUserId.value = key
-        viewModel.currentStoryIndex.intValue = 0
-        val currentStoryPoster = viewModel.allUsersList.find { it.firebaseUserId == key }
-        if (currentStoryPoster == null) {
+        if (index !in 0..viewModel.allStoriesWithUsersList.lastIndex) {
+            LoggingHelper.logData(
+                LoggingLevelEnum.Error,
+                ERROR_TAG,
+                ScreenNameEnum.ShowStoryScreen.name,
+                "Index $index not found for in stories with user list"
+            )
             navigator.popBackStack()
             return@HorizontalPager
         }
+        viewModel.currentStoryIndex.intValue = 0
+        val currentStoriesWithUser =
+            viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndex.value]
         UserStories(
             viewModel = viewModel,
-            storyBeans = viewModel.allUsersStories[viewModel.storyVisibleForUserId.value],
-            storyPoster = currentStoryPoster,
+            storyList = currentStoriesWithUser.storiesList,
+            storyPoster = currentStoriesWithUser.usersBean,
             navigator = navigator,
             loggedInUserFirebaseId
         )
@@ -198,7 +205,7 @@ fun StoryMainSection(
 @Composable
 fun UserStories(
     viewModel: ShowStoryViewModel,
-    storyBeans: ArrayList<StoryBean>?,
+    storyList: ArrayList<StoryBean>,
     storyPoster: UsersBean,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
@@ -206,11 +213,17 @@ fun UserStories(
     val context = LocalContext.current
     val screenWidth = context.resources.displayMetrics.widthPixels
     val screenHeight = context.resources.displayMetrics.heightPixels
-    if (storyBeans.isNullOrEmpty()) {
+    if (storyList.isEmpty()) {
+        LoggingHelper.logData(
+            LoggingLevelEnum.Error,
+            ERROR_TAG,
+            ScreenNameEnum.ShowStoryScreen.name,
+            "empty story list"
+        )
         navigator.popBackStack()
         return
     }
-    val currentStory = storyBeans[viewModel.currentStoryIndex.intValue]
+    val currentStory = storyList[viewModel.currentStoryIndex.intValue]
     var pauseTimer by remember {
         mutableStateOf(false)
     }
@@ -243,10 +256,10 @@ fun UserStories(
                             }
                         }
                     } else if (it.action == MotionEvent.ACTION_DOWN) {
-                        if (viewModel.currentStoryIndex.intValue < storyBeans.lastIndex) {
+                        if (viewModel.currentStoryIndex.intValue < storyList.lastIndex) {
                             viewModel.currentStoryIndex.intValue++
                         } else {
-                            viewModel.currentStoryIndex.intValue = storyBeans.lastIndex
+                            viewModel.currentStoryIndex.intValue = storyList.lastIndex
                         }
                     }
                     true
@@ -260,7 +273,7 @@ fun UserStories(
                 .fillMaxWidth()
         ) {
             SpacerWidth6()
-            for (index in 0 until storyBeans.size) {
+            for (index in 0 until storyList.size) {
                 LinearIndicator(
                     modifier = Modifier.weight(1f),
                     currentPageIndex = viewModel.currentStoryIndex.intValue,
@@ -269,7 +282,7 @@ fun UserStories(
                     onPauseTimer = pauseTimer,
                     progressMaxTime = if (currentStory.mediaType == MediaTypeEnum.Video.name || currentStory.mediaType == MediaTypeEnum.TextVideo.name) currentStory.videoLength else ConstantsHelper.STORY_PROGRESS_MAX_TIME
                 ) {
-                    if (viewModel.currentStoryIndex.intValue < storyBeans.lastIndex) {
+                    if (viewModel.currentStoryIndex.intValue < storyList.lastIndex) {
                         viewModel.currentStoryIndex.intValue++
                     }
                 }
@@ -429,7 +442,7 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
                     Text(text = postDetailsDropdownList[1])
                 }
             }, onClick = {
-                  showDeletePostAlertDialog = true
+                showDeletePostAlertDialog = true
             })
         }
     }
