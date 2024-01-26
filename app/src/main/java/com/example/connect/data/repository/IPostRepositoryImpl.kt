@@ -14,6 +14,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -170,7 +171,11 @@ class IPostRepositoryImpl @Inject constructor(
             postListResponse.forEach { postDocument ->
                 if (postDocument != null && postDocument.exists()) {
                     val post = postDocument.toObject(PostRemoteEntity::class.java)
-                    if (!post.whetherDeleted && currentUser?.otherUsersStatus?.get(post.createdByUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                    val whetherPostVisibleToLoggedInUser =
+                        post.postVisibilityScope == VisibilityScopeEnum.Public.name || (currentUser?.otherUsersStatus?.get(
+                            post.createdByUserFirebaseId
+                        ) == StatusWithCurrentUserRemoteEnum.Friends.name)
+                    if (!post.whetherDeleted && currentUser?.otherUsersStatus?.get(post.createdByUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name && whetherPostVisibleToLoggedInUser) {
                         postList.add(post.toPostBean(postDocument.id))
                     }
                 }
