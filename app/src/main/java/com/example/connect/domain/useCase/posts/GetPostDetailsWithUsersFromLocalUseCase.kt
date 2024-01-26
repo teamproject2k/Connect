@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class GetPostDetailsWithUsersFromLocalUseCase @Inject constructor(private val repository: IPostRepository) {
 
-    suspend fun invoke(): ResponseState<List<PostWithUserDetails>> {
+    suspend operator fun invoke(): ResponseState<List<PostWithUserDetails>> {
         return repository.getPostDetailsWithUsersFromLocal()
     }
 

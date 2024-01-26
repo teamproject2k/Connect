@@ -118,7 +118,7 @@ class EditProfileViewModel @Inject constructor(
                     // If the profile photo state is not null, upload the profile photo to the remote server.
                     if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name) && profilePhotoState.value != null) {
                         val updateProfilePhotoResponseState =
-                            uploadFileToRemoteUseCase.invoke(
+                            uploadFileToRemoteUseCase(
                                 profilePhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.PROFILE_PHOTO_KEY}"
                             )
@@ -141,7 +141,7 @@ class EditProfileViewModel @Inject constructor(
                     // If the cover photo state is not null, upload the cover photo to the remote server.
                     if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name) && coverPhotoState.value != null) {
                         val updateCoverPhotoResponseState =
-                            uploadFileToRemoteUseCase.invoke(
+                            uploadFileToRemoteUseCase(
                                 coverPhotoState.value!!.uri,
                                 "${userDetails.firebaseUserId}/${FirebaseConstants.COVER_PHOTO_KEY}"
                             )
@@ -170,14 +170,14 @@ class EditProfileViewModel @Inject constructor(
 
                     // Update the user details on the remote server.
                     val updatedUserResponseState =
-                        updateUserDetailsOnRemoteUseCase.invoke(
+                        updateUserDetailsOnRemoteUseCase(
                             fieldsToUpdate,
                             userDetails.firebaseUserId
                         )
 
                     // If the update was successful, update the user details on the database and in the UI.
                     if (updatedUserResponseState.status != RequestStatusEnum.Exception) {
-                        updateUserDetailsOnLocalUseCase.invoke(
+                        updateUserDetailsOnLocalUseCase(
                             getFieldsToUpdateInDbMap(fieldsToUpdate),
                             userDetails.firebaseUserId
                         )

@@ -15,7 +15,7 @@ class LiveUserObserverFromRemoteUseCase @Inject constructor(private val reposito
      * @param userObserverStateFlow The user observer state flow.
      * @return The listener registration.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
     ): ListenerRegistration {
         return repository.liveObserveUserFromRemote(firebaseUserId, userObserverStateFlow)

@@ -11,7 +11,7 @@ class GetUserDetailsFromLocalUseCase @Inject constructor(private val repository:
      * @param fireBaseId The user's Firebase ID.
      * @return The user details, or null if the user does not exist.
      */
-    suspend fun invoke(fireBaseId: String): UsersBean? {
+    suspend operator fun invoke(fireBaseId: String): UsersBean? {
         return repository.getUserDetailsFromLocal(fireBaseId)
     }
 }

@@ -11,7 +11,7 @@ class GetUsersCountFromNameInitialsFromRemoteUseCase @Inject constructor(private
      * @param connectIdFirstPart The user name.
      * @return The response state.
      */
-    suspend fun invoke(connectIdFirstPart: String): ResponseState<Int> {
+    suspend operator fun invoke(connectIdFirstPart: String): ResponseState<Int> {
         return repository.getUsersCountFromNameInitialsFromRemote(connectIdFirstPart)
     }
 }

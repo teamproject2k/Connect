@@ -12,7 +12,7 @@ class WithdrawFriendRequestOnRemoteUseCase @Inject constructor(private val repos
      * @param requestedUserFirebaseId The Firebase ID of the requested user.
      * @return A ResponseState object containing the result of the operation.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {

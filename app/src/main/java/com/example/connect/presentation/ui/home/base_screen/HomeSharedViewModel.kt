@@ -55,7 +55,7 @@ class HomeSharedViewModel @Inject constructor(
                 // If the Firebase ID is not null,
                 if (firebaseId != null) {
                     // Get the device ID from the remote server using the Firebase ID.
-                    val responseState = getDeviceIdFromRemoteUseCase.invoke(firebaseId)
+                    val responseState = getDeviceIdFromRemoteUseCase(firebaseId)
                     // If the response state is successful,
                     if (responseState.status == RequestStatusEnum.Success) {
                         // If the device ID from the remote server does not match the device ID in the shared preferences,
@@ -102,12 +102,12 @@ class HomeSharedViewModel @Inject constructor(
                     if (context.isNetworkAvailable()) {
                         // Get the user details from the server
                         val userDetailsFromServerResponseState =
-                            getUserDetailsFromRemoteUseCase.invoke(fireBaseId)
+                            getUserDetailsFromRemoteUseCase(fireBaseId)
 
                         // Check if the response state is successful
                         if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the database
-                            addUserToLocalUseCase.invoke(userDetailsFromServerResponseState.data!!)
+                            addUserToLocalUseCase(userDetailsFromServerResponseState.data!!)
 
                             // Update the usersDetails variable
                             usersDetails = userDetailsFromServerResponseState.data
@@ -122,7 +122,7 @@ class HomeSharedViewModel @Inject constructor(
                         }
                     } else {
                         // Get the user details from the database
-                        val userDetails = getUserDetailsFromLocalUseCase.invoke(fireBaseId)
+                        val userDetails = getUserDetailsFromLocalUseCase(fireBaseId)
 
                         // Check if the user details are not null
                         if (userDetails != null) {

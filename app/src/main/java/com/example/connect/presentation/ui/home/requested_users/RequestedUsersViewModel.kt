@@ -47,7 +47,7 @@ class RequestedUsersViewModel @Inject constructor(
                 } else {
                     // If the list is not empty, get the user details from the remote use case
                     _getRequestedUsersStateFlow.value =
-                        getUserDetailsFromIdsFromRemoteUseCase.invoke(requestedUsersList)
+                        getUserDetailsFromIdsFromRemoteUseCase(requestedUsersList)
                 }
             }
         }

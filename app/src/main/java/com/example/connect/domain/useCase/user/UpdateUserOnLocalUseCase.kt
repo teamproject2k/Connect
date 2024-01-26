@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UpdateUserOnLocalUseCase @Inject constructor(private val repository: IUserRepository) {
-    suspend fun invoke(userDetails: UsersBean): Int {
+    suspend operator fun invoke(userDetails: UsersBean): Int {
         return repository.updateUserOnLocal(userDetails)
     }
 }

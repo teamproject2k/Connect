@@ -102,7 +102,7 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun getPostWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
+    suspend fun getPostDetailsWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 

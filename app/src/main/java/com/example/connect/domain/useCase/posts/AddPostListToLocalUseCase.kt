@@ -11,7 +11,7 @@ class AddPostListToLocalUseCase @Inject constructor(private val repository: IPos
      * @param postDetails The list of posts to add.
      * @return The IDs of the posts that were added.
      */
-    suspend fun invoke(postDetails: List<PostBean>): LongArray {
+    suspend operator fun invoke(postDetails: List<PostBean>): LongArray {
         return repository.addPostListToLocal(postDetails)
     }
 }

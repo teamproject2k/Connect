@@ -12,7 +12,7 @@ class AddUserToRemoteUseCase @Inject constructor(private val repository: IUserRe
      * @param userDetails The user details to add.
      * @return A response state containing the result of the operation.
      */
-    suspend fun invoke(userDetails: UsersBean): ResponseState<Nothing> {
+    suspend operator fun invoke(userDetails: UsersBean): ResponseState<Nothing> {
         return repository.addUserToRemote(userDetails)
     }
 }

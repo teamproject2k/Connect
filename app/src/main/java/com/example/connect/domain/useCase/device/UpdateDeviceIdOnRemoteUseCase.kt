@@ -12,7 +12,7 @@ class UpdateDeviceIdOnRemoteUseCase @Inject constructor(private val repository: 
      * @param updatedDeviceId The updated device ID of the user.
      * @return A ResponseState object containing the result of the update.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         fireBaseId: String,
         updatedDeviceId: String
     ): ResponseState<Nothing> {

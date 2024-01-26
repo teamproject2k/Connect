@@ -53,7 +53,7 @@ class FriendsAndPendingViewModel @Inject constructor(
                     _getFriendsListStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     _getFriendsListStateFlow.value =
-                        getUserDetailsFromIdsFromRemoteUseCase.invoke(friendsList)
+                        getUserDetailsFromIdsFromRemoteUseCase(friendsList)
                 }
             }
         }
@@ -69,7 +69,7 @@ class FriendsAndPendingViewModel @Inject constructor(
                         ResponseState.success(emptyList())
                 } else {
                     _getPendingFriendRequestListStateFlow.value =
-                        getUserDetailsFromIdsFromRemoteUseCase.invoke(pendingList)
+                        getUserDetailsFromIdsFromRemoteUseCase(pendingList)
                 }
             }
         }

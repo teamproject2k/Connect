@@ -96,17 +96,17 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _storyDetailsStateFlow.value = ResponseState.loading()
                 if (!isStoryListFetchedFromRemote && isNetworkAvailable) {
-                    val response = storyDetailsWithUserDetailsUseCase.invoke(loggedInUserFirebaseId)
+                    val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
                     if (response.status == RequestStatusEnum.Success) {
                         val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
                         val usersList = response.data?.map { it.usersBean } ?: emptyList()
-                        deleteAllStoriesFromLocalUseCase.invoke()
-                        if (addAllStoriesToLocalUseCase.invoke(storyList).size == storyList.size) {
-                            addUserListToLocalUseCase.invoke(usersList)
+                        deleteAllStoriesFromLocalUseCase()
+                        if (addAllStoriesToLocalUseCase(storyList).size == storyList.size) {
+                            addUserListToLocalUseCase(usersList)
                             isStoryListFetchedFromRemote = true
                             _storyDetailsStateFlow.value =
                                 ResponseState.success(
-                                    getAllStoriesWithUserFromLocalUseCase.invoke(
+                                    getAllStoriesWithUserFromLocalUseCase(
                                         loggedInUserFirebaseId
                                     )
                                 )
@@ -120,7 +120,7 @@ class HomeViewModel @Inject constructor(
                 } else {
                     _storyDetailsStateFlow.value =
                         ResponseState.success(
-                            getAllStoriesWithUserFromLocalUseCase.invoke(
+                            getAllStoriesWithUserFromLocalUseCase(
                                 loggedInUserFirebaseId
                             )
                         )
@@ -135,20 +135,20 @@ class HomeViewModel @Inject constructor(
                 _postDetailsStateFlow.value = ResponseState.loading()
                 if (!isPostListFromRemoteFetched && isNetworkAvailable) {
                     val postListWithUserDetailsResponse =
-                        postDetailsWithUserDetailsUseCase.invoke(loggedInUserFirebaseId)
+                        postDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
                     if (postListWithUserDetailsResponse.status == RequestStatusEnum.Success) {
                         isPostListFromRemoteFetched = true
                         val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
                         val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
                         if (postList != null && userList != null) {
-                            deleteAllUsersExceptInListFromLocalUseCase.invoke(listOf(loggedInUserFirebaseId))
-                            deleteAllPostsFromLocal.invoke()
+                            deleteAllUsersExceptInListFromLocalUseCase(listOf(loggedInUserFirebaseId))
+                            deleteAllPostsFromLocal()
                             val addPostToLocalResult =
-                                addPostListToLocalUseCase.invoke(postList)
+                                addPostListToLocalUseCase(postList)
                             if (addPostToLocalResult.size == postList.size) {
-                                addUserListToLocalUseCase.invoke(userList)
+                                addUserListToLocalUseCase(userList)
                                 _postDetailsStateFlow.value =
-                                    getPostDetailsWithUsersFromLocalUseCase.invoke()
+                                    getPostDetailsWithUsersFromLocalUseCase()
                             } else {
                                 _postDetailsStateFlow.value =
                                     ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
@@ -162,7 +162,7 @@ class HomeViewModel @Inject constructor(
                     }
                 } else {
                     _postDetailsStateFlow.value =
-                        getPostDetailsWithUsersFromLocalUseCase.invoke()
+                        getPostDetailsWithUsersFromLocalUseCase()
                 }
             }
         }
@@ -172,18 +172,18 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val addLikeResponse = addLikeOnRemoteUseCase.invoke(
+                val addLikeResponse = addLikeOnRemoteUseCase(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
                 if (addLikeResponse.status == RequestStatusEnum.Success) {
                     postDetails.likedBy.add(loggedInUserFirebaseId)
-                    updatePostDetailsOnLocalUseCase.invoke(postDetails)
+                    updatePostDetailsOnLocalUseCase(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (addLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(postDetails.postFirebaseId)
+                        deletePostFromLocalUseCase(postDetails.postFirebaseId)
                     }
                     _likeUnlikePostStateFlow.value =
                         ResponseState.error(
@@ -203,18 +203,18 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase.invoke(
+                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = postDetails.postFirebaseId
                 )
                 if (removeLikeResponse.status == RequestStatusEnum.Success) {
                     postDetails.likedBy.remove(loggedInUserFirebaseId)
-                    updatePostDetailsOnLocalUseCase.invoke(postDetails)
+                    updatePostDetailsOnLocalUseCase(postDetails)
                     onUpdate()
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 }
                 if (removeLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                    deletePostFromLocalUseCase.invoke(postDetails.postFirebaseId)
+                    deletePostFromLocalUseCase(postDetails.postFirebaseId)
                 }
                 _likeUnlikePostStateFlow.value =
                     ResponseState.error(
@@ -230,15 +230,15 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostOnRemoteUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
+                    savePostOnRemoteUseCase(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(postFirebaseId)
-                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(postFirebaseId)
+                        deletePostFromLocalUseCase(postFirebaseId)
                     }
                     _saveUnSavePostStateFlow.value =
                         ResponseState.error(responseState.message ?: "", postFirebaseId)
@@ -252,18 +252,18 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostFromRemoteUseCase.invoke(
+                    unSavePostFromRemoteUseCase(
                         loggedInUsersBean.firebaseUserId,
                         postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(postFirebaseId)
-                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(postFirebaseId)
+                        deletePostFromLocalUseCase(postFirebaseId)
                     }
                     _saveUnSavePostStateFlow.value =
                         ResponseState.error(responseState.message ?: "", postFirebaseId)

@@ -62,7 +62,7 @@ class MobileNumberInputViewModel @Inject constructor(
                 _sendOtpUIStateFlow.value = ResponseState.loading()
 
                 // Call the sendOtpUseCase with the selected country code, user mobile number, and the UI state flow.
-                sendOtpUseCase.invoke(
+                sendOtpUseCase(
                     selectedCountryCodeState.value,
                     userMobileNumberState.value,
                     _sendOtpUIStateFlow
@@ -84,38 +84,38 @@ class MobileNumberInputViewModel @Inject constructor(
                 // Set the state of the _getUserDetailsStateFlow to loading.
                 _getUserDetailsStateFlow.value = ResponseState.loading()
                 // Get the user details from the remote use case.
-                val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
+                val userDetailsResponseState = getUserDetailsFromRemoteUseCase(userId)
                 // Check if the response state is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     // Add the user to the database using the addUserToLocalUseCase.
-                    addUserToLocalUseCase.invoke(userDetailsResponseState.data)
+                    addUserToLocalUseCase(userDetailsResponseState.data)
                     // Check if the current logged in device id is different from the shared preference device id.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null
                     ) {
                         // Update the device id on the remote using the updateDeviceIdOnRemoteUseCase.
                         val updateDeviceIdOnRemoteResponseState =
-                            updateDeviceIdOnRemoteUseCase.invoke(
+                            updateDeviceIdOnRemoteUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
                         // Check if the update device id on remote response state is successful.
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             // Update the device id on the database using the updateDeviceIdOnDbUseCase.
-                            updateDeviceIdOnLocalUseCase.invoke(
+                            updateDeviceIdOnLocalUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
                         }
                     }
-                    val tokenResponseState = getFCMTokenUseCase.invoke()
+                    val tokenResponseState = getFCMTokenUseCase()
                     if (tokenResponseState.status == RequestStatusEnum.Success && tokenResponseState.data != null) {
-                        val responseState = updateFCMTokenOnRemoteUseCase.invoke(
+                        val responseState = updateFCMTokenOnRemoteUseCase(
                             userDetailsResponseState.data.firebaseUserId,
                             tokenResponseState.data
                         )
                         if (responseState.status == RequestStatusEnum.Success) {
-                            updateFcmTokenOnLocalUseCase.invoke(
+                            updateFcmTokenOnLocalUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 tokenResponseState.data
                             )

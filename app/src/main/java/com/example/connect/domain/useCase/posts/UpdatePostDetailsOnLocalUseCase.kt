@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class UpdatePostDetailsOnLocalUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(postDetails: PostBean): Int {
+    suspend operator fun invoke(postDetails: PostBean): Int {
         return repository.updatePostDetailsOnLocal(postDetails)
     }
 }

@@ -12,7 +12,7 @@ class GetSavedPostsWithUsersFromRemoteUseCase @Inject constructor(private val re
      * @param firebaseId The fire base id of the post.
      * @return The post details.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
     ): ResponseState<List<PostWithUserDetails>> {

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class SendFCMUseCase @Inject constructor(private val repository: IFCMRepository) {
 
-    suspend fun invoke(
+    suspend operator fun invoke(
         token: String,
         data: Map<String, String>,
         sendTo: String

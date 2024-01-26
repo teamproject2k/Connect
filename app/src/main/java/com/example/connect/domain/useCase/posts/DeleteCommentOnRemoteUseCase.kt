@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class DeleteCommentOnRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(
+    suspend operator fun invoke(
         commentId: String,
         postFirebaseId: String,
         deleteCount: Int,

@@ -12,7 +12,7 @@ class UpdateFcmTokenOnLocalUseCase @Inject constructor(private val repository: I
      * @param updatedToken The updated FCM token.
      * @return The number of rows affected.
      */
-    suspend fun invoke(loggedInUserFirebaseId: String, updatedToken: String): Int {
+    suspend operator fun invoke(loggedInUserFirebaseId: String, updatedToken: String): Int {
         return repository.updateFCMTokenOnLocal(loggedInUserFirebaseId, updatedToken)
     }
 }

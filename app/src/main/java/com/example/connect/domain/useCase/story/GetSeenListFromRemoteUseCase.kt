@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
 class GetSeenListFromRemoteUseCase @Inject constructor(private val repository: IStoryRepository) {
-    suspend fun invoke(storyId: String): ResponseState<List<Pair<String, Long>>> {
+    suspend operator fun invoke(storyId: String): ResponseState<List<Pair<String, Long>>> {
         return repository.getSeenListFromRemote(storyId)
     }
 }

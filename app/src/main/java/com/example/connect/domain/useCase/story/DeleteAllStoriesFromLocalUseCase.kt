@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 class DeleteAllStoriesFromLocalUseCase @Inject constructor(private val repository: IStoryRepository) {
 
-    suspend fun invoke(): Int {
+    suspend operator fun invoke(): Int {
         return repository.deleteAllStoriesFromLocal()
     }
 }

@@ -494,7 +494,7 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPostWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
+    override suspend fun getPostDetailsWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
         val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
         return try {
             val postWithUsersList =

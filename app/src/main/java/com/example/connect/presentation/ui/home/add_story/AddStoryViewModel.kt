@@ -79,7 +79,7 @@ class AddStoryViewModel @Inject constructor(
                 if (selectedMediaState.value != null) {
                     // Upload the selected media to the remote server.
                     val uploadFileToRemoteResponse =
-                        uploadFileToRemoteUseCase.invoke(
+                        uploadFileToRemoteUseCase(
                             selectedMediaState.value!!.uri,
                             "${FirebaseConstants.STORY_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
                         )
@@ -152,7 +152,7 @@ class AddStoryViewModel @Inject constructor(
 
                 // Upload the story details to the remote server.
                 val serverResponse =
-                    addStoryToRemoteUseCase.invoke(storyDetails)
+                    addStoryToRemoteUseCase(storyDetails)
 
                 // Check if the upload operation was successful.
                 if (serverResponse.status == RequestStatusEnum.Success) {

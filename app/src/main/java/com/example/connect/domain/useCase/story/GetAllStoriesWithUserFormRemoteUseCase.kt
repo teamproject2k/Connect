@@ -6,7 +6,7 @@ import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
 class GetAllStoriesWithUserFormRemoteUseCase @Inject constructor(private val repository: IStoryRepository) {
-    suspend fun invoke(loggedInUserFirebaseId: String): ResponseState<ArrayList<StoriesWithUser>> {
+    suspend operator fun invoke(loggedInUserFirebaseId: String): ResponseState<ArrayList<StoriesWithUser>> {
         return repository.getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId)
     }
 }

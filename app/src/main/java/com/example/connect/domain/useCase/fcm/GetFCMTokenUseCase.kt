@@ -11,7 +11,7 @@ class GetFCMTokenUseCase @Inject constructor(private val repository: IFCMReposit
      *
      * @return A ResponseState containing the fcm token or error.
      */
-    suspend fun invoke(): ResponseState<String> {
+    suspend operator fun invoke(): ResponseState<String> {
         return repository.getFCMToken()
     }
 }

@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 class DeleteAllPostOfUserFromLocalUseCase @Inject constructor(private val repository: IPostRepository) {
 
-    suspend fun invoke(userFirebaseId: String): Int {
+    suspend operator fun invoke(userFirebaseId: String): Int {
         return repository.deleteAllPostOfUserFromLocal(userFirebaseId)
     }
 }

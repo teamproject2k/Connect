@@ -57,7 +57,7 @@ class UserDetailsViewModel @Inject constructor(
 
                 // Get the number of users with the same name to set the user ID.
                 val currentUserByNameResponseState =
-                    getUsersFromNameUseCase.invoke(
+                    getUsersFromNameUseCase(
                         FunctionHelper.getConnectIdFirstPart(
                             lowerCaseUserNameWithoutAnyExtraSpace
                         )
@@ -67,7 +67,7 @@ class UserDetailsViewModel @Inject constructor(
                 if (currentUserByNameResponseState.status != RequestStatusEnum.Exception && sharedPreference.deviceId != null) {
                     // Get the current time in milliseconds.
                     val createdDate = FunctionHelper.getCurrentTimeInMillis()
-                    val fcmTokenResponseState = getFCMTokenUseCase.invoke()
+                    val fcmTokenResponseState = getFCMTokenUseCase()
                     if (fcmTokenResponseState.status == RequestStatusEnum.Success && !fcmTokenResponseState.data.isNullOrBlank()) {
                         // Create a user object with the user's information.
                         val user = UsersBean(
@@ -91,12 +91,12 @@ class UserDetailsViewModel @Inject constructor(
                         )
 
                         // Add the user to the remote database.
-                        val userDetailsResponseState = addUserToRemoteUseCase.invoke(user)
+                        val userDetailsResponseState = addUserToRemoteUseCase(user)
 
                         // Check if the response is successful.
                         if (userDetailsResponseState.status == RequestStatusEnum.Success) {
                             // Add the user to the local database.
-                            addUserToLocalUseCase.invoke(user)
+                            addUserToLocalUseCase(user)
                         }
 
                         // Set the response state of the user profile creation process.

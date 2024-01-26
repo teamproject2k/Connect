@@ -12,7 +12,7 @@ class UpdateUserDetailsOnRemoteUseCase @Inject constructor(private val repositor
      * @param firebaseUserId The user's Firebase ID.
      * @return A response state containing either the updated user details or an error.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): ResponseState<Nothing?> {

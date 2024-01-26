@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
 class AddAllStoriesToLocalUseCase @Inject constructor(private val repository: IStoryRepository) {
-    suspend fun invoke(storiesList: List<StoryBean>): LongArray {
+    suspend operator fun invoke(storiesList: List<StoryBean>): LongArray {
         return repository.addAllStoriesToLocal(storiesList)
     }
 }

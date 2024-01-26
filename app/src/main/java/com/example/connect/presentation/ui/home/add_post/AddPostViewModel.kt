@@ -73,7 +73,7 @@ class AddPostViewModel @Inject constructor(
                 if (selectedMediaState.value != null) {
                     // Upload the selected media to the remote server.
                     val uploadFileToRemoteResponseState =
-                        uploadFileToRemoteUseCase.invoke(
+                        uploadFileToRemoteUseCase(
                             selectedMediaState.value!!.uri,
                             "${FirebaseConstants.POST_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
                         )
@@ -138,7 +138,7 @@ class AddPostViewModel @Inject constructor(
 
                 // Upload the post details to the remote server.
                 val serverResponseState =
-                    uploadPostToRemoteUseCase.invoke(postDetails, loggedInUserFirebaseId)
+                    uploadPostToRemoteUseCase(postDetails, loggedInUserFirebaseId)
 
                 // Check if the upload operation was successful.
                 if (serverResponseState.status == RequestStatusEnum.Success) {
@@ -146,7 +146,7 @@ class AddPostViewModel @Inject constructor(
                     postDetails.postFirebaseId = serverResponseState.data ?: ""
 
                     // Add the post to the local database.
-                    addPostToLocalUseCase.invoke(postDetails)
+                    addPostToLocalUseCase(postDetails)
 
                     // Set the upload post state to success.
                     _uploadPostStateFlow.value = ResponseState.success(null)

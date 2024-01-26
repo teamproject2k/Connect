@@ -46,7 +46,7 @@ class LikedByViewModel @Inject constructor(
                 } else {
                     // Otherwise, get the user details from the remote use case and set the state to success with the result.
                     _getLikedByUsersStateFlow.value =
-                        getUserDetailsFromIdsFromRemoteUseCase.invoke(likedByUsersList)
+                        getUserDetailsFromIdsFromRemoteUseCase(likedByUsersList)
                 }
             }
         }

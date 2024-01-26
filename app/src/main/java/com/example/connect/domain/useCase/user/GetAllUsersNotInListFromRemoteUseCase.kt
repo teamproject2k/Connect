@@ -14,7 +14,7 @@ class GetAllUsersNotInListFromRemoteUseCase @Inject constructor(private val repo
      * @param loggedInUserFirebaseId The current user's firebase id.
      * @return A response state containing the list of users.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
     ): ResponseState<ArrayList<UsersBean>> {

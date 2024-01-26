@@ -13,7 +13,7 @@ class UploadPostToRemoteUseCase @Inject constructor(private val repository: IPos
      * @param fireBaseId The fire base id.
      * @return The response state.
      */
-    suspend fun invoke(postDetails: PostBean, fireBaseId: String): ResponseState<String> {
+    suspend operator fun invoke(postDetails: PostBean, fireBaseId: String): ResponseState<String> {
         return repository.uploadPostToRemote(postDetails, fireBaseId)
     }
 }

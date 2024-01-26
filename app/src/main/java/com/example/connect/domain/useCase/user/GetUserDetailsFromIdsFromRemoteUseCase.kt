@@ -12,7 +12,7 @@ class GetUserDetailsFromIdsFromRemoteUseCase @Inject constructor(private val rep
      * @param idList The list of user ids.
      * @return A [ResponseState] containing the user details.
      */
-    suspend fun invoke(idList: List<String>): ResponseState<List<UsersBean>> {
+    suspend operator fun invoke(idList: List<String>): ResponseState<List<UsersBean>> {
         return repository.getUserDetailsFromIdsFromRemote(idList)
     }
 }

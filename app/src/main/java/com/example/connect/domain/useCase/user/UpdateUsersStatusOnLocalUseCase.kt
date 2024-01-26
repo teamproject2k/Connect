@@ -11,7 +11,7 @@ class UpdateUsersStatusOnLocalUseCase @Inject constructor(private val repository
      * @param otherUsersStatus A mutable map of other users' Firebase IDs to their status.
      * @return The number of users whose status was successfully updated.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int {

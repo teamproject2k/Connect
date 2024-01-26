@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class RemoveLikeOfPostFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {

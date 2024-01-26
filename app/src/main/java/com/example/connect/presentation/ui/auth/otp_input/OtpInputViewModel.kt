@@ -89,7 +89,7 @@ class OtpInputViewModel @Inject constructor(
                 // Set the resendOtpStateFlow to loading state.
                 _resendOtpStateFlow.value = ResponseState.loading()
                 // Call the sendOtpUseCase with the country code, mobile number, and resendOtpStateFlow.
-                sendOtpUseCase.invoke(
+                sendOtpUseCase(
                     countryCode,
                     mobileNumber,
                     _resendOtpStateFlow
@@ -112,12 +112,12 @@ class OtpInputViewModel @Inject constructor(
                 _getUserDetailsStateFlow.value = ResponseState.loading()
 
                 // Get the user details from the remote server.
-                val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
+                val userDetailsResponseState = getUserDetailsFromRemoteUseCase(userId)
 
                 // Check if the response is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
                     // Add the user to the database.
-                    addUserToLocalUseCase.invoke(userDetailsResponseState.data)
+                    addUserToLocalUseCase(userDetailsResponseState.data)
 
                     // Check if the current logged in device ID is different from the shared preference device ID.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
@@ -125,7 +125,7 @@ class OtpInputViewModel @Inject constructor(
                     ) {
                         // Update the device ID on the remote server.
                         val updateDeviceIdOnRemoteResponseState =
-                            updateDeviceIdOnRemoteUseCase.invoke(
+                            updateDeviceIdOnRemoteUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
@@ -133,20 +133,20 @@ class OtpInputViewModel @Inject constructor(
                         // Check if the response is successful.
                         if (updateDeviceIdOnRemoteResponseState.status == RequestStatusEnum.Success) {
                             // Update the device ID on the database.
-                            updateDeviceIdOnLocalUseCase.invoke(
+                            updateDeviceIdOnLocalUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 sharedPreference.deviceId!!
                             )
                         }
                     }
-                    val tokenResponseState = getFCMTokenUseCase.invoke()
+                    val tokenResponseState = getFCMTokenUseCase()
                     if (tokenResponseState.status == RequestStatusEnum.Success && tokenResponseState.data != null) {
-                        val responseState = updateFCMTokenOnRemoteUseCase.invoke(
+                        val responseState = updateFCMTokenOnRemoteUseCase(
                             userDetailsResponseState.data.firebaseUserId,
                             tokenResponseState.data
                         )
                         if (responseState.status == RequestStatusEnum.Success) {
-                            updateFcmTokenOnLocalUseCase.invoke(
+                            updateFcmTokenOnLocalUseCase(
                                 userDetailsResponseState.data.firebaseUserId,
                                 tokenResponseState.data
                             )
@@ -175,7 +175,7 @@ class OtpInputViewModel @Inject constructor(
 
                 // Call the verifyOtpUseCase and update the verifyOtpStateFlow with the result.
                 _verifyOtpStateFlow.value =
-                    verifyOtpUseCase.invoke(verificationId, otpState.value)
+                    verifyOtpUseCase(verificationId, otpState.value)
             }
         }
     }

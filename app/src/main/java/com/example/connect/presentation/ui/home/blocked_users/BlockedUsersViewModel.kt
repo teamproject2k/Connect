@@ -46,7 +46,7 @@ class BlockedUsersViewModel @Inject constructor(
                 } else {
                     // Otherwise, get the user details from the remote use case and set the state to success with the result.
                     _getBlockedUsersStateFlow.value =
-                        getUserDetailsFromIdsFromRemoteUseCase.invoke(blockedUsersList)
+                        getUserDetailsFromIdsFromRemoteUseCase(blockedUsersList)
                 }
             }
         }

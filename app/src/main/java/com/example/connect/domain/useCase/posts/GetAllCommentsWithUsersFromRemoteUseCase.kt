@@ -6,7 +6,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class GetAllCommentsWithUsersFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(
+    suspend operator fun invoke(
         postFirebaseId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>> {

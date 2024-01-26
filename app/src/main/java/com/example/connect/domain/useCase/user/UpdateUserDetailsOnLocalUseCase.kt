@@ -11,7 +11,7 @@ class UpdateUserDetailsOnLocalUseCase @Inject constructor(private val repository
      * @param firebaseUserId The user's firebase ID.
      * @return The ID of the updated user.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         fieldsToUpdate: MutableMap<String, Any>,
         firebaseUserId: String
     ): Long {

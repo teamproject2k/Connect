@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class AddLikeOnRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
 
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {

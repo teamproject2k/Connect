@@ -12,7 +12,7 @@ class UnfriendAndBlockUserOnRemoteUseCase @Inject constructor(private val reposi
      * @param requestedUserFirebaseId The ID of the user to unfriend and block.
      * @return A response state indicating the success or failure of the operation.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {

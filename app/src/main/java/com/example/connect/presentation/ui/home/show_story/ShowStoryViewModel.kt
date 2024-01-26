@@ -63,7 +63,7 @@ class ShowStoryViewModel @Inject constructor(private val deleteStoryInRemoteUseC
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _deleteStoryStateFlow.value = ResponseState.loading()
-                _deleteStoryStateFlow.value = deleteStoryInRemoteUseCase.invoke(storyId)
+                _deleteStoryStateFlow.value = deleteStoryInRemoteUseCase(storyId)
             }
         }
     }

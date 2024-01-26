@@ -12,7 +12,7 @@ class UnfriendUserOnRemoteUseCase @Inject constructor(private val repository: IU
      * @param requestedUserFirebaseId The Firebase ID of the user to unfriend.
      * @return A [ResponseState] containing either a success or failure message.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {

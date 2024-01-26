@@ -132,20 +132,20 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val addLikeResponse = addLikeOnRemoteUseCase.invoke(
+                val addLikeResponse = addLikeOnRemoteUseCase(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (addLikeResponse.status == RequestStatusEnum.Success) {
                     post.likedBy.add(loggedInUserFirebaseId)
-                    updatePostDetailsOnLocalUseCase.invoke(post)
+                    updatePostDetailsOnLocalUseCase(post)
                     withContext(Dispatchers.Main) {
                         isPostLikedByLoggedInUserState.value = true
                     }
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (addLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                        deletePostFromLocalUseCase(post.postFirebaseId)
                     }
                     _likeUnlikePostStateFlow.value =
                         ResponseState.error(addLikeResponse.message ?: "")
@@ -158,20 +158,20 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _likeUnlikePostStateFlow.value = ResponseState.loading()
-                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase.invoke(
+                val removeLikeResponse = removeLikeOfPostFromRemoteUseCase(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     postFirebaseId = post.postFirebaseId
                 )
                 if (removeLikeResponse.status == RequestStatusEnum.Success) {
                     post.likedBy.remove(loggedInUserFirebaseId)
-                    updatePostDetailsOnLocalUseCase.invoke(post)
+                    updatePostDetailsOnLocalUseCase(post)
                     withContext(Dispatchers.Main) {
                         isPostLikedByLoggedInUserState.value = false
                     }
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
                 }
                 if (removeLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                    deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                    deletePostFromLocalUseCase(post.postFirebaseId)
                 }
                 _likeUnlikePostStateFlow.value =
                     ResponseState.error(removeLikeResponse.message ?: "")
@@ -184,20 +184,20 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostOnRemoteUseCase.invoke(
+                    savePostOnRemoteUseCase(
                         loggedInUsersBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(post.postFirebaseId)
-                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = true
                     }
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                        deletePostFromLocalUseCase(post.postFirebaseId)
                     }
                     _saveUnSavePostStateFlow.value =
                         ResponseState.error(responseState.message ?: "")
@@ -211,20 +211,20 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    unSavePostFromRemoteUseCase.invoke(
+                    unSavePostFromRemoteUseCase(
                         loggedInUsersBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
-                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase(loggedInUsersBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = false
                     }
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
                     if (responseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                        deletePostFromLocalUseCase(post.postFirebaseId)
                     }
                     _saveUnSavePostStateFlow.value =
                         ResponseState.error(responseState.message ?: "")
@@ -238,9 +238,9 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _deletePostStateFlow.value = ResponseState.loading()
                 if (loggedInUserFirebaseId == post.createdByUserFirebaseId) {
-                    val deletePostResponse = deletePostFromRemoteUseCase.invoke(post.postFirebaseId)
+                    val deletePostResponse = deletePostFromRemoteUseCase(post.postFirebaseId)
                     if (deletePostResponse.status == RequestStatusEnum.Success) {
-                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                        deletePostFromLocalUseCase(post.postFirebaseId)
                     }
                     _deletePostStateFlow.value = deletePostResponse
                 } else {
@@ -284,7 +284,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()
-                val addCommentResponseState = addCommentOnRemoteUseCase.invoke(comment)
+                val addCommentResponseState = addCommentOnRemoteUseCase(comment)
                 if (addCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
@@ -294,7 +294,7 @@ class PostDetailsViewModel @Inject constructor(
                     }
                 } else {
                     if (addCommentResponseState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                        deletePostFromLocalUseCase.invoke(post.postFirebaseId)
+                        deletePostFromLocalUseCase(post.postFirebaseId)
                     }
                     _addCommentStateFlow.value =
                         ResponseState.error(addCommentResponseState.message ?: "")
@@ -308,7 +308,7 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _deleteCommentStateFlow.value = ResponseState.loading()
                 val deleteCommentResponseState =
-                    deleteCommentOnRemoteUseCase.invoke(
+                    deleteCommentOnRemoteUseCase(
                         comment.commentFirebaseId,
                         post.postFirebaseId,
                         deleteCount
@@ -316,7 +316,7 @@ class PostDetailsViewModel @Inject constructor(
                 if (deleteCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.whetherDeleted = true
                     post.commentCount -= deleteCount
-                    updatePostDetailsOnLocalUseCase.invoke(post)
+                    updatePostDetailsOnLocalUseCase(post)
                     _deleteCommentStateFlow.value =
                         ResponseState.success(
                             Pair(
@@ -338,7 +338,7 @@ class PostDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getAllCommentsStateFlow.value = ResponseState.loading()
                 val getAllCommentsResponse =
-                    getAllCommentsWithUsersFromRemoteUseCase.invoke(
+                    getAllCommentsWithUsersFromRemoteUseCase(
                         post.postFirebaseId,
                         loggedInUserFireId
                     )
@@ -362,7 +362,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val addLikeForCommentResponseState =
-                    addLikeForCommentOnRemoteUseCase.invoke(
+                    addLikeForCommentOnRemoteUseCase(
                         comment.commentFirebaseId,
                         loggedInUserFireId
                     )
@@ -387,7 +387,7 @@ class PostDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val removeLikeForCommentResponseState =
-                    removeLikeForCommentFromRemoteUseCase.invoke(
+                    removeLikeForCommentFromRemoteUseCase(
                         comment.commentFirebaseId,
                         loggedInUserFireId
                     )
@@ -407,13 +407,13 @@ class PostDetailsViewModel @Inject constructor(
                 _updatePostVisibilityStateFlow.value = ResponseState.loading()
                 if (post.createdByUserFirebaseId == loggedInUserFirebaseId) {
                     val response =
-                        updatePostVisibilityOnRemoteUseCase.invoke(
+                        updatePostVisibilityOnRemoteUseCase(
                             post.postFirebaseId,
                             postScope.scopeEnum.name
                         )
                     if (response.status == RequestStatusEnum.Success) {
                         post.postVisibilityScope = postScope.scopeEnum.name
-                        updatePostDetailsOnLocalUseCase.invoke(post)
+                        updatePostDetailsOnLocalUseCase(post)
                         _updatePostVisibilityStateFlow.value = ResponseState.success(postScope)
                     } else {
                         _updatePostVisibilityStateFlow.value =

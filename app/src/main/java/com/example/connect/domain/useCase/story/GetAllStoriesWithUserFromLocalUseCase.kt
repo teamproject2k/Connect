@@ -10,7 +10,7 @@ class GetAllStoriesWithUserFromLocalUseCase @Inject constructor(
     private val storyRepository: IStoryRepository,
     private val userRepository: IUserRepository
 ) {
-    suspend fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUser> {
+    suspend operator fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUser> {
         val storiesList = storyRepository.getAllStoriesFromLocal()
         val userIdList = storiesList.map { it.createdByUserFirebaseId }.toSet().toMutableList()
         val usersList = userRepository.getAllUsersFromIdsFromLocal(userIdList)

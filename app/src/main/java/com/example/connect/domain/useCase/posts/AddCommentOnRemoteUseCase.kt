@@ -6,7 +6,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class AddCommentOnRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(
+    suspend operator fun invoke(
         comment: CommentBean
     ): ResponseState<String> {
         return repository.addCommentOnRemote(comment)

@@ -72,19 +72,19 @@ class CurrentUserProfileViewModel @Inject constructor(
                 _postDetailsStateFlow.value = ResponseState.loading()
                 if (isForceRefresh) {
                     val postDetailsFromServerResponseState =
-                        getPostDetailsFromRemoteUseCase.invoke(
+                        getPostDetailsFromRemoteUseCase(
                             loggedInUserDetailsState.value.firebaseUserId,
                             loggedInUserDetailsState.value.firebaseUserId
                         )
                     if (postDetailsFromServerResponseState.status == RequestStatusEnum.Success && postDetailsFromServerResponseState.data != null) {
-                        addPostListToLocalUseCase.invoke(postDetailsFromServerResponseState.data)
+                        addPostListToLocalUseCase(postDetailsFromServerResponseState.data)
                     }
                     _postDetailsStateFlow.value = ResponseState.success(
-                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
+                        getPostDetailsFromLocalUseCase(loggedInUserDetailsState.value.firebaseUserId)
                     )
                 } else {
                     _postDetailsStateFlow.value = ResponseState.success(
-                        getPostDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
+                        getPostDetailsFromLocalUseCase(loggedInUserDetailsState.value.firebaseUserId)
                     )
                 }
             }
@@ -104,7 +104,7 @@ class CurrentUserProfileViewModel @Inject constructor(
                     _friendsDetailsStateFlow.value = ResponseState.success(emptyList())
                 } else {
                     _friendsDetailsStateFlow.value =
-                        getUserDetailsFromIds.invoke(loggedInUserDetailsState.value.friendList)
+                        getUserDetailsFromIds(loggedInUserDetailsState.value.friendList)
                 }
             }
         }
@@ -116,11 +116,11 @@ class CurrentUserProfileViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _loggedInUserDetailsStateFlow.value = ResponseState.loading()
                 val getUserDetailsResponse =
-                    getUserDetailsFromRemoteUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
+                    getUserDetailsFromRemoteUseCase(loggedInUserDetailsState.value.firebaseUserId)
                 if (getUserDetailsResponse.status == RequestStatusEnum.Success && getUserDetailsResponse.data != null) {
-                    addUserToLocalUseCase.invoke(getUserDetailsResponse.data)
+                    addUserToLocalUseCase(getUserDetailsResponse.data)
                     val userDetails =
-                        getUserDetailsFromLocalUseCase.invoke(loggedInUserDetailsState.value.firebaseUserId)
+                        getUserDetailsFromLocalUseCase(loggedInUserDetailsState.value.firebaseUserId)
                     if (userDetails != null) {
                         _loggedInUserDetailsStateFlow.value = ResponseState.success(userDetails)
                     } else {

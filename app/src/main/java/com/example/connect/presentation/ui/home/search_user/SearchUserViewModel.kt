@@ -35,7 +35,7 @@ class SearchUserViewModel @Inject constructor(
                 fetchDetailsNotForList.addAll(currentUser.blockedUsersList)
                 _searchUserStateFlow.value = ResponseState.loading()
                 _searchUserStateFlow.value =
-                    getAllUsersNotInListFromRemoteUseCase.invoke(
+                    getAllUsersNotInListFromRemoteUseCase(
                         fetchDetailsNotForList,
                         currentUser.firebaseUserId
                     )

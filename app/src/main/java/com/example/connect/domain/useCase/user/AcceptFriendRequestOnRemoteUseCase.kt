@@ -12,7 +12,7 @@ class AcceptFriendRequestOnRemoteUseCase @Inject constructor(private val reposit
      * @param requestUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] containing the result of the operation.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestUserFirebaseId: String
     ): ResponseState<Nothing> {

@@ -13,7 +13,7 @@ class UploadFileToRemoteUseCase @Inject constructor(private val repository: IUpl
      * @param path The path to the file on the remote server.
      * @return A [ResponseState] containing the result of the upload.
      */
-    suspend fun invoke(uri: Uri, path: String): ResponseState<String> {
+    suspend operator fun invoke(uri: Uri, path: String): ResponseState<String> {
         return repository.uploadFileToRemote(uri, path)
     }
 }

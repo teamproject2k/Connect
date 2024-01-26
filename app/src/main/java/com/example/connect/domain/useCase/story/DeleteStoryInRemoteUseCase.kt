@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IStoryRepository
 import javax.inject.Inject
 
 class DeleteStoryInRemoteUseCase @Inject constructor(private val repository: IStoryRepository) {
-    suspend fun invoke(storyId: String): ResponseState<Nothing> {
+    suspend operator fun invoke(storyId: String): ResponseState<Nothing> {
         return repository.deleteStoryInRemote(storyId)
     }
 }

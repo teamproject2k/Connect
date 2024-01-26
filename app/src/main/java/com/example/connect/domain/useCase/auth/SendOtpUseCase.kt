@@ -13,7 +13,7 @@ class SendOtpUseCase @Inject constructor(private val repository: IAuthentication
      * @param mobileNumber The mobile number.
      * @param responseStateFlow The state flow that will be updated with the response.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         countryCode: String,
         mobileNumber: String,
         responseStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>>

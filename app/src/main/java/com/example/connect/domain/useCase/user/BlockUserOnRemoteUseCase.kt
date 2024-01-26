@@ -12,7 +12,7 @@ class BlockUserOnRemoteUseCase @Inject constructor(private val repository: IUser
      * @param requestedUserFirebaseId The ID of the user to block.
      * @return A [ResponseState] containing the result of the operation.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {

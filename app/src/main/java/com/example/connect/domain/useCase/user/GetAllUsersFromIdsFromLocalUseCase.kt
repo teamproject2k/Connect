@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class GetAllUsersFromIdsFromLocalUseCase @Inject constructor(private val repository: IUserRepository) {
 
-    suspend fun invoke(userIdList: List<String>): List<UsersBean> {
+    suspend operator fun invoke(userIdList: List<String>): List<UsersBean> {
         return repository.getAllUsersFromIdsFromLocal(userIdList)
     }
 }

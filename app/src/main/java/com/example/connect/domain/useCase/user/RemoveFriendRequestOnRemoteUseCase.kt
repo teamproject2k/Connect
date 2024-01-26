@@ -12,7 +12,7 @@ class RemoveFriendRequestOnRemoteUseCase @Inject constructor(private val reposit
      * @param requestedUserFirebaseId The Firebase ID of the user who sent the friend request.
      * @return A [ResponseState] object that indicates the success or failure of the operation.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         requestedUserFirebaseId: String
     ): ResponseState<Nothing> {

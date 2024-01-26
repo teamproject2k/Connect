@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class RemoveLikeForCommentFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
 
-    suspend fun invoke(commentId: String, loggedInUserFirebaseId: String): ResponseState<Nothing> {
+    suspend operator fun invoke(commentId: String, loggedInUserFirebaseId: String): ResponseState<Nothing> {
         return repository.removeLikeForCommentFromRemote(commentId, loggedInUserFirebaseId)
     }
 }

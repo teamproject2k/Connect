@@ -11,7 +11,7 @@ class GetDeviceIdFromRemoteUseCase @Inject constructor(private val repository: I
      * @param firebaseId The Firebase ID of the user.
      * @return A [ResponseState] containing the device ID or an error.
      */
-    suspend fun invoke(firebaseId: String): ResponseState<String> {
+    suspend operator fun invoke(firebaseId: String): ResponseState<String> {
         return repository.getDeviceIdFromRemote(firebaseId)
     }
 }

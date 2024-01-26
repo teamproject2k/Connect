@@ -12,7 +12,7 @@ class GetPostDetailsFromRemoteUseCase @Inject constructor(private val repository
      * @param fireBaseId The fire base id of the post.
      * @return A [ResponseState] containing the list of post details.
      */
-    suspend fun invoke(
+    suspend operator fun invoke(
         fireBaseId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {

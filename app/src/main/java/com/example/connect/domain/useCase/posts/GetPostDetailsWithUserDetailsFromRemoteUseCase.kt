@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class GetPostDetailsWithUserDetailsFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
 
-    suspend fun invoke(loggedInUserFirebaseId: String): ResponseState<List<PostWithUserDetails>> {
+    suspend operator fun invoke(loggedInUserFirebaseId: String): ResponseState<List<PostWithUserDetails>> {
         return repository.getAllPostsWithUserDetailsFromRemote(loggedInUserFirebaseId)
     }
 }

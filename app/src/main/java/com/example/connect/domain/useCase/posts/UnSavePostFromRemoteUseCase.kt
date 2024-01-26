@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class UnSavePostFromRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
 
-    suspend fun invoke(
+    suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         postFirebaseId: String
     ): ResponseState<Nothing> {

@@ -6,7 +6,7 @@ import com.example.connect.presentation.ui.models.VisibilityScope
 import javax.inject.Inject
 
 class UpdatePostVisibilityOnRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(postFirebaseId: String, postScopeName: String): ResponseState<Nothing> {
+    suspend operator fun invoke(postFirebaseId: String, postScopeName: String): ResponseState<Nothing> {
         return repository.updatePostVisibilityOnRemote(postFirebaseId, postScopeName)
     }
 }

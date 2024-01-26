@@ -11,7 +11,7 @@ class UpdateDeviceIdOnLocalUseCase @Inject constructor(private val repository: I
      * @param updatedDeviceId The updated device ID.
      * @return The number of rows affected.
      */
-    suspend fun invoke(fireBaseId: String, updatedDeviceId: String): Int {
+    suspend operator fun invoke(fireBaseId: String, updatedDeviceId: String): Int {
         return repository.updateDeviceIdOnLocal(fireBaseId, updatedDeviceId)
     }
 }

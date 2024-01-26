@@ -5,7 +5,7 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class DeletePostFromRemoteUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend fun invoke(postFirebaseId: String): ResponseState<Nothing> {
+    suspend operator fun invoke(postFirebaseId: String): ResponseState<Nothing> {
         return repository.deletePostFromRemote(postFirebaseId)
     }
 }

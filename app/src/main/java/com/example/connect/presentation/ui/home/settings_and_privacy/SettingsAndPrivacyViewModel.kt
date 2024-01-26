@@ -131,7 +131,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 _updateGenderVisibilityStateFlow.value = ResponseState.loading()
 
                 // Call the updateUserDetailsOnRemoteUseCase to update the gender visibility on the remote database.
-                val result = updateUserDetailsOnRemoteUseCase.invoke(
+                val result = updateUserDetailsOnRemoteUseCase(
                     // Create a map of the gender visibility field and its new value.
                     mutableMapOf(
                         UserRemoteEntity::genderVisibility.name to genderScope.scopeEnum.name
@@ -143,7 +143,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 // Check if the update was successful.
                 if (result.status == RequestStatusEnum.Success) {
                     // Update the gender visibility on the local database.
-                    updateUserDetailsOnLocalUseCase.invoke(
+                    updateUserDetailsOnLocalUseCase(
                         // Create a map of the gender visibility field and its new value.
                         mutableMapOf(
                             UsersDbEntity::genderVisibility.name to genderScope.scopeEnum.name
@@ -175,7 +175,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 // Set the loading state.
                 _updateDobVisibilityStateFlow.value = ResponseState.loading()
                 // Call the updateUserDetailsOnRemoteUseCase to update the user's details on the remote server.
-                val result = updateUserDetailsOnRemoteUseCase.invoke(
+                val result = updateUserDetailsOnRemoteUseCase(
                     // Create a map of the user's details to be updated.
                     mutableMapOf(
                         // The key is the name of the field to be updated.
@@ -187,7 +187,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 // Check if the result is successful.
                 if (result.status == RequestStatusEnum.Success) {
                     // Call the updateUserDetailsOnLocalUseCase to update the user's details in the local database.
-                    updateUserDetailsOnLocalUseCase.invoke(
+                    updateUserDetailsOnLocalUseCase(
                         // Create a map of the user's details to be updated.
                         mutableMapOf(
                             // The key is the name of the field to be updated.
@@ -219,7 +219,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 _updateFriendListVisibilityStateFlow.value = ResponseState.loading()
 
                 // Call the updateUserDetailsOnRemoteUseCase to update the user details on the remote server.
-                val result = updateUserDetailsOnRemoteUseCase.invoke(
+                val result = updateUserDetailsOnRemoteUseCase(
                     // Create a map of the user details to be updated.
                     mutableMapOf(
                         // The friend list visibility field.
@@ -232,7 +232,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 // Check if the result is successful.
                 if (result.status == RequestStatusEnum.Success) {
                     // Call the updateUserDetailsOnLocalUseCase to update the user details in the local database.
-                    updateUserDetailsOnLocalUseCase.invoke(
+                    updateUserDetailsOnLocalUseCase(
                         // Create a map of the user details to be updated.
                         mutableMapOf(
                             // The friend list visibility field.

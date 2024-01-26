@@ -177,7 +177,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 // Set the post details state to loading
                 _postDetailsStateFlow.value = ResponseState.loading()
                 // Get the post details from the remote use case
-                _postDetailsStateFlow.value = getPostDetailsFromRemoteUseCase.invoke(
+                _postDetailsStateFlow.value = getPostDetailsFromRemoteUseCase(
                     otherUserState.value.firebaseUserId,
                     loggedInUserState.value.firebaseUserId
                 )
@@ -204,7 +204,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     // If the friendIdList is not empty, emit a loading state.
                     // Get the user details from the userIds.
                     _friendsDetailsStateFlow.value =
-                        getUserDetailsFromIdsUseCase.invoke(otherUserState.value.friendList)
+                        getUserDetailsFromIdsUseCase(otherUserState.value.friendList)
                 }
             }
         }
@@ -222,7 +222,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _sendFriendRequestStateFlow.value = ResponseState.loading()
                 // Call the sendFriendRequestOnRemoteUseCase.
                 val responseState =
-                    sendFriendRequestOnRemoteUseCase.invoke(
+                    sendFriendRequestOnRemoteUseCase(
                         // Get the current user's firebaseUserId from the currentUserState.
                         loggedInUserState.value.firebaseUserId,
                         // Get the required user's firebaseUserId from the requiredUserState.
@@ -239,7 +239,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         otherUserState.value.receivedFriendRequestList.add(loggedInUserState.value.firebaseUserId)
                     }
                     // Call the updateOtherUserStatusOnDbUseCase.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         // Get the current user's firebaseUserId from the currentUserState.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's otherUsersStatus from the currentUserState.
@@ -255,7 +255,7 @@ class OtherUserProfileViewModel @Inject constructor(
                             NotificationTypesEnum.FriendRequestReceived.name
                         )
                     )
-                    sendFCMUseCase.invoke(
+                    sendFCMUseCase(
                         FunctionHelper.getAccessToken(context),
                         data,
                         otherUserState.value.fcmToken
@@ -283,7 +283,7 @@ class OtherUserProfileViewModel @Inject constructor(
 
                 // Call the withdrawFriendRequestOnRemoteUseCase.
                 val responseState =
-                    withdrawFriendRequestOnRemoteUseCase.invoke(
+                    withdrawFriendRequestOnRemoteUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the required user's firebase user ID.
@@ -299,7 +299,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     otherUserState.value.receivedFriendRequestList.remove(loggedInUserState.value.firebaseUserId)
 
                     // Call the updateOtherUserStatusOnDbUseCase.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's UserDbEntity.
@@ -329,7 +329,7 @@ class OtherUserProfileViewModel @Inject constructor(
 
                 // Call the acceptFriendRequestOnRemoteUseCase to accept the friend request.
                 val responseState =
-                    acceptFriendRequestOnRemoteUseCase.invoke(
+                    acceptFriendRequestOnRemoteUseCase(
                         loggedInUserState.value.firebaseUserId,
                         otherUserState.value.firebaseUserId
                     )
@@ -353,7 +353,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     }
 
                     // Call the updateOtherUserStatusOnDbUseCase to update the other user's status on the database.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
@@ -367,7 +367,7 @@ class OtherUserProfileViewModel @Inject constructor(
                             NotificationTypesEnum.FriendRequestAccepted.name
                         )
                     )
-                    sendFCMUseCase.invoke(
+                    sendFCMUseCase(
                         FunctionHelper.getAccessToken(context),
                         data,
                         otherUserState.value.fcmToken
@@ -395,7 +395,7 @@ class OtherUserProfileViewModel @Inject constructor(
 
                 // Call the removeFriendRequestOnRemoteUseCase.
                 val responseState =
-                    removeFriendRequestOnRemoteUseCase.invoke(
+                    removeFriendRequestOnRemoteUseCase(
                         loggedInUserState.value.firebaseUserId,
                         otherUserState.value.firebaseUserId
                     )
@@ -409,7 +409,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     otherUserState.value.requestedFriendRequestList.remove(loggedInUserState.value.firebaseUserId)
 
                     // Call the updateOtherUserStatusOnDbUseCase.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
@@ -436,7 +436,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _unBlockUserStateFlow.value = ResponseState.loading()
                 // Call the unBlockUserOnRemoteUseCase.
                 val responseState =
-                    unBlockUserOnRemoteUseCase.invoke(
+                    unBlockUserOnRemoteUseCase(
                         // Get the current user's firebase user id.
                         loggedInUserState.value.firebaseUserId,
                         // Get the required user's firebase user id.
@@ -447,7 +447,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Remove the required user's firebase user id from the current user's blockedUsersList.
                     loggedInUserState.value.blockedUsersList.remove(otherUserState.value.firebaseUserId)
                     // Call the updateOtherUserStatusOnDbUseCase.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         // Get the current user's firebase user id.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's otherUsersStatus.
@@ -475,7 +475,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _blockUserStateFlow.value = ResponseState.loading()
                 // Call the blockUserOnRemoteUseCase.
                 val responseState =
-                    blockUserOnRemoteUseCase.invoke(
+                    blockUserOnRemoteUseCase(
                         loggedInUserState.value.firebaseUserId,
                         otherUserState.value.firebaseUserId
                     )
@@ -490,12 +490,12 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Remove the requiredUserState.value.firebaseUserId from the currentUserState.value.receivedFriendRequestList.
                     loggedInUserState.value.receivedFriendRequestList.remove(otherUserState.value.firebaseUserId)
                     // Call the updateOtherUserStatusOnDbUseCase.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
 
-                    deleteAllPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
+                    deleteAllPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
 
                     // Set the blockUserStateFlow to the responseState.
                     _blockUserStateFlow.value = responseState
@@ -519,7 +519,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _unfriendUserStateFlow.value = ResponseState.loading()
                 // Call the unfriendUserOnRemoteUseCase to unfriend the user.
                 val responseState =
-                    unfriendUserOnRemoteUseCase.invoke(
+                    unfriendUserOnRemoteUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the required user's firebase user ID.
@@ -532,13 +532,13 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Remove the current user's firebase user ID from the required user's friend list.
                     otherUserState.value.friendList.remove(loggedInUserState.value.firebaseUserId)
                     // Call the updateOtherUserStatusOnDbUseCase to update the other user's status on the database.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's other users status.
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
-                    deleteOnlyFriendsOnlyPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
+                    deleteOnlyFriendsOnlyPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
 
                     // Set the unfriendUserStateFlow to the response state.
                     _unfriendUserStateFlow.value = responseState
@@ -562,7 +562,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _unfriendAndBlockUserStateFlow.value = ResponseState.loading()
                 // Call the unfriend and block user use case.
                 val responseState =
-                    unfriendAndBlockUserOnRemoteUseCase.invoke(
+                    unfriendAndBlockUserOnRemoteUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the required user's firebase user ID.
@@ -577,13 +577,13 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Remove the current user from the required user's friend list.
                     otherUserState.value.friendList.remove(loggedInUserState.value.firebaseUserId)
                     // Update the other user's status on the database.
-                    updateUsersStatusOnLocalUseCase.invoke(
+                    updateUsersStatusOnLocalUseCase(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's other users status.
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
-                    deleteAllPostOfUserFromLocalUseCase.invoke(otherUserState.value.firebaseUserId)
+                    deleteAllPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
                     // Set the unfriend and block user state flow to the response state.
                     _unfriendAndBlockUserStateFlow.value = responseState
                 } else {
@@ -606,7 +606,7 @@ class OtherUserProfileViewModel @Inject constructor(
                 _userDetailsStateFlow.value = ResponseState.loading()
 
                 // Call the getUserDetailsFromIdsUseCase to get the user details
-                val response = getUserDetailsFromIdsUseCase.invoke(
+                val response = getUserDetailsFromIdsUseCase(
                     listOf(
                         loggedInUserState.value.firebaseUserId,
                         otherUserState.value.firebaseUserId
@@ -633,7 +633,7 @@ class OtherUserProfileViewModel @Inject constructor(
                                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                         } else {
                             // Add the current user to the database
-                            addUserToLocalUseCase.invoke(currentUser)
+                            addUserToLocalUseCase(currentUser)
                             // Set the state of the userDetailsStateFlow to success with the current user
                             _userDetailsStateFlow.value =
                                 ResponseState.success(Pair(currentUser, otherUser))
@@ -658,7 +658,7 @@ class OtherUserProfileViewModel @Inject constructor(
         // Launch a coroutine to observe the required users.
         viewModelScope.launch {
             // Get the live user observer from the remote use case.
-            liveObserveOtherUserListener = liveUserObserverFromRemoteUseCase.invoke(
+            liveObserveOtherUserListener = liveUserObserverFromRemoteUseCase(
                 // The firebase user ID of the required user.
                 otherUserState.value.firebaseUserId,
                 // The live data flow to emit the required user details.
@@ -674,7 +674,7 @@ class OtherUserProfileViewModel @Inject constructor(
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Get the live user observer from the remote use case.
-            liveObserveLoggedInUserListener = liveUserObserverFromRemoteUseCase.invoke(
+            liveObserveLoggedInUserListener = liveUserObserverFromRemoteUseCase(
                 // Get the current user's firebase user id.
                 loggedInUserState.value.firebaseUserId,
                 // Get the live observe current user details state flow.
@@ -712,7 +712,7 @@ class OtherUserProfileViewModel @Inject constructor(
         loggedInUserState.value = updatedDetails
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                updateUserOnLocalUseCase.invoke(updatedDetails)
+                updateUserOnLocalUseCase(updatedDetails)
             }
         }
         // Update the status with current user state.
