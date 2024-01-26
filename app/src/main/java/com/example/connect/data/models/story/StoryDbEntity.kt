@@ -1,8 +1,11 @@
 package com.example.connect.data.models.story
 
+import androidx.room.Entity
 import com.example.connect.domain.models.StoryBean
 
-data class StoryRemoteEntity(
+@Entity(tableName = "stories")
+data class StoryDbEntity(
+    var storyFirebaseId: String,
     val createdByUserFirebaseId: String,
     val mediaUrl: String,
     val caption: String,
@@ -14,11 +17,9 @@ data class StoryRemoteEntity(
     val videoLength: Long = 0,
     val whetherDeleted: Boolean = false
 ) {
-    constructor() : this("", "", "", 0, "", "", "", "", 0, false)
-
-    fun toStoryBean(storyId: String): StoryBean {
+    fun toStoryBean(): StoryBean {
         return StoryBean(
-            storyId,
+            storyFirebaseId,
             createdByUserFirebaseId,
             mediaUrl,
             caption,

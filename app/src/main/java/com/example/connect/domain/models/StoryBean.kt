@@ -1,11 +1,15 @@
 package com.example.connect.domain.models
 
+import android.os.Parcelable
+import com.example.connect.data.models.story.StoryDbEntity
 import com.example.connect.data.models.story.StoryRemoteEntity
-import java.io.Serializable
+import kotlinx.parcelize.Parcelize
 
+
+@Parcelize
 data class StoryBean(
-    var id: String,
-    val fireBaseUserId: String,
+    var storyFirebaseId: String,
+    val createdByUserFirebaseId: String,
     val mediaUrl: String,
     val caption: String,
     val createdAt: Long,
@@ -14,11 +18,11 @@ data class StoryBean(
     val textOffset: String,
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
-    val isDeleted: Boolean = false
-) : Serializable {
+    val whetherDeleted: Boolean = false
+) : Parcelable {
     fun toStoryRemoteEntity(): StoryRemoteEntity {
         return StoryRemoteEntity(
-            fireBaseUserId,
+            createdByUserFirebaseId,
             mediaUrl,
             caption,
             createdAt,
@@ -27,7 +31,23 @@ data class StoryBean(
             textOffset,
             backgroundGradientColor,
             videoLength,
-            isDeleted
+            whetherDeleted
+        )
+    }
+
+    fun toStoryDbEntity(): StoryDbEntity {
+        return StoryDbEntity(
+            storyFirebaseId,
+            createdByUserFirebaseId,
+            mediaUrl,
+            caption,
+            createdAt,
+            mediaType,
+            textColor,
+            textOffset,
+            backgroundGradientColor,
+            videoLength,
+            whetherDeleted
         )
     }
 }

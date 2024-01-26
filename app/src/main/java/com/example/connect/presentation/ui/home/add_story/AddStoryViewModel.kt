@@ -157,7 +157,7 @@ class AddStoryViewModel @Inject constructor(
                 // Check if the upload operation was successful.
                 if (serverResponse.status == RequestStatusEnum.Success) {
                     // Get the story ID from the response.
-                    storyDetails.id = serverResponse.data ?: ""
+                    storyDetails.storyFirebaseId = serverResponse.data ?: ""
 
                     // Set the upload story state to success.
                     _uploadStoryStateFlow.value = ResponseState.success(null)

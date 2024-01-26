@@ -3,18 +3,21 @@ package com.example.connect.data.repository
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.story.StoryRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.domain.models.StoriesWithUser
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IStoryRepository
 import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class IStoryRepositoryImpl @Inject constructor(
-    private val fireStore: FirebaseFirestore, private val appDatabase: AppDatabase
+    private val fireStore: FirebaseFirestore,
+    private val appDatabase: AppDatabase
 ) :
     IStoryRepository {
     override suspend fun addStoryToRemote(story: StoryBean): ResponseState<String> {
@@ -35,28 +38,39 @@ class IStoryRepositoryImpl @Inject constructor(
         return elapsedTimeInMillis < twentyFourHoursInMillis
     }
 
-    override suspend fun getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>> {
+    override suspend fun getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<ArrayList<StoriesWithUser>> {
         return try {
-            val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
-                .whereEqualTo(StoryRemoteEntity::whetherDeleted.name, false).get().await()
-            val storyList = arrayListOf<StoryBean>()
+            val loggedInUserDocument =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
+                    .get().await()
             val userList = arrayListOf<UsersBean>()
-            val storiesPerUser = mutableMapOf<String, ArrayList<StoryBean>>()
-            storyListResponse.documents.forEach { document ->
-                if (document.exists()) {
-                    val story = document.toObject(StoryRemoteEntity::class.java)
-                    val isUploadedBeforeOneDay = isUploadedBeforeOneDay(story?.createdAt ?: 0)
-                    if (story != null && isUploadedBeforeOneDay) {
-                        storyList.add(story.toStoryBean(document.id))
-                    }
+            val storyList = arrayListOf<StoryBean>()
+            val useIdToStoryListMap = mutableMapOf<UsersBean, ArrayList<StoryBean>>()
+            val loggedInUser =
+                loggedInUserDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
+            if (loggedInUserDocument != null && loggedInUserDocument.exists() && loggedInUser != null) {
+                userList.add(loggedInUser)
+                val getStoriesFor = loggedInUser.friendList
+                getStoriesFor.add(loggedInUserFirebaseId)
+                val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
+                    .whereIn(
+                        StoryRemoteEntity::createdByUserFirebaseId.name,
+                        getStoriesFor
+                    ).whereEqualTo(StoryRemoteEntity::whetherDeleted.name, false)
+                    .whereLessThan(StoryRemoteEntity::createdAt.name, 1).get().await()
+                storyListResponse.forEach { storyDocument ->
+                    val story = storyDocument.toObject(StoryRemoteEntity::class.java)
+                    storyList.add(story.toStoryBean(storyDocument.id))
                 }
-            }
-            storyList.sortBy { it.createdAt }
-            if (storyList.isNotEmpty()) {
-                val userListIds = storyList.map { it.fireBaseUserId }.toSet().toList()
-                val userListResponse = fireStore.collection(FirebaseConstants.USER_KEY)
-                    .whereIn(UserRemoteEntity::firebaseUserId.name, userListIds).get().await()
-                userListResponse.documents.forEach { document ->
+                if (storyList.any { it.createdByUserFirebaseId == loggedInUserFirebaseId }) {
+                    useIdToStoryListMap[loggedInUser] = arrayListOf()
+                }
+                val allStoryPostersIdList =
+                    storyList.map { it.createdByUserFirebaseId }.toSet().toList()
+                val allUsersDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                    .whereIn(UserRemoteEntity::firebaseUserId.name, allStoryPostersIdList).get()
+                    .await()
+                allUsersDocument.documents.forEach { document ->
                     if (document != null && document.exists()) {
                         val user = document.toObject(UserRemoteEntity::class.java)
                         if (user != null) {
@@ -64,35 +78,32 @@ class IStoryRepositoryImpl @Inject constructor(
                         }
                     }
                 }
-                storyList.removeIf { story ->
-                    val user = userList.find { it.firebaseUserId == story.fireBaseUserId }
-                    val whetherShowStory =
-                        story.fireBaseUserId == loggedInUserFirebaseId ||
-                                (user?.friendList?.contains(loggedInUserFirebaseId) == true)
-                    if (!whetherShowStory) {
-                        userList.remove(user)
-                    }
-                    !whetherShowStory || user == null
-                }
-                val currentUserStories =
-                    storyList.filter { it.fireBaseUserId == loggedInUserFirebaseId } as ArrayList
-                if (currentUserStories.isNotEmpty()) {
-                    storiesPerUser[loggedInUserFirebaseId] = currentUserStories
-                }
                 storyList.forEach { story ->
-                    if (story.fireBaseUserId != loggedInUserFirebaseId) {
+                    if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
                         val storyPoster =
-                            userList.find { it.firebaseUserId == story.fireBaseUserId }
-                        if (storyPoster != null) {
-                            val userStories =
-                                storiesPerUser.getOrPut(storyPoster.firebaseUserId) { arrayListOf() }
-                            userStories.add(story)
-                            storiesPerUser[storyPoster.firebaseUserId] = userStories
+                            userList.find { it.firebaseUserId == story.createdByUserFirebaseId }
+                        if (storyPoster != null && storyPoster.friendList.contains(
+                                loggedInUserFirebaseId
+                            )
+                        ) {
+                            if (useIdToStoryListMap.containsKey(storyPoster)) {
+                                useIdToStoryListMap[storyPoster]?.add(story)
+                            } else {
+                                useIdToStoryListMap[storyPoster] =
+                                    arrayListOf(story)
+                            }
                         }
                     }
                 }
+                ResponseState.success(useIdToStoryListMap.map {
+                    StoriesWithUser(
+                        it.key,
+                        it.value
+                    )
+                } as ArrayList)
+            } else {
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
-            ResponseState.success(Pair(storiesPerUser, userList))
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
@@ -147,6 +158,26 @@ class IStoryRepositoryImpl @Inject constructor(
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
+    }
+
+    override suspend fun getAllStoriesFromLocal(): List<StoryBean> {
+        return appDatabase.getStoryDao().getAllStories().map { it.toStoryBean() }
+    }
+
+    override suspend fun addAllStoriesToLocal(storyList: List<StoryBean>): LongArray {
+        return appDatabase.getStoryDao().insertAllStories(storyList.map { it.toStoryDbEntity() })
+    }
+
+    override suspend fun deleteAllStoriesFromLocal(): Int {
+        return appDatabase.getStoryDao().deleteAllStories()
+    }
+
+    override suspend fun deleteStoryFromLocal(storyId: String): Int {
+        return appDatabase.getStoryDao().deleteStory(storyId)
+    }
+
+    override suspend fun addStoryToLocal(story: StoryBean): Long {
+        return appDatabase.getStoryDao().insertStory(story.toStoryDbEntity())
     }
 
 }

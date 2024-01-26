@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.example.connect.data.models.post.PostDbEntity
-import com.example.connect.data.models.post.PostWithUserDetailsFromLocal
+import com.example.connect.data.models.post.PostWithUserDetailsFromLocalEntity
 import com.example.connect.domain.utils.VisibilityScopeEnum
 
 @Dao
@@ -24,11 +24,11 @@ interface IPostDao {
 
     @Transaction
     @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedPostFirebaseIds) ORDER BY createdAt DESC")
-    fun getSavedPostsAndUsers(savedPostFirebaseIds: List<String>): List<PostWithUserDetailsFromLocal>
+    fun getSavedPostsAndUsers(savedPostFirebaseIds: List<String>): List<PostWithUserDetailsFromLocalEntity>
 
     @Transaction
     @Query("SELECT * FROM posts WHERE whetherDeleted=0 ORDER BY createdAt DESC")
-    fun getPostDetailsWithUsers(): List<PostWithUserDetailsFromLocal>
+    fun getPostDetailsWithUsers(): List<PostWithUserDetailsFromLocalEntity>
 
     @Update
     fun updatePostDetails(postDetails: PostDbEntity): Int

@@ -59,6 +59,7 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.PostBean
+import com.example.connect.domain.models.StoriesWithUser
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -84,7 +85,6 @@ import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreen
 import com.example.connect.presentation.ui.destinations.LikedByScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.PostDetailsScreenDestination
-import com.example.connect.presentation.ui.destinations.ShowStoryScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -92,7 +92,6 @@ import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
-import com.google.gson.Gson
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -160,8 +159,10 @@ fun HomeScreen(navigator: DestinationsNavigator) {
             homeSharedViewModel.usersDetails.firebaseUserId,
             isNetworkAvailable
         )
-        // TODO: 16/01/24 cd-user  handle is network available
-        viewModel.getStoryDetailsWithUserDetails(homeSharedViewModel.usersDetails.firebaseUserId)
+        viewModel.getStoryDetailsWithUserDetails(
+            homeSharedViewModel.usersDetails.firebaseUserId,
+            isNetworkAvailable
+        )
         if (!isNetworkAvailable) {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.viewing_in_offline_mode)
@@ -189,7 +190,7 @@ private fun HandleStoryDetailsWithUserDetails(
 
         RequestStatusEnum.Success -> {
             StoryUiSection(
-                storiesPerUser = storyDetailsWithUserDetailsState.data,
+                allStoriesWithUserList = storyDetailsWithUserDetailsState.data,
                 loggedInUserFirebaseId = currentUsersBean.firebaseUserId,
                 navigator = navigator
             )
@@ -219,11 +220,11 @@ private fun HandleStoryDetailsWithUserDetails(
 
 @Composable
 private fun StoryUiSection(
-    storiesPerUser: Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>?,
+    allStoriesWithUserList: ArrayList<StoriesWithUser>?,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    if (storiesPerUser == null || storiesPerUser.first.isEmpty()) return
+    if (allStoriesWithUserList.isNullOrEmpty()) return
     Column(
         modifier = Modifier
             .padding(start = 12.dp)
@@ -235,20 +236,13 @@ private fun StoryUiSection(
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(storiesPerUser.first.keys.toList()) { firebaseUserId ->
-
-                val storyPoster =
-                    storiesPerUser.second.find { it.firebaseUserId == firebaseUserId }
-
-                if (storyPoster != null) {
-                    StoryItem(
-                        storyPoster,
-                        storiesPerUser.first,
-                        storiesPerUser.second,
-                        loggedInUserFirebaseId,
-                        navigator
-                    )
-                }
+            items(allStoriesWithUserList) { storiesWithUser ->
+                StoryItem(
+                    storiesWithUser,
+                    allStoriesWithUserList,
+                    loggedInUserFirebaseId,
+                    navigator
+                )
             }
         }
         DividerLightGrayAlpha50()
@@ -283,37 +277,33 @@ fun StoryLoaderItem() {
 
 @Composable
 private fun StoryItem(
-    storyPoster: UsersBean,
-    allStories: MutableMap<String, ArrayList<StoryBean>>,
-    allStoryPosters: ArrayList<UsersBean>,
+    storiesWithUser: StoriesWithUser,
+    allStoriesList: ArrayList<StoriesWithUser>,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    val isLoggedInUser = loggedInUserFirebaseId == storyPoster.firebaseUserId
-    val currentUserStories = allStories[storyPoster.firebaseUserId]
-    if (currentUserStories != null) {
-        Column(modifier = Modifier.clickable {
-            val gsonString: String = Gson().toJson(allStories)
-            navigator.navigate(
-                ShowStoryScreenDestination(
-                    storyPoster.firebaseUserId,
-                    gsonString,
-                    allStoryPosters,
-                    loggedInUserFirebaseId
-                )
-            )
-        }, horizontalAlignment = Alignment.CenterHorizontally) {
-            BreakCircularBorder(
-                storyPoster.profilePhoto,
-                parts = currentUserStories.size,
-                getColorListFromStories(currentUserStories, loggedInUserFirebaseId)
-            )
-            SpacerHeight6()
-            Text(
-                text = if (isLoggedInUser) stringResource(R.string.your_story) else storyPoster.name,
-                fontSize = 12.sp
-            )
-        }
+    val isLoggedInUser = loggedInUserFirebaseId == storiesWithUser.usersBean.firebaseUserId
+    Column(modifier = Modifier.clickable {
+//        val gsonString: String = Gson().toJson(allStories)
+//        navigator.navigate(
+//            ShowStoryScreenDestination(
+//                storyPoster.firebaseUserId,
+//                gsonString,
+//                allStoryPosters,
+//                loggedInUserFirebaseId
+//            )
+//        )
+    }, horizontalAlignment = Alignment.CenterHorizontally) {
+        BreakCircularBorder(
+            storiesWithUser.usersBean.profilePhoto,
+            parts = storiesWithUser.storiesList.size,
+            getColorListFromStories(storiesWithUser.storiesList, loggedInUserFirebaseId)
+        )
+        SpacerHeight6()
+        Text(
+            text = if (isLoggedInUser) stringResource(R.string.your_story) else storiesWithUser.usersBean.name,
+            fontSize = 12.sp
+        )
     }
 }
 

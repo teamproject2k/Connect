@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.PostWithUserDetails
-import com.example.connect.domain.models.StoryBean
+import com.example.connect.domain.models.StoriesWithUser
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -19,7 +19,10 @@ import com.example.connect.domain.useCase.posts.RemoveLikeOfPostFromRemoteUseCas
 import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
-import com.example.connect.domain.useCase.story.GetStoryDetailsWithUserFromRemoteDetailsUseCase
+import com.example.connect.domain.useCase.story.AddAllStoriesToLocalUseCase
+import com.example.connect.domain.useCase.story.DeleteAllStoriesFromLocalUseCase
+import com.example.connect.domain.useCase.story.GetAllStoriesWithUserFormRemoteUseCase
+import com.example.connect.domain.useCase.story.GetAllStoriesWithUserFromLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
 import com.example.connect.domain.useCase.user.DeleteAllUserFromLocalExceptInList
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
@@ -28,7 +31,6 @@ import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,7 +40,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val postDetailsWithUserDetailsUseCase: GetPostDetailsWithUserDetailsFromRemoteUseCase,
-    private val storyDetailsWithUserDetailsUseCase: GetStoryDetailsWithUserFromRemoteDetailsUseCase,
+    private val storyDetailsWithUserDetailsUseCase: GetAllStoriesWithUserFormRemoteUseCase,
     private val addLikeOnRemoteUseCase: AddLikeOnRemoteUseCase,
     private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
     private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
@@ -50,7 +52,10 @@ class HomeViewModel @Inject constructor(
     private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
     private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
-    private val deleteAllUserFromLocalExceptInList: DeleteAllUserFromLocalExceptInList
+    private val deleteAllUserFromLocalExceptInList: DeleteAllUserFromLocalExceptInList,
+    private val getAllStoriesWithUserFromLocalUseCase: GetAllStoriesWithUserFromLocalUseCase,
+    private val addAllStoriesToLocalUseCase: AddAllStoriesToLocalUseCase,
+    private val deleteAllStoriesFromLocalUseCase: DeleteAllStoriesFromLocalUseCase
 ) : BaseViewModel() {
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
@@ -58,8 +63,10 @@ class HomeViewModel @Inject constructor(
 
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
-    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>>> =
+    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<ArrayList<StoriesWithUser>>> =
         MutableStateFlow(ResponseState.none())
+
+    val storyDetailsStateFlow = _storyDetailsStateFlow.asStateFlow()
 
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
@@ -76,16 +83,48 @@ class HomeViewModel @Inject constructor(
 
     private var isPostListFromRemoteFetched: Boolean = false
 
+    private var isStoryListFetchedFromRemote: Boolean = false
+
     val postListWithUsersState = mutableStateListOf<PostWithUserDetails>()
-    val storyDetailsStateFlow: StateFlow<ResponseState<Pair<MutableMap<String, ArrayList<StoryBean>>, ArrayList<UsersBean>>>> get() = _storyDetailsStateFlow
 
 
-    fun getStoryDetailsWithUserDetails(loggedInUserFirebaseId: String) {
+    fun getStoryDetailsWithUserDetails(
+        loggedInUserFirebaseId: String,
+        isNetworkAvailable: Boolean
+    ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _storyDetailsStateFlow.value = ResponseState.loading()
-                _storyDetailsStateFlow.value =
-                    storyDetailsWithUserDetailsUseCase.invoke(loggedInUserFirebaseId)
+                if (!isStoryListFetchedFromRemote && isNetworkAvailable) {
+                    val response = storyDetailsWithUserDetailsUseCase.invoke(loggedInUserFirebaseId)
+                    if (response.status == RequestStatusEnum.Success) {
+                        val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
+                        val usersList = response.data?.map { it.usersBean } ?: emptyList()
+                        deleteAllStoriesFromLocalUseCase.invoke()
+                        if (addAllStoriesToLocalUseCase.invoke(storyList).size == storyList.size) {
+                            addUserListToLocalUseCase.invoke(usersList)
+                            isStoryListFetchedFromRemote = true
+                            _storyDetailsStateFlow.value =
+                                ResponseState.success(
+                                    getAllStoriesWithUserFromLocalUseCase.invoke(
+                                        loggedInUserFirebaseId
+                                    )
+                                )
+                        } else {
+                            _storyDetailsStateFlow.value =
+                                ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
+                        }
+                    } else {
+                        _storyDetailsStateFlow.value = ResponseState.error(response.message ?: "")
+                    }
+                } else {
+                    _storyDetailsStateFlow.value =
+                        ResponseState.success(
+                            getAllStoriesWithUserFromLocalUseCase.invoke(
+                                loggedInUserFirebaseId
+                            )
+                        )
+                }
             }
         }
     }
