@@ -4,7 +4,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class GetUserDetailsFromDbUseCase @Inject constructor(private val repository: IUserRepository) {
+class GetUserDetailsFromLocalUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Gets the user details from the database.
      *

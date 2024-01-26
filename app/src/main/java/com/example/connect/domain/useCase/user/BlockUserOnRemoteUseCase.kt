@@ -4,7 +4,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class BlockUserUseCase @Inject constructor(private val repository: IUserRepository) {
+class BlockUserOnRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Blocks a user.
      *

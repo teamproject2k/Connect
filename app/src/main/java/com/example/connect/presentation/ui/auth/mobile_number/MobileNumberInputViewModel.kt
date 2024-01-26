@@ -10,7 +10,7 @@ import com.example.connect.domain.useCase.device.UpdateDeviceIdOnLocalUseCase
 import com.example.connect.domain.useCase.device.UpdateDeviceIdOnRemoteUseCase
 import com.example.connect.domain.useCase.fcm.GetFCMTokenUseCase
 import com.example.connect.domain.useCase.fcm.UpdateFCMTokenOnRemoteUseCase
-import com.example.connect.domain.useCase.user.AddUserToDbUseCase
+import com.example.connect.domain.useCase.user.AddUserToLocalUseCase
 import com.example.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateFcmTokenOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MobileNumberInputViewModel @Inject constructor(
-    private val addUserToDbUseCase: AddUserToDbUseCase,
+    private val addUserToLocalUseCase: AddUserToLocalUseCase,
     private val sendOtpUseCase: SendOtpUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val updateDeviceIdOnLocalUseCase: UpdateDeviceIdOnLocalUseCase,
@@ -87,8 +87,8 @@ class MobileNumberInputViewModel @Inject constructor(
                 val userDetailsResponseState = getUserDetailsFromRemoteUseCase.invoke(userId)
                 // Check if the response state is successful and the data is not null.
                 if (userDetailsResponseState.status == RequestStatusEnum.Success && userDetailsResponseState.data != null) {
-                    // Add the user to the database using the addUserToDbUseCase.
-                    addUserToDbUseCase.invoke(userDetailsResponseState.data)
+                    // Add the user to the database using the addUserToLocalUseCase.
+                    addUserToLocalUseCase.invoke(userDetailsResponseState.data)
                     // Check if the current logged in device id is different from the shared preference device id.
                     if (userDetailsResponseState.data.currentLoggedInDeviceId != sharedPreference.deviceId
                         && sharedPreference.deviceId != null

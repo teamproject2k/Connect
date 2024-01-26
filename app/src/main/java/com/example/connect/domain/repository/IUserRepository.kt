@@ -20,7 +20,7 @@ interface IUserRepository {
      * @param connectIdFirstPart The name.
      * @return The response state.
      */
-    suspend fun getUsersCountFromNameFromRemote(connectIdFirstPart: String): ResponseState<Int>
+    suspend fun getUsersCountFromNameInitialsFromRemote(connectIdFirstPart: String): ResponseState<Int>
 
     /**
      * Adds the user to the remote database.
@@ -194,7 +194,7 @@ interface IUserRepository {
      * @param otherUsersStatus A map of other users' Firebase IDs to their statuses.
      * @return The number of rows affected.
      */
-    suspend fun updateOtherUsersStatusOnLocal(
+    suspend fun updateUsersStatusOnLocal(
         loggedInUserFirebaseId: String,
         otherUsersStatus: MutableMap<String, String>
     ): Int
@@ -235,10 +235,10 @@ interface IUserRepository {
     suspend fun updateUserOnLocal(userDetails: UsersBean): Int
 
 
-    suspend fun addUserListTLocal(userList: List<UsersBean>): LongArray
+    suspend fun addUserListToLocal(userList: List<UsersBean>): LongArray
 
-    suspend fun getAllUsersFromIdFromLocal(userIdList: List<String>): List<UsersBean>
+    suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UsersBean>
 
 
-    suspend fun deleteAllUsersFromLocalExcept(exceptList: List<String>): Int
+    suspend fun deleteAllUsersFromLocalExceptInList(exceptList: List<String>): Int
 }

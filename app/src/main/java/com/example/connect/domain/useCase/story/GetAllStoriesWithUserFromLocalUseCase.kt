@@ -13,7 +13,7 @@ class GetAllStoriesWithUserFromLocalUseCase @Inject constructor(
     suspend fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUser> {
         val storiesList = storyRepository.getAllStoriesFromLocal()
         val userIdList = storiesList.map { it.createdByUserFirebaseId }.toSet().toMutableList()
-        val usersList = userRepository.getAllUsersFromIdFromLocal(userIdList)
+        val usersList = userRepository.getAllUsersFromIdsFromLocal(userIdList)
         val storiesWithUsersList = arrayListOf<StoriesWithUser>()
         val storiesIdToStoryListMap = mutableMapOf<String, ArrayList<StoryBean>>()
         // to show logged in user stories at first place

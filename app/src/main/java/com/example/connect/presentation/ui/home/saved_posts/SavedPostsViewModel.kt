@@ -18,7 +18,7 @@ import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
-import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocal
+import com.example.connect.domain.useCase.user.UpdateUserOnLocalUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +37,7 @@ class SavedPostsViewModel @Inject constructor(
     private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
     private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
     private val unSavePostFromRemoteUseCase: UnSavePostFromRemoteUseCase,
-    private val updateUserDetailsOnLocal: UpdateUserDetailsOnLocal,
+    private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase,
     private val getSavedPostDetailsWithUserFromLocal: GetSavedPostDetailsWithUserFromLocal,
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
@@ -175,7 +175,7 @@ class SavedPostsViewModel @Inject constructor(
                     savePostOnRemoteUseCase.invoke(loggedInUsersBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.add(postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -200,7 +200,7 @@ class SavedPostsViewModel @Inject constructor(
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
                     loggedInUsersBean.savedPosts.remove(postFirebaseId)
-                    updateUserDetailsOnLocal.invoke(loggedInUsersBean)
+                    updateUserOnLocalUseCase.invoke(loggedInUsersBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {

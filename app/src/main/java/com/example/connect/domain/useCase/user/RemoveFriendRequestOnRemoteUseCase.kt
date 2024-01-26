@@ -4,7 +4,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
-class RemoveFriendRequestUseCase @Inject constructor(private val repository: IUserRepository) {
+class RemoveFriendRequestOnRemoteUseCase @Inject constructor(private val repository: IUserRepository) {
     /**
      * Removes a friend request from the database.
      *

@@ -9,7 +9,7 @@ import com.example.connect.data.models.user.UsersDbEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
+import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.domain.utils.VisibilityScopeEnum
 import com.example.connect.presentation.base.BaseViewModel
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsAndPrivacyViewModel @Inject constructor(
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
-    private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase
+    private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase
 ) : BaseViewModel() {
     lateinit var genderVisibilityScopeList: List<VisibilityScope>
     lateinit var dobVisibilityScopeList: List<VisibilityScope>
@@ -143,7 +143,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 // Check if the update was successful.
                 if (result.status == RequestStatusEnum.Success) {
                     // Update the gender visibility on the local database.
-                    updateUserDetailsOnDbUseCase.invoke(
+                    updateUserDetailsOnLocalUseCase.invoke(
                         // Create a map of the gender visibility field and its new value.
                         mutableMapOf(
                             UsersDbEntity::genderVisibility.name to genderScope.scopeEnum.name
@@ -186,8 +186,8 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                 )
                 // Check if the result is successful.
                 if (result.status == RequestStatusEnum.Success) {
-                    // Call the updateUserDetailsOnDbUseCase to update the user's details in the local database.
-                    updateUserDetailsOnDbUseCase.invoke(
+                    // Call the updateUserDetailsOnLocalUseCase to update the user's details in the local database.
+                    updateUserDetailsOnLocalUseCase.invoke(
                         // Create a map of the user's details to be updated.
                         mutableMapOf(
                             // The key is the name of the field to be updated.
@@ -231,8 +231,8 @@ class SettingsAndPrivacyViewModel @Inject constructor(
 
                 // Check if the result is successful.
                 if (result.status == RequestStatusEnum.Success) {
-                    // Call the updateUserDetailsOnDbUseCase to update the user details in the local database.
-                    updateUserDetailsOnDbUseCase.invoke(
+                    // Call the updateUserDetailsOnLocalUseCase to update the user details in the local database.
+                    updateUserDetailsOnLocalUseCase.invoke(
                         // Create a map of the user details to be updated.
                         mutableMapOf(
                             // The friend list visibility field.

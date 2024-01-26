@@ -13,7 +13,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
-import com.example.connect.domain.useCase.user.UpdateUserDetailsOnDbUseCase
+import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel
@@ -33,7 +33,7 @@ import javax.inject.Inject
 class EditProfileViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
-    private val updateUserDetailsOnDbUseCase: UpdateUserDetailsOnDbUseCase,
+    private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase,
 ) :
     BaseViewModel() {
     private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
@@ -177,7 +177,7 @@ class EditProfileViewModel @Inject constructor(
 
                     // If the update was successful, update the user details on the database and in the UI.
                     if (updatedUserResponseState.status != RequestStatusEnum.Exception) {
-                        updateUserDetailsOnDbUseCase.invoke(
+                        updateUserDetailsOnLocalUseCase.invoke(
                             getFieldsToUpdateInDbMap(fieldsToUpdate),
                             userDetails.firebaseUserId
                         )
