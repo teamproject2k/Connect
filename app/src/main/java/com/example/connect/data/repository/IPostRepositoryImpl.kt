@@ -158,16 +158,8 @@ class IPostRepositoryImpl @Inject constructor(
             if (loggedInUser != null) {
                 usersList.add(loggedInUser.toUserBean())
             }
-            var baseCondition = fireStore.collection(FirebaseConstants.POST_KEY)
+            val baseCondition = fireStore.collection(FirebaseConstants.POST_KEY)
                 .whereEqualTo(PostRemoteEntity::whetherDeleted.name, false)
-            val userBlockedList =
-                loggedInUser?.otherUsersStatus?.map { it.value == StatusWithCurrentUserRemoteEnum.Blocked.name }
-            if (!userBlockedList.isNullOrEmpty()) {
-                baseCondition = baseCondition.whereNotIn(
-                    PostRemoteEntity::createdByUserFirebaseId.name,
-                    userBlockedList
-                )
-            }
             val postListQuery = if (postListToFetch == null) {
                 baseCondition
             } else {
@@ -177,7 +169,10 @@ class IPostRepositoryImpl @Inject constructor(
             val postListResponse = postListQuery.get().await()
             postListResponse.forEach { postDocument ->
                 val post = postDocument.toObject(PostRemoteEntity::class.java)
-                if (postDocument != null && postDocument.exists()) {
+                if (postDocument != null && postDocument.exists() && loggedInUser?.otherUsersStatus?.get(
+                        post.createdByUserFirebaseId
+                    ) != StatusWithCurrentUserRemoteEnum.Blocked.name
+                ) {
                     postList.add(post.toPostBean(postDocument.id))
                 }
             }
