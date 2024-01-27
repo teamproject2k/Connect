@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.home.home
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -161,6 +162,7 @@ class HomeViewModel @Inject constructor(
                         _postDetailsStateFlow.value = postListWithUserDetailsResponse
                     }
                 } else {
+                    Log.e("abc", "getPostDetailsWithUserDetails: ")
                     _postDetailsStateFlow.value =
                         getPostDetailsWithUsersFromLocalUseCase()
                 }

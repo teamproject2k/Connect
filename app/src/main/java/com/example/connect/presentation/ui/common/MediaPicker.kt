@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.example.connect.R
 import com.example.connect.presentation.utils.ConstantsHelper
-import com.example.connect.presentation.utils.ConstantsHelper.MEDIA_TYPE_IMAGE
 import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.getFileSize
 import com.example.connect.presentation.utils.FunctionHelper.showToast
@@ -36,9 +35,6 @@ fun mediaPicker(
                     )
                 )
             } else {
-                val isImageFile =
-                    FunctionHelper.getMediaType(context.contentResolver, uri) == MEDIA_TYPE_IMAGE
-
                 onMediaPick(uri)
             }
         }
