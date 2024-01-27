@@ -1102,17 +1102,17 @@ private fun HandleLikeUnlikeState(
     navigator: DestinationsNavigator
 ) {
     val likeUnlikeState = viewModel.likeUnlikePostStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (likeUnlikeState.status) {
         RequestStatusEnum.Loading -> {
             LoaderDialog(stringResource(id = R.string.please_wait))
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 if (likeUnlikeState.message == FirebaseErrorCodes.POST_NOT_FOUND) {
                     viewModel.snackBarMessageState.value =
                         stringResource(id = R.string.post_not_found)
@@ -1122,12 +1122,16 @@ private fun HandleLikeUnlikeState(
                         likeUnlikeState.message
                             ?: stringResource(id = R.string.something_went_wrong)
                 }
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            // do not handle this
+            if (!isResponseHandled) {
+                viewModel.forceRecomposeState.intValue++
+                isResponseHandled = true
+            }
+
         }
 
         RequestStatusEnum.None -> {
