@@ -78,11 +78,11 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow = _getAllCommentsStateFlow.asStateFlow()
 
-    private val _addCommentStateFlow: MutableStateFlow<ResponseState<CommentBean>> =
+    private val _addCommentStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val addCommentStateFlow = _addCommentStateFlow.asStateFlow()
 
-    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Pair<String, String?>>> =
+    private val _deleteCommentStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val deleteCommentStateFlow = _deleteCommentStateFlow.asStateFlow()
 
@@ -255,46 +255,72 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun addComment(loggedInUserFirebaseId: String) {
-        val comment: CommentBean
-        val commentedOn = commentedOnState.value
-        if (commentedOn == null) {  // Parent comment
-            comment = CommentBean(
-                commentFirebaseId = "",
-                createdAt = FunctionHelper.getCurrentTimeInMillis(),
-                commentedBy = loggedInUserFirebaseId,
-                parentCommentId = null,
-                repliedOnCommentId = null,
-                repliedOnUserId = null,
-                postFirebaseId = post.postFirebaseId,
-                commentMessage = commentTextState.value,
-                whetherDeleted = false,
-                likedBy = arrayListOf()
-            )
-        } else {  // Child comment
-            comment = CommentBean(
-                commentFirebaseId = "",
-                createdAt = FunctionHelper.getCurrentTimeInMillis(),
-                commentedBy = loggedInUserFirebaseId,
-                parentCommentId = commentedOn.parentCommentId ?: commentedOn.commentFirebaseId,
-                repliedOnCommentId = commentedOn.commentFirebaseId,
-                repliedOnUserId = commentedOn.commentedBy,
-                postFirebaseId = post.postFirebaseId,
-                commentMessage = commentTextState.value,
-                whetherDeleted = false,
-                likedBy = arrayListOf()
-            )
-        }
+    fun addComment(loggedInUser: UsersBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()
+                val comment: CommentBean
+                val commentedOn = commentedOnState.value
+                if (commentedOn == null) {  // Parent comment
+                    comment = CommentBean(
+                        commentFirebaseId = "",
+                        createdAt = FunctionHelper.getCurrentTimeInMillis(),
+                        commentedBy = loggedInUser.firebaseUserId,
+                        parentCommentId = null,
+                        repliedOnCommentId = null,
+                        repliedOnUserId = null,
+                        postFirebaseId = post.postFirebaseId,
+                        commentMessage = commentTextState.value,
+                        whetherDeleted = false,
+                        likedBy = arrayListOf()
+                    )
+                } else {  // Child comment
+                    comment = CommentBean(
+                        commentFirebaseId = "",
+                        createdAt = FunctionHelper.getCurrentTimeInMillis(),
+                        commentedBy = loggedInUser.firebaseUserId,
+                        parentCommentId = commentedOn.parentCommentId
+                            ?: commentedOn.commentFirebaseId,
+                        repliedOnCommentId = commentedOn.commentFirebaseId,
+                        repliedOnUserId = commentedOn.commentedBy,
+                        postFirebaseId = post.postFirebaseId,
+                        commentMessage = commentTextState.value,
+                        whetherDeleted = false,
+                        likedBy = arrayListOf()
+                    )
+                }
                 val addCommentResponseState = addCommentOnRemoteUseCase(comment)
                 if (addCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
                         post.commentCount++
                         updatePostDetailsOnLocalUseCase(post)
-                        _addCommentStateFlow.value = ResponseState.success(comment)
+                        if (comment.parentCommentId == null) {
+                            val updatedMap =
+                                mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
+                            updatedMap[CommentWithUser(comment, loggedInUser)] = arrayListOf()
+                            updatedMap.putAll(commentDataMap)
+                            commentDataMap = updatedMap
+                        } else {
+                            val parent =
+                                commentDataMap.keys.find { it.comment.commentFirebaseId == comment.parentCommentId }
+                            if (parent != null) {
+                                val updatedChildList = arrayListOf<CommentWithUser>()
+                                val currentChildList = commentDataMap[parent]
+                                if (currentChildList != null) {
+                                    updatedChildList.addAll(currentChildList)
+                                    updatedChildList.add(
+                                        CommentWithUser(
+                                            comment,
+                                            loggedInUser,
+                                            repliedCommentPosterConnectIdState.value
+                                        )
+                                    )
+                                    commentDataMap[parent] = updatedChildList
+                                }
+                            }
+                        }
+                        _addCommentStateFlow.value = ResponseState.success(null)
                     } else {
                         _addCommentStateFlow.value = ResponseState.error("")
                     }
@@ -323,13 +349,17 @@ class PostDetailsViewModel @Inject constructor(
                     comment.whetherDeleted = true
                     post.commentCount -= deleteCount
                     updatePostDetailsOnLocalUseCase(post)
+                    if (comment.parentCommentId == null) {
+                        //parent comment
+                        commentDataMap.keys.removeIf { it.comment.commentFirebaseId == comment.commentFirebaseId }
+
+                    } else {
+                        val parent =
+                            commentDataMap.keys.find { it.comment.commentFirebaseId == comment.parentCommentId }
+                        commentDataMap[parent]?.removeIf { it.comment.commentFirebaseId == comment.commentFirebaseId }
+                    }
                     _deleteCommentStateFlow.value =
-                        ResponseState.success(
-                            Pair(
-                                comment.commentFirebaseId,
-                                comment.parentCommentId
-                            )
-                        )
+                        ResponseState.success(null)
                 } else {
                     _deleteCommentStateFlow.value =
                         ResponseState.error(deleteCommentResponseState.message ?: "")
@@ -349,6 +379,7 @@ class PostDetailsViewModel @Inject constructor(
                     )
                 if (getAllCommentsResponse.status == RequestStatusEnum.Success && getAllCommentsResponse.data != null) {
                     commentDataMap = getAllCommentsResponse.data
+                    isCommentDataFetched = true
                     _getAllCommentsStateFlow.value = ResponseState.success(null)
                 } else {
                     _getAllCommentsStateFlow.value =

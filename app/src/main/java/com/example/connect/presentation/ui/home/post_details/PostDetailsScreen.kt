@@ -230,7 +230,7 @@ fun PostDetailsScreen(
     }
     HandleGetAllCommentsSection(viewModel)
     HandleDeletePostState(viewModel = viewModel, navigator = navigator)
-    HandleAddCommentSectionState(viewModel = viewModel, homeSharedViewModel.usersDetails, navigator)
+    HandleAddCommentSectionState(viewModel = viewModel, navigator)
     HandleDeleteCommentSectionState(viewModel = viewModel)
     HandleUpdatePostVisibilityState(viewModel = viewModel)
     HandleLikeUnlikeState(viewModel, navigator)
@@ -244,7 +244,7 @@ fun PostDetailsScreen(
     if (!viewModel.isCommentDataFetched) {
         if (context.isNetworkAvailable()) {
             viewModel.getAllCommentsWithUsers(homeSharedViewModel.usersDetails.firebaseUserId)
-            viewModel.isCommentDataFetched = true
+
         } else {
             viewModel.snackBarMessageState.value =
                 stringResource(id = R.string.no_internet_connection)
@@ -503,17 +503,17 @@ fun HandleUpdatePostVisibilityState(
     viewModel: PostDetailsViewModel
 ) {
     val updatePostVisibilityState = viewModel.updatePostVisibilityStateFlow.collectAsState().value
-    var isResponseHandled by remember {
+    var isExceptionHandled by remember {
         mutableStateOf(false)
     }
     when (updatePostVisibilityState.status) {
         RequestStatusEnum.Loading -> {
             LoaderDialog(loadingText = stringResource(R.string.updating_post_visibility))
-            isResponseHandled = false
+            isExceptionHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
+            if (!isExceptionHandled) {
                 if (updatePostVisibilityState.message == FirebaseErrorCodes.UNAUTHORIZED_ACCESS) {
                     viewModel.snackBarMessageState.value =
                         stringResource(id = R.string.something_went_wrong)
@@ -529,16 +529,13 @@ fun HandleUpdatePostVisibilityState(
                     ScreenNameEnum.PostDetailsScreen.name,
                     updatePostVisibilityState.message.toString()
                 )
-                isResponseHandled = true
+                isExceptionHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            if (!isResponseHandled) {
-                if (updatePostVisibilityState.data != null) {
-                    viewModel.currentPostVisibilityState.value = updatePostVisibilityState.data
-                }
-                isResponseHandled = true
+            if (updatePostVisibilityState.data != null) {
+                viewModel.currentPostVisibilityState.value = updatePostVisibilityState.data
             }
         }
 
@@ -671,7 +668,6 @@ fun ParentChildCommentItem(
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     navigator = navigator
                 ) {
-                    viewModel.deleteComment(commentWithUser.comment, 1)
                     if (context.isNetworkAvailable()) {
                         viewModel.deleteComment(commentWithUser.comment, 1)
                     } else {
@@ -731,6 +727,7 @@ fun CommentItemLoading() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommentItem(
     commentWithCommentPoster: CommentWithUser,
@@ -739,6 +736,7 @@ fun CommentItem(
     loggedInUserFirebaseId: String,
     onDeleteCommentClicked: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     var isLoading by remember {
         mutableStateOf(false)
@@ -807,6 +805,7 @@ fun CommentItem(
             Row {
                 Text(
                     modifier = Modifier.clickable {
+                        keyboardController?.show()
                         viewModel.repliedCommentPosterConnectIdState.value =
                             commentWithCommentPoster.userDetails.connectUserId
                         viewModel.commentedOnState.value = commentWithCommentPoster.comment
@@ -980,7 +979,7 @@ fun AddCommentSection(
             IconButton(onClick = {
                 keyboardController?.hide()
                 if (context.isNetworkAvailable()) {
-                    viewModel.addComment(loggedInUser.firebaseUserId)
+                    viewModel.addComment(loggedInUser)
                 } else {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)
@@ -1006,7 +1005,6 @@ fun AddCommentSection(
 @Composable
 fun HandleAddCommentSectionState(
     viewModel: PostDetailsViewModel,
-    loggedInUser: UsersBean,
     navigator: DestinationsNavigator
 ) {
     val addCommentState = viewModel.addCommentStateFlow.collectAsState().value
@@ -1045,38 +1043,11 @@ fun HandleAddCommentSectionState(
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                val comment = addCommentState.data
-                if (comment != null) {
-                    if (comment.parentCommentId == null) {
-                        val updatedMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
-                        updatedMap[CommentWithUser(comment, loggedInUser)] = arrayListOf()
-                        updatedMap.putAll(viewModel.commentDataMap)
-                        viewModel.commentDataMap = updatedMap
-                    } else {
-                        val parent =
-                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == comment.parentCommentId }
-                        if (parent != null) {
-                            val updatedChildList = arrayListOf<CommentWithUser>()
-                            val currentChildList = viewModel.commentDataMap[parent]
-                            if (currentChildList != null) {
-                                updatedChildList.addAll(currentChildList)
-                                updatedChildList.add(
-                                    CommentWithUser(
-                                        comment,
-                                        loggedInUser,
-                                        viewModel.repliedCommentPosterConnectIdState.value
-                                    )
-                                )
-                                viewModel.commentDataMap[parent] = updatedChildList
-                            }
-                        }
-                    }
-                    viewModel.forceRecomposeState.value++
-                }
+                isResponseHandled = true
                 viewModel.commentedOnState.value = null
                 viewModel.commentTextState.value = ""
                 viewModel.isSendingCommentState.value = false
-                isResponseHandled = true
+                viewModel.forceRecomposeState.value++
             }
         }
 
@@ -1114,23 +1085,7 @@ fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
-                val commentId = deleteCommentState.data?.first
-                val parentCommentId = deleteCommentState.data?.second
-                if (commentId != null) {
-                    if (parentCommentId == null) {
-                        //parent comment
-                        val parentCommentWithUser =
-                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == commentId }
-                        if (parentCommentWithUser != null) {
-                            viewModel.commentDataMap.keys.remove(parentCommentWithUser)
-                        }
-                    } else {
-                        val parent =
-                            viewModel.commentDataMap.keys.find { it.comment.commentFirebaseId == parentCommentId }
-                        viewModel.commentDataMap[parent]?.removeIf { it.comment.commentFirebaseId == commentId }
-                    }
-                    viewModel.forceRecomposeState.value++
-                }
+                viewModel.forceRecomposeState.intValue++
                 isResponseHandled = true
             }
         }
