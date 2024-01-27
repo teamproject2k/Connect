@@ -639,40 +639,6 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
 }
 
 @Composable
-fun CommentUi(
-    viewModel: PostDetailsViewModel,
-    loggedInUserFirebaseId: String,
-    navigator: DestinationsNavigator
-) {
-    if (viewModel.commentDataMap.isEmpty()) {
-        Column {
-            TextBold14(
-                text = stringResource(R.string.no_comments_found),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp),
-                alignment = TextAlign.Center
-            )
-        }
-        return
-    }
-    Column {
-        viewModel.commentDataMap.keys.forEach { parent ->
-            val childCommentList = viewModel.commentDataMap[parent]
-            if (childCommentList != null) {
-                ParentChildCommentItem(
-                    viewModel,
-                    parent,
-                    childCommentList,
-                    loggedInUserFirebaseId = loggedInUserFirebaseId,
-                    navigator = navigator
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun ParentChildCommentItem(
     viewModel: PostDetailsViewModel,
     parentCommentWithUser: CommentWithUser,
