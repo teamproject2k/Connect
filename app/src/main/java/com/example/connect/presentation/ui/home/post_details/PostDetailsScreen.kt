@@ -45,10 +45,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -306,7 +308,6 @@ fun PostDetailsDropDownSection(
     viewModel: PostDetailsViewModel,
     onDropDownMenuDismiss: () -> Unit
 ) {
-
     DropdownMenu(
         expanded = true,
         onDismissRequest = { onDropDownMenuDismiss() }
@@ -663,8 +664,6 @@ fun ParentChildCommentItem(
                     context.getString(R.string.no_internet_connection)
                 FunctionHelper.vibrateDevice(context)
             }
-
-
         }
         Column(modifier = Modifier.padding(start = 32.dp)) {
             childCommentList.forEach { commentWithUser ->
@@ -684,7 +683,6 @@ fun ParentChildCommentItem(
                         FunctionHelper.vibrateDevice(context)
                     }
                 }
-
             }
         }
         if (childCommentList.isNotEmpty()) {
@@ -791,7 +789,7 @@ fun CommentItem(
             SpacerHeight4()
             Text(
                 buildAnnotatedString {
-                    if (comment.postFirebaseId != comment.repliedOnCommentId) {
+                    if (comment.repliedOnCommentId != null) {
                         withStyle(
                             SpanStyle(
                                 fontWeight = FontWeight.Bold,
@@ -902,6 +900,7 @@ fun CommentItem(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddCommentSection(
     viewModel: PostDetailsViewModel,
@@ -909,6 +908,8 @@ fun AddCommentSection(
 ) {
     val context = LocalContext.current
     val isReply = viewModel.commentedOnState.value != null
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Row(
         modifier = Modifier
             .padding(horizontal = 12.dp)
@@ -962,6 +963,7 @@ fun AddCommentSection(
         }
         if (viewModel.commentTextState.value.isNotBlank() && !viewModel.isSendingCommentState.value) {
             IconButton(onClick = {
+                keyboardController?.hide()
                 if (context.isNetworkAvailable()) {
                     viewModel.addComment(loggedInUser.firebaseUserId)
                 } else {
@@ -1045,12 +1047,11 @@ fun HandleAddCommentSectionState(
                             val currentChildList = viewModel.commentDataMap[parent]
                             if (currentChildList != null) {
                                 updatedChildList.addAll(currentChildList)
-                                updatedChildList.add(0, CommentWithUser(comment, loggedInUser))
+                                updatedChildList.add(CommentWithUser(comment, loggedInUser))
                                 viewModel.commentDataMap[parent] = updatedChildList
                             }
                         }
                     }
-                    viewModel.post.commentCount++
                     viewModel.forceRecomposeState.value++
                 }
                 viewModel.isSendingCommentState.value = false

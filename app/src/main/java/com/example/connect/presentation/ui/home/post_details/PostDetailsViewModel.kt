@@ -288,6 +288,8 @@ class PostDetailsViewModel @Inject constructor(
                 if (addCommentResponseState.status == RequestStatusEnum.Success) {
                     comment.commentFirebaseId = addCommentResponseState.data ?: ""
                     if (comment.commentFirebaseId.isNotBlank()) {
+                        post.commentCount++
+                        updatePostDetailsOnLocalUseCase(post)
                         _addCommentStateFlow.value = ResponseState.success(comment)
                     } else {
                         _addCommentStateFlow.value = ResponseState.error("")
@@ -328,7 +330,6 @@ class PostDetailsViewModel @Inject constructor(
                     _deleteCommentStateFlow.value =
                         ResponseState.error(deleteCommentResponseState.message ?: "")
                 }
-
             }
         }
     }

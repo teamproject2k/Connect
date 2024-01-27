@@ -437,6 +437,7 @@ class IPostRepositoryImpl @Inject constructor(
                 commentList.sortBy { it.createdAt }
                 val parentCommentList =
                     commentList.filter { comment -> comment.parentCommentId == null }
+                        .sortedByDescending { it.createdAt }
                 parentCommentList.forEach { parentComment ->
                     val parentUser =
                         userList.find { user -> user.firebaseUserId == parentComment.commentedBy }
