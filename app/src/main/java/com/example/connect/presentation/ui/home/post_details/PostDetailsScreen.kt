@@ -131,6 +131,15 @@ fun PostDetailsScreen(
         viewModel.initialize(context, postDetails, homeSharedViewModel.usersDetails)
     }
 
+    if (homeSharedViewModel.usersDetails.blockedUsersList.contains(viewModel.post.createdByUserFirebaseId)) {
+        LoggingHelper.logData(
+            LoggingLevelEnum.Info,
+            ConstantsHelper.INFO_TAG,
+            ScreenNameEnum.PostDetailsScreen.name,
+            "Blocked user post"
+        )
+        navigator.popBackStack()
+    }
     val snackBarHostState = SnackbarHostState()
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },

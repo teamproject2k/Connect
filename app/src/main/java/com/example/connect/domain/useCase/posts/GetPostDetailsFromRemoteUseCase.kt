@@ -9,13 +9,13 @@ class GetPostDetailsFromRemoteUseCase @Inject constructor(private val repository
     /**
      * Gets the post details from the server.
      *
-     * @param fireBaseId The fire base id of the post.
+     * @param postFireBaseId The fire base id of the post.
      * @return A [ResponseState] containing the list of post details.
      */
     suspend operator fun invoke(
-        fireBaseId: String,
+        postFireBaseId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {
-        return repository.getPostDetailsFromRemote(fireBaseId, loggedInUserFirebaseId)
+        return repository.getPostDetailsFromRemote(postFireBaseId, loggedInUserFirebaseId)
     }
 }

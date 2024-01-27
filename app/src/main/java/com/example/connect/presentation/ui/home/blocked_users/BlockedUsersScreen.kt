@@ -159,7 +159,8 @@ private fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList:
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()), contentAlignment = Alignment.Center
+                .verticalScroll(rememberScrollState()),
+            contentAlignment = Alignment.Center
         ) {
             Text(text = stringResource(id = R.string.no_user_found))
         }

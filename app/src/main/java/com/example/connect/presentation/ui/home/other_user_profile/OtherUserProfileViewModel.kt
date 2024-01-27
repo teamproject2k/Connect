@@ -149,8 +149,6 @@ class OtherUserProfileViewModel @Inject constructor(
      * @param requestedUser The requested user.
      */
     fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
-
-
         // Set the current user state.
         loggedInUserState = mutableStateOf(currentUser)
 
@@ -453,6 +451,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's otherUsersStatus.
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
+                    getPostDetails()
                     // Set the unBlockUserStateFlow to the responseState.
                     _unBlockUserStateFlow.value = responseState
                 } else {
@@ -494,9 +493,8 @@ class OtherUserProfileViewModel @Inject constructor(
                         loggedInUserState.value.firebaseUserId,
                         loggedInUserState.value.toUserDbEntity().otherUsersStatus
                     )
-
                     deleteAllPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
-
+                    getPostDetails()
                     // Set the blockUserStateFlow to the responseState.
                     _blockUserStateFlow.value = responseState
                 } else {

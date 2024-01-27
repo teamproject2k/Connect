@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -108,9 +110,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
             FunctionHelper.vibrateDevice(context)
         }
     }
-
 }
-
 
 @Composable
 fun HandleGetRequestedUsersState(
@@ -158,7 +158,12 @@ private fun DisplayUsersList(
     requestedUsersList: List<UsersBean>
 ) {
     if (requestedUsersList.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            contentAlignment = Alignment.Center
+        ) {
             Text(text = stringResource(id = R.string.no_user_found))
         }
     } else {

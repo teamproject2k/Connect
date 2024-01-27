@@ -181,7 +181,6 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
                 context.getString(R.string.no_internet_connection)
             FunctionHelper.vibrateDevice(context)
         }
-
     }
 
     HandleSendFriendRequestStateFlow(viewModel = viewModel)
@@ -266,7 +265,7 @@ private fun ProfileScreen(
             ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
-            HandlePostSection(viewModel, navigator, userDetails)
+            HandlePostDetailsState(viewModel, navigator, userDetails)
         }
     }
 }
@@ -537,7 +536,7 @@ private fun HandleFriendListSection(
 }
 
 @Composable
-private fun HandlePostSection(
+private fun HandlePostDetailsState(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
     usersBean: UsersBean,
@@ -844,7 +843,6 @@ private fun HandleUnBlockUserStateFlow(
                     stringResource(R.string.user_unblocked_successfully)
                 isResponseHandled = true
             }
-
         }
 
         RequestStatusEnum.Exception -> {

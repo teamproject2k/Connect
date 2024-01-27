@@ -23,10 +23,12 @@ object LoggingHelper {
             }
 
             Info -> {
+                Firebase.crashlytics.log(message)
                 Log.i(logTag, message)
             }
 
             Debug -> {
+                Firebase.crashlytics.log(message)
                 Log.d(logTag, message)
             }
 

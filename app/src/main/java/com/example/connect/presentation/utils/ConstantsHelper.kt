@@ -9,6 +9,7 @@ object ConstantsHelper {
     const val OTP_CHAR_COUNT = 6
     const val NAVIGATION_ANIMATION_DURATION = 300
     const val ERROR_TAG = "Error"
+    const val INFO_TAG = "Info"
     const val PROFILE_FRIENDS_COLUMN_COUNT = 4
     const val NAME_MAX_CHAR_LIMIT = 50
     const val BIO_MAX_CHAR_LIMIT = 100
