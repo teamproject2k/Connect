@@ -395,6 +395,7 @@ class IPostRepositoryImpl @Inject constructor(
         return try {
             val commentListResponse = fireStore.collection(FirebaseConstants.COMMENT_KEY)
                 .whereEqualTo(CommentRemoteEntity::postFirebaseId.name, postFirebaseId)
+                .whereEqualTo(CommentRemoteEntity::whetherDeleted.name, false)
                 .get()
                 .await()
             val parentChildMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
@@ -408,7 +409,7 @@ class IPostRepositoryImpl @Inject constructor(
                 commentListResponse.documents.forEach { document ->
                     if (document.exists()) {
                         val comment = document.toObject(CommentRemoteEntity::class.java)
-                        if (comment != null && !comment.whetherDeleted && loggedInUser.otherUsersStatus[comment.commentedBy] != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        if (comment != null && loggedInUser.otherUsersStatus[comment.commentedBy] != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             val commentedByUserDetails =
                                 userList.find { user -> user.firebaseUserId == comment.commentedBy }
                             if (commentedByUserDetails == null) {
@@ -448,11 +449,14 @@ class IPostRepositoryImpl @Inject constructor(
                         childCommentsList.forEach { comment ->
                             val childCommentUser =
                                 userList.find { user -> user.firebaseUserId == comment.commentedBy }
+                            val commentedOnConnectId =
+                                userList.find { user -> user.firebaseUserId == comment.repliedOnUserId }?.connectUserId
                             if (childCommentUser != null) {
                                 childCommentListWithUsers.add(
                                     CommentWithUser(
                                         comment,
-                                        childCommentUser
+                                        childCommentUser,
+                                        commentedOnConnectId
                                     )
                                 )
                             }

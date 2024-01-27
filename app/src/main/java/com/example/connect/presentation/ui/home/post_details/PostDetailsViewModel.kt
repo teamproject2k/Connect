@@ -91,9 +91,11 @@ class PostDetailsViewModel @Inject constructor(
     val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
     val commentTextState = mutableStateOf("")
+
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
 
     val forceRecomposeState = mutableIntStateOf(0)
+
     val repliedCommentPosterConnectIdState = mutableStateOf("")
     var isInitialized = false
 
@@ -108,6 +110,8 @@ class PostDetailsViewModel @Inject constructor(
     lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
 
     lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
+
+    val getCommentListState = mutableIntStateOf(-1)
 
     var isCommentDataFetched: Boolean = false
 
