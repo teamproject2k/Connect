@@ -410,7 +410,7 @@ class IPostRepositoryImpl @Inject constructor(
                         if (comment != null && !comment.whetherDeleted && loggedInUser.otherUsersStatus[comment.commentedBy] != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             val commentedByUserDetails =
                                 userList.find { user -> user.firebaseUserId == comment.commentedBy }
-                            if (commentedByUserDetails != null) {
+                            if (commentedByUserDetails == null) {
                                 val userDocument =
                                     fireStore.collection(FirebaseConstants.USER_KEY)
                                         .document(comment.commentedBy).get().await()
