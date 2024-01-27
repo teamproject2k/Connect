@@ -12,6 +12,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IUserRepository
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -738,7 +739,7 @@ class IUserRepositoryImpl @Inject constructor(
                     if (postedByUserDocument.exists()) {
                         val postedByUserEntity =
                             postedByUserDocument.toObject(UserRemoteEntity::class.java)
-                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        return if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             fireStore.collection(FirebaseConstants.USER_KEY)
                                 .document(loggedInUserFirebaseId)
                                 .update(
@@ -746,9 +747,9 @@ class IUserRepositoryImpl @Inject constructor(
                                     FieldValue.arrayUnion(postFirebaseId)
                                 )
                                 .await()
-                            return ResponseState.success(null)
+                            ResponseState.success(null)
                         } else {
-                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                            ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
                         }
                     } else {
                         return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
@@ -780,7 +781,7 @@ class IUserRepositoryImpl @Inject constructor(
                     if (postedByUserDocument.exists()) {
                         val postedByUserEntity =
                             postedByUserDocument.toObject(UserRemoteEntity::class.java)
-                        if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
+                        return if (postedByUserEntity?.otherUsersStatus?.get(loggedInUserFirebaseId) != StatusWithCurrentUserRemoteEnum.Blocked.name) {
                             fireStore.collection(FirebaseConstants.USER_KEY)
                                 .document(loggedInUserFirebaseId)
                                 .update(
@@ -788,9 +789,9 @@ class IUserRepositoryImpl @Inject constructor(
                                     FieldValue.arrayRemove(postFirebaseId)
                                 )
                                 .await()
-                            return ResponseState.success(null)
+                            ResponseState.success(null)
                         } else {
-                            return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
+                            ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
                         }
                     } else {
                         return ResponseState.error(FirebaseErrorCodes.POST_NOT_FOUND)
@@ -853,5 +854,59 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().deleteAllUsersExcept(exceptList)
     }
 
+    override suspend fun getUserReceivedFriendRequestList(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+        return try {
+            val userDocument =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(userFirebaseId).get()
+                    .await()
+            val userBean = userDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
+            val pendingRequestUserList = arrayListOf<UsersBean>()
+            if (userBean != null) {
+                if (userBean.receivedFriendRequestList.isNotEmpty()) {
+                    val pendingFriendRequestListResponseDocument =
+                        fireStore.collection(FirebaseConstants.USER_KEY).whereIn(
+                            FieldPath.documentId(), userBean.receivedFriendRequestList
+                        ).get().await()
+                    pendingFriendRequestListResponseDocument.forEach { document ->
+                        val user = document.toObject(UserRemoteEntity::class.java)
+                        pendingRequestUserList.add(user.toUserBean())
+                    }
+                    pendingRequestUserList.sortByDescending { it.createdAt }
+                }
+                ResponseState.success(Pair(userBean, pendingRequestUserList))
+            } else {
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+            }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 
+    override suspend fun getUserFriendRequestList(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+        return try {
+            val userDocument =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(userFirebaseId).get()
+                    .await()
+            val userBean = userDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
+            val friendUserList = arrayListOf<UsersBean>()
+            if (userBean != null) {
+                if (userBean.friendList.isNotEmpty()) {
+                    val friendListResponseDocument =
+                        fireStore.collection(FirebaseConstants.USER_KEY).whereIn(
+                            FieldPath.documentId(), userBean.friendList
+                        ).get().await()
+                    friendListResponseDocument.forEach { document ->
+                        val user = document.toObject(UserRemoteEntity::class.java)
+                        friendUserList.add(user.toUserBean())
+                    }
+                    friendUserList.sortByDescending { it.createdAt }
+                }
+                ResponseState.success(Pair(userBean, friendUserList))
+            } else {
+                ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
+            }
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
 }

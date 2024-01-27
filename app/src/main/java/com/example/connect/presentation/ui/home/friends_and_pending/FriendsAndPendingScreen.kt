@@ -84,9 +84,9 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
             refreshing = true
             if (context.isNetworkAvailable()) {
                 if (viewModel.selectedTabIndexState.intValue == 0) {
-                    viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
+                    viewModel.getFriendsList(homeSharedViewModel.usersDetails.firebaseUserId)
                 } else {
-                    viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+                    viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.firebaseUserId)
                 }
                 refreshing = false
             } else {
@@ -104,7 +104,7 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            FriendsAndPendingTabs(viewModel = viewModel, navigator = navigator)
+            FriendsAndPendingTabs(viewModel = viewModel, homeSharedViewModel, navigator = navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -121,8 +121,8 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
     }
     LaunchedEffect(Unit) {
         if (context.isNetworkAvailable()) {
-            viewModel.getFriendsList(homeSharedViewModel.usersDetails.friendList)
-            viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.receivedFriendRequestList)
+            viewModel.getFriendsList(homeSharedViewModel.usersDetails.firebaseUserId)
+            viewModel.getPendingFriendRequestList(homeSharedViewModel.usersDetails.firebaseUserId)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)
@@ -135,6 +135,7 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
 @Composable
 private fun FriendsAndPendingTabs(
     viewModel: FriendsAndPendingViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val itemList = stringArrayResource(id = R.array.friends_tab_list)
@@ -150,8 +151,17 @@ private fun FriendsAndPendingTabs(
             }
         }
         when (viewModel.selectedTabIndexState.intValue) {
-            0 -> HandleGetFriendsListStateFlow(viewModel = viewModel, navigator = navigator)
-            1 -> HandleGetPendingFriendRequestListStateFlow(viewModel, navigator)
+            0 -> HandleGetFriendsListStateFlow(
+                viewModel = viewModel,
+                homeSharedViewModel,
+                navigator = navigator
+            )
+
+            1 -> HandleGetPendingFriendRequestListStateFlow(
+                viewModel,
+                homeSharedViewModel,
+                navigator
+            )
         }
     }
 }
@@ -159,21 +169,22 @@ private fun FriendsAndPendingTabs(
 @Composable
 private fun HandleGetFriendsListStateFlow(
     viewModel: FriendsAndPendingViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val getFriendsListAsUsersState =
         viewModel.getFriendsListStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (getFriendsListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
             SearchBarAndUserListUiLoading()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     getFriendsListAsUsersState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -183,12 +194,16 @@ private fun HandleGetFriendsListStateFlow(
                     ScreenNameEnum.FriendsAndPendingScreen.name,
                     getFriendsListAsUsersState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            FriendsListUI(getFriendsListAsUsersState.data ?: emptyList(), navigator)
+            if (!isResponseHandled && getFriendsListAsUsersState.data != null) {
+                homeSharedViewModel.usersDetails = getFriendsListAsUsersState.data.first
+                isResponseHandled = true
+            }
+            FriendsListUI(getFriendsListAsUsersState.data?.second ?: emptyList(), navigator)
         }
 
         RequestStatusEnum.None -> {
@@ -251,21 +266,22 @@ private fun FriendsListUI(
 @Composable
 private fun HandleGetPendingFriendRequestListStateFlow(
     viewModel: FriendsAndPendingViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val getPendingFriendRequestListAsUsersState =
         viewModel.getPendingFriendRequestListStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (getPendingFriendRequestListAsUsersState.status) {
         RequestStatusEnum.Loading -> {
             SearchBarAndUserListUiLoading()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     getPendingFriendRequestListAsUsersState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -275,13 +291,18 @@ private fun HandleGetPendingFriendRequestListStateFlow(
                     ScreenNameEnum.FriendsAndPendingScreen.name,
                     getPendingFriendRequestListAsUsersState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
+            if (getPendingFriendRequestListAsUsersState.data != null && !isResponseHandled) {
+                homeSharedViewModel.usersDetails =
+                    getPendingFriendRequestListAsUsersState.data.first
+                isResponseHandled = true
+            }
             PendingListUI(
-                getPendingFriendRequestListAsUsersState.data ?: emptyList(),
+                getPendingFriendRequestListAsUsersState.data?.second ?: emptyList(),
                 navigator,
             )
         }
