@@ -437,12 +437,11 @@ private fun PostBottomSection(
                 )
             }
         }
-        val likeCount = viewModel.post.likedBy.size
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = if (likeCount == 1) stringResource(R.string._1_like) else stringResource(
+                text = if (viewModel.post.likedBy.size == 1) stringResource(R.string._1_like) else stringResource(
                     R.string.like_count_likes,
-                    likeCount
+                    viewModel.post.likedBy.size
                 ),
                 modifier = Modifier
                     .padding(start = 16.dp)

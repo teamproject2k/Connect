@@ -173,12 +173,14 @@ class PostDetailsViewModel @Inject constructor(
                         isPostLikedByLoggedInUserState.value = false
                     }
                     _likeUnlikePostStateFlow.value = ResponseState.success(null)
+                } else {
+                    if (removeLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
+                        deletePostFromLocalUseCase(post.postFirebaseId)
+                    }
+                    _likeUnlikePostStateFlow.value =
+                        ResponseState.error(removeLikeResponse.message ?: "")
                 }
-                if (removeLikeResponse.message == FirebaseErrorCodes.POST_NOT_FOUND) {
-                    deletePostFromLocalUseCase(post.postFirebaseId)
-                }
-                _likeUnlikePostStateFlow.value =
-                    ResponseState.error(removeLikeResponse.message ?: "")
+
             }
         }
     }

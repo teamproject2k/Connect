@@ -52,12 +52,16 @@ class IStoryRepositoryImpl @Inject constructor(
                 userList.add(loggedInUser)
                 val getStoriesFor = loggedInUser.friendList
                 getStoriesFor.add(loggedInUserFirebaseId)
+                val currentTimeMillis = System.currentTimeMillis()
+                val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L // 24 hours in milliseconds
+                val elapsedTimeInMillis = currentTimeMillis - twentyFourHoursInMillis
                 val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)
                     .whereIn(
                         StoryRemoteEntity::createdByUserFirebaseId.name,
                         getStoriesFor
                     ).whereEqualTo(StoryRemoteEntity::whetherDeleted.name, false)
-                    .whereLessThan(StoryRemoteEntity::createdAt.name, 1).get().await()
+                    .whereGreaterThan(StoryRemoteEntity::createdAt.name, elapsedTimeInMillis).get()
+                    .await()
                 storyListResponse.forEach { storyDocument ->
                     val story = storyDocument.toObject(StoryRemoteEntity::class.java)
                     storyList.add(story.toStoryBean(storyDocument.id))
@@ -67,40 +71,44 @@ class IStoryRepositoryImpl @Inject constructor(
                 }
                 val allStoryPostersIdList =
                     storyList.map { it.createdByUserFirebaseId }.toSet().toList()
-                val allUsersDocument = fireStore.collection(FirebaseConstants.USER_KEY)
-                    .whereIn(UserRemoteEntity::firebaseUserId.name, allStoryPostersIdList).get()
-                    .await()
-                allUsersDocument.documents.forEach { document ->
-                    if (document != null && document.exists()) {
-                        val user = document.toObject(UserRemoteEntity::class.java)
-                        if (user != null) {
-                            userList.add(user.toUserBean())
-                        }
-                    }
-                }
-                storyList.forEach { story ->
-                    if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
-                        val storyPoster =
-                            userList.find { it.firebaseUserId == story.createdByUserFirebaseId }
-                        if (storyPoster != null && storyPoster.friendList.contains(
-                                loggedInUserFirebaseId
-                            )
-                        ) {
-                            if (useIdToStoryListMap.containsKey(storyPoster)) {
-                                useIdToStoryListMap[storyPoster]?.add(story)
-                            } else {
-                                useIdToStoryListMap[storyPoster] =
-                                    arrayListOf(story)
+                if (allStoryPostersIdList.isNotEmpty()) {
+                    val allUsersDocument = fireStore.collection(FirebaseConstants.USER_KEY)
+                        .whereIn(UserRemoteEntity::firebaseUserId.name, allStoryPostersIdList).get()
+                        .await()
+                    allUsersDocument.documents.forEach { document ->
+                        if (document != null && document.exists()) {
+                            val user = document.toObject(UserRemoteEntity::class.java)
+                            if (user != null) {
+                                userList.add(user.toUserBean())
                             }
                         }
                     }
+                    storyList.forEach { story ->
+                        if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
+                            val storyPoster =
+                                userList.find { it.firebaseUserId == story.createdByUserFirebaseId }
+                            if (storyPoster != null && storyPoster.friendList.contains(
+                                    loggedInUserFirebaseId
+                                )
+                            ) {
+                                if (useIdToStoryListMap.containsKey(storyPoster)) {
+                                    useIdToStoryListMap[storyPoster]?.add(story)
+                                } else {
+                                    useIdToStoryListMap[storyPoster] =
+                                        arrayListOf(story)
+                                }
+                            }
+                        }
+                    }
+                    ResponseState.success(useIdToStoryListMap.map {
+                        StoriesWithUser(
+                            it.key,
+                            it.value
+                        )
+                    } as ArrayList)
+                } else {
+                    ResponseState.success(arrayListOf())
                 }
-                ResponseState.success(useIdToStoryListMap.map {
-                    StoriesWithUser(
-                        it.key,
-                        it.value
-                    )
-                } as ArrayList)
             } else {
                 ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
             }
