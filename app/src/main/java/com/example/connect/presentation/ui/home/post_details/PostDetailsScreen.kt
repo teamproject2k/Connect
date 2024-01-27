@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.home.post_details
 import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,10 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -66,7 +68,6 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.models.CommentBean
 import com.example.connect.domain.models.CommentWithUser
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
@@ -138,29 +139,58 @@ fun PostDetailsScreen(
     ) {
         if (viewModel.forceRecomposeState.value >= 0) {
             Column {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .padding(it)
                         .weight(1f)
-                        .verticalScroll(rememberScrollState())
                 ) {
-                    PostDetails(
-                        usersDetails = postedByDetails,
-                        loggedInUser = homeSharedViewModel.usersDetails,
-                        viewModel = viewModel,
-                        navigator = navigator
-                    ) {
-                        showPostVisibilityScopeBottomSheet = true
+                    item {
+                        PostDetails(
+                            usersDetails = postedByDetails,
+                            loggedInUser = homeSharedViewModel.usersDetails,
+                            viewModel = viewModel,
+                            navigator = navigator
+                        ) {
+                            showPostVisibilityScopeBottomSheet = true
+                        }
                     }
-                    TextBold18(
-                        text = stringResource(R.string.comments),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    HandleGetAllCommentsSection(
-                        viewModel,
-                        homeSharedViewModel.usersDetails.firebaseUserId,
-                        navigator
-                    )
+                    item {
+                        TextBold18(
+                            text = stringResource(R.string.comments),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    if (viewModel.getCommentListState.intValue == 0) {
+                        items(8) {
+                            CommentItemLoading()
+                        }
+                    } else if (viewModel.getCommentListState.intValue == 2) {
+                        if (viewModel.commentDataMap.isEmpty()) {
+                            item {
+                                TextBold14(
+                                    text = stringResource(R.string.no_comments_found),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(top = 16.dp),
+                                    alignment = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            items(viewModel.commentDataMap.keys.toList()) { parent ->
+                                val childCommentList = viewModel.commentDataMap[parent]
+                                if (childCommentList != null) {
+                                    ParentChildCommentItem(
+                                        viewModel,
+                                        parent,
+                                        childCommentList,
+                                        loggedInUserFirebaseId = homeSharedViewModel.usersDetails.firebaseUserId,
+                                        navigator = navigator
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                 }
                 DividerLightGrayAlpha50()
                 AddCommentSection(
@@ -189,6 +219,7 @@ fun PostDetailsScreen(
             }
         }
     }
+    HandleGetAllCommentsSection(viewModel)
     HandleDeletePostState(viewModel = viewModel, navigator = navigator)
     HandleAddCommentSectionState(viewModel = viewModel, homeSharedViewModel.usersDetails, navigator)
     HandleDeleteCommentSectionState(viewModel = viewModel)
@@ -561,23 +592,20 @@ fun HandleDeletePostState(
 }
 
 @Composable
-fun HandleGetAllCommentsSection(
-    viewModel: PostDetailsViewModel,
-    loggedInUserFirebaseId: String,
-    navigator: DestinationsNavigator
-) {
+fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
     val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
     when (getAllCommentsState.status) {
         RequestStatusEnum.Loading -> {
-            CommentUiLoading()
             isExceptionHandled = false
+            viewModel.getCommentListState.intValue = 0
         }
 
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
+                viewModel.getCommentListState.intValue = 1
                 viewModel.snackBarMessageState.value =
                     getAllCommentsState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -592,11 +620,7 @@ fun HandleGetAllCommentsSection(
         }
 
         RequestStatusEnum.Success -> {
-            CommentUi(
-                viewModel,
-                loggedInUserFirebaseId,
-                navigator
-            )
+            viewModel.getCommentListState.intValue = 2
         }
 
         RequestStatusEnum.None -> {
@@ -650,8 +674,7 @@ fun ParentChildCommentItem(
     val context = LocalContext.current
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         CommentItem(
-            comment = parentCommentWithUser.comment,
-            commentPoster = parentCommentWithUser.userDetails,
+            parentCommentWithUser,
             viewModel = viewModel,
             loggedInUserFirebaseId = loggedInUserFirebaseId,
             navigator = navigator
@@ -668,8 +691,7 @@ fun ParentChildCommentItem(
         Column(modifier = Modifier.padding(start = 32.dp)) {
             childCommentList.forEach { commentWithUser ->
                 CommentItem(
-                    comment = commentWithUser.comment,
-                    commentPoster = commentWithUser.userDetails,
+                    commentWithUser,
                     viewModel = viewModel,
                     loggedInUserFirebaseId = loggedInUserFirebaseId,
                     navigator = navigator
@@ -692,54 +714,51 @@ fun ParentChildCommentItem(
 }
 
 @Composable
-fun CommentUiLoading() {
-    repeat(4) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+fun CommentItemLoading() {
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .shimmer()
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .shimmer()
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .height(13.dp)
-                            .fillMaxWidth()
-                            .shimmer()
-                            .weight(1f)
-                    )
-                    SpacerWidth8()
-                    Box(
-                        modifier = Modifier
-                            .height(12.dp)
-                            .width(40.dp)
-                            .shimmer()
-                    )
-                }
-                SpacerHeight4()
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .height(13.dp)
                         .fillMaxWidth()
                         .shimmer()
+                        .weight(1f)
+                )
+                SpacerWidth8()
+                Box(
+                    modifier = Modifier
+                        .height(12.dp)
+                        .width(40.dp)
+                        .shimmer()
                 )
             }
+            SpacerHeight4()
+            Box(
+                modifier = Modifier
+                    .height(13.dp)
+                    .fillMaxWidth()
+                    .shimmer()
+            )
         }
     }
 }
 
 @Composable
 fun CommentItem(
-    comment: CommentBean,
-    commentPoster: UsersBean,
+    commentWithCommentPoster: CommentWithUser,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String,
@@ -754,10 +773,10 @@ fun CommentItem(
             .padding(vertical = 12.dp)
             .fillMaxWidth()
             .clickable {
-                if (commentPoster.firebaseUserId == loggedInUserFirebaseId) {
+                if (commentWithCommentPoster.userDetails.firebaseUserId == loggedInUserFirebaseId) {
                     navigator.navigate(CurrentUserProfileScreenDestination)
                 } else {
-                    navigator.navigate(OtherUserProfileScreenDestination(commentPoster))
+                    navigator.navigate(OtherUserProfileScreenDestination(commentWithCommentPoster.userDetails))
                 }
             },
     ) {
@@ -766,8 +785,8 @@ fun CommentItem(
                 .size(40.dp)
                 .clip(CircleShape)
                 .border(1.dp, ColorsHelper.black(), CircleShape),
-            model = commentPoster.profilePhoto,
-            contentDescription = commentPoster.name,
+            model = commentWithCommentPoster.userDetails.profilePhoto,
+            contentDescription = commentWithCommentPoster.userDetails.name,
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user)
         )
@@ -777,10 +796,14 @@ fun CommentItem(
                 .weight(1f)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextBold13(text = commentPoster.connectUserId)
+                TextBold13(text = commentWithCommentPoster.userDetails.connectUserId)
                 SpacerWidth8()
                 Text(
-                    text = FunctionHelper.getTimeAgo(comment.createdAt, context, true),
+                    text = FunctionHelper.getTimeAgo(
+                        commentWithCommentPoster.comment.createdAt,
+                        context,
+                        true
+                    ),
                     color = ColorsHelper.gray(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -789,7 +812,7 @@ fun CommentItem(
             SpacerHeight4()
             Text(
                 buildAnnotatedString {
-                    if (comment.repliedOnCommentId != null) {
+                    if (commentWithCommentPoster.comment.repliedOnCommentId != null) {
                         withStyle(
                             SpanStyle(
                                 fontWeight = FontWeight.Bold,
@@ -797,10 +820,10 @@ fun CommentItem(
                                 color = ColorsHelper.gray()
                             )
                         ) {
-                            append("${commentPoster.connectUserId}  ")
+                            append("${commentWithCommentPoster.commentedOnUserConnectId}  ")
                         }
                     }
-                    append(comment.commentMessage)
+                    append(commentWithCommentPoster.comment.commentMessage)
                 },
                 fontSize = 13.sp,
                 lineHeight = 16.sp
@@ -810,8 +833,8 @@ fun CommentItem(
                 Text(
                     modifier = Modifier.clickable {
                         viewModel.repliedCommentPosterConnectIdState.value =
-                            commentPoster.connectUserId
-                        viewModel.commentedOnState.value = comment
+                            commentWithCommentPoster.userDetails.connectUserId
+                        viewModel.commentedOnState.value = commentWithCommentPoster.comment
                     },
                     text = stringResource(R.string.reply),
                     fontSize = 12.sp,
@@ -819,7 +842,7 @@ fun CommentItem(
                     fontWeight = FontWeight.Medium
                 )
                 SpacerWidth16()
-                if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId || comment.commentedBy == loggedInUserFirebaseId) {
+                if (viewModel.post.createdByUserFirebaseId == loggedInUserFirebaseId || commentWithCommentPoster.comment.commentedBy == loggedInUserFirebaseId) {
                     Text(
                         modifier = Modifier.clickable {
                             onDeleteCommentClicked()
@@ -841,59 +864,76 @@ fun CommentItem(
                     strokeWidth = 1.5.dp
                 )
             } else {
-                IconButton(onClick = {
-                    if (context.isNetworkAvailable()) {
-                        isLoading = true
-                        if (comment.likedBy.contains(loggedInUserFirebaseId)) {
-                            viewModel.removeLikeForComment(
-                                comment,
-                                loggedInUserFirebaseId,
-                                onSuccess = {
-                                    isLoading = false
-                                }) { errorMessage ->
-                                viewModel.snackBarMessageState.value =
-                                    if (errorMessage.isNullOrBlank()) context.getString(
-                                        R.string.something_went_wrong
-                                    ) else errorMessage
-                                isLoading = false
-                            }
-                        } else {
-                            viewModel.addLikeForComment(
-                                comment,
-                                loggedInUserFirebaseId,
-                                onSuccess = {
-                                    isLoading = false
-                                }) { errorMessage ->
-                                viewModel.snackBarMessageState.value =
-                                    if (errorMessage.isNullOrBlank()) context.getString(
-                                        R.string.something_went_wrong
-                                    ) else errorMessage
-                                isLoading = false
-                            }
-                        }
-                    } else {
-                        viewModel.snackBarMessageState.value =
-                            context.getString(R.string.no_internet_connection)
-                        FunctionHelper.vibrateDevice(context)
-                    }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .pointerInput(true) {
+                            detectTapGestures(onTap = {
+                                if (context.isNetworkAvailable()) {
+                                    isLoading = true
+                                    if (commentWithCommentPoster.comment.likedBy.contains(
+                                            loggedInUserFirebaseId
+                                        )
+                                    ) {
+                                        viewModel.removeLikeForComment(
+                                            commentWithCommentPoster.comment,
+                                            loggedInUserFirebaseId,
+                                            onSuccess = {
+                                                isLoading = false
+                                            }) { errorMessage ->
+                                            viewModel.snackBarMessageState.value =
+                                                if (errorMessage.isNullOrBlank()) context.getString(
+                                                    R.string.something_went_wrong
+                                                ) else errorMessage
+                                            isLoading = false
+                                        }
+                                    } else {
+                                        viewModel.addLikeForComment(
+                                            commentWithCommentPoster.comment,
+                                            loggedInUserFirebaseId,
+                                            onSuccess = {
+                                                isLoading = false
+                                            }) { errorMessage ->
+                                            viewModel.snackBarMessageState.value =
+                                                if (errorMessage.isNullOrBlank()) context.getString(
+                                                    R.string.something_went_wrong
+                                                ) else errorMessage
+                                            isLoading = false
+                                        }
+                                    }
+                                } else {
+                                    viewModel.snackBarMessageState.value =
+                                        context.getString(R.string.no_internet_connection)
+                                    FunctionHelper.vibrateDevice(context)
+                                }
 
-                }) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            painter = if (comment.likedBy.contains(loggedInUserFirebaseId)) {
-                                painterResource(id = R.drawable.ic_heart_filled)
-                            } else {
-                                painterResource(id = R.drawable.ic_heart)
-                            }, contentDescription = stringResource(R.string.like_comment),
-                            tint = if (comment.likedBy.contains(loggedInUserFirebaseId)) ColorsHelper.red() else LocalContentColor.current
-                        )
-                        SpacerHeight4()
-                        Text(
-                            text = comment.likedBy.size.toString(),
-                            fontSize = 11.sp
-                        )
-                    }
+                            }, onLongPress = {
+                                FunctionHelper.vibrateDevice(context, 100)
+                                navigator.navigate(LikedByScreenDestination(commentWithCommentPoster.comment.likedBy))
+
+                            })
+                        }) {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        painter = if (commentWithCommentPoster.comment.likedBy.contains(
+                                loggedInUserFirebaseId
+                            )
+                        ) {
+                            painterResource(id = R.drawable.ic_heart_filled)
+                        } else {
+                            painterResource(id = R.drawable.ic_heart)
+                        }, contentDescription = stringResource(R.string.like_comment),
+                        tint = if (commentWithCommentPoster.comment.likedBy.contains(
+                                loggedInUserFirebaseId
+                            )
+                        ) ColorsHelper.red() else LocalContentColor.current
+                    )
+                    SpacerHeight4()
+                    Text(
+                        text = commentWithCommentPoster.comment.likedBy.size.toString(),
+                        fontSize = 11.sp
+                    )
                 }
             }
         }
@@ -1031,8 +1071,6 @@ fun HandleAddCommentSectionState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 val comment = addCommentState.data
-                viewModel.commentedOnState.value = null
-                viewModel.commentTextState.value = ""
                 if (comment != null) {
                     if (comment.parentCommentId == null) {
                         val updatedMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
@@ -1047,13 +1085,21 @@ fun HandleAddCommentSectionState(
                             val currentChildList = viewModel.commentDataMap[parent]
                             if (currentChildList != null) {
                                 updatedChildList.addAll(currentChildList)
-                                updatedChildList.add(CommentWithUser(comment, loggedInUser))
+                                updatedChildList.add(
+                                    CommentWithUser(
+                                        comment,
+                                        loggedInUser,
+                                        viewModel.repliedCommentPosterConnectIdState.value
+                                    )
+                                )
                                 viewModel.commentDataMap[parent] = updatedChildList
                             }
                         }
                     }
                     viewModel.forceRecomposeState.value++
                 }
+                viewModel.commentedOnState.value = null
+                viewModel.commentTextState.value = ""
                 viewModel.isSendingCommentState.value = false
                 isResponseHandled = true
             }
