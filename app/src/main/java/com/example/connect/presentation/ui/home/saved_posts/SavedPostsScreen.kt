@@ -98,8 +98,8 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
             if (context.isNetworkAvailable()) {
                 viewModel.getSavedPosts(
                     homeSharedViewModel.usersDetails.firebaseUserId,
+                    homeSharedViewModel.usersDetails.blockedUsersList,
                     homeSharedViewModel.usersDetails.savedPosts,
-                    true
                 )
             } else {
                 viewModel.snackBarMessageState.value =
@@ -143,8 +143,8 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
     LaunchedEffect(Unit) {
         viewModel.getSavedPosts(
             homeSharedViewModel.usersDetails.firebaseUserId,
+            homeSharedViewModel.usersDetails.blockedUsersList,
             homeSharedViewModel.usersDetails.savedPosts,
-            false
         )
     }
     HandleLikeUnlikeState(viewModel)

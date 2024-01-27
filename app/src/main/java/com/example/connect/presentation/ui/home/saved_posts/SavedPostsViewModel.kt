@@ -66,45 +66,48 @@ class SavedPostsViewModel @Inject constructor(
 
     fun getSavedPosts(
         loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>,
         savedPosts: ArrayList<String>,
-        isForceRefresh: Boolean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getSavedPostsWithUsersStateFlow.value = ResponseState.loading()
-                if (isForceRefresh) {
-                    if (savedPosts.isEmpty()) {
-                        delay(500)
-                        _getSavedPostsWithUsersStateFlow.value = ResponseState.success(emptyList())
-                    } else {
-                        val savedPostResponse = getSavedPostsWithUsersFromRemoteUseCase(
-                            loggedInUserFirebaseId,
-                            savedPosts
-                        )
-                        if (savedPostResponse.status == RequestStatusEnum.Success) {
-                            val postList = savedPostResponse.data?.map { it.postDetail }
-                            val userList = savedPostResponse.data?.map { it.userDetail }
-                            if (postList != null && userList != null) {
-                                val addPostToLocalResult =
-                                    addPostListToLocalUseCase(postList)
-                                if (addPostToLocalResult.size == postList.size) {
-                                    addUserListToLocalUseCase(userList)
-                                    _getSavedPostsWithUsersStateFlow.value =
-                                        getSavedPostDetailsWithUserFromLocalUseCase(savedPosts)
-                                } else {
-                                    _getSavedPostsWithUsersStateFlow.value =
-                                        ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
-                                }
+                if (savedPosts.isEmpty()) {
+                    delay(500)
+                    _getSavedPostsWithUsersStateFlow.value = ResponseState.success(emptyList())
+                } else {
+                    val savedPostResponse = getSavedPostsWithUsersFromRemoteUseCase(
+                        loggedInUserFirebaseId,
+                        savedPosts
+                    )
+                    if (savedPostResponse.status == RequestStatusEnum.Success) {
+                        val postList = savedPostResponse.data?.map { it.postDetail }
+                        val userList = savedPostResponse.data?.map { it.userDetail }
+                        if (postList != null && userList != null) {
+                            val addPostToLocalResult =
+                                addPostListToLocalUseCase(postList)
+                            if (addPostToLocalResult.size == postList.size) {
+                                addUserListToLocalUseCase(userList)
+                                _getSavedPostsWithUsersStateFlow.value =
+                                    getSavedPostDetailsWithUserFromLocalUseCase(
+                                        savedPosts,
+                                        loggedInUserFirebaseId,
+                                        loggedInUserBlockedList
+                                    )
                             } else {
                                 _getSavedPostsWithUsersStateFlow.value =
                                     ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
+                                return@withContext
                             }
+                        } else {
+                            _getSavedPostsWithUsersStateFlow.value =
+                                ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
+                            return@withContext
                         }
-                        _getSavedPostsWithUsersStateFlow.value = savedPostResponse
+                    } else {
+                        _getSavedPostsWithUsersStateFlow.value =
+                            ResponseState.error(savedPostResponse.message ?: "")
                     }
-                } else {
-                    _getSavedPostsWithUsersStateFlow.value =
-                        getSavedPostDetailsWithUserFromLocalUseCase(savedPosts)
                 }
             }
         }

@@ -16,7 +16,10 @@ interface IPostRepository {
     suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostBean>
 
 
-    suspend fun getPostDetailsWithUsersFromLocal(): ResponseState<List<PostWithUserDetails>>
+    suspend fun getPostDetailsWithUsersFromLocal(
+        loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>
+    ): ResponseState<List<PostWithUserDetails>>
 
     /**
      * Gets post details from remote.
@@ -102,7 +105,10 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
 
-    suspend fun getPostDetailsWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>>
+    suspend fun getPostDetailsWithUserFromLocal(
+        savedPostFirebaseIds: List<String>, loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>,
+    ): ResponseState<List<PostWithUserDetails>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 

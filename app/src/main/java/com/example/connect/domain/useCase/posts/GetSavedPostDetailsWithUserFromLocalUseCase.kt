@@ -6,7 +6,14 @@ import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 
 class GetSavedPostDetailsWithUserFromLocalUseCase @Inject constructor(private val repository: IPostRepository) {
-    suspend operator fun invoke(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
-        return repository.getPostDetailsWithUserFromLocal(savedPostFirebaseIds)
+    suspend operator fun invoke(
+        savedPostFirebaseIds: List<String>, loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>,
+    ): ResponseState<List<PostWithUserDetails>> {
+        return repository.getPostDetailsWithUserFromLocal(
+            savedPostFirebaseIds,
+            loggedInUserFirebaseId,
+            loggedInUserBlockedList
+        )
     }
 }

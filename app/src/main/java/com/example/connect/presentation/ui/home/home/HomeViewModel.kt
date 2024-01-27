@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.home
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -130,7 +129,11 @@ class HomeViewModel @Inject constructor(
 //        }
     }
 
-    fun getPostDetailsWithUserDetails(loggedInUserFirebaseId: String, isNetworkAvailable: Boolean) {
+    fun getPostDetailsWithUserDetails(
+        loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>,
+        isNetworkAvailable: Boolean
+    ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
@@ -149,7 +152,10 @@ class HomeViewModel @Inject constructor(
                             if (addPostToLocalResult.size == postList.size) {
                                 addUserListToLocalUseCase(userList)
                                 _postDetailsStateFlow.value =
-                                    getPostDetailsWithUsersFromLocalUseCase()
+                                    getPostDetailsWithUsersFromLocalUseCase(
+                                        loggedInUserFirebaseId,
+                                        loggedInUserBlockedList
+                                    )
                             } else {
                                 _postDetailsStateFlow.value =
                                     ResponseState.error(FirebaseErrorCodes.UNKNOWN_ERROR)
@@ -162,9 +168,11 @@ class HomeViewModel @Inject constructor(
                         _postDetailsStateFlow.value = postListWithUserDetailsResponse
                     }
                 } else {
-                    Log.e("abc", "getPostDetailsWithUserDetails: ")
                     _postDetailsStateFlow.value =
-                        getPostDetailsWithUsersFromLocalUseCase()
+                        getPostDetailsWithUsersFromLocalUseCase(
+                            loggedInUserFirebaseId,
+                            loggedInUserBlockedList
+                        )
                 }
             }
         }

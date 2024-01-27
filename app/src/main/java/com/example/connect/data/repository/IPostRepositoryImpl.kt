@@ -3,6 +3,7 @@ package com.example.connect.data.repository
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.models.comment.CommentRemoteEntity
 import com.example.connect.data.models.post.PostRemoteEntity
+import com.example.connect.data.models.post.PostWithUserDetailsFromLocalEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.CommentBean
@@ -30,21 +31,18 @@ class IPostRepositoryImpl @Inject constructor(
         return appDatabase.getPostDao().getPostList(fireBaseId).map { it.toPostBean() }
     }
 
-    override suspend fun getPostDetailsWithUsersFromLocal(): ResponseState<List<PostWithUserDetails>> {
-        val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
+    override suspend fun getPostDetailsWithUsersFromLocal(
+        loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>
+    ): ResponseState<List<PostWithUserDetails>> {
         return try {
-            val postWithUsersList = appDatabase.getPostDao().getPostDetailsWithUsers()
-            postWithUsersList.forEach { postWithUser ->
-                if (postWithUser.userDetail != null) {
-                    postWithUsersDetailList.add(
-                        PostWithUserDetails(
-                            postWithUser.postDetail.toPostBean(),
-                            postWithUser.userDetail.toUserBean()
-                        )
-                    )
-                }
-            }
-            ResponseState.success(postWithUsersDetailList)
+            ResponseState.success(
+                getPostDetailsWithUsers(
+                    appDatabase.getPostDao().getPostDetailsWithUsers(),
+                    loggedInUserFirebaseId,
+                    loggedInUserBlockedList
+                )
+            )
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }
@@ -500,25 +498,51 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPostDetailsWithUserFromLocal(savedPostFirebaseIds: List<String>): ResponseState<List<PostWithUserDetails>> {
-        val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
+    override suspend fun getPostDetailsWithUserFromLocal(
+        savedPostFirebaseIds: List<String>,
+        loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>,
+    ): ResponseState<List<PostWithUserDetails>> {
         return try {
-            val postWithUsersList =
-                appDatabase.getPostDao().getSavedPostsAndUsers(savedPostFirebaseIds)
-            postWithUsersList.forEach { postWithUser ->
-                if (postWithUser.userDetail != null) {
+            ResponseState.success(
+                getPostDetailsWithUsers(
+                    appDatabase.getPostDao().getSavedPostsAndUsers(savedPostFirebaseIds),
+                    loggedInUserFirebaseId,
+                    loggedInUserBlockedList
+                )
+            )
+        } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    private fun getPostDetailsWithUsers(
+        postWithUsersList: List<PostWithUserDetailsFromLocalEntity>,
+        loggedInUserFirebaseId: String,
+        loggedInUserBlockedList: List<String>
+    ): ArrayList<PostWithUserDetails> {
+        val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
+        postWithUsersList.forEach { postWithUser ->
+            val postedBy = postWithUser.userDetail?.toUserBean()
+            if (postedBy != null && !loggedInUserBlockedList.contains(postedBy.firebaseUserId) && !postedBy.blockedUsersList.contains(
+                    loggedInUserFirebaseId
+                )
+            ) {
+                val whetherShowPostToLoggedInUser =
+                    postWithUser.postDetail.createdByUserFirebaseId == loggedInUserFirebaseId
+                            || postWithUser.postDetail.postVisibilityScope == VisibilityScopeEnum.Public.name
+                            || (postedBy.friendList.contains(loggedInUserFirebaseId))
+                if (whetherShowPostToLoggedInUser) {
                     postWithUsersDetailList.add(
                         PostWithUserDetails(
                             postWithUser.postDetail.toPostBean(),
-                            postWithUser.userDetail.toUserBean()
+                            postedBy
                         )
                     )
                 }
             }
-            ResponseState.success(postWithUsersDetailList)
-        } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
         }
+        return postWithUsersDetailList
     }
 
     override suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int {
