@@ -141,11 +141,17 @@ fun SavedPostsScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getSavedPosts(
-            homeSharedViewModel.usersDetails.firebaseUserId,
-            homeSharedViewModel.usersDetails.blockedUsersList,
-            homeSharedViewModel.usersDetails.savedPosts,
-        )
+        if (context.isNetworkAvailable()) {
+            viewModel.getSavedPosts(
+                homeSharedViewModel.usersDetails.firebaseUserId,
+                homeSharedViewModel.usersDetails.blockedUsersList,
+                homeSharedViewModel.usersDetails.savedPosts,
+            )
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+            FunctionHelper.vibrateDevice(context)
+        }
     }
     HandleLikeUnlikeState(viewModel)
     HandleSaveUnSavePost(viewModel)
