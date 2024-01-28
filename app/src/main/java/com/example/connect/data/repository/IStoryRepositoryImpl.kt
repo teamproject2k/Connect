@@ -33,14 +33,6 @@ class IStoryRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun isUploadedBeforeOneDay(createdAtInMillis: Long): Boolean {
-        val currentTimeMillis = System.currentTimeMillis()
-        val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L // 24 hours in milliseconds
-
-        val elapsedTimeInMillis = currentTimeMillis - createdAtInMillis
-        return elapsedTimeInMillis < twentyFourHoursInMillis
-    }
-
     override suspend fun getAllStoriesWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<ArrayList<StoriesWithUserBean>> {
         return try {
             val loggedInUserDocument =
@@ -48,10 +40,10 @@ class IStoryRepositoryImpl @Inject constructor(
                     .get().await()
             val userList = arrayListOf<UsersBean>()
             val storyList = arrayListOf<StoryBean>()
-            val useIdToStoryListMap = mutableMapOf<UsersBean, ArrayList<StoryBean>>()
+            val userToStoryListMap = mutableMapOf<UsersBean, ArrayList<StoryBean>>()
             val loggedInUser =
                 loggedInUserDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
-            if (loggedInUserDocument != null && loggedInUserDocument.exists() && loggedInUser != null) {
+            if (loggedInUser != null) {
                 userList.add(loggedInUser)
                 val getStoriesFor = loggedInUser.friendList
                 getStoriesFor.add(loggedInUserFirebaseId)
@@ -63,7 +55,7 @@ class IStoryRepositoryImpl @Inject constructor(
                         StoryRemoteEntity::createdByUserFirebaseId.name,
                         getStoriesFor
                     ).whereEqualTo(StoryRemoteEntity::whetherDeleted.name, false)
-                   // .whereGreaterThan(StoryRemoteEntity::createdAt.name, elapsedTimeInMillis)
+                    .whereGreaterThan(StoryRemoteEntity::createdAt.name, elapsedTimeInMillis)
                     .get()
                     .await()
                 storyListResponse.forEach { storyDocument ->
@@ -71,7 +63,7 @@ class IStoryRepositoryImpl @Inject constructor(
                     storyList.add(story.toStoryBean(storyDocument.id))
                 }
                 if (storyList.any { it.createdByUserFirebaseId == loggedInUserFirebaseId }) {
-                    useIdToStoryListMap[loggedInUser] = arrayListOf()
+                    userToStoryListMap[loggedInUser] = arrayListOf()
                 }
                 val allStoryPostersIdList =
                     storyList.map { it.createdByUserFirebaseId }.toSet().toList()
@@ -80,34 +72,32 @@ class IStoryRepositoryImpl @Inject constructor(
                         .whereIn(UserRemoteEntity::firebaseUserId.name, allStoryPostersIdList).get()
                         .await()
                     allUsersDocument.documents.forEach { document ->
-                        if (document != null && document.exists()) {
-                            val user = document.toObject(UserRemoteEntity::class.java)
-                            if (user != null) {
-                                userList.add(user.toUserBean())
-                            }
+                        val user = document.toObject(UserRemoteEntity::class.java)
+                        if (user != null) {
+                            userList.add(user.toUserBean())
                         }
                     }
+                    storyList.sortByDescending { it.createdAt }
                     storyList.forEach { story ->
-                        if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
-                            val storyPoster =
-                                userList.find { it.firebaseUserId == story.createdByUserFirebaseId }
-                            if (storyPoster != null && storyPoster.friendList.contains(
-                                    loggedInUserFirebaseId
-                                )
-                            ) {
-                                if (useIdToStoryListMap.containsKey(storyPoster)) {
-                                    useIdToStoryListMap[storyPoster]?.add(story)
-                                } else {
-                                    useIdToStoryListMap[storyPoster] =
-                                        arrayListOf(story)
-                                }
+                        val storyPoster =
+                            userList.find { it.firebaseUserId == story.createdByUserFirebaseId }
+                        if (storyPoster != null && (storyPoster.firebaseUserId == loggedInUserFirebaseId || storyPoster.friendList.contains(
+                                loggedInUserFirebaseId
+                            ))
+                        ) {
+                            if (userToStoryListMap.containsKey(storyPoster)) {
+                                userToStoryListMap[storyPoster]?.add(story)
+                            } else {
+                                userToStoryListMap[storyPoster] =
+                                    arrayListOf(story)
                             }
                         }
                     }
-                    ResponseState.success(useIdToStoryListMap.map {
+
+                    ResponseState.success(userToStoryListMap.map {
                         StoriesWithUserBean(
                             it.key,
-                            it.value
+                            it.value.reversed() as ArrayList
                         )
                     } as ArrayList)
                 } else {
