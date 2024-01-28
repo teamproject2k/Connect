@@ -94,12 +94,14 @@ class IStoryRepositoryImpl @Inject constructor(
                         }
                     }
 
-                    ResponseState.success(userToStoryListMap.map {
+                    val storyListWithUserDetails = userToStoryListMap.map {
+                        it.value.reverse()
                         StoriesWithUserBean(
                             it.key,
-                            it.value.reversed() as ArrayList
+                            it.value
                         )
-                    } as ArrayList)
+                    } as ArrayList
+                    ResponseState.success(storyListWithUserDetails)
                 } else {
                     ResponseState.success(arrayListOf())
                 }
