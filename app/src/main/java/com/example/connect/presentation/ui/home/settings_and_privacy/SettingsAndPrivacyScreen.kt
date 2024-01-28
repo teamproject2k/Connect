@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.home.settings_and_privacy
 
 import android.content.Context
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,7 +95,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
             modifier = Modifier.padding(it)
         ) {
             SettingsAndPrivacySectionWithVisibilityItem(
-                itemNameId = R.string.gender_privacy,
+                itemName = stringResource(id = R.string.gender_privacy),
                 drawableId = viewModel.genderVisibilityState.value.drawableId,
                 scopeName = viewModel.genderVisibilityState.value.scopeName
             ) {
@@ -102,7 +103,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacySectionWithVisibilityItem(
-                itemNameId = R.string.date_of_birth_privacy,
+                itemName = stringResource(id = R.string.date_of_birth_privacy),
                 drawableId = viewModel.dobVisibilityState.value.drawableId,
                 scopeName = viewModel.dobVisibilityState.value.scopeName
             ) {
@@ -110,22 +111,22 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
             }
             DividerLightGrayAlpha50()
             SettingsAndPrivacySectionWithVisibilityItem(
-                itemNameId = R.string.friend_list_privacy,
+                itemName = stringResource(id = R.string.friend_list_privacy),
                 drawableId = viewModel.friendListVisibilityState.value.drawableId,
                 scopeName = viewModel.friendListVisibilityState.value.scopeName
             ) {
                 showFriendListBottomSheet = true
             }
             DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemNameId = R.string.saved_posts) {
+            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.saved_posts)) {
                 navigator.navigate(SavedPostsScreenDestination())
             }
             DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemNameId = R.string.blocked_users) {
+            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.blocked_users)) {
                 navigator.navigate(BlockedListScreenDestination())
             }
             DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemNameId = R.string.requested_users) {
+            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.requested_users)) {
                 navigator.navigate(RequestedListScreenDestination())
             }
             DividerLightGrayAlpha50()
@@ -200,27 +201,26 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
 
 @Composable
 private fun SettingsAndPrivacySectionWithVisibilityItem(
-    itemNameId: Int,
-    drawableId: Int,
+    itemName: String,
+    @DrawableRes drawableId: Int,
     scopeName: String,
     onItemClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick() },
+            .clickable { onItemClick() }
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(itemNameId),
+            text = itemName,
             fontWeight = FontWeight.Medium,
             modifier = Modifier
-                .padding(vertical = 16.dp, horizontal = 24.dp)
                 .weight(1f),
             fontSize = 14.sp
         )
         VisibilityItem(
-            modifier = Modifier.padding(end = 16.dp),
             drawableId = drawableId,
             scopeName = scopeName
         ) {
@@ -231,19 +231,20 @@ private fun SettingsAndPrivacySectionWithVisibilityItem(
 
 @Composable
 private fun SettingsAndPrivacyClickableItem(
-    itemNameId: Int,
+    itemName: String,
     onItemClick: () -> (Unit)
 ) {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .clickable {
-            onItemClick()
-        }) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onItemClick()
+            }
+            .padding(16.dp)
+    ) {
         Text(
-            text = stringResource(itemNameId),
+            text = itemName,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier
-                .padding(vertical = 16.dp, horizontal = 24.dp),
             fontSize = 14.sp
         )
     }

@@ -243,8 +243,12 @@ interface IUserRepository {
     suspend fun deleteAllUsersFromLocalExceptInList(exceptList: List<String>): Int
 
 
-    suspend fun getUserReceivedFriendRequestList(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+    suspend fun getLoggedInUserReceivedFriendRequestListFromRemote(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
 
-    suspend fun getUserFriendRequestList(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+    suspend fun getLoggedInUserFriendListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+
+    suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+
+    suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
 
 }

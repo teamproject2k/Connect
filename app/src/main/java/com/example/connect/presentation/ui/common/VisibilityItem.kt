@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.common
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun VisibilityItem(
     modifier: Modifier = Modifier,
-    drawableId: Int,
+    @DrawableRes drawableId: Int,
     scopeName: String,
     onClick: () -> Unit
 ) {

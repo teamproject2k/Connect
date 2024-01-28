@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.user.GetUserFriendListFromRemoteUseCase
-import com.example.connect.domain.useCase.user.GetUserReceivedFriendRequestListFromRemoteUseCase
+import com.example.connect.domain.useCase.user.GetLoggedInUserFriendListFromRemoteUseCase
+import com.example.connect.domain.useCase.user.GetLoggedInUserReceivedFriendRequestListFromRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateUserOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,8 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendsAndPendingViewModel @Inject constructor(
-    private val getUserReceivedFriendRequestListFromRemoteUseCase: GetUserReceivedFriendRequestListFromRemoteUseCase,
-    private val getUserFriendListFromRemoteUseCase: GetUserFriendListFromRemoteUseCase,
+    private val getLoggedInUserReceivedFriendRequestListFromRemoteUseCase: GetLoggedInUserReceivedFriendRequestListFromRemoteUseCase,
+    private val getLoggedInUserFriendListFromRemoteUseCase: GetLoggedInUserFriendListFromRemoteUseCase,
     private val updateUserDetailsOnLocalUseCase: UpdateUserOnLocalUseCase
 ) : BaseViewModel() {
 
@@ -53,14 +53,11 @@ class FriendsAndPendingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getFriendsListStateFlow.value = ResponseState.loading()
                 val friendListResponse =
-                    getUserFriendListFromRemoteUseCase.invoke(
+                    getLoggedInUserFriendListFromRemoteUseCase.invoke(
                         loggedInUserFirebaseId
                     )
-                if (friendListResponse.status == RequestStatusEnum.Success) {
-                    if (friendListResponse.data != null) {
-                        updateUserDetailsOnLocalUseCase.invoke(friendListResponse.data.first)
-                    }
-
+                if (friendListResponse.status == RequestStatusEnum.Success && friendListResponse.data != null) {
+                    updateUserDetailsOnLocalUseCase.invoke(friendListResponse.data.first)
                 }
                 _getFriendsListStateFlow.value = friendListResponse
             }
@@ -72,14 +69,11 @@ class FriendsAndPendingViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _getPendingFriendRequestListStateFlow.value = ResponseState.loading()
                 val pendingListResponse =
-                    getUserReceivedFriendRequestListFromRemoteUseCase.invoke(
+                    getLoggedInUserReceivedFriendRequestListFromRemoteUseCase.invoke(
                         loggedInUserFirebaseId
                     )
-                if (pendingListResponse.status == RequestStatusEnum.Success) {
-                    if (pendingListResponse.data != null) {
-                        updateUserDetailsOnLocalUseCase.invoke(pendingListResponse.data.first)
-                    }
-
+                if (pendingListResponse.status == RequestStatusEnum.Success && pendingListResponse.data != null) {
+                    updateUserDetailsOnLocalUseCase.invoke(pendingListResponse.data.first)
                 }
                 _getPendingFriendRequestListStateFlow.value = pendingListResponse
             }

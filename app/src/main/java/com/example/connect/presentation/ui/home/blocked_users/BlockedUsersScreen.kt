@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
@@ -65,7 +67,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
             if (context.isNetworkAvailable()) {
-                viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+                viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.firebaseUserId)
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -86,7 +88,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleGetBlockedUsersState(viewModel, navigator)
+            HandleGetBlockedUsersState(viewModel, homeSharedViewModel, navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -104,7 +106,7 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(Unit) {
         if (context.isNetworkAvailable()) {
-            viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.blockedUsersList)
+            viewModel.getBlockedUsers(homeSharedViewModel.usersDetails.firebaseUserId)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)
@@ -116,20 +118,21 @@ fun BlockedListScreen(navigator: DestinationsNavigator) {
 @Composable
 private fun HandleGetBlockedUsersState(
     viewModel: BlockedUsersViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val blockedUsersState = viewModel.getBlockedUsersStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (blockedUsersState.status) {
         RequestStatusEnum.Loading -> {
             UserListLoading()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     blockedUsersState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -139,12 +142,18 @@ private fun HandleGetBlockedUsersState(
                     ScreenNameEnum.BlockedUsersScreen.name,
                     blockedUsersState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(navigator, blockedUsersState.data ?: emptyList())
+            if (!isResponseHandled) {
+                if (blockedUsersState.data != null) {
+                    homeSharedViewModel.usersDetails = blockedUsersState.data.first
+                }
+                isResponseHandled = true
+            }
+            DisplayUsersList(navigator, blockedUsersState.data?.second ?: emptyList())
         }
 
         RequestStatusEnum.None -> {
@@ -168,6 +177,19 @@ private fun DisplayUsersList(navigator: DestinationsNavigator, blockedUsersList:
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
+            item {
+                val textToShow =
+                    if (blockedUsersList.size == 1) {
+                        stringResource(R.string.you_blocked_user, blockedUsersList.size)
+                    } else {
+                        stringResource(R.string.you_blocked_users, blockedUsersList.size)
+                    }
+                Text(
+                    text = textToShow,
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 14.sp
+                )
+            }
             items(blockedUsersList, key = {
                 it.firebaseUserId
             }) { blockedUser ->

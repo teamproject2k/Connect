@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
@@ -251,6 +253,19 @@ private fun FriendsListUI(
             return
         }
         LazyColumn {
+            item {
+                val textToShow =
+                    if (usersList.size == 1) {
+                        stringResource(R.string.you_have_1_friend)
+                    } else {
+                        stringResource(R.string.you_have_friends, usersList.size)
+                    }
+                Text(
+                    text = textToShow,
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 14.sp
+                )
+            }
             items(filteredUserList, key = {
                 it.firebaseUserId
             }) { user ->
@@ -351,6 +366,19 @@ private fun PendingListUI(
             return
         }
         LazyColumn {
+            item {
+                val textToShow =
+                    if (usersList.size == 1) {
+                        stringResource(R.string.you_have_1_pending_request)
+                    } else {
+                        stringResource(R.string.you_have_pending_requests, usersList.size)
+                    }
+                Text(
+                    text = textToShow,
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 14.sp
+                )
+            }
             items(filteredUserList, key = {
                 it.firebaseUserId
             }) { user ->

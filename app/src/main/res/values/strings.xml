@@ -229,4 +229,12 @@
     <string name="chats">Chats</string>
     <string name="liked_by">Liked by</string>
     <string name="search_users">Search Users</string>
+    <string name="you_blocked_user">You blocked %1$s user</string>
+    <string name="you_blocked_users">You blocked %1$s users</string>
+    <string name="you_requested_1_user">You requested 1 user</string>
+    <string name="you_requested_users">You requested %1$s users</string>
+    <string name="you_have_1_pending_request">You have 1 pending request</string>
+    <string name="you_have_pending_requests">You have %1$s pending requests</string>
+    <string name="you_have_1_friend">You have 1 friend</string>
+    <string name="you_have_friends">You have %1$s friends</string>
 </resources>

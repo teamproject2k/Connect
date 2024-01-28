@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
@@ -56,7 +58,9 @@ import kotlinx.coroutines.launch
 fun RequestedListScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: RequestedUsersViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var refreshing by rememberSaveable { mutableStateOf(false) }
@@ -65,7 +69,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
             if (context.isNetworkAvailable()) {
-                viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
+                viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.firebaseUserId)
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -86,7 +90,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleGetRequestedUsersState(viewModel, navigator)
+            HandleGetRequestedUsersState(viewModel, homeSharedViewModel, navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -103,7 +107,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(Unit) {
         if (context.isNetworkAvailable()) {
-            viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.requestedFriendRequestList)
+            viewModel.getRequestedUsers(homeSharedViewModel.usersDetails.firebaseUserId)
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)
@@ -115,20 +119,21 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
 @Composable
 fun HandleGetRequestedUsersState(
     viewModel: RequestedUsersViewModel,
+    homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
     val requestedUsersState = viewModel.getRequestedUsersStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
     when (requestedUsersState.status) {
         RequestStatusEnum.Loading -> {
             UserListLoading()
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.snackBarMessageState.value =
                     requestedUsersState.message
                         ?: stringResource(id = R.string.something_went_wrong)
@@ -138,12 +143,16 @@ fun HandleGetRequestedUsersState(
                     ScreenNameEnum.RequestedUsersScreen.name,
                     requestedUsersState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            DisplayUsersList(navigator, requestedUsersState.data ?: emptyList())
+            if (!isResponseHandled && requestedUsersState.data != null) {
+                homeSharedViewModel.usersDetails = requestedUsersState.data.first
+                isResponseHandled = true
+            }
+            DisplayUsersList(navigator, requestedUsersState.data?.second ?: emptyList())
         }
 
         RequestStatusEnum.None -> {
@@ -170,6 +179,19 @@ private fun DisplayUsersList(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
+            item {
+                val textToShow =
+                    if (requestedUsersList.size == 1) {
+                        stringResource(R.string.you_requested_1_user)
+                    } else {
+                        stringResource(R.string.you_requested_users, requestedUsersList.size)
+                    }
+                Text(
+                    text = textToShow,
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 14.sp
+                )
+            }
             items(requestedUsersList, key = {
                 it.firebaseUserId
             }) { requestedUser ->
