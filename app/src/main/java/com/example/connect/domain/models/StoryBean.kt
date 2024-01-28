@@ -30,7 +30,7 @@ data class StoryBean(
             textColor,
             textOffset,
             backgroundGradientColor,
-            emptyList(),
+            arrayListOf(),
             videoLength,
             whetherDeleted
         )

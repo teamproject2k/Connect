@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.show_story
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -15,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -59,6 +60,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -74,13 +77,15 @@ import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
-import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
+import com.example.connect.presentation.ui.common.UserDetailsSection
+import com.example.connect.presentation.ui.common.UsersListItemLoading
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -128,22 +133,22 @@ fun ShowStoryScreen(
         }
         if (viewModel.showStorySeenListBottomSheetState.value) {
             ModalBottomSheet(
-                onDismissRequest = { viewModel.showStorySeenListBottomSheetState.value = false },
+                onDismissRequest = {
+                    viewModel.showStorySeenListBottomSheetState.value = false
+                    viewModel.pauseTimerState.value = false
+                },
                 shape = RoundedCornerShape(
                     topEnd = ConstantsHelper.BottomSheetRoundness,
                     topStart = ConstantsHelper.BottomSheetRoundness
                 )
+
             ) {
-                ShowStoryBottomSheet(
-                    modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    viewModel = viewModel
-                ) {
-                    viewModel.showStorySeenListBottomSheetState.value = false
+                Column(modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight)) {
+                    ShowStoryBottomSheet(viewModel = viewModel)
                 }
             }
         }
     }
-    HandleGetStoryState(viewModel)
     HandleDeleteStoryState(viewModel = viewModel, navigator)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
@@ -156,45 +161,94 @@ fun ShowStoryScreen(
 }
 
 @Composable
-fun ShowStoryBottomSheet(
-    modifier: Modifier,
-    viewModel: ShowStoryViewModel,
-    onDismissRequest: () -> Unit
-) {
-    Column(modifier = modifier) {
-        viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList.forEach { postScope ->
-           // StorySeenListItem()
-            onDismissRequest()
+fun ShowStoryBottomSheet(viewModel: ShowStoryViewModel) {
+    val getSeenListState =
+        viewModel.getSeenListStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getSeenListState.status) {
+        RequestStatusEnum.Loading -> {
+            repeat(3) {
+                UsersListItemLoading()
+            }
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    getSeenListState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ERROR_TAG,
+                    ScreenNameEnum.ShowStoryScreen.name,
+                    getSeenListState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                isResponseHandled = true
+            }
+            StorySeenListSection(getSeenListState.data ?: emptyList())
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
         }
     }
 }
 
 @Composable
+fun StorySeenListSection(storySeenList: List<StorySeenTimeWithUserDetailsBean>) {
+    LazyColumn {
+        if (storySeenList.isEmpty()) {
+            item {
+                Text(
+                    text = stringResource(id = R.string.no_user_found),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        } else {
+            items(storySeenList) {
+                StorySeenListItem(it)
+            }
+        }
+
+    }
+}
+
+@Composable
 fun StorySeenListItem(storySeenTimeWithUserDetailsBean: StorySeenTimeWithUserDetailsBean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        AsyncImage(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .border(1.dp, ColorsHelper.gray(), CircleShape),
-            model = storySeenTimeWithUserDetailsBean.seenBy.profilePhoto,
-            contentDescription = storySeenTimeWithUserDetailsBean.seenBy.name,
-            contentScale = ContentScale.Crop,
-            error = painterResource(id = R.drawable.ic_default_user)
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 12.dp),
-        ) {
-            TextBold16(text = storySeenTimeWithUserDetailsBean.seenBy.name)
+    val context = LocalContext.current
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
+            UserDetailsSection(
+                user = storySeenTimeWithUserDetailsBean.seenBy,
+                modifier = Modifier.weight(1f)
+            )
             Text(
-                text = storySeenTimeWithUserDetailsBean.seenAt.toString(),
-                fontSize = 13.sp,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
+                fontSize = 14.sp,
+                color = ColorsHelper.black(),
+                fontWeight = FontWeight.Medium,
+                text = FunctionHelper.getTimeAgo(
+                    storySeenTimeWithUserDetailsBean.seenAt,
+                    context,
+                    true
+                )
             )
         }
+        DividerLightGrayAlpha50()
     }
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -204,7 +258,7 @@ fun StoryMainSection(
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
 ) {
-    val pageState = rememberPagerState(viewModel.currentUserStoriesIndexState.intValue) {
+    val pageState = rememberPagerState(viewModel.userStoriesIndexState.intValue) {
         viewModel.allStoriesWithUsersList.size
     }
     HorizontalPager(state = pageState, modifier = Modifier.fillMaxSize()) { index ->
@@ -218,10 +272,12 @@ fun StoryMainSection(
             navigator.popBackStack()
             return@HorizontalPager
         }
-        viewModel.currentUserStoriesIndexState.intValue = index
-        viewModel.currentStoryIndexState.intValue = 0
+        if (index != viewModel.userStoriesIndexState.intValue) {
+            viewModel.currentStoryIndexState.intValue = 0
+        }
+        viewModel.userStoriesIndexState.intValue = index
         val currentStoriesWithUser =
-            viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.value]
+            viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.value]
         UserStories(
             viewModel = viewModel,
             storyList = currentStoriesWithUser.storiesList,
@@ -255,9 +311,6 @@ fun UserStories(
         return
     }
     val currentStory = storyList[viewModel.currentStoryIndexState.intValue]
-    var pauseTimer by remember {
-        mutableStateOf(false)
-    }
     var isMediaLoaded by remember {
         mutableStateOf(false)
     }
@@ -268,7 +321,7 @@ fun UserStories(
             .pointerInteropFilter {
                 val tapLocationX = it.x
                 val tapLocationY = it.y
-                if (tapLocationY > screenHeight * 0.4f) {
+                if (tapLocationY > screenHeight * 0.3f) {
                     val screenSplitCoordinates = screenWidth.toFloat() / 3
                     if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
                         if (viewModel.currentStoryIndexState.intValue > 0) {
@@ -279,11 +332,11 @@ fun UserStories(
                     } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
                         when (it.action) {
                             MotionEvent.ACTION_DOWN -> {
-                                pauseTimer = true
+                                viewModel.pauseTimerState.value = true
                             }
 
                             MotionEvent.ACTION_UP -> {
-                                pauseTimer = false
+                                viewModel.pauseTimerState.value = false
                             }
                         }
                     } else if (it.action == MotionEvent.ACTION_DOWN) {
@@ -310,7 +363,7 @@ fun UserStories(
                     currentPageIndex = viewModel.currentStoryIndexState.intValue,
                     progressBarIndex = index,
                     startProgress = index == viewModel.currentStoryIndexState.intValue && isMediaLoaded,
-                    onPauseTimer = pauseTimer,
+                    onPauseTimer = viewModel.pauseTimerState.value,
                     progressMaxTime = if (currentStory.mediaType == MediaTypeEnum.Video.name || currentStory.mediaType == MediaTypeEnum.TextVideo.name) currentStory.videoLength else ConstantsHelper.STORY_PROGRESS_MAX_TIME
                 ) {
                     if (viewModel.currentStoryIndexState.intValue < storyList.lastIndex) {
@@ -422,14 +475,19 @@ private fun StoryTopSection(
         }
         if (storyPoster.firebaseUserId == loggedInUserFirebaseId) {
             Box {
-                IconButton(onClick = { viewModel.isDropdownMenuVisibleState.value = true }) {
+                IconButton(onClick = {
+                    viewModel.isDropdownMenuVisibleState.value = true
+                    viewModel.pauseTimerState.value = true
+                }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(id = R.string.more_options),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                ShowStoryDropDownSection(viewModel, loggedInUserFirebaseId)
+                if (viewModel.isDropdownMenuVisibleState.value) {
+                    ShowStoryDropDownSection(viewModel, loggedInUserFirebaseId)
+                }
             }
         }
     }
@@ -437,49 +495,49 @@ private fun StoryTopSection(
 
 @Composable
 fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel, loggedInUserFirebaseId: String) {
-    val storyDropdownList =
-        listOf(stringResource(id = R.string.seen_list), stringResource(R.string.delete_story))
-
     var showDeleteStoryAlertDialog by remember {
         mutableStateOf(false)
     }
-
     val context = LocalContext.current
-    if (viewModel.isDropdownMenuVisibleState.value) {
-        DropdownMenu(
-            expanded = true,
-            onDismissRequest = { viewModel.isDropdownMenuVisibleState.value = false }
-        ) {
-            DropdownMenuItem(text = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = Icons.Default.RemoveRedEye,
-                        contentDescription = storyDropdownList[0]
-                    )
-                    SpacerWidth16()
-                    Text(text = storyDropdownList[0])
-                }
-            }, onClick = {
-                viewModel.getSeenList(
-                    viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue].storyFirebaseId,
-                    loggedInUserFirebaseId
-                )
-            })
-            DropdownMenuItem(text = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = storyDropdownList[1]
-                    )
-                    SpacerWidth16()
-                    Text(text = storyDropdownList[1])
-                }
-            }, onClick = {
-                showDeleteStoryAlertDialog = true
-            })
+    DropdownMenu(
+        expanded = true,
+        onDismissRequest = {
+            viewModel.isDropdownMenuVisibleState.value = false
+            viewModel.pauseTimerState.value = false
         }
+    ) {
+        DropdownMenuItem(text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Default.RemoveRedEye,
+                    contentDescription = stringResource(id = R.string.seen_list)
+                )
+                SpacerWidth16()
+                Text(text = stringResource(id = R.string.seen_list))
+            }
+        }, onClick = {
+            viewModel.getSeenList(
+                viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue].storyFirebaseId,
+                loggedInUserFirebaseId
+            )
+            viewModel.showStorySeenListBottomSheetState.value = true
+            viewModel.pauseTimerState.value = true
+            viewModel.isDropdownMenuVisibleState.value = false
+        })
+        DropdownMenuItem(text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.delete_story)
+                )
+                SpacerWidth16()
+                Text(text = stringResource(id = R.string.delete_story))
+            }
+        }, onClick = {
+            showDeleteStoryAlertDialog = true
+        })
     }
     if (showDeleteStoryAlertDialog) {
         TitleMessageIconOkCancelDialog(
@@ -491,11 +549,12 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel, loggedInUserFirebase
             onCancel = {
                 showDeleteStoryAlertDialog = false
                 viewModel.isDropdownMenuVisibleState.value = false
+                viewModel.pauseTimerState.value = false
             }) {
             showDeleteStoryAlertDialog = false
             viewModel.isDropdownMenuVisibleState.value = false
             if (context.isNetworkAvailable()) {
-                viewModel.deleteStory(viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue])
+                viewModel.deleteStory(viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue])
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -574,7 +633,6 @@ private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded:
     }
 }
 
-@SuppressLint("OpaqueUnitKey")
 @Composable
 private fun ShowStoryVideo(
     videoUrl: String,
@@ -649,46 +707,6 @@ fun LinearIndicator(
     )
 }
 
-@Composable
-fun HandleGetStoryState(viewModel: ShowStoryViewModel) {
-    val getSeenListState =
-        viewModel.getSeenListStateFlow.collectAsState().value
-    var isResponseHandled by remember {
-        mutableStateOf(false)
-    }
-    when (getSeenListState.status) {
-        RequestStatusEnum.Loading -> {
-            LoaderDialog(loadingText = stringResource(R.string.getting_viewers_list))
-            isResponseHandled = false
-        }
-
-        RequestStatusEnum.Exception -> {
-            if (!isResponseHandled) {
-                viewModel.snackBarMessageState.value =
-                    getSeenListState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
-                LoggingHelper.logData(
-                    LoggingLevelEnum.Error,
-                    ERROR_TAG,
-                    ScreenNameEnum.ShowStoryScreen.name,
-                    getSeenListState.message.toString()
-                )
-                isResponseHandled = true
-            }
-        }
-
-        RequestStatusEnum.Success -> {
-            if (!isResponseHandled) {
-                viewModel.showStorySeenListBottomSheetState.value = true
-                isResponseHandled = true
-            }
-        }
-
-        RequestStatusEnum.None -> {
-            // no need to handle this
-        }
-    }
-}
 
 @Composable
 fun HandleDeleteStoryState(viewModel: ShowStoryViewModel, navigator: DestinationsNavigator) {
@@ -714,12 +732,14 @@ fun HandleDeleteStoryState(viewModel: ShowStoryViewModel, navigator: Destination
                     ScreenNameEnum.ShowStoryScreen.name,
                     deleteStoryState.message.toString()
                 )
+                viewModel.pauseTimerState.value = false
                 isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
+                viewModel.pauseTimerState.value = false
                 if (deleteStoryState.data == true) {
                     navigator.popBackStack()
                 }

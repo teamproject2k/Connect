@@ -246,21 +246,23 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
         modifier = Modifier
             .offset {
                 IntOffset(
-                    viewModel.captionOffsetXState.roundToInt(),
-                    viewModel.captionOffsetYState.roundToInt()
+                    viewModel.captionOffsetXState.floatValue.roundToInt(),
+                    viewModel.captionOffsetYState.floatValue.roundToInt()
                 )
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
-                    viewModel.captionOffsetXState += dragAmount.x
-                    viewModel.captionOffsetYState += dragAmount.y
+                    viewModel.captionOffsetXState.floatValue += dragAmount.x
+                    viewModel.captionOffsetYState.floatValue += dragAmount.y
                 }
             }
             .onGloballyPositioned {
                 if (viewModel.isFirstTimePlaced) {
-                    viewModel.captionOffsetXState = ((screenWidth - it.size.width) / 2).toFloat()
-                    viewModel.captionOffsetYState = ((screenHeight - it.size.height) / 2).toFloat()
+                    viewModel.captionOffsetXState.floatValue =
+                        ((screenWidth - it.size.width) / 2).toFloat()
+                    viewModel.captionOffsetYState.floatValue =
+                        ((screenHeight - it.size.height) / 2).toFloat()
                     viewModel.isFirstTimePlaced = false
                 }
             },

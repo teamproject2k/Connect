@@ -11,11 +11,11 @@ data class StoryRemoteEntity(
     val textColor: String,
     val textOffset: String,
     val backgroundGradientColor: String,
-    val seenBy: List<StorySeenByRemoteEntity>,
+    val seenBy: ArrayList<StorySeenByRemoteEntity>,
     val videoLength: Long = 0,
     val whetherDeleted: Boolean = false
 ) {
-    constructor() : this("", "", "", 0, "", "", "", "", emptyList(), 0, false)
+    constructor() : this("", "", "", 0, "", "", "", "", arrayListOf(), 0, false)
 
     fun toStoryBean(storyId: String): StoryBean {
         return StoryBean(

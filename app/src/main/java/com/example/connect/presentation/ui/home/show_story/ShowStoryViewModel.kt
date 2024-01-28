@@ -46,14 +46,16 @@ class ShowStoryViewModel @Inject constructor(
 
     lateinit var allStoriesWithUsersList: ArrayList<StoriesWithUserBean>
     lateinit var currentStoryIndexState: MutableIntState
-    lateinit var currentUserStoriesIndexState: MutableIntState
+    lateinit var userStoriesIndexState: MutableIntState
+
+    val pauseTimerState = mutableStateOf(false)
 
     fun init(
         allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>,
         currentStoryIndex: Int
     ) {
         this.allStoriesWithUsersList = allBeanStoriesWithUsersList
-        this.currentUserStoriesIndexState = mutableIntStateOf(currentStoryIndex)
+        this.userStoriesIndexState = mutableIntStateOf(currentStoryIndex)
         this.currentStoryIndexState = mutableIntStateOf(0)
         areDetailsInitialized = true
     }
@@ -62,7 +64,8 @@ class ShowStoryViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _getSeenListStateFlow.value = ResponseState.loading()
-                val response = getSeenListFromRemoteUseCase(storyId, loggedInUserFirebaseId)
+                _getSeenListStateFlow.value =
+                    getSeenListFromRemoteUseCase(storyId, loggedInUserFirebaseId)
             }
         }
     }
@@ -76,7 +79,7 @@ class ShowStoryViewModel @Inject constructor(
                     deleteStoryFromLocalUseCase(story.storyFirebaseId)
                     withContext(Dispatchers.Main) {
                         val storyList =
-                            allStoriesWithUsersList[currentUserStoriesIndexState.intValue].storiesList
+                            allStoriesWithUsersList[userStoriesIndexState.intValue].storiesList
                         if (storyList.size == 1) {
                             _deleteStoryStateFlow.value = ResponseState.success(true)
                         } else {

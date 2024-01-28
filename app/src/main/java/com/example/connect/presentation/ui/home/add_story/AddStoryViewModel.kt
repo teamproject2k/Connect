@@ -1,10 +1,8 @@
 package com.example.connect.presentation.ui.home.add_story
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
@@ -23,7 +21,7 @@ import com.example.connect.presentation.utils.FunctionHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.internal.toHexString
@@ -40,7 +38,8 @@ class AddStoryViewModel @Inject constructor(
 
     private val _uploadStoryStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-    val uploadStoryStateFlow: StateFlow<ResponseState<Nothing>> get() = _uploadStoryStateFlow
+
+    val uploadStoryStateFlow = _uploadStoryStateFlow.asStateFlow()
 
     val captionTextState = mutableStateOf("")
     val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
@@ -51,8 +50,8 @@ class AddStoryViewModel @Inject constructor(
 
     var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
 
-    var captionOffsetXState by mutableFloatStateOf(0f)
-    var captionOffsetYState by mutableFloatStateOf(0f)
+    val captionOffsetXState = mutableFloatStateOf(0f)
+    val captionOffsetYState = mutableFloatStateOf(0f)
 
     lateinit var colorOnMediaState: MutableState<Color>
 
@@ -128,7 +127,8 @@ class AddStoryViewModel @Inject constructor(
                     }
 
                 // Create a comma separated string from the caption offset values
-                val captionOffset = "$captionOffsetXState,$captionOffsetYState"
+                val captionOffset =
+                    "${captionOffsetXState.floatValue},${captionOffsetYState.floatValue}"
 
                 val backgroundColorGradient =
                     if (selectedMediaState.value == null) storyBackgroundColorState.value else FunctionHelper.getDefaultBackgroundGradient()
