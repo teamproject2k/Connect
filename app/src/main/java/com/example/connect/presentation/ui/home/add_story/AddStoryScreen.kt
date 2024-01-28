@@ -106,7 +106,6 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                 viewModel.selectedMediaState.value =
                     MediaData(uri, mediaType)
             }
-
         }
     }
     val textColor = MaterialTheme.colorScheme.onPrimary
@@ -141,7 +140,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     }
     LaunchedEffect(key1 = viewModel.selectedMediaState.value) {
         if (viewModel.selectedMediaState.value == null) {
-            viewModel.colorOnMedia.value = textColor
+            viewModel.colorOnMediaState.value = textColor
         } else {
             val fileBitmap = FunctionHelper.uriToBitmap(
                 context.contentResolver,
@@ -151,7 +150,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                 Palette.from(fileBitmap).generate { palette ->
                     val vibrant = palette?.vibrantSwatch
                     if (vibrant != null) {
-                        viewModel.colorOnMedia.value = Color(vibrant.rgb)
+                        viewModel.colorOnMediaState.value = Color(vibrant.rgb)
                     }
                 }
             }
@@ -247,21 +246,21 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
         modifier = Modifier
             .offset {
                 IntOffset(
-                    viewModel.captionOffsetX.roundToInt(),
-                    viewModel.captionOffsetY.roundToInt()
+                    viewModel.captionOffsetXState.roundToInt(),
+                    viewModel.captionOffsetYState.roundToInt()
                 )
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
-                    viewModel.captionOffsetX += dragAmount.x
-                    viewModel.captionOffsetY += dragAmount.y
+                    viewModel.captionOffsetXState += dragAmount.x
+                    viewModel.captionOffsetYState += dragAmount.y
                 }
             }
             .onGloballyPositioned {
                 if (viewModel.isFirstTimePlaced) {
-                    viewModel.captionOffsetX = ((screenWidth - it.size.width) / 2).toFloat()
-                    viewModel.captionOffsetY = ((screenHeight - it.size.height) / 2).toFloat()
+                    viewModel.captionOffsetXState = ((screenWidth - it.size.width) / 2).toFloat()
+                    viewModel.captionOffsetYState = ((screenHeight - it.size.height) / 2).toFloat()
                     viewModel.isFirstTimePlaced = false
                 }
             },
@@ -270,7 +269,7 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
             Text(
                 text = stringResource(R.string.type_something),
                 fontSize = 18.sp,
-                color = viewModel.colorOnMedia.value,
+                color = viewModel.colorOnMediaState.value,
                 textAlign = TextAlign.Center
             )
         },
@@ -278,7 +277,7 @@ private fun StoryCaptionField(viewModel: AddStoryViewModel) {
             viewModel.captionTextState.value = updatedValue
         },
         textStyle = TextStyle.Default.copy(
-            color = viewModel.colorOnMedia.value,
+            color = viewModel.colorOnMediaState.value,
             fontSize = 18.sp
         )
     )
@@ -372,10 +371,10 @@ private fun BottomSection(
                     )
                     .clickable {
                         val currentColorIndex =
-                            viewModel.textColorList.indexOf(viewModel.colorOnMedia.value)
+                            viewModel.textColorList.indexOf(viewModel.colorOnMediaState.value)
                         val nextColorIndex =
                             (currentColorIndex + 1) % viewModel.textColorList.size
-                        viewModel.colorOnMedia.value =
+                        viewModel.colorOnMediaState.value =
                             viewModel.textColorList[nextColorIndex]
                     }
                     .padding(vertical = 6.dp, horizontal = 12.dp)
@@ -385,7 +384,7 @@ private fun BottomSection(
                         .size(24.dp)
                         .clip(CircleShape)
                         .border(1.5.dp, ColorsHelper.gray(), CircleShape)
-                        .background(viewModel.colorOnMedia.value)
+                        .background(viewModel.colorOnMediaState.value)
                 )
                 SpacerWidth8()
                 Icon(

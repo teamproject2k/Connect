@@ -1,6 +1,5 @@
 package com.example.connect.presentation.ui.home.add_story
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -12,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.story.AddStoryToLocalUseCase
 import com.example.connect.domain.useCase.story.AddStoryToRemoteUseCase
 import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
@@ -29,11 +29,11 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.toHexString
 import javax.inject.Inject
 
-@SuppressLint("StateNameRule")
 @HiltViewModel
 class AddStoryViewModel @Inject constructor(
     private val addStoryToRemoteUseCase: AddStoryToRemoteUseCase,
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
+    private val addStoryToLocalUseCase: AddStoryToLocalUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
@@ -51,10 +51,10 @@ class AddStoryViewModel @Inject constructor(
 
     var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
 
-    var captionOffsetX by mutableFloatStateOf(0f)
-    var captionOffsetY by mutableFloatStateOf(0f)
+    var captionOffsetXState by mutableFloatStateOf(0f)
+    var captionOffsetYState by mutableFloatStateOf(0f)
 
-    lateinit var colorOnMedia: MutableState<Color>
+    lateinit var colorOnMediaState: MutableState<Color>
 
     var isDataInitialized = false
 
@@ -62,7 +62,7 @@ class AddStoryViewModel @Inject constructor(
 
 
     fun initData(textColor: Color) {
-        this.colorOnMedia = mutableStateOf(textColor)
+        this.colorOnMediaState = mutableStateOf(textColor)
         isDataInitialized = true
     }
 
@@ -128,7 +128,7 @@ class AddStoryViewModel @Inject constructor(
                     }
 
                 // Create a comma separated string from the caption offset values
-                val captionOffset = "$captionOffsetX,$captionOffsetY"
+                val captionOffset = "$captionOffsetXState,$captionOffsetYState"
 
                 val backgroundColorGradient =
                     if (selectedMediaState.value == null) storyBackgroundColorState.value else FunctionHelper.getDefaultBackgroundGradient()
@@ -143,7 +143,7 @@ class AddStoryViewModel @Inject constructor(
                     captionTextState.value,
                     FunctionHelper.getCurrentTimeInMillis(),
                     storyType,
-                    colorOnMedia.value.toArgb().toHexString(),
+                    colorOnMediaState.value.toArgb().toHexString(),
                     captionOffset,
                     colorGradientString,
                     selectedMediaState.value?.mediaDuration ?: 0,
@@ -158,7 +158,7 @@ class AddStoryViewModel @Inject constructor(
                 if (serverResponse.status == RequestStatusEnum.Success) {
                     // Get the story ID from the response.
                     storyDetails.storyFirebaseId = serverResponse.data ?: ""
-
+                    addStoryToLocalUseCase(storyDetails)
                     // Set the upload story state to success.
                     _uploadStoryStateFlow.value = ResponseState.success(null)
                 } else {

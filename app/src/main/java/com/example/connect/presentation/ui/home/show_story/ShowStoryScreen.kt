@@ -86,6 +86,7 @@ import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.ConstantsHelper.ERROR_TAG
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.HomeNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -144,7 +145,7 @@ fun ShowStoryScreen(
             }
         }
     }
-    HandleDeleteStoryState(viewModel = viewModel)
+    HandleDeleteStoryState(viewModel = viewModel, navigator)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -178,11 +179,11 @@ fun StoryMainSection(
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
 ) {
-    val pageState = rememberPagerState(viewModel.currentUserStoriesIndex.intValue) {
-        viewModel.allBeanStoriesWithUsersList.size
+    val pageState = rememberPagerState(viewModel.currentUserStoriesIndexState.intValue) {
+        viewModel.allStoriesWithUsersList.size
     }
     HorizontalPager(state = pageState, modifier = Modifier.fillMaxSize()) { index ->
-        if (index !in 0..viewModel.allBeanStoriesWithUsersList.lastIndex) {
+        if (index !in 0..viewModel.allStoriesWithUsersList.lastIndex) {
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ERROR_TAG,
@@ -192,9 +193,10 @@ fun StoryMainSection(
             navigator.popBackStack()
             return@HorizontalPager
         }
-        viewModel.currentStoryIndex.intValue = 0
+        viewModel.currentUserStoriesIndexState.intValue = index
+        viewModel.currentStoryIndexState.intValue = 0
         val currentStoriesWithUser =
-            viewModel.allBeanStoriesWithUsersList[viewModel.currentUserStoriesIndex.value]
+            viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.value]
         UserStories(
             viewModel = viewModel,
             storyList = currentStoriesWithUser.storiesList,
@@ -227,7 +229,7 @@ fun UserStories(
         navigator.popBackStack()
         return
     }
-    val currentStory = storyList[viewModel.currentStoryIndex.intValue]
+    val currentStory = storyList[viewModel.currentStoryIndexState.intValue]
     var pauseTimer by remember {
         mutableStateOf(false)
     }
@@ -244,10 +246,10 @@ fun UserStories(
                 if (tapLocationY > screenHeight * 0.4f) {
                     val screenSplitCoordinates = screenWidth.toFloat() / 3
                     if (tapLocationX in 0.0f..screenSplitCoordinates && it.action == MotionEvent.ACTION_DOWN) {
-                        if (viewModel.currentStoryIndex.intValue > 0) {
-                            viewModel.currentStoryIndex.intValue--
+                        if (viewModel.currentStoryIndexState.intValue > 0) {
+                            viewModel.currentStoryIndexState.intValue--
                         } else {
-                            viewModel.currentStoryIndex.intValue = 0
+                            viewModel.currentStoryIndexState.intValue = 0
                         }
                     } else if (tapLocationX in screenSplitCoordinates..2 * screenSplitCoordinates) {
                         when (it.action) {
@@ -260,10 +262,10 @@ fun UserStories(
                             }
                         }
                     } else if (it.action == MotionEvent.ACTION_DOWN) {
-                        if (viewModel.currentStoryIndex.intValue < storyList.lastIndex) {
-                            viewModel.currentStoryIndex.intValue++
+                        if (viewModel.currentStoryIndexState.intValue < storyList.lastIndex) {
+                            viewModel.currentStoryIndexState.intValue++
                         } else {
-                            viewModel.currentStoryIndex.intValue = storyList.lastIndex
+                            viewModel.currentStoryIndexState.intValue = storyList.lastIndex
                         }
                     }
                     true
@@ -280,14 +282,14 @@ fun UserStories(
             for (index in 0 until storyList.size) {
                 LinearIndicator(
                     modifier = Modifier.weight(1f),
-                    currentPageIndex = viewModel.currentStoryIndex.intValue,
+                    currentPageIndex = viewModel.currentStoryIndexState.intValue,
                     progressBarIndex = index,
-                    startProgress = index == viewModel.currentStoryIndex.intValue && isMediaLoaded,
+                    startProgress = index == viewModel.currentStoryIndexState.intValue && isMediaLoaded,
                     onPauseTimer = pauseTimer,
                     progressMaxTime = if (currentStory.mediaType == MediaTypeEnum.Video.name || currentStory.mediaType == MediaTypeEnum.TextVideo.name) currentStory.videoLength else ConstantsHelper.STORY_PROGRESS_MAX_TIME
                 ) {
-                    if (viewModel.currentStoryIndex.intValue < storyList.lastIndex) {
-                        viewModel.currentStoryIndex.intValue++
+                    if (viewModel.currentStoryIndexState.intValue < storyList.lastIndex) {
+                        viewModel.currentStoryIndexState.intValue++
                     }
                 }
                 SpacerWidth6()
@@ -417,6 +419,7 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
         mutableStateOf(false)
     }
 
+    val context = LocalContext.current
     if (viewModel.isDropdownMenuVisibleState.value) {
         DropdownMenu(
             expanded = true,
@@ -461,9 +464,14 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
                 showDeleteStoryAlertDialog = false
                 viewModel.isDropdownMenuVisibleState.value = false
             }) {
-            viewModel.deleteStory(storyId = viewModel.allBeanStoriesWithUsersList[viewModel.currentUserStoriesIndex.intValue].storiesList[viewModel.currentStoryIndex.intValue].storyFirebaseId)
             showDeleteStoryAlertDialog = false
             viewModel.isDropdownMenuVisibleState.value = false
+            if (context.isNetworkAvailable()) {
+                viewModel.deleteStory(viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue])
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+            }
         }
     }
 }
@@ -559,7 +567,6 @@ private fun ShowStoryVideo(
                     onMediaLoaded()
                 }
             }) { _, _ ->
-
         }
     }
 }
@@ -615,7 +622,7 @@ fun LinearIndicator(
 }
 
 @Composable
-fun HandleDeleteStoryState(viewModel: ShowStoryViewModel) {
+fun HandleDeleteStoryState(viewModel: ShowStoryViewModel, navigator: DestinationsNavigator) {
     val deleteStoryState =
         viewModel.deleteStoryStateFlow.collectAsState().value
     var isResponseHandled by remember {
@@ -644,6 +651,9 @@ fun HandleDeleteStoryState(viewModel: ShowStoryViewModel) {
 
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
+                if (deleteStoryState.data == true) {
+                    navigator.popBackStack()
+                }
                 isResponseHandled = true
             }
         }
