@@ -10,14 +10,16 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.posts.AddLikeOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.AddPostListToLocalUseCase
+import com.example.connect.domain.useCase.posts.DeleteAllPostFromLocalUseCase
 import com.example.connect.domain.useCase.posts.DeletePostFromLocalUseCase
+import com.example.connect.domain.useCase.posts.GetPostDetailsWithUserDetailsFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.GetSavedPostDetailsWithUserFromLocalUseCase
-import com.example.connect.domain.useCase.posts.GetSavedPostsWithUsersFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.RemoveLikeOfPostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.SavePostOnRemoteUseCase
 import com.example.connect.domain.useCase.posts.UnSavePostFromRemoteUseCase
 import com.example.connect.domain.useCase.posts.UpdatePostDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
+import com.example.connect.domain.useCase.user.DeleteAllUsersExceptInListFromLocalUseCase
 import com.example.connect.domain.useCase.user.UpdateUserOnLocalUseCase
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseViewModel
@@ -32,7 +34,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SavedPostsViewModel @Inject constructor(
-    private val getSavedPostsWithUsersFromRemoteUseCase: GetSavedPostsWithUsersFromRemoteUseCase,
+    private val postDetailsWithUserDetailsUseCase: GetPostDetailsWithUserDetailsFromRemoteUseCase,
     private val addLikeOnRemoteUseCase: AddLikeOnRemoteUseCase,
     private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
     private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
@@ -42,8 +44,11 @@ class SavedPostsViewModel @Inject constructor(
     private val addPostListToLocalUseCase: AddPostListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
-    private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase
-) : BaseViewModel() {
+    private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
+    private val deleteAllUsersExceptInListFromLocalUseCase: DeleteAllUsersExceptInListFromLocalUseCase,
+    private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase,
+
+    ) : BaseViewModel() {
 
     private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
         MutableStateFlow(ResponseState.none())
@@ -76,14 +81,14 @@ class SavedPostsViewModel @Inject constructor(
                     delay(500)
                     _getSavedPostsWithUsersStateFlow.value = ResponseState.success(emptyList())
                 } else {
-                    val savedPostResponse = getSavedPostsWithUsersFromRemoteUseCase(
-                        loggedInUserFirebaseId,
-                        savedPosts
-                    )
-                    if (savedPostResponse.status == RequestStatusEnum.Success) {
-                        val postList = savedPostResponse.data?.map { it.postDetail }
-                        val userList = savedPostResponse.data?.map { it.userDetail }
+                    val postListWithUserDetailsResponse =
+                        postDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
+                    if (postListWithUserDetailsResponse.status == RequestStatusEnum.Success) {
+                        val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
+                        val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
                         if (postList != null && userList != null) {
+                            deleteAllUsersExceptInListFromLocalUseCase(listOf(loggedInUserFirebaseId))
+                            deleteAllPostsFromLocal()
                             val addPostToLocalResult =
                                 addPostListToLocalUseCase(postList)
                             if (addPostToLocalResult.size == postList.size) {
@@ -106,7 +111,7 @@ class SavedPostsViewModel @Inject constructor(
                         }
                     } else {
                         _getSavedPostsWithUsersStateFlow.value =
-                            ResponseState.error(savedPostResponse.message ?: "")
+                            ResponseState.error(postListWithUserDetailsResponse.message ?: "")
                     }
                 }
             }
