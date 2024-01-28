@@ -53,24 +53,20 @@ class IPostRepositoryImpl @Inject constructor(
         loggedInUserFirebaseId: String
     ): ResponseState<List<PostBean>> {
         // Get the post details from the server.
-        val postList = arrayListOf<PostBean>()
         try {
             if (userFirebaseId == loggedInUserFirebaseId) {
                 val postListDocument = fireStore.collection(FirebaseConstants.POST_KEY)
                     .whereEqualTo(PostRemoteEntity::createdByUserFirebaseId.name, userFirebaseId)
+                    .whereEqualTo(PostRemoteEntity::whetherDeleted.name, false)
                     .get()
                     .await()
                 val loggedInUserPostList = arrayListOf<PostBean>()
                 postListDocument.forEach { postDocument ->
-                    if (postDocument != null && postDocument.exists()) {
-                        val postBean = postDocument.toObject(PostRemoteEntity::class.java)
-                            .toPostBean(postDocument.id)
-                        if (!postBean.whetherDeleted) {
-                            loggedInUserPostList.add(postBean)
-                        }
-                    }
+                    val postBean = postDocument.toObject(PostRemoteEntity::class.java)
+                    loggedInUserPostList.add(postBean.toPostBean(postDocument.id))
                 }
-                return ResponseState.success(postList)
+                loggedInUserPostList.sortByDescending { it.createdAt }
+                return ResponseState.success(loggedInUserPostList)
             } else {
                 val loggedInUserAndOtherUserDocument =
                     fireStore.collection(FirebaseConstants.USER_KEY).whereIn(
@@ -87,21 +83,30 @@ class IPostRepositoryImpl @Inject constructor(
                             PostRemoteEntity::createdByUserFirebaseId.name,
                             userFirebaseId
                         )
+                        .whereEqualTo(PostRemoteEntity::whetherDeleted.name, false)
                         .get()
                         .await()
-                    postListDocument.forEach { postDocument ->
-                        if (postDocument != null && postDocument.exists()) {
+                    val loggedInUser =
+                        loggedInUserAndOtherUserDocument.find { it.firebaseUserId == loggedInUserFirebaseId }
+                    val otherUser =
+                        loggedInUserAndOtherUserDocument.find { it.firebaseUserId == userFirebaseId }
+                    if (loggedInUser != null && otherUser != null) {
+                        postListDocument.forEach { postDocument ->
                             val postBean = postDocument.toObject(PostRemoteEntity::class.java)
                                 .toPostBean(postDocument.id)
                             if (
-                                !postBean.whetherDeleted &&
-                                loggedInUserAndOtherUserDocument[0].otherUsersStatus[loggedInUserAndOtherUserDocument[1].firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name &&
-                                loggedInUserAndOtherUserDocument[1].otherUsersStatus[loggedInUserAndOtherUserDocument[0].firebaseUserId] != StatusWithCurrentUserRemoteEnum.Blocked.name
+                                loggedInUser.otherUsersStatus[userFirebaseId] != StatusWithCurrentUserRemoteEnum.Blocked.name
+                                && otherUser.otherUsersStatus[loggedInUserFirebaseId] != StatusWithCurrentUserRemoteEnum.Blocked.name
                             ) {
-                                otherUserPostList.add(postBean)
+                                val whetherShowPostToCurrentUser =
+                                    postBean.postVisibilityScope == VisibilityScopeEnum.Public.name || otherUser.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name
+                                if (whetherShowPostToCurrentUser) {
+                                    otherUserPostList.add(postBean)
+                                }
                             }
                         }
                     }
+                    otherUserPostList.sortByDescending { it.createdAt }
                     return ResponseState.success(otherUserPostList)
                 } else {
                     return ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
