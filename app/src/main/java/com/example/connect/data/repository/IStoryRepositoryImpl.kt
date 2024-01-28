@@ -7,7 +7,7 @@ import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
-import com.example.connect.domain.models.StorySeenListWithUserDetailsBean
+import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IStoryRepository
@@ -138,12 +138,12 @@ class IStoryRepositoryImpl @Inject constructor(
     override suspend fun getSeenListFromRemote(
         storyId: String,
         loggedInUserFirebaseId: String
-    ): ResponseState<ArrayList<StorySeenListWithUserDetailsBean>> {
+    ): ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>> {
         return try {
             val storyDocument =
                 fireStore.collection(FirebaseConstants.STORY_KEY).document(storyId).get().await()
             val story = storyDocument.toObject(StoryRemoteEntity::class.java)
-            val seenList = arrayListOf<StorySeenListWithUserDetailsBean>()
+            val seenList = arrayListOf<StorySeenTimeWithUserDetailsBean>()
             if (story != null && story.seenBy.isNotEmpty() && !story.whetherDeleted) {
                 val seenUserListDocument = fireStore.collection(FirebaseConstants.USER_KEY).whereIn(
                     UserRemoteEntity::firebaseUserId.name,
@@ -153,7 +153,7 @@ class IStoryRepositoryImpl @Inject constructor(
                     val seenTime =
                         story.seenBy.find { it.seenUserId == user.firebaseUserId }?.seenTime
                     if (seenTime != null && user.otherUsersStatus[loggedInUserFirebaseId] == StatusWithCurrentUserRemoteEnum.Friends.name) {
-                        seenList.add(StorySeenListWithUserDetailsBean(user.toUserBean(), seenTime))
+                        seenList.add(StorySeenTimeWithUserDetailsBean(user.toUserBean(), seenTime))
                     }
                 }
             }

@@ -70,6 +70,7 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
+import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
@@ -78,6 +79,7 @@ import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
+import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.example.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -108,10 +110,6 @@ fun ShowStoryScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
 
-    var showStorySeenListBottomSheet by remember {
-        mutableStateOf(false)
-    }
-
     if (!viewModel.areDetailsInitialized) {
         viewModel.init(allBeanStoriesWithUsersList, currentStoryIndex)
     }
@@ -128,9 +126,9 @@ fun ShowStoryScreen(
                 loggedInUserFirebaseId
             )
         }
-        if (showStorySeenListBottomSheet) {
+        if (viewModel.showStorySeenListBottomSheetState.value) {
             ModalBottomSheet(
-                onDismissRequest = { showStorySeenListBottomSheet = false },
+                onDismissRequest = { viewModel.showStorySeenListBottomSheetState.value = false },
                 shape = RoundedCornerShape(
                     topEnd = ConstantsHelper.BottomSheetRoundness,
                     topStart = ConstantsHelper.BottomSheetRoundness
@@ -140,11 +138,12 @@ fun ShowStoryScreen(
                     modifier = Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
                     viewModel = viewModel
                 ) {
-                    showStorySeenListBottomSheet = false
+                    viewModel.showStorySeenListBottomSheetState.value = false
                 }
             }
         }
     }
+    HandleGetStoryState(viewModel)
     HandleDeleteStoryState(viewModel = viewModel, navigator)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
@@ -163,12 +162,38 @@ fun ShowStoryBottomSheet(
     onDismissRequest: () -> Unit
 ) {
     Column(modifier = modifier) {
-//        viewModel.postVisibilityScopeList.forEach { postScope ->
-//            VisibilityScopeBottomSheetItem(postScope) {
-//                viewModel.updatePostVisibility(postScope)
-//                onDismissRequest()
-//            }
-//        }
+        viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList.forEach { postScope ->
+           // StorySeenListItem()
+            onDismissRequest()
+        }
+    }
+}
+
+@Composable
+fun StorySeenListItem(storySeenTimeWithUserDetailsBean: StorySeenTimeWithUserDetailsBean) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        AsyncImage(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .border(1.dp, ColorsHelper.gray(), CircleShape),
+            model = storySeenTimeWithUserDetailsBean.seenBy.profilePhoto,
+            contentDescription = storySeenTimeWithUserDetailsBean.seenBy.name,
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = R.drawable.ic_default_user)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp),
+        ) {
+            TextBold16(text = storySeenTimeWithUserDetailsBean.seenBy.name)
+            Text(
+                text = storySeenTimeWithUserDetailsBean.seenAt.toString(),
+                fontSize = 13.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
     }
 }
 
@@ -404,14 +429,14 @@ private fun StoryTopSection(
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                ShowStoryDropDownSection(viewModel)
+                ShowStoryDropDownSection(viewModel, loggedInUserFirebaseId)
             }
         }
     }
 }
 
 @Composable
-fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
+fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel, loggedInUserFirebaseId: String) {
     val storyDropdownList =
         listOf(stringResource(id = R.string.seen_list), stringResource(R.string.delete_story))
 
@@ -436,7 +461,10 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
                     Text(text = storyDropdownList[0])
                 }
             }, onClick = {
-
+                viewModel.getSeenList(
+                    viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue].storyFirebaseId,
+                    loggedInUserFirebaseId
+                )
             })
             DropdownMenuItem(text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -619,6 +647,47 @@ fun LinearIndicator(
             .clip(RoundedCornerShape(12.dp)),
         progress = progress
     )
+}
+
+@Composable
+fun HandleGetStoryState(viewModel: ShowStoryViewModel) {
+    val getSeenListState =
+        viewModel.getSeenListStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getSeenListState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(loadingText = stringResource(R.string.getting_viewers_list))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    getSeenListState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ERROR_TAG,
+                    ScreenNameEnum.ShowStoryScreen.name,
+                    getSeenListState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                viewModel.showStorySeenListBottomSheetState.value = true
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
+        }
+    }
 }
 
 @Composable

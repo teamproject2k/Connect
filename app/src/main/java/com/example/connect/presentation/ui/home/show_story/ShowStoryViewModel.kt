@@ -6,10 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
+import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.story.DeleteStoryFromLocalUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
+import com.example.connect.domain.useCase.story.GetSeenListFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,9 +24,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ShowStoryViewModel @Inject constructor(
     private val deleteStoryInRemoteUseCase: DeleteStoryInRemoteUseCase,
-    private val deleteStoryFromLocalUseCase: DeleteStoryFromLocalUseCase
+    private val deleteStoryFromLocalUseCase: DeleteStoryFromLocalUseCase,
+    private val getSeenListFromRemoteUseCase: GetSeenListFromRemoteUseCase
 ) :
     BaseViewModel() {
+
+    private val _getSeenListStateFlow: MutableStateFlow<ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>>> =
+        MutableStateFlow(ResponseState.none())
+    val getSeenListStateFlow = _getSeenListStateFlow.asStateFlow()
 
     private val _deleteStoryStateFlow: MutableStateFlow<ResponseState<Boolean>> =
         MutableStateFlow(ResponseState.none())
@@ -32,6 +39,8 @@ class ShowStoryViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
     var areDetailsInitialized = false
+
+    var showStorySeenListBottomSheetState = mutableStateOf(false)
 
     val isDropdownMenuVisibleState = mutableStateOf(false)
 
@@ -47,6 +56,15 @@ class ShowStoryViewModel @Inject constructor(
         this.currentUserStoriesIndexState = mutableIntStateOf(currentStoryIndex)
         this.currentStoryIndexState = mutableIntStateOf(0)
         areDetailsInitialized = true
+    }
+
+    fun getSeenList(storyId: String, loggedInUserFirebaseId: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _getSeenListStateFlow.value = ResponseState.loading()
+                val response = getSeenListFromRemoteUseCase(storyId, loggedInUserFirebaseId)
+            }
+        }
     }
 
     fun deleteStory(story: StoryBean) {
