@@ -1,7 +1,7 @@
 package com.example.connect.domain.models
 
 import android.os.Parcelable
-import com.example.connect.data.models.post.PostDbEntity
+import com.example.connect.data.models.post.PostLocalEntity
 import com.example.connect.data.models.post.PostRemoteEntity
 import kotlinx.parcelize.Parcelize
 
@@ -33,8 +33,8 @@ data class PostBean(
         )
     }
 
-    fun toPostDbEntity(): PostDbEntity {
-        return PostDbEntity(
+    fun toPostDbEntity(): PostLocalEntity {
+        return PostLocalEntity(
             postFirebaseId,
             createdByUserFirebaseId,
             mediaUrl,

@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.models.PostWithUserDetails
+import com.example.connect.domain.models.PostWithUserDetailsBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -50,7 +50,7 @@ class SavedPostsViewModel @Inject constructor(
 
     ) : BaseViewModel() {
 
-    private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
+    private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
 
     val getSavedPostsWithUsersStateFlow = _getSavedPostsWithUsersStateFlow.asStateFlow()
@@ -67,7 +67,7 @@ class SavedPostsViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetails>()
+    var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetailsBean>()
 
     fun getSavedPosts(
         loggedInUserFirebaseId: String,

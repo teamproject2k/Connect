@@ -4,13 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.connect.data.models.story.StoryDbEntity
+import com.example.connect.data.models.story.StoryLocalEntity
 
 @Dao
 interface IStoryDao {
 
     @Query("SELECT * FROM STORIES WHERE whetherDeleted =0")
-    fun getAllStories(): List<StoryDbEntity>
+    fun getAllStories(): List<StoryLocalEntity>
 
     @Query("DELETE FROM stories")
     fun deleteAllStories(): Int
@@ -19,9 +19,9 @@ interface IStoryDao {
     fun deleteStory(storyFirebaseId: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAllStories(storiesList: List<StoryDbEntity>): LongArray
+    fun insertAllStories(storiesList: List<StoryLocalEntity>): LongArray
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertStory(storyDbEntity: StoryDbEntity): Long
+    fun insertStory(storyLocalEntity: StoryLocalEntity): Long
 
 }

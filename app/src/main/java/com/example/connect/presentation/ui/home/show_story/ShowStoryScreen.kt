@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,11 +68,13 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.models.StoriesWithUser
+import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.GetPlayerView
+import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.common.TextBold14
@@ -96,7 +99,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShowStoryScreen(
     navigator: DestinationsNavigator,
-    allStoriesWithUsersList: ArrayList<StoriesWithUser>,
+    allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>,
     currentStoryIndex: Int,
     loggedInUserFirebaseId: String
 ) {
@@ -109,7 +112,7 @@ fun ShowStoryScreen(
     }
 
     if (!viewModel.areDetailsInitialized) {
-        viewModel.init(allStoriesWithUsersList, currentStoryIndex)
+        viewModel.init(allBeanStoriesWithUsersList, currentStoryIndex)
     }
 
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
@@ -141,6 +144,7 @@ fun ShowStoryScreen(
             }
         }
     }
+    HandleDeleteStoryState(viewModel = viewModel)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -175,10 +179,10 @@ fun StoryMainSection(
     loggedInUserFirebaseId: String
 ) {
     val pageState = rememberPagerState(viewModel.currentUserStoriesIndex.intValue) {
-        viewModel.allStoriesWithUsersList.size
+        viewModel.allBeanStoriesWithUsersList.size
     }
     HorizontalPager(state = pageState, modifier = Modifier.fillMaxSize()) { index ->
-        if (index !in 0..viewModel.allStoriesWithUsersList.lastIndex) {
+        if (index !in 0..viewModel.allBeanStoriesWithUsersList.lastIndex) {
             LoggingHelper.logData(
                 LoggingLevelEnum.Error,
                 ERROR_TAG,
@@ -190,7 +194,7 @@ fun StoryMainSection(
         }
         viewModel.currentStoryIndex.intValue = 0
         val currentStoriesWithUser =
-            viewModel.allStoriesWithUsersList[viewModel.currentUserStoriesIndex.value]
+            viewModel.allBeanStoriesWithUsersList[viewModel.currentUserStoriesIndex.value]
         UserStories(
             viewModel = viewModel,
             storyList = currentStoriesWithUser.storiesList,
@@ -406,10 +410,10 @@ private fun StoryTopSection(
 
 @Composable
 fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
-    val postDetailsDropdownList =
-        listOf(stringResource(id = R.string.seen_list), stringResource(R.string.delete_post))
+    val storyDropdownList =
+        listOf(stringResource(id = R.string.seen_list), stringResource(R.string.delete_story))
 
-    var showDeletePostAlertDialog by remember {
+    var showDeleteStoryAlertDialog by remember {
         mutableStateOf(false)
     }
 
@@ -423,10 +427,10 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.Default.RemoveRedEye,
-                        contentDescription = postDetailsDropdownList[0]
+                        contentDescription = storyDropdownList[0]
                     )
                     SpacerWidth16()
-                    Text(text = postDetailsDropdownList[0])
+                    Text(text = storyDropdownList[0])
                 }
             }, onClick = {
 
@@ -436,17 +440,17 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.Default.Delete,
-                        contentDescription = postDetailsDropdownList[1]
+                        contentDescription = storyDropdownList[1]
                     )
                     SpacerWidth16()
-                    Text(text = postDetailsDropdownList[1])
+                    Text(text = storyDropdownList[1])
                 }
             }, onClick = {
-                showDeletePostAlertDialog = true
+                showDeleteStoryAlertDialog = true
             })
         }
     }
-    if (showDeletePostAlertDialog) {
+    if (showDeleteStoryAlertDialog) {
         TitleMessageIconOkCancelDialog(
             imageVector = Icons.Default.Warning,
             iconTint = ColorsHelper.warning(),
@@ -454,11 +458,11 @@ fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel) {
             subTitle = stringResource(R.string.are_you_sure_you_want_to_delete_this_story),
             positiveButtonText = stringResource(R.string.delete),
             onCancel = {
-                showDeletePostAlertDialog = false
+                showDeleteStoryAlertDialog = false
                 viewModel.isDropdownMenuVisibleState.value = false
             }) {
-            viewModel.deleteStory(storyId = "")
-            showDeletePostAlertDialog = false
+            viewModel.deleteStory(storyId = viewModel.allBeanStoriesWithUsersList[viewModel.currentUserStoriesIndex.intValue].storiesList[viewModel.currentStoryIndex.intValue].storyFirebaseId)
+            showDeleteStoryAlertDialog = false
             viewModel.isDropdownMenuVisibleState.value = false
         }
     }
@@ -542,7 +546,6 @@ private fun ShowStoryVideo(
     context: Context,
     onMediaLoaded: () -> Unit
 ) {
-
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         GetPlayerView(
             context = context,
@@ -559,9 +562,7 @@ private fun ShowStoryVideo(
 
         }
     }
-
 }
-
 
 @Composable
 fun LinearIndicator(
@@ -611,4 +612,44 @@ fun LinearIndicator(
             .clip(RoundedCornerShape(12.dp)),
         progress = progress
     )
+}
+
+@Composable
+fun HandleDeleteStoryState(viewModel: ShowStoryViewModel) {
+    val deleteStoryState =
+        viewModel.deleteStoryStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (deleteStoryState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(loadingText = stringResource(id = R.string.deleting_story))
+            isResponseHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                viewModel.snackBarMessageState.value =
+                    deleteStoryState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ERROR_TAG,
+                    ScreenNameEnum.ShowStoryScreen.name,
+                    deleteStoryState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // no need to handle this
+        }
+    }
 }

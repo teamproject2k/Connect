@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.CommentBean
-import com.example.connect.domain.models.CommentWithUser
+import com.example.connect.domain.models.CommentWithUserBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -65,7 +65,7 @@ class PostDetailsViewModel @Inject constructor(
 
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
-    var commentDataMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
+    var commentDataMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
 
 
     val snackBarMessageState = mutableStateOf("")
@@ -299,20 +299,20 @@ class PostDetailsViewModel @Inject constructor(
                         updatePostDetailsOnLocalUseCase(post)
                         if (comment.parentCommentId == null) {
                             val updatedMap =
-                                mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
-                            updatedMap[CommentWithUser(comment, loggedInUser)] = arrayListOf()
+                                mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
+                            updatedMap[CommentWithUserBean(comment, loggedInUser)] = arrayListOf()
                             updatedMap.putAll(commentDataMap)
                             commentDataMap = updatedMap
                         } else {
                             val parent =
                                 commentDataMap.keys.find { it.comment.commentFirebaseId == comment.parentCommentId }
                             if (parent != null) {
-                                val updatedChildList = arrayListOf<CommentWithUser>()
+                                val updatedChildList = arrayListOf<CommentWithUserBean>()
                                 val currentChildList = commentDataMap[parent]
                                 if (currentChildList != null) {
                                     updatedChildList.addAll(currentChildList)
                                     updatedChildList.add(
-                                        CommentWithUser(
+                                        CommentWithUserBean(
                                             comment,
                                             loggedInUser,
                                             repliedCommentPosterConnectIdState.value

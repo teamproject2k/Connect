@@ -68,7 +68,7 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.models.CommentWithUser
+import com.example.connect.domain.models.CommentWithUserBean
 import com.example.connect.domain.models.PostBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -637,22 +637,22 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
 @Composable
 fun ParentChildCommentItem(
     viewModel: PostDetailsViewModel,
-    parentCommentWithUser: CommentWithUser,
-    childCommentList: List<CommentWithUser>,
+    parentCommentWithUserBean: CommentWithUserBean,
+    childCommentList: List<CommentWithUserBean>,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator,
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         CommentItem(
-            parentCommentWithUser,
+            parentCommentWithUserBean,
             viewModel = viewModel,
             loggedInUserFirebaseId = loggedInUserFirebaseId,
             navigator = navigator
         ) {
             if (context.isNetworkAvailable()) {
                 val deleteCount = childCommentList.count { !it.comment.whetherDeleted } + 1
-                viewModel.deleteComment(parentCommentWithUser.comment, deleteCount)
+                viewModel.deleteComment(parentCommentWithUserBean.comment, deleteCount)
             } else {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.no_internet_connection)
@@ -729,7 +729,7 @@ fun CommentItemLoading() {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommentItem(
-    commentWithCommentPoster: CommentWithUser,
+    commentWithCommentPoster: CommentWithUserBean,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String,

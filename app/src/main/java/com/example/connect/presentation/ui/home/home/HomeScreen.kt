@@ -61,7 +61,7 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.models.StoriesWithUser
+import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -164,16 +164,18 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            HandleStoryDetailsWithUserDetails(
-                viewModel = viewModel,
-                homeSharedViewModel.usersDetails,
-                navigator
-            )
-            HandlePostDetailsWithUserDetails(
-                viewModel = viewModel,
-                homeSharedViewModel.usersDetails,
-                navigator
-            )
+            Column(modifier = Modifier.fillMaxSize()) {
+                HandleStoryDetailsWithUserDetails(
+                    viewModel = viewModel,
+                    homeSharedViewModel.usersDetails,
+                    navigator
+                )
+                HandlePostDetailsWithUserDetails(
+                    viewModel = viewModel,
+                    homeSharedViewModel.usersDetails,
+                    navigator
+                )
+            }
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
@@ -225,7 +227,7 @@ private fun HandleStoryDetailsWithUserDetails(
 
         RequestStatusEnum.Success -> {
             StoryUiSection(
-                allStoriesWithUserList = storyDetailsWithUserDetailsState.data,
+                allStoriesWithUserBeanList = storyDetailsWithUserDetailsState.data,
                 loggedInUserFirebaseId = currentUsersBean.firebaseUserId,
                 navigator = navigator
             )
@@ -255,11 +257,11 @@ private fun HandleStoryDetailsWithUserDetails(
 
 @Composable
 private fun StoryUiSection(
-    allStoriesWithUserList: ArrayList<StoriesWithUser>?,
+    allStoriesWithUserBeanList: ArrayList<StoriesWithUserBean>?,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {
-    if (allStoriesWithUserList.isNullOrEmpty()) return
+    if (allStoriesWithUserBeanList.isNullOrEmpty()) return
     Column(
         modifier = Modifier
             .padding(start = 12.dp)
@@ -271,10 +273,10 @@ private fun StoryUiSection(
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            itemsIndexed(allStoriesWithUserList) { index, storiesWithUser ->
+            itemsIndexed(allStoriesWithUserBeanList) { index, storiesWithUser ->
                 StoryItem(
                     index,
-                    allStoriesWithUserList,
+                    allStoriesWithUserBeanList,
                     loggedInUserFirebaseId,
                     navigator
                 )
@@ -313,7 +315,7 @@ fun StoryLoaderItem() {
 @Composable
 private fun StoryItem(
     currentStoryIndex: Int,
-    allStoriesList: ArrayList<StoriesWithUser>,
+    allStoriesList: ArrayList<StoriesWithUserBean>,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
 ) {

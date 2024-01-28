@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.example.connect.domain.models.StoryBean
 
 @Entity(tableName = "stories")
-data class StoryDbEntity(
+data class StoryLocalEntity(
     @PrimaryKey
     var storyFirebaseId: String,
     val createdByUserFirebaseId: String,

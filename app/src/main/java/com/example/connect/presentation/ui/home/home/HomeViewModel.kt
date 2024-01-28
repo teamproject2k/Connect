@@ -4,8 +4,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.models.PostWithUserDetails
-import com.example.connect.domain.models.StoriesWithUser
+import com.example.connect.domain.models.PostWithUserDetailsBean
+import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -58,12 +58,12 @@ class HomeViewModel @Inject constructor(
     private val deleteAllStoriesFromLocalUseCase: DeleteAllStoriesFromLocalUseCase
 ) : BaseViewModel() {
 
-    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetails>>> =
+    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
 
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
-    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<ArrayList<StoriesWithUser>>> =
+    private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<ArrayList<StoriesWithUserBean>>> =
         MutableStateFlow(ResponseState.none())
 
     val storyDetailsStateFlow = _storyDetailsStateFlow.asStateFlow()
@@ -85,8 +85,7 @@ class HomeViewModel @Inject constructor(
 
     private var isStoryListFetchedFromRemote: Boolean = false
 
-    val postListWithUsersState = mutableStateListOf<PostWithUserDetails>()
-
+    val postListWithUsersState = mutableStateListOf<PostWithUserDetailsBean>()
 
     fun getStoryDetailsWithUserDetails(
         loggedInUserFirebaseId: String,

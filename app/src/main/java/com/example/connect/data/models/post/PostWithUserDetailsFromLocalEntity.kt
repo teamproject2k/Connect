@@ -6,7 +6,7 @@ import com.example.connect.data.models.user.UsersDbEntity
 
 data class PostWithUserDetailsFromLocalEntity(
     @Embedded
-    val postDetail: PostDbEntity,
+    val postDetail: PostLocalEntity,
 
     @Relation(
         parentColumn = "createdByUserFirebaseId",

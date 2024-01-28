@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.story
 
-import com.example.connect.domain.models.StoriesWithUser
+import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.repository.IStoryRepository
 import com.example.connect.domain.repository.IUserRepository
@@ -10,12 +10,12 @@ class GetAllStoriesWithUserFromLocalUseCase @Inject constructor(
     private val storyRepository: IStoryRepository,
     private val userRepository: IUserRepository
 ) {
-    suspend operator fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUser> {
+    suspend operator fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUserBean> {
         val storiesList =
             storyRepository.getAllStoriesFromLocal().sortedByDescending { it.createdAt }
         val userIdList = storiesList.map { it.createdByUserFirebaseId }.toSet().toMutableList()
         val usersList = userRepository.getAllUsersFromIdsFromLocal(userIdList)
-        val storiesWithUsersList = arrayListOf<StoriesWithUser>()
+        val storiesWithUsersListBean = arrayListOf<StoriesWithUserBean>()
         val storiesIdToStoryListMap = mutableMapOf<String, ArrayList<StoryBean>>()
         // to show logged in user stories at first place
         if (userIdList.contains(loggedInUserFirebaseId)) {
@@ -31,12 +31,12 @@ class GetAllStoriesWithUserFromLocalUseCase @Inject constructor(
         storiesIdToStoryListMap.forEach {
             val storyPoster = usersList.find { user -> user.firebaseUserId == it.key }
             if (storyPoster != null) {
-                storiesWithUsersList.add(StoriesWithUser(storyPoster, it.value))
+                storiesWithUsersListBean.add(StoriesWithUserBean(storyPoster, it.value))
             }
         }
-        storiesWithUsersList.forEach {
+        storiesWithUsersListBean.forEach {
             it.storiesList.reverse()
         }
-        return storiesWithUsersList
+        return storiesWithUsersListBean
     }
 }

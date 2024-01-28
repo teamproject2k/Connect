@@ -7,9 +7,9 @@ import com.example.connect.data.models.post.PostWithUserDetailsFromLocalEntity
 import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.CommentBean
-import com.example.connect.domain.models.CommentWithUser
+import com.example.connect.domain.models.CommentWithUserBean
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.models.PostWithUserDetails
+import com.example.connect.domain.models.PostWithUserDetailsBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
@@ -34,7 +34,7 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun getPostDetailsWithUsersFromLocal(
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>
-    ): ResponseState<List<PostWithUserDetails>> {
+    ): ResponseState<List<PostWithUserDetailsBean>> {
         return try {
             ResponseState.success(
                 getPostDetailsWithUsers(
@@ -147,8 +147,8 @@ class IPostRepositoryImpl @Inject constructor(
     private suspend fun getPostDetailsWithUserDetailsFromRemote(
         loggedInUserFirebaseId: String,
         postListToFetch: List<String>?
-    ): ResponseState<List<PostWithUserDetails>> {
-        val postsWithUsersList = arrayListOf<PostWithUserDetails>()
+    ): ResponseState<List<PostWithUserDetailsBean>> {
+        val postsWithUsersList = arrayListOf<PostWithUserDetailsBean>()
         val postList = arrayListOf<PostBean>()
         val usersList = arrayListOf<UsersBean>()
         val loggedInUser: UserRemoteEntity?
@@ -202,7 +202,7 @@ class IPostRepositoryImpl @Inject constructor(
                                 post.postVisibilityScope == VisibilityScopeEnum.Public.name ||
                                 postedByUser.friendList.contains(loggedInUserFirebaseId)
                     if (whetherPostVisibleToLoggedInUser) {
-                        postsWithUsersList.add(PostWithUserDetails(post, postedByUser))
+                        postsWithUsersList.add(PostWithUserDetailsBean(post, postedByUser))
                     }
                 }
             }
@@ -212,7 +212,7 @@ class IPostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllPostsWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<List<PostWithUserDetails>> {
+    override suspend fun getAllPostsWithUserDetailsFromRemote(loggedInUserFirebaseId: String): ResponseState<List<PostWithUserDetailsBean>> {
         return getPostDetailsWithUserDetailsFromRemote(loggedInUserFirebaseId, null)
     }
 
@@ -299,7 +299,7 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun getSavedPostsWithUsersFromRemote(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
-    ): ResponseState<List<PostWithUserDetails>> {
+    ): ResponseState<List<PostWithUserDetailsBean>> {
         return getPostDetailsWithUserDetailsFromRemote(loggedInUserFirebaseId, savedPosts)
     }
 
@@ -389,14 +389,14 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun getAllCommentsWithUsersFromRemote(
         postFirebaseId: String,
         loggedInUserFirebaseId: String
-    ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>> {
+    ): ResponseState<MutableMap<CommentWithUserBean, ArrayList<CommentWithUserBean>>> {
         return try {
             val commentListResponse = fireStore.collection(FirebaseConstants.COMMENT_KEY)
                 .whereEqualTo(CommentRemoteEntity::postFirebaseId.name, postFirebaseId)
                 .whereEqualTo(CommentRemoteEntity::whetherDeleted.name, false)
                 .get()
                 .await()
-            val parentChildMap = mutableMapOf<CommentWithUser, ArrayList<CommentWithUser>>()
+            val parentChildMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
             val commentList = arrayListOf<CommentBean>()
             val userList = arrayListOf<UsersBean>()
             val loggedInUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
@@ -443,7 +443,7 @@ class IPostRepositoryImpl @Inject constructor(
                     val childCommentsList =
                         commentList.filter { comment -> comment.parentCommentId == parentComment.commentFirebaseId } as ArrayList
                     if (parentUser != null) {
-                        val childCommentListWithUsers = arrayListOf<CommentWithUser>()
+                        val childCommentListWithUsers = arrayListOf<CommentWithUserBean>()
                         childCommentsList.forEach { comment ->
                             val childCommentUser =
                                 userList.find { user -> user.firebaseUserId == comment.commentedBy }
@@ -451,7 +451,7 @@ class IPostRepositoryImpl @Inject constructor(
                                 userList.find { user -> user.firebaseUserId == comment.repliedOnUserId }?.connectUserId
                             if (childCommentUser != null) {
                                 childCommentListWithUsers.add(
-                                    CommentWithUser(
+                                    CommentWithUserBean(
                                         comment,
                                         childCommentUser,
                                         commentedOnConnectId
@@ -459,7 +459,7 @@ class IPostRepositoryImpl @Inject constructor(
                                 )
                             }
                         }
-                        parentChildMap[CommentWithUser(parentComment, parentUser)] =
+                        parentChildMap[CommentWithUserBean(parentComment, parentUser)] =
                             childCommentListWithUsers
                     }
                 }
@@ -507,7 +507,7 @@ class IPostRepositoryImpl @Inject constructor(
         savedPostFirebaseIds: List<String>,
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
-    ): ResponseState<List<PostWithUserDetails>> {
+    ): ResponseState<List<PostWithUserDetailsBean>> {
         return try {
             ResponseState.success(
                 getPostDetailsWithUsers(
@@ -525,8 +525,8 @@ class IPostRepositoryImpl @Inject constructor(
         postWithUsersList: List<PostWithUserDetailsFromLocalEntity>,
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>
-    ): ArrayList<PostWithUserDetails> {
-        val postWithUsersDetailList = arrayListOf<PostWithUserDetails>()
+    ): ArrayList<PostWithUserDetailsBean> {
+        val postWithUsersDetailList = arrayListOf<PostWithUserDetailsBean>()
         postWithUsersList.forEach { postWithUser ->
             val postedBy = postWithUser.userDetail?.toUserBean()
             if (postedBy != null && !loggedInUserBlockedList.contains(postedBy.firebaseUserId) && !postedBy.blockedUsersList.contains(
@@ -539,7 +539,7 @@ class IPostRepositoryImpl @Inject constructor(
                             || (postedBy.friendList.contains(loggedInUserFirebaseId))
                 if (whetherShowPostToLoggedInUser) {
                     postWithUsersDetailList.add(
-                        PostWithUserDetails(
+                        PostWithUserDetailsBean(
                             postWithUser.postDetail.toPostBean(),
                             postedBy
                         )

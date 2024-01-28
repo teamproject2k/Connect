@@ -1,7 +1,7 @@
 package com.example.connect.domain.models
 
 import android.os.Parcelable
-import com.example.connect.data.models.story.StoryDbEntity
+import com.example.connect.data.models.story.StoryLocalEntity
 import com.example.connect.data.models.story.StoryRemoteEntity
 import kotlinx.parcelize.Parcelize
 
@@ -30,13 +30,14 @@ data class StoryBean(
             textColor,
             textOffset,
             backgroundGradientColor,
+            emptyList(),
             videoLength,
             whetherDeleted
         )
     }
 
-    fun toStoryDbEntity(): StoryDbEntity {
-        return StoryDbEntity(
+    fun toStoryDbEntity(): StoryLocalEntity {
+        return StoryLocalEntity(
             storyFirebaseId,
             createdByUserFirebaseId,
             mediaUrl,

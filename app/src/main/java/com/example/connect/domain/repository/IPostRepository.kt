@@ -1,9 +1,9 @@
 package com.example.connect.domain.repository
 
 import com.example.connect.domain.models.CommentBean
-import com.example.connect.domain.models.CommentWithUser
+import com.example.connect.domain.models.CommentWithUserBean
 import com.example.connect.domain.models.PostBean
-import com.example.connect.domain.models.PostWithUserDetails
+import com.example.connect.domain.models.PostWithUserDetailsBean
 import com.example.connect.domain.network_request_response.ResponseState
 
 interface IPostRepository {
@@ -19,7 +19,7 @@ interface IPostRepository {
     suspend fun getPostDetailsWithUsersFromLocal(
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>
-    ): ResponseState<List<PostWithUserDetails>>
+    ): ResponseState<List<PostWithUserDetailsBean>>
 
     /**
      * Gets post details from remote.
@@ -62,7 +62,7 @@ interface IPostRepository {
 
     suspend fun getAllPostsWithUserDetailsFromRemote(
         loggedInUserFirebaseId: String
-    ): ResponseState<List<PostWithUserDetails>>
+    ): ResponseState<List<PostWithUserDetailsBean>>
 
     suspend fun addLikeOnPostOnRemote(
         loggedInUserFirebaseId: String,
@@ -77,7 +77,7 @@ interface IPostRepository {
     suspend fun getSavedPostsWithUsersFromRemote(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
-    ): ResponseState<List<PostWithUserDetails>>
+    ): ResponseState<List<PostWithUserDetailsBean>>
 
     suspend fun deletePostFromRemote(postFirebaseId: String): ResponseState<Nothing>
     suspend fun addCommentOnRemote(comment: CommentBean): ResponseState<String>
@@ -91,7 +91,7 @@ interface IPostRepository {
     suspend fun getAllCommentsWithUsersFromRemote(
         postFirebaseId: String,
         loggedInUserFirebaseId: String
-    ): ResponseState<MutableMap<CommentWithUser, ArrayList<CommentWithUser>>>
+    ): ResponseState<MutableMap<CommentWithUserBean, ArrayList<CommentWithUserBean>>>
 
 
     suspend fun addLikeForCommentOnRemote(
@@ -108,7 +108,7 @@ interface IPostRepository {
     suspend fun getPostDetailsWithUserFromLocal(
         savedPostFirebaseIds: List<String>, loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
-    ): ResponseState<List<PostWithUserDetails>>
+    ): ResponseState<List<PostWithUserDetailsBean>>
 
     suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int
 

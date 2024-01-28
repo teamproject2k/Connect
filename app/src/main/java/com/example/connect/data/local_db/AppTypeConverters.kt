@@ -24,7 +24,6 @@ class AppTypeConverters {
         return Gson().toJson(listOfString)
     }
 
-
     @TypeConverter
     fun toListOfStringFromString(stringOfList: String): ArrayList<String> {
         return Gson().fromJson(

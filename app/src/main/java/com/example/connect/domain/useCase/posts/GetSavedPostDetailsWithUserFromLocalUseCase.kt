@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.posts
 
-import com.example.connect.domain.models.PostWithUserDetails
+import com.example.connect.domain.models.PostWithUserDetailsBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
@@ -9,7 +9,7 @@ class GetSavedPostDetailsWithUserFromLocalUseCase @Inject constructor(private va
     suspend operator fun invoke(
         savedPostFirebaseIds: List<String>, loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
-    ): ResponseState<List<PostWithUserDetails>> {
+    ): ResponseState<List<PostWithUserDetailsBean>> {
         return repository.getPostDetailsWithUserFromLocal(
             savedPostFirebaseIds,
             loggedInUserFirebaseId,

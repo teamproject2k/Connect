@@ -6,20 +6,20 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.connect.data.models.post.PostDbEntity
+import com.example.connect.data.models.post.PostLocalEntity
 import com.example.connect.data.models.post.PostWithUserDetailsFromLocalEntity
 import com.example.connect.domain.utils.VisibilityScopeEnum
 
 @Dao
 interface IPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertPost(postDetails: PostDbEntity): Long
+    fun insertPost(postDetails: PostLocalEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertPostList(postDetailsList: List<PostDbEntity>): LongArray
+    fun insertPostList(postDetailsList: List<PostLocalEntity>): LongArray
 
     @Query("SELECT * FROM posts WHERE createdByUserFirebaseId = :createdByUserFirebaseId AND whetherDeleted=0 ORDER BY createdAt DESC")
-    fun getPostList(createdByUserFirebaseId: String): List<PostDbEntity>
+    fun getPostList(createdByUserFirebaseId: String): List<PostLocalEntity>
 
 
     @Transaction
@@ -31,7 +31,7 @@ interface IPostDao {
     fun getPostDetailsWithUsers(): List<PostWithUserDetailsFromLocalEntity>
 
     @Update
-    fun updatePostDetails(postDetails: PostDbEntity): Int
+    fun updatePostDetails(postDetails: PostLocalEntity): Int
 
 
     @Query("DELETE FROM posts WHERE postFirebaseId = :postFirebaseId")

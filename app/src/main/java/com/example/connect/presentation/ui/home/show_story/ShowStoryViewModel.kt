@@ -5,7 +5,7 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.connect.domain.models.StoriesWithUser
+import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
@@ -32,8 +32,7 @@ class ShowStoryViewModel @Inject constructor(private val deleteStoryInRemoteUseC
 
     val isDropdownMenuVisibleState = mutableStateOf(false)
 
-
-    lateinit var allStoriesWithUsersList: ArrayList<StoriesWithUser>
+    lateinit var allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>
 
 //    lateinit var allUsersStories: MutableMap<String, ArrayList<StoryBean>>
 //
@@ -47,10 +46,10 @@ class ShowStoryViewModel @Inject constructor(private val deleteStoryInRemoteUseC
     // val mapKeyList = mutableListOf<String>()
 
     fun init(
-        allStoriesWithUsersList: ArrayList<StoriesWithUser>,
+        allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>,
         currentStoryIndex: Int
     ) {
-        this.allStoriesWithUsersList = allStoriesWithUsersList
+        this.allBeanStoriesWithUsersList = allBeanStoriesWithUsersList
         this.currentUserStoriesIndex = mutableIntStateOf(currentStoryIndex)
         this.currentStoryIndex = mutableIntStateOf(0)
         areDetailsInitialized = true

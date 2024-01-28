@@ -1,6 +1,6 @@
 package com.example.connect.domain.useCase.posts
 
-import com.example.connect.domain.models.PostWithUserDetails
+import com.example.connect.domain.models.PostWithUserDetailsBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IPostRepository
 import javax.inject.Inject
@@ -15,7 +15,7 @@ class GetSavedPostsWithUsersFromRemoteUseCase @Inject constructor(private val re
     suspend operator fun invoke(
         loggedInUserFirebaseId: String,
         savedPosts: ArrayList<String>
-    ): ResponseState<List<PostWithUserDetails>> {
+    ): ResponseState<List<PostWithUserDetailsBean>> {
         return repository.getSavedPostsWithUsersFromRemote(loggedInUserFirebaseId, savedPosts)
     }
 }

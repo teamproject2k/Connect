@@ -6,7 +6,7 @@ import com.example.connect.data.local_db.TableNames
 import com.example.connect.domain.models.PostBean
 
 @Entity(tableName = TableNames.POST_TABLE_NAME)
-data class PostDbEntity(
+data class PostLocalEntity(
     @PrimaryKey
     val postFirebaseId: String,
     val createdByUserFirebaseId: String,
