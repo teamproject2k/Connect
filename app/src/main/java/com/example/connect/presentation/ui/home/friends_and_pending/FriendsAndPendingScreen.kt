@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -142,6 +143,8 @@ private fun FriendsAndPendingTabs(
     homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator
 ) {
+    val pagerState = rememberPagerState { 2 }
+    val coroutineScope = rememberCoroutineScope()
     val itemList = stringArrayResource(id = R.array.friends_tab_list)
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = viewModel.selectedTabIndexState.intValue) {
@@ -149,23 +152,26 @@ private fun FriendsAndPendingTabs(
                 Tab(
                     text = { Text(title) },
                     selected = viewModel.selectedTabIndexState.intValue == index,
-                    onClick = { viewModel.selectedTabIndexState.intValue = index },
+                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
                     unselectedContentColor = ColorsHelper.gray()
                 )
             }
         }
-        when (viewModel.selectedTabIndexState.intValue) {
-            0 -> HandleGetFriendsListStateFlow(
-                viewModel = viewModel,
-                homeSharedViewModel,
-                navigator = navigator
-            )
+        HorizontalPager(state = pagerState) {
+            viewModel.selectedTabIndexState.intValue = it
+            when (viewModel.selectedTabIndexState.intValue) {
+                0 -> HandleGetFriendsListStateFlow(
+                    viewModel = viewModel,
+                    homeSharedViewModel,
+                    navigator = navigator
+                )
 
-            1 -> HandleGetPendingFriendRequestListStateFlow(
-                viewModel,
-                homeSharedViewModel,
-                navigator
-            )
+                1 -> HandleGetPendingFriendRequestListStateFlow(
+                    viewModel,
+                    homeSharedViewModel,
+                    navigator
+                )
+            }
         }
     }
 }
