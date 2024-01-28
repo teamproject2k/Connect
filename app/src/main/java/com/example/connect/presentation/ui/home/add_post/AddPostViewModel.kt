@@ -75,7 +75,7 @@ class AddPostViewModel @Inject constructor(
                     val uploadFileToRemoteResponseState =
                         uploadFileToRemoteUseCase(
                             selectedMediaState.value!!.uri,
-                            "${FirebaseConstants.POST_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
+                            "${FirebaseConstants.POST_KEY}/$loggedInUserFirebaseId/${FunctionHelper.getCurrentTimeInMillis()}"
                         )
 
                     // Check if the upload operation was successful.

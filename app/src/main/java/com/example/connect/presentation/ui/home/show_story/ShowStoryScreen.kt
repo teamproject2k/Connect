@@ -385,6 +385,15 @@ fun UserStories(
             viewModel = viewModel,
             story = currentStory,
         ) {
+            val story =
+                viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue]
+            if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
+                viewModel.addUserToSeenList(
+                    story.storyFirebaseId,
+                    loggedInUserFirebaseId,
+                    FunctionHelper.getCurrentTimeInMillis()
+                )
+            }
             isMediaLoaded = true
         }
     }

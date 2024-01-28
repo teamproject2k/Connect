@@ -8,6 +8,7 @@ enum class ScreenNameEnum {
     HomeScreen,
     AddStoryScreen,
     ShowStoryScreen,
+    ShowStoryViewModel,
     ChatListScreen,
     PostDetailsScreen,
     LikedByScreen,

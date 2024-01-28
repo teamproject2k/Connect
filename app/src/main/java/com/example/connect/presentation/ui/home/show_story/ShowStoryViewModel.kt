@@ -4,15 +4,20 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
 import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.story.AddUserToSeenListInRemoteUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryFromLocalUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
 import com.example.connect.domain.useCase.story.GetSeenListFromRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
+import com.example.connect.presentation.utils.ConstantsHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,13 +30,17 @@ import javax.inject.Inject
 class ShowStoryViewModel @Inject constructor(
     private val deleteStoryInRemoteUseCase: DeleteStoryInRemoteUseCase,
     private val deleteStoryFromLocalUseCase: DeleteStoryFromLocalUseCase,
-    private val getSeenListFromRemoteUseCase: GetSeenListFromRemoteUseCase
+    private val getSeenListFromRemoteUseCase: GetSeenListFromRemoteUseCase,
+    private val addUserToSeenListInRemoteUseCase: AddUserToSeenListInRemoteUseCase
 ) :
     BaseViewModel() {
 
     private val _getSeenListStateFlow: MutableStateFlow<ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
     val getSeenListStateFlow = _getSeenListStateFlow.asStateFlow()
+
+    private val _addUserToSeenListStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
 
     private val _deleteStoryStateFlow: MutableStateFlow<ResponseState<Boolean>> =
         MutableStateFlow(ResponseState.none())
@@ -66,6 +75,25 @@ class ShowStoryViewModel @Inject constructor(
                 _getSeenListStateFlow.value = ResponseState.loading()
                 _getSeenListStateFlow.value =
                     getSeenListFromRemoteUseCase(storyId, loggedInUserFirebaseId)
+            }
+        }
+    }
+
+    fun addUserToSeenList(storyId: String, loggedInUserFirebaseId: String, seenAt: Long) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _addUserToSeenListStateFlow.value = ResponseState.loading()
+                val response =
+                    addUserToSeenListInRemoteUseCase(storyId, loggedInUserFirebaseId, seenAt)
+                if (response.status == RequestStatusEnum.Exception) {
+                    LoggingHelper.logData(
+                        LoggingLevelEnum.Error,
+                        ConstantsHelper.ERROR_TAG,
+                        ScreenNameEnum.ShowStoryViewModel.name,
+                        response.message.toString()
+                    )
+                }
+                _addUserToSeenListStateFlow.value = response
             }
         }
     }

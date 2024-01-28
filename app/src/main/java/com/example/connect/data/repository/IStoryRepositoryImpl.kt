@@ -13,6 +13,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IStoryRepository
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.domain.utils.FirebaseErrorCodes
+import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -47,7 +48,7 @@ class IStoryRepositoryImpl @Inject constructor(
                 userList.add(loggedInUser)
                 val getStoriesFor = loggedInUser.friendList
                 getStoriesFor.add(loggedInUserFirebaseId)
-                val currentTimeMillis = System.currentTimeMillis()
+                val currentTimeMillis = FunctionHelper.getCurrentTimeInMillis()
                 val twentyFourHoursInMillis = 24 * 60 * 60 * 1000L // 24 hours in milliseconds
                 val elapsedTimeInMillis = currentTimeMillis - twentyFourHoursInMillis
                 val storyListResponse = fireStore.collection(FirebaseConstants.STORY_KEY)

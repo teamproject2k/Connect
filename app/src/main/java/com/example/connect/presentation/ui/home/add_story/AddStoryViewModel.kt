@@ -80,7 +80,7 @@ class AddStoryViewModel @Inject constructor(
                     val uploadFileToRemoteResponse =
                         uploadFileToRemoteUseCase(
                             selectedMediaState.value!!.uri,
-                            "${FirebaseConstants.STORY_KEY}/$loggedInUserFirebaseId/${System.currentTimeMillis()}"
+                            "${FirebaseConstants.STORY_KEY}/$loggedInUserFirebaseId/${FunctionHelper.getCurrentTimeInMillis()}"
                         )
 
                     // Check if the upload operation was successful.
