@@ -89,12 +89,12 @@ class HomeViewModel @Inject constructor(
 
     fun getStoryDetailsWithUserDetails(
         loggedInUserFirebaseId: String,
-        isNetworkAvailable: Boolean
+        isForceRefresh: Boolean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _storyDetailsStateFlow.value = ResponseState.loading()
-                if (!isStoryListFetchedFromRemote && isNetworkAvailable) {
+                if (isForceRefresh || !isStoryListFetchedFromRemote) {
                     val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
                     if (response.status == RequestStatusEnum.Success) {
                         val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
@@ -131,16 +131,15 @@ class HomeViewModel @Inject constructor(
     fun getPostDetailsWithUserDetails(
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
-        isNetworkAvailable: Boolean
+        isForceRefresh: Boolean
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _postDetailsStateFlow.value = ResponseState.loading()
-                if (!isPostListFromRemoteFetched && isNetworkAvailable) {
+                if (!isPostListFromRemoteFetched || isForceRefresh) {
                     val postListWithUserDetailsResponse =
                         postDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
                     if (postListWithUserDetailsResponse.status == RequestStatusEnum.Success) {
-                        isPostListFromRemoteFetched = true
                         val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
                         val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
                         if (postList != null && userList != null) {
@@ -150,6 +149,7 @@ class HomeViewModel @Inject constructor(
                                 addPostListToLocalUseCase(postList)
                             if (addPostToLocalResult.size == postList.size) {
                                 addUserListToLocalUseCase(userList)
+                                isPostListFromRemoteFetched = true
                                 _postDetailsStateFlow.value =
                                     getPostDetailsWithUsersFromLocalUseCase(
                                         loggedInUserFirebaseId,

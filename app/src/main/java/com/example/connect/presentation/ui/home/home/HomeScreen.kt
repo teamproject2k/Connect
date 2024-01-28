@@ -116,17 +116,16 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            val isNetworkAvailable = context.isNetworkAvailable()
             viewModel.getPostDetailsWithUserDetails(
                 homeSharedViewModel.usersDetails.firebaseUserId,
                 homeSharedViewModel.usersDetails.blockedUsersList,
-                isNetworkAvailable
+                true
             )
             viewModel.getStoryDetailsWithUserDetails(
                 homeSharedViewModel.usersDetails.firebaseUserId,
-                isNetworkAvailable
+                true
             )
-            if (!isNetworkAvailable) {
+            if (!context.isNetworkAvailable()) {
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.viewing_in_offline_mode)
             }
@@ -190,17 +189,16 @@ fun HomeScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        val isNetworkAvailable = context.isNetworkAvailable()
         viewModel.getPostDetailsWithUserDetails(
             homeSharedViewModel.usersDetails.firebaseUserId,
             homeSharedViewModel.usersDetails.blockedUsersList,
-            isNetworkAvailable
+            false
         )
         viewModel.getStoryDetailsWithUserDetails(
             homeSharedViewModel.usersDetails.firebaseUserId,
-            isNetworkAvailable
+            false
         )
-        if (!isNetworkAvailable) {
+        if (!context.isNetworkAvailable()) {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.viewing_in_offline_mode)
         }
