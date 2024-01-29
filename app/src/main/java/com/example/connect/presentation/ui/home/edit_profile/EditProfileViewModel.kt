@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import com.example.connect.data.models.user.UserRemoteEntity
-import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.data.models.user.UsersLocalEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -247,42 +247,42 @@ class EditProfileViewModel @Inject constructor(
                 fieldsToUpdate[UserRemoteEntity::name.name] as String
             )
             // Add the formatted display name to the map.
-            fieldsToUpdateInDb[UsersDbEntity::name.name] = formattedDisplayName
+            fieldsToUpdateInDb[UsersLocalEntity::name.name] = formattedDisplayName
         }
         if (fieldsToUpdate.containsKey(UserRemoteEntity::profilePhoto.name)) {
             // Get the profile photo URL.
             val profilePhotoUrl = fieldsToUpdate[UserRemoteEntity::profilePhoto.name] as String
 
             // Add the profile photo URL to the map.
-            fieldsToUpdateInDb[UsersDbEntity::profilePhoto.name] = profilePhotoUrl
+            fieldsToUpdateInDb[UsersLocalEntity::profilePhoto.name] = profilePhotoUrl
         }
         if (fieldsToUpdate.containsKey(UserRemoteEntity::coverPhoto.name)) {
             // Get the cover photo URL.
             val coverPhotoUrl = fieldsToUpdate[UserRemoteEntity::coverPhoto.name] as String
 
             // Add the cover photo URL to the map.
-            fieldsToUpdateInDb[UsersDbEntity::coverPhoto.name] = coverPhotoUrl
+            fieldsToUpdateInDb[UsersLocalEntity::coverPhoto.name] = coverPhotoUrl
         }
         if (fieldsToUpdate.containsKey(UserRemoteEntity::bio.name)) {
             // Get the bio.
             val bio = fieldsToUpdate[UserRemoteEntity::bio.name] as String
 
             // Add the bio to the map.
-            fieldsToUpdateInDb[UsersDbEntity::bio.name] = bio
+            fieldsToUpdateInDb[UsersLocalEntity::bio.name] = bio
         }
         if (fieldsToUpdate.containsKey(UserRemoteEntity::gender.name)) {
             // Get the gender.
             val gender = fieldsToUpdate[UserRemoteEntity::gender.name] as String
 
             // Add the gender to the map.
-            fieldsToUpdateInDb[UsersDbEntity::gender.name] = gender
+            fieldsToUpdateInDb[UsersLocalEntity::gender.name] = gender
         }
         if (fieldsToUpdate.containsKey(UserRemoteEntity::dateOfBirth.name)) {
             // Get the date of birth.
             val dateOfBirth = fieldsToUpdate[UserRemoteEntity::dateOfBirth.name] as Long
 
             // Add the date of birth to the map.
-            fieldsToUpdateInDb[UsersDbEntity::dateOfBirth.name] = dateOfBirth
+            fieldsToUpdateInDb[UsersLocalEntity::dateOfBirth.name] = dateOfBirth
         }
         return fieldsToUpdateInDb
     }

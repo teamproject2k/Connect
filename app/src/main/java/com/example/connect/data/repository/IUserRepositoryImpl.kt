@@ -5,7 +5,7 @@ import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.local_db.TableNames
 import com.example.connect.data.models.post.PostRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
-import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.data.models.user.UsersLocalEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.ResponseState
@@ -91,7 +91,7 @@ class IUserRepositoryImpl @Inject constructor(
 
     override suspend fun addUserToLocal(userDetails: UsersBean): Long {
         // Add the user to the local database.
-        return appDatabase.getUsersDao().insertUser(userDetails.toUserDbEntity())
+        return appDatabase.getUsersDao().insertUser(userDetails.toUserLocalEntity())
     }
 
     override suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean? {
@@ -148,7 +148,7 @@ class IUserRepositoryImpl @Inject constructor(
 
         // Create the SQL query to update the user details.
         val sql =
-            "UPDATE ${TableNames.USERS_TABLE_NAME} SET $setClause WHERE ${UsersDbEntity::firebaseUserId.name} = ?"
+            "UPDATE ${TableNames.USERS_TABLE_NAME} SET $setClause WHERE ${UsersLocalEntity::firebaseUserId.name} = ?"
 
         // Create a list of the bind arguments, which are the values of the fields to update.
         val bindArgs = fieldsToUpdate.values.toMutableList()
@@ -839,11 +839,11 @@ class IUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateUserOnLocal(userDetails: UsersBean): Int {
-        return appDatabase.getUsersDao().updateUsersDetails(userDetails.toUserDbEntity())
+        return appDatabase.getUsersDao().updateUsersDetails(userDetails.toUserLocalEntity())
     }
 
     override suspend fun addUserListToLocal(userList: List<UsersBean>): LongArray {
-        return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserDbEntity() })
+        return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserLocalEntity() })
     }
 
     override suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UsersBean> {

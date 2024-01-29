@@ -1,9 +1,9 @@
 package com.example.connect.domain.models
 
-import com.example.connect.data.models.chats.ChatsDbEntity
-import com.example.connect.data.models.chats.ChatsRemoteEntity
+import com.example.connect.data.models.chats.ChatLocalEntity
+import com.example.connect.data.models.chats.ChatRemoteEntity
 
-data class ChatsBean(
+data class ChatBean(
     val id: String,
     val senderId: String,
     val receiverId: String,
@@ -13,8 +13,8 @@ data class ChatsBean(
     val messageStatus: String,
     val deletedBy: String
 ) {
-    fun toChatsRemoteEntity(): ChatsRemoteEntity {
-        return ChatsRemoteEntity(
+    fun toChatRemoteEntity(): ChatRemoteEntity {
+        return ChatRemoteEntity(
             id,
             senderId,
             receiverId,
@@ -26,8 +26,8 @@ data class ChatsBean(
         )
     }
 
-    fun toChatsDbEntity(): ChatsDbEntity {
-        return ChatsDbEntity(
+    fun toChatLocalEntity(): ChatLocalEntity {
+        return ChatLocalEntity(
             id,
             senderId,
             receiverId,

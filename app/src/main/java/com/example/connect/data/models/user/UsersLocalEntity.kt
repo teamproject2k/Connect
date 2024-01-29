@@ -8,7 +8,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.presentation.utils.FunctionHelper
 
 @Entity(tableName = TableNames.USERS_TABLE_NAME)
-data class UsersDbEntity(
+data class UsersLocalEntity(
     @PrimaryKey
     val firebaseUserId: String,
     val connectUserId: String,

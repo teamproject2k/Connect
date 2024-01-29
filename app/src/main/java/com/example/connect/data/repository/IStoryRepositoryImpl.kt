@@ -180,7 +180,7 @@ class IStoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addAllStoriesToLocal(storyList: List<StoryBean>): LongArray {
-        return appDatabase.getStoryDao().insertAllStories(storyList.map { it.toStoryDbEntity() })
+        return appDatabase.getStoryDao().insertAllStories(storyList.map { it.toStoryLocalEntity() })
     }
 
     override suspend fun deleteAllStoriesFromLocal(): Int {
@@ -192,7 +192,7 @@ class IStoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addStoryToLocal(story: StoryBean): Long {
-        return appDatabase.getStoryDao().insertStory(story.toStoryDbEntity())
+        return appDatabase.getStoryDao().insertStory(story.toStoryLocalEntity())
     }
 
 }

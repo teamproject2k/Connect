@@ -7,19 +7,19 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.data.models.user.UsersLocalEntity
 
 @Dao
 interface IUsersDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUser(userDetails: UsersDbEntity): Long
+    fun insertUser(userDetails: UsersLocalEntity): Long
 
     @Query("UPDATE users SET currentLoggedInDeviceId = :updatedDeviceId WHERE firebaseUserId = :fireBaseId")
     fun updateDeviceId(fireBaseId: String, updatedDeviceId: String): Int
 
     @Query("SELECT * FROM users WHERE firebaseUserId = :fireBaseId")
-    fun getUserDetails(fireBaseId: String): UsersDbEntity?
+    fun getUserDetails(fireBaseId: String): UsersLocalEntity?
 
 
     @Query("UPDATE users SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :loggedInUserFirebaseId")
@@ -42,15 +42,15 @@ interface IUsersDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUserList(userList: List<UsersDbEntity>): LongArray
+    fun insertUserList(userList: List<UsersLocalEntity>): LongArray
 
 
     @Update
-    fun updateUsersDetails(userDetails: UsersDbEntity): Int
+    fun updateUsersDetails(userDetails: UsersLocalEntity): Int
 
 
     @Query("SELECT * FROM users WHERE firebaseUserId IN (:userIdList) ORDER BY createdAt DESC")
-    fun getAllUserFromIds(userIdList: List<String>): List<UsersDbEntity>
+    fun getAllUserFromIds(userIdList: List<String>): List<UsersLocalEntity>
 
 
     @Query("DELETE FROM users WHERE firebaseUserId NOT IN (:exceptList)")

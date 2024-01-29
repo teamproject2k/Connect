@@ -241,7 +241,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's firebaseUserId from the currentUserState.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's otherUsersStatus from the currentUserState.
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     val data = hashMapOf(
                         Pair(
@@ -301,7 +301,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's UserDbEntity.
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
 
                     // Set the withdrawFriendRequestStateFlow to the responseState.
@@ -353,7 +353,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Call the updateOtherUserStatusOnDbUseCase to update the other user's status on the database.
                     updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     val data = hashMapOf(
                         Pair(
@@ -409,7 +409,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Call the updateOtherUserStatusOnDbUseCase.
                     updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
 
                     // Set the removeFriendRequestStateFlow to the responseState.
@@ -449,7 +449,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's firebase user id.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's otherUsersStatus.
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     getPostDetails()
                     // Set the unBlockUserStateFlow to the responseState.
@@ -491,7 +491,7 @@ class OtherUserProfileViewModel @Inject constructor(
                     // Call the updateOtherUserStatusOnDbUseCase.
                     updateUsersStatusOnLocalUseCase(
                         loggedInUserState.value.firebaseUserId,
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     deleteAllPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
                     getPostDetails()
@@ -534,7 +534,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's other users status.
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     deleteOnlyFriendsOnlyPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
 
@@ -579,7 +579,7 @@ class OtherUserProfileViewModel @Inject constructor(
                         // Get the current user's firebase user ID.
                         loggedInUserState.value.firebaseUserId,
                         // Get the current user's other users status.
-                        loggedInUserState.value.toUserDbEntity().otherUsersStatus
+                        loggedInUserState.value.toUserLocalEntity().otherUsersStatus
                     )
                     deleteAllPostOfUserFromLocalUseCase(otherUserState.value.firebaseUserId)
                     // Set the unfriend and block user state flow to the response state.

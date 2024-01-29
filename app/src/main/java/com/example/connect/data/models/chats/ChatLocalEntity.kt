@@ -2,10 +2,10 @@ package com.example.connect.data.models.chats
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.connect.domain.models.ChatsBean
+import com.example.connect.domain.models.ChatBean
 
 @Entity
-data class ChatsDbEntity(
+data class ChatLocalEntity(
     @PrimaryKey
     val id: String,
     val senderId: String,
@@ -16,8 +16,8 @@ data class ChatsDbEntity(
     val messageStatus: String,
     val deletedBy: String
 ) {
-    fun toChatBean(): ChatsBean {
-        return ChatsBean(
+    fun toChatBean(): ChatBean {
+        return ChatBean(
             id,
             senderId,
             receiverId,

@@ -33,7 +33,7 @@ data class PostBean(
         )
     }
 
-    fun toPostDbEntity(): PostLocalEntity {
+    fun toPostLocalEntity(): PostLocalEntity {
         return PostLocalEntity(
             postFirebaseId,
             createdByUserFirebaseId,

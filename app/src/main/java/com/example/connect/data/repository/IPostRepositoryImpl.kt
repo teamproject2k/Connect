@@ -119,12 +119,13 @@ class IPostRepositoryImpl @Inject constructor(
 
     override suspend fun addPostToLocal(postDetails: PostBean): Long {
         // Add the post details to the local database.
-        return appDatabase.getPostDao().insertPost(postDetails.toPostDbEntity())
+        return appDatabase.getPostDao().insertPost(postDetails.toPostLocalEntity())
     }
 
     override suspend fun addPostListToLocal(postDetailList: List<PostBean>): LongArray {
         // Add the post details to the local database.
-        return appDatabase.getPostDao().insertPostList(postDetailList.map { it.toPostDbEntity() })
+        return appDatabase.getPostDao()
+            .insertPostList(postDetailList.map { it.toPostLocalEntity() })
     }
 
     override suspend fun uploadPostToRemote(
@@ -551,7 +552,7 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updatePostDetailsOnLocal(postDetails: PostBean): Int {
-        return appDatabase.getPostDao().updatePostDetails(postDetails.toPostDbEntity())
+        return appDatabase.getPostDao().updatePostDetails(postDetails.toPostLocalEntity())
     }
 
     override suspend fun updatePostVisibilityOnRemote(

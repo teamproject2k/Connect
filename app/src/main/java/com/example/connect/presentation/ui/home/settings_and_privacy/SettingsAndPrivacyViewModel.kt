@@ -5,7 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.data.models.user.UserRemoteEntity
-import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.data.models.user.UsersLocalEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -146,7 +146,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                     updateUserDetailsOnLocalUseCase(
                         // Create a map of the gender visibility field and its new value.
                         mutableMapOf(
-                            UsersDbEntity::genderVisibility.name to genderScope.scopeEnum.name
+                            UsersLocalEntity::genderVisibility.name to genderScope.scopeEnum.name
                         ),
                         // Pass the firebase user id.
                         firebaseUserId
@@ -191,7 +191,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                         // Create a map of the user's details to be updated.
                         mutableMapOf(
                             // The key is the name of the field to be updated.
-                            UsersDbEntity::dobVisibility.name to dobScope.scopeEnum.name
+                            UsersLocalEntity::dobVisibility.name to dobScope.scopeEnum.name
                         ),
                         // The firebaseUserId of the user.
                         firebaseUserId
@@ -236,7 +236,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
                         // Create a map of the user details to be updated.
                         mutableMapOf(
                             // The friend list visibility field.
-                            UsersDbEntity::friendListVisibility.name to friendListScope.scopeEnum.name
+                            UsersLocalEntity::friendListVisibility.name to friendListScope.scopeEnum.name
                         ),
                         // The firebase user ID.
                         firebaseUserId

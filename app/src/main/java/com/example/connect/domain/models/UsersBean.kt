@@ -2,7 +2,7 @@ package com.example.connect.domain.models
 
 import android.os.Parcelable
 import com.example.connect.data.models.user.UserRemoteEntity
-import com.example.connect.data.models.user.UsersDbEntity
+import com.example.connect.data.models.user.UsersLocalEntity
 import com.example.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import kotlinx.parcelize.Parcelize
 
@@ -66,7 +66,7 @@ data class UsersBean(
         )
     }
 
-    fun toUserDbEntity(): UsersDbEntity {
+    fun toUserLocalEntity(): UsersLocalEntity {
         val otherUsersStatus: MutableMap<String, String> = mutableMapOf()
         friendList.forEach { key ->
             otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Friends.name
@@ -80,7 +80,7 @@ data class UsersBean(
         blockedUsersList.forEach { key ->
             otherUsersStatus[key] = StatusWithCurrentUserRemoteEnum.Blocked.name
         }
-        return UsersDbEntity(
+        return UsersLocalEntity(
             firebaseUserId,
             connectUserId,
             fcmToken,
