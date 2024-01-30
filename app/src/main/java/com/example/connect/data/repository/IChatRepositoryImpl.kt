@@ -1,10 +1,15 @@
 package com.example.connect.data.repository
 
+import android.util.Log
+import com.example.connect.domain.models.ChatBean
+import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IChatRepository
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.connect.domain.utils.FirebaseConstants
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class IChatRepositoryImpl @Inject constructor(private val fireStore: FirebaseFirestore) :
+class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: FirebaseDatabase) :
     IChatRepository {
     override suspend fun getChatListFromRemote(loggedInUserFirebaseId: String) {
 //        try {
@@ -25,5 +30,22 @@ class IChatRepositoryImpl @Inject constructor(private val fireStore: FirebaseFir
 //        } catch (exception: Exception) {
 //            ResponseState.error(exception.localizedMessage ?: "")
 //        }
+    }
+
+    override suspend fun sendChatMessage(message: ChatBean) {
+        try {
+            val id1 = message.senderId
+            val id2 = message.receiverId
+            val resultId = if (id1 < id2) id1 + id2 else id2 + id1
+            val messageReference =
+               // firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).push()
+            firebaseDatabase.getReference("https://console.firebase.google.com/u/0/project/connect-6b6fe/database/connect-6b6fe-default-rtdb/data/~2F")
+                .child(FirebaseConstants.CHATS_KEY).child(resultId).push()
+            messageReference.setValue(message.toChatRemoteEntity()).await()
+            ResponseState.success(messageReference.key)
+        } catch (exception: Exception) {
+            Log.e("aryan", exception.localizedMessage)
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
     }
 }

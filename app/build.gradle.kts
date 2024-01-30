@@ -88,6 +88,7 @@ dependencies {
     implementation(Dependencies.firebaseStorage)
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.3.0")
+    implementation("com.google.firebase:firebase-database-ktx")
 
     //coil
     implementation(Dependencies.coil)

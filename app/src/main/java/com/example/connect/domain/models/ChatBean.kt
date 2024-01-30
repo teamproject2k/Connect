@@ -17,7 +17,6 @@ data class ChatBean(
 ) {
     fun toChatRemoteEntity(): ChatRemoteEntity {
         return ChatRemoteEntity(
-            firebaseId,
             senderId,
             receiverId,
             message,

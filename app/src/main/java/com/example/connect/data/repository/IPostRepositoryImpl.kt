@@ -217,7 +217,6 @@ class IPostRepositoryImpl @Inject constructor(
         return getPostDetailsWithUserDetailsFromRemote(loggedInUserFirebaseId, null)
     }
 
-
     private suspend fun addOrRemoveLikeOnPost(
         loggedInUserFirebaseId: String,
         postFirebaseId: String,

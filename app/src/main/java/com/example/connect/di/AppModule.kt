@@ -26,6 +26,9 @@ import com.example.connect.domain.repository.IUploadFileRepository
 import com.example.connect.domain.repository.IUserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -67,8 +70,11 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun getFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
+    fun getFirebaseDatabase(): FirebaseDatabase = Firebase.database
 
+    @Provides
+    @Singleton
+    fun getFirebaseMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
 
     @Provides
     @Singleton
@@ -131,10 +137,9 @@ class AppModule {
     @Provides
     @Singleton
     fun getIChatRepository(
-        fireStore: FirebaseFirestore
+        firebaseDatabase: FirebaseDatabase
     ): IChatRepository =
-        IChatRepositoryImpl(fireStore)
-
+        IChatRepositoryImpl(firebaseDatabase)
 
     @Provides
     @Singleton

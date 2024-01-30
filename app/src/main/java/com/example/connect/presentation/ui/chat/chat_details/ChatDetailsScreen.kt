@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -24,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
@@ -78,31 +77,7 @@ fun ChatDetailsScreen(navigator: DestinationsNavigator, loggedInUserDetails: Use
                     navigator
                 )
             }
-//            ChatBubble(message = Message("hehehe", isUser = true))
-//            ChatBubble(message = Message("yyoyoyoyoy", isUser = false))
-            Row(Modifier.height(IntrinsicSize.Max)) {
-                Column(
-                    modifier = Modifier
-                        .background(
-                            color = Color.Green,
-                            shape = RoundedCornerShape(4.dp, 4.dp, 0.dp, 4.dp)
-                        )
-                        .width(100.dp)
-                ) {
-                    Text("Chat")
-                }
-                Column(
-                    modifier = Modifier
-                        .background(
-                            color = Color.White,
-                            shape = TriangleEdgeShape(10)
-                        )
-                        .width(8.dp)
-                        .fillMaxHeight()
-                ) {
-
-                }
-            }
+            ChatBubble(message = Message("hehehe", isUser = true))
             ChatDetailsBottomSection(
                 viewModel,
                 loggedInUserDetails,
@@ -220,24 +195,23 @@ fun ChatBubble(message: Message) {
             .padding(8.dp),
         horizontalArrangement = Arrangement.End
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .shadow(4.dp, shape = RoundedCornerShape(16.dp))
                 .clip(RoundedCornerShape(16.dp))
-                .background(backgroundColor)
-                .padding(12.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = backgroundColor,
-            contentColor = contentColor
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(2.dp)
         ) {
             Text(
                 text = message.text,
                 fontWeight = FontWeight.Normal,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
 }
+
 
 class TriangleEdgeShape(val offset: Int) : Shape {
     override fun createOutline(

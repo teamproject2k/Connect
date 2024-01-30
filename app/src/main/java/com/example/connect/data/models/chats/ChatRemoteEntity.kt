@@ -3,7 +3,6 @@ package com.example.connect.data.models.chats
 import com.example.connect.domain.models.ChatBean
 
 data class ChatRemoteEntity(
-    val firebaseId: String,
     val senderId: String,
     val receiverId: String,
     val message: String,
@@ -14,7 +13,7 @@ data class ChatRemoteEntity(
     val mediaUrl: String,
     val mediaType: String
 ) {
-    fun toChatBean(): ChatBean {
+    fun toChatBean(firebaseId: String): ChatBean {
         return ChatBean(
             firebaseId,
             senderId,
