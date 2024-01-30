@@ -70,17 +70,17 @@ object FunctionHelper {
     }
 
     /**
-     * Formats the given time in milliseconds to a string in the format "dd MMM yyyy".
+     * Formats the given time in milliseconds to a string in the specified format.
      *
      * @param timeInMillis The time in milliseconds.
      * @return The formatted date.
      */
-    fun getFormattedDate(timeInMillis: Long): String {
+    fun getFormattedDateTime(timeInMillis: Long, format: String = "dd MMM yyyy"): String {
         // Create a Date object from the time in milliseconds.
         val date = Date(timeInMillis)
 
         // Create a SimpleDateFormat object to format the date.
-        val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        val formatter = SimpleDateFormat(format, Locale.getDefault())
 
         // Format the date and return the result.
         return formatter.format(date)

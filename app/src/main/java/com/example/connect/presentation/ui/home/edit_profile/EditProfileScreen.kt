@@ -371,7 +371,7 @@ private fun EditProfileDOBPicker(viewModel: EditProfileViewModel) {
     }
     val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
-        value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
+        value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDateTime(
             viewModel.selectedDOBState.longValue
         ) else "",
         modifier = Modifier.fillMaxWidth(),

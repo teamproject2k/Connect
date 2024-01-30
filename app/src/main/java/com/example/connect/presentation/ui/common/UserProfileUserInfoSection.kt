@@ -43,7 +43,7 @@ fun UserProfileUserInfoSection(userDetails: UsersBean, loggedInUserFirebaseId: S
             SpacerHeight8()
             ImageTextItem(
                 Icons.Default.DateRange,
-                FunctionHelper.getFormattedDate(userDetails.dateOfBirth)
+                FunctionHelper.getFormattedDateTime(userDetails.dateOfBirth)
             )
         }
         val showGenderSection =

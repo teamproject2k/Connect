@@ -216,7 +216,7 @@ private fun DOBPickerSection(viewModel: UserDetailsViewModel) {
     val dateSelectionState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     OutlinedTextFieldDisabledFeelsLikeEnabled(
         showEnabledByDefault = false,
-        value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDate(
+        value = if (viewModel.selectedDOBState.longValue != -1L) FunctionHelper.getFormattedDateTime(
             viewModel.selectedDOBState.longValue
         ) else "",
         modifier = Modifier

@@ -56,12 +56,14 @@ import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.annotation.Destination
@@ -93,14 +95,14 @@ fun ChatDetailsScreen(
                     ColorsHelper
                         .lightGray()
                         .copy(alpha = 0.05f)
-                )
+                ), verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column {
                 ChatDetailsTopSection(
                     otherUserDetails,
                     navigator
                 )
-                ChatListSection(viewModel)
+                ChatListSection(viewModel, loggedInUserFirebaseId)
             }
             ChatDetailsBottomSection(
                 viewModel,
@@ -127,10 +129,10 @@ fun ChatDetailsScreen(
 }
 
 @Composable
-fun ChatListSection(viewModel: ChatDetailsViewModel) {
+fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: String) {
     LazyColumn {
         items(viewModel.chatListState) { chat ->
-            ChatBubble(chat)
+            ChatBubble(chat, loggedInUserFirebaseId)
         }
     }
 }
@@ -303,14 +305,13 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 }
 
 @Composable
-fun ChatBubble(message: ChatBean) {
-
-
-    Row(
+fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
+    val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.End
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
     ) {
         Box(
             modifier = Modifier
@@ -323,9 +324,15 @@ fun ChatBubble(message: ChatBean) {
                 fontWeight = FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(8.dp),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary
             )
         }
+        SpacerHeight2()
+        Text(
+            text = FunctionHelper.getFormattedDateTime(message.sentAt, "dd-MM-yy, hh:mm a"),
+            color = ColorsHelper.gray(),
+            fontSize = 11.sp,
+        )
     }
 }
 

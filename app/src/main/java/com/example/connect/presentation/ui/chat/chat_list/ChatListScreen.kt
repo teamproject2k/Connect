@@ -266,7 +266,12 @@ private fun ChatList(
         LazyColumn {
             items(chatList) { chat ->
                 ChatListItem(otherUser = chat.usersBean, chat = chat) {
-                    navigator.navigate(ChatDetailsScreenDestination(viewModel.loggedInUserDetails.firebaseUserId, viewModel.loggedInUserDetails))
+                    navigator.navigate(
+                        ChatDetailsScreenDestination(
+                            viewModel.loggedInUserDetails.firebaseUserId,
+                            viewModel.loggedInUserDetails.copy(firebaseUserId = "OUbbPgo1mnUxIog93aqiFsaN07M2")
+                        )
+                    )
                 }
             }
         }
