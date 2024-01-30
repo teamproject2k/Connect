@@ -239,4 +239,6 @@
     <string name="you_have_friends">You have %1$s friends</string>
     <string name="getting_viewers_list">Getting Viewers List</string>
     <string name="no_chats_found">No chats found</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
 </resources>

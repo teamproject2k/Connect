@@ -146,7 +146,10 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 }
                 IconButton(onClick = {
                     val intent = Intent(context, ChatActivity::class.java)
-                    intent.putExtra("userDetails", homeSharedViewModel.usersDetails)
+                    intent.putExtra(
+                        ConstantsHelper.USER_DETAILS_KEY,
+                        homeSharedViewModel.usersDetails
+                    )
                     activity.startActivity(intent)
                 }) {
                     Icon(

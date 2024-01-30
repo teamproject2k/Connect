@@ -36,7 +36,7 @@ data class StoryBean(
         )
     }
 
-    fun toStoryLocalEntity(): StoryLocalEntity {
+    fun toStoryLocal7Entity(): StoryLocalEntity {
         return StoryLocalEntity(
             storyFirebaseId,
             createdByUserFirebaseId,

@@ -18,6 +18,7 @@ object ConstantsHelper {
     const val BACK_EXIT_RESET_TIME: Long = 3000
     const val MINIMIZED_MAX_LINES = 2
     const val STORY_PROGRESS_MAX_TIME: Long = 8000
+    const val USER_DETAILS_KEY = "user_details"
     val POST_DISPLAY_MEDIA_HEIGHT = 300.dp
     val BottomSheetRoundness = 32.dp
     val NavigationBarHeight = 48.dp

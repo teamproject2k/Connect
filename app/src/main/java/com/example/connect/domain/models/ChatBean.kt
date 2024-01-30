@@ -4,38 +4,44 @@ import com.example.connect.data.models.chats.ChatLocalEntity
 import com.example.connect.data.models.chats.ChatRemoteEntity
 
 data class ChatBean(
-    val id: String,
+    val firebaseId: String,
     val senderId: String,
     val receiverId: String,
     val message: String,
     val sentAt: Long,
-    val modifiedAt: String,
+    val modifiedAt: Long,
     val messageStatus: String,
-    val deletedBy: String
+    val deletedBy: String,
+    val mediaUrl: String,
+    val mediaType: String
 ) {
     fun toChatRemoteEntity(): ChatRemoteEntity {
         return ChatRemoteEntity(
-            id,
+            firebaseId,
             senderId,
             receiverId,
             message,
             sentAt,
             modifiedAt,
             messageStatus,
-            deletedBy
+            deletedBy,
+            mediaUrl,
+            mediaType
         )
     }
 
     fun toChatLocalEntity(): ChatLocalEntity {
         return ChatLocalEntity(
-            id,
+            firebaseId,
             senderId,
             receiverId,
             message,
             sentAt,
             modifiedAt,
             messageStatus,
-            deletedBy
+            deletedBy,
+            mediaUrl,
+            mediaType
         )
     }
 }

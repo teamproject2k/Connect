@@ -48,9 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.UsersBean
-import com.example.connect.presentation.ui.chat.base_screen.ChatSharedViewModel
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.TransparentTextField
@@ -62,9 +60,8 @@ import kotlinx.coroutines.launch
 @ChatNavGraph
 @Destination
 @Composable
-fun ChatDetailsScreen(navigator: DestinationsNavigator) {
+fun ChatDetailsScreen(navigator: DestinationsNavigator, loggedInUserDetails: UsersBean) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
-    val chatSharedViewModel: ChatSharedViewModel = hiltViewModel(LocalActivity.current)
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -76,8 +73,8 @@ fun ChatDetailsScreen(navigator: DestinationsNavigator) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
-                    chatSharedViewModel.usersDetails,
-                    chatSharedViewModel.usersDetails,
+                    loggedInUserDetails,
+                    loggedInUserDetails,
                     navigator
                 )
             }
@@ -108,8 +105,8 @@ fun ChatDetailsScreen(navigator: DestinationsNavigator) {
             }
             ChatDetailsBottomSection(
                 viewModel,
-                chatSharedViewModel.usersDetails,
-                chatSharedViewModel.usersDetails
+                loggedInUserDetails,
+                loggedInUserDetails
             )
         }
         LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {

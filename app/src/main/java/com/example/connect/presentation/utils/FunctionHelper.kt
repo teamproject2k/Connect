@@ -2,11 +2,14 @@ package com.example.connect.presentation.utils
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
+import android.os.Parcelable
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.MediaStore
@@ -706,5 +709,10 @@ object FunctionHelper {
             e.printStackTrace()
         }
         return null
+    }
+
+    inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
+        SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
+        else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
     }
 }

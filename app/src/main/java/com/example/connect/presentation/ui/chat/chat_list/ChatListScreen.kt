@@ -12,7 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -28,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,19 +48,25 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.ChatWithUserDetails
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
-import com.example.connect.presentation.ui.chat.base_screen.ChatSharedViewModel
+import com.example.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight4
+import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestination
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.parcelable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -61,11 +75,35 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun ChatListScreen(navigator: DestinationsNavigator) {
-    val chatSharedViewModel: ChatSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: ChatListViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val activity = (LocalActivity.current as ChatActivity)
+    val context = LocalContext.current
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
+    if (!viewModel.isDetailsInitialized) {
+        val userDetails =
+            activity.intent.parcelable<UsersBean>(ConstantsHelper.USER_DETAILS_KEY)
+        if (userDetails != null) {
+            viewModel.initData(userDetails)
+        } else {
+            activity.finish()
+        }
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        floatingActionButton = {
+
+            FloatingActionButton(
+                onClick = { /*TODO*/ },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Chat,
+                    contentDescription = stringResource(id = R.string.chat)
+                )
+            }
+        },
         topBar = {
             AppTopAppBar(title = stringResource(id = R.string.chats))
         }) {
@@ -74,7 +112,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
                 .fillMaxSize()
                 .padding(it)
         ) {
-            HandleChatListSectionState(chatSharedViewModel.usersDetails, viewModel, navigator)
+            HandleChatListSectionState(viewModel, navigator)
         }
     }
     LaunchedEffect(viewModel.snackBarMessageState.value) {
@@ -83,11 +121,19 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
             viewModel.snackBarMessageState.value = ""
         }
     }
+
+    LaunchedEffect(Unit) {
+        if (context.isNetworkAvailable()) {
+            viewModel.getChatList()
+        } else {
+            viewModel.snackBarMessageState.value =
+                context.getString(R.string.no_internet_connection)
+        }
+    }
 }
 
 @Composable
 fun HandleChatListSectionState(
-    loggedInUser: UsersBean,
     viewModel: ChatListViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -116,7 +162,93 @@ fun HandleChatListSectionState(
         }
 
         RequestStatusEnum.Success -> {
-            ChatList(loggedInUser, getChatListState.data, navigator)
+            val chatList = arrayListOf<ChatWithUserDetails>()
+            chatList.add(
+                ChatWithUserDetails(
+                    viewModel.loggedInUserDetails,
+                    ChatBean(
+                        "1",
+                        "1",
+                        "1",
+                        "Hello How are you",
+                        1,
+                        1,
+                        "1",
+                        "a",
+                        "",
+                        MediaTypeEnum.Text.name
+                    )
+                )
+            )
+            chatList.add(
+                ChatWithUserDetails(
+                    viewModel.loggedInUserDetails,
+                    ChatBean(
+                        "1",
+                        "1",
+                        "1",
+                        "Hello How are you",
+                        1,
+                        1,
+                        "1",
+                        "a",
+                        "",
+                        MediaTypeEnum.Image.name
+                    )
+                )
+            )
+            chatList.add(
+                ChatWithUserDetails(
+                    viewModel.loggedInUserDetails,
+                    ChatBean(
+                        "1",
+                        "1",
+                        "1",
+                        "Hello How are you",
+                        1,
+                        1,
+                        "1",
+                        "a",
+                        "",
+                        MediaTypeEnum.TextImage.name
+                    )
+                )
+            )
+            chatList.add(
+                ChatWithUserDetails(
+                    viewModel.loggedInUserDetails,
+                    ChatBean(
+                        "1",
+                        "1",
+                        "1",
+                        "Hello How are you",
+                        1,
+                        1,
+                        "1",
+                        "a",
+                        "",
+                        MediaTypeEnum.Video.name
+                    )
+                )
+            )
+            chatList.add(
+                ChatWithUserDetails(
+                    viewModel.loggedInUserDetails,
+                    ChatBean(
+                        "1",
+                        "1",
+                        "1",
+                        "Hello How are you",
+                        1,
+                        1,
+                        "1",
+                        "a",
+                        "",
+                        MediaTypeEnum.TextVideo.name
+                    )
+                )
+            )
+            ChatList(chatList, viewModel, navigator)
         }
 
         RequestStatusEnum.None -> {
@@ -127,8 +259,8 @@ fun HandleChatListSectionState(
 
 @Composable
 private fun ChatList(
-    loggedInUser: UsersBean,
     chatList: MutableList<ChatWithUserDetails>?,
+    viewModel: ChatListViewModel,
     navigator: DestinationsNavigator
 ) {
     if (chatList.isNullOrEmpty()) {
@@ -137,9 +269,9 @@ private fun ChatList(
         }
     } else {
         LazyColumn {
-            items(chatList) { chat->
-                ChatListItem(otherUser = loggedInUser, chat) {
-                    navigator.navigate(ChatDetailsScreenDestination())
+            items(chatList) { chat ->
+                ChatListItem(otherUser = chat.usersBean, chat = chat) {
+                    navigator.navigate(ChatDetailsScreenDestination(viewModel.loggedInUserDetails))
                 }
             }
         }
@@ -148,17 +280,17 @@ private fun ChatList(
 
 @Composable
 private fun ChatListItem(
-    modifier: Modifier = Modifier,
     otherUser: UsersBean,
     chat: ChatWithUserDetails,
     onItemClick: () -> (Unit)
 ) {
+    val context = LocalContext.current
     Column(modifier = Modifier.clickable {
         onItemClick()
     }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             AsyncImage(
                 modifier = Modifier
@@ -185,7 +317,7 @@ private fun ChatListItem(
                         maxLines = 1
                     )
                     Text(
-                        text = "12 min",
+                        text = FunctionHelper.getTimeAgo(chat.chatsBean.modifiedAt, context),
                         fontSize = 12.sp,
                         color = ColorsHelper.gray(),
                         fontWeight = FontWeight.Medium
@@ -196,13 +328,46 @@ private fun ChatListItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = "Hello. How are you? Hello mat bolo gaendue prasad chamasssss",
-                        fontSize = 13.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
+                    val isTextPresent =
+                        chat.chatsBean.mediaType == MediaTypeEnum.Text.name || chat.chatsBean.mediaType == MediaTypeEnum.TextImage.name || chat.chatsBean.mediaType == MediaTypeEnum.TextVideo.name
+                    val isLastMessageSeen = false
+                    if (isTextPresent) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = chat.chatsBean.message,
+                            fontSize = 13.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            fontWeight = if (isLastMessageSeen) null else FontWeight.Medium,
+                            color = if (isLastMessageSeen) Color.Unspecified else MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            val isImageFile = chat.chatsBean.mediaType == MediaTypeEnum.Image.name
+                            Icon(
+                                imageVector = if (isImageFile) Icons.Default.Image else Icons.Default.VideoCall,
+                                contentDescription = chat.chatsBean.mediaType,
+                                modifier = Modifier.size(18.dp),
+                                tint = if (isLastMessageSeen) ColorsHelper.gray() else MaterialTheme.colorScheme.primary
+                            )
+                            SpacerWidth6()
+                            Text(
+                                text = if (isImageFile) stringResource(R.string.image) else stringResource(
+                                    R.string.video
+                                ),
+                                fontSize = 13.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                fontWeight = if (isLastMessageSeen) null else FontWeight.Medium,
+                                color = if (isLastMessageSeen) Color.Unspecified else MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    // TODO: rethink on this logic
                     Box(
                         modifier = Modifier
                             .size(24.dp)

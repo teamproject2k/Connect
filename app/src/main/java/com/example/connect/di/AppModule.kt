@@ -9,6 +9,7 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.connect.data.local_db.AppDatabase
 import com.example.connect.data.remote.IRemoteRepository
 import com.example.connect.data.repository.IAuthenticationRepositoryImpl
+import com.example.connect.data.repository.IChatRepositoryImpl
 import com.example.connect.data.repository.IDeviceIdRepositoryImpl
 import com.example.connect.data.repository.IFCMRepositoryImpl
 import com.example.connect.data.repository.IPostRepositoryImpl
@@ -16,6 +17,7 @@ import com.example.connect.data.repository.IStoryRepositoryImpl
 import com.example.connect.data.repository.IUploadRepositoryImpl
 import com.example.connect.data.repository.IUserRepositoryImpl
 import com.example.connect.domain.repository.IAuthenticationRepository
+import com.example.connect.domain.repository.IChatRepository
 import com.example.connect.domain.repository.IDeviceIdRepository
 import com.example.connect.domain.repository.IFCMRepository
 import com.example.connect.domain.repository.IPostRepository
@@ -125,6 +127,13 @@ class AppModule {
         appDatabase: AppDatabase
     ): IStoryRepository =
         IStoryRepositoryImpl(fireStore, appDatabase)
+
+    @Provides
+    @Singleton
+    fun getIChatRepository(
+        fireStore: FirebaseFirestore
+    ): IChatRepository =
+        IChatRepositoryImpl(fireStore)
 
 
     @Provides
