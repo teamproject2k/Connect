@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -37,8 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +52,7 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
@@ -59,6 +62,8 @@ import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
+import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
+import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -74,6 +79,10 @@ fun ChatDetailsScreen(
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    if (viewModel.listener == null) {
+        viewModel.liveObserveChat(loggedInUserFirebaseId, otherUserDetails.firebaseUserId)
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
@@ -91,8 +100,8 @@ fun ChatDetailsScreen(
                     otherUserDetails,
                     navigator
                 )
+                ChatListSection(viewModel)
             }
-            ChatBubble(message = Message("hehehe", isUser = true))
             ChatDetailsBottomSection(
                 viewModel,
                 loggedInUserFirebaseId,
@@ -107,6 +116,21 @@ fun ChatDetailsScreen(
                     viewModel.snackBarMessageState.value = ""
                 }
             }
+        }
+        LaunchedEffect(key1 = viewModel.onListenerErrorOccurredState.value) {
+            if (viewModel.onListenerErrorOccurredState.value.isNotBlank()) {
+                context.showToast(viewModel.onListenerErrorOccurredState.value)
+                navigator.popBackStack()
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatListSection(viewModel: ChatDetailsViewModel) {
+    LazyColumn {
+        items(viewModel.chatListState) { chat ->
+            ChatBubble(chat)
         }
     }
 }
@@ -155,6 +179,7 @@ fun ChatDetailsBottomSection(
     loggedInUserFirebaseId: String,
     otherUserDetails: UsersBean
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -201,10 +226,15 @@ fun ChatDetailsBottomSection(
                 onClick = {
                     if (viewModel.messageState.value.isNotBlank()) {
                         keyboardController?.hide()
-                        viewModel.sendMessage(
-                            loggedInUserFirebaseId,
-                            otherUserDetails.firebaseUserId
-                        )
+                        if (context.isNetworkAvailable()) {
+                            viewModel.sendMessage(
+                                loggedInUserFirebaseId,
+                                otherUserDetails.firebaseUserId
+                            )
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                        }
                     }
                 },
                 colors = IconButtonDefaults.iconButtonColors(
@@ -272,21 +302,9 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
     }
 }
 
-data class Message(val text: String, val isUser: Boolean)
-
 @Composable
-fun ChatBubble(message: Message) {
-    val backgroundColor = if (message.isUser) {
-        Color(0xFFDCF8C6)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+fun ChatBubble(message: ChatBean) {
 
-    val contentColor = if (message.isUser) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
 
     Row(
         modifier = Modifier
@@ -301,7 +319,7 @@ fun ChatBubble(message: Message) {
                 .padding(2.dp)
         ) {
             Text(
-                text = message.text,
+                text = message.message,
                 fontWeight = FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(8.dp),

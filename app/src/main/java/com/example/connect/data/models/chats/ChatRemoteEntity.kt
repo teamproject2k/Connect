@@ -12,6 +12,8 @@ data class ChatRemoteEntity(
     val mediaUrl: String,
     val mediaType: String
 ) {
+    constructor() : this("", "", "", 0, 0, "", "", "")
+
     fun toChatBean(firebaseId: String): ChatBean {
         return ChatBean(
             firebaseId,
