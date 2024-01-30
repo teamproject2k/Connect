@@ -1,6 +1,5 @@
 package com.example.connect.data.repository
 
-import android.util.Log
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IChatRepository
@@ -32,19 +31,16 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
 //        }
     }
 
-    override suspend fun sendChatMessage(message: ChatBean) {
-        try {
+    override suspend fun sendChatMessage(message: ChatBean): ResponseState<String> {
+        return try {
             val id1 = message.senderId
             val id2 = message.receiverId
             val resultId = if (id1 < id2) id1 + id2 else id2 + id1
             val messageReference =
-               // firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).push()
-            firebaseDatabase.getReference("https://console.firebase.google.com/u/0/project/connect-6b6fe/database/connect-6b6fe-default-rtdb/data/~2F")
-                .child(FirebaseConstants.CHATS_KEY).child(resultId).push()
+                firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).push()
             messageReference.setValue(message.toChatRemoteEntity()).await()
             ResponseState.success(messageReference.key)
         } catch (exception: Exception) {
-            Log.e("aryan", exception.localizedMessage)
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
