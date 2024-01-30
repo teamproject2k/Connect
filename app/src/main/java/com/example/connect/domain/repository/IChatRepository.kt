@@ -7,5 +7,7 @@ interface IChatRepository {
 
     suspend fun getChatListFromRemote(loggedInUserFirebaseId: String)
 
-    suspend fun sendChatMessage(message: ChatBean): ResponseState<String>
+    fun liveObserveChat(loggedInUserFirebaseId: String, otherUserFirebaseId: String)
+
+    suspend fun sendChatMessage(message: ChatBean): ResponseState<Nothing>
 }

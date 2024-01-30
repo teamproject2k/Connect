@@ -175,7 +175,6 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        "",
                         MediaTypeEnum.Text.name
                     )
                 )
@@ -192,7 +191,6 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        "",
                         MediaTypeEnum.Image.name
                     )
                 )
@@ -209,7 +207,6 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        "",
                         MediaTypeEnum.TextImage.name
                     )
                 )
@@ -226,7 +223,6 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        "",
                         MediaTypeEnum.Video.name
                     )
                 )
@@ -243,7 +239,6 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        "",
                         MediaTypeEnum.TextVideo.name
                     )
                 )
@@ -271,7 +266,7 @@ private fun ChatList(
         LazyColumn {
             items(chatList) { chat ->
                 ChatListItem(otherUser = chat.usersBean, chat = chat) {
-                    navigator.navigate(ChatDetailsScreenDestination(viewModel.loggedInUserDetails))
+                    navigator.navigate(ChatDetailsScreenDestination(viewModel.loggedInUserDetails.firebaseUserId, viewModel.loggedInUserDetails))
                 }
             }
         }

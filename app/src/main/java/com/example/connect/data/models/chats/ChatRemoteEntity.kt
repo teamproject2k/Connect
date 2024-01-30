@@ -8,7 +8,6 @@ data class ChatRemoteEntity(
     val message: String,
     val sentAt: Long,
     val modifiedAt: Long,
-    val messageStatus: String,
     val deletedBy: String,
     val mediaUrl: String,
     val mediaType: String
@@ -21,7 +20,6 @@ data class ChatRemoteEntity(
             message,
             sentAt,
             modifiedAt,
-            messageStatus,
             deletedBy,
             mediaUrl,
             mediaType

@@ -31,15 +31,23 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
 //        }
     }
 
-    override suspend fun sendChatMessage(message: ChatBean): ResponseState<String> {
+    override fun liveObserveChat(loggedInUserFirebaseId: String, otherUserFirebaseId: String) {
+        val resultId =
+            if (loggedInUserFirebaseId < otherUserFirebaseId) loggedInUserFirebaseId + otherUserFirebaseId else otherUserFirebaseId + loggedInUserFirebaseId
+
+        firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).addValueEventListener {
+
+        }
+    }
+
+    override suspend fun sendChatMessage(message: ChatBean): ResponseState<Nothing> {
         return try {
             val id1 = message.senderId
             val id2 = message.receiverId
             val resultId = if (id1 < id2) id1 + id2 else id2 + id1
-            val messageReference =
-                firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).push()
-            messageReference.setValue(message.toChatRemoteEntity()).await()
-            ResponseState.success(messageReference.key)
+            firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId).push()
+                .setValue(message.toChatRemoteEntity()).await()
+            ResponseState.success(null)
         } catch (exception: Exception) {
             ResponseState.error(exception.localizedMessage ?: "")
         }

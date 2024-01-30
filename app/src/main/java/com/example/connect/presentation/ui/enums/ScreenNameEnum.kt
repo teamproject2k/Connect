@@ -10,6 +10,7 @@ enum class ScreenNameEnum {
     ShowStoryScreen,
     ShowStoryViewModel,
     ChatListScreen,
+    ChatDetailsScreen,
     PostDetailsScreen,
     LikedByScreen,
     SearchUserScreen,

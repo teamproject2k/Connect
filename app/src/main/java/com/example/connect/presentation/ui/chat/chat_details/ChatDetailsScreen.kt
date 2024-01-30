@@ -6,21 +6,20 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -28,30 +27,38 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.logger.LoggingHelper
+import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.SpacerWidth16
+import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold16
-import com.example.connect.presentation.ui.common.TransparentTextField
+import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
+import com.example.connect.presentation.utils.ConstantsHelper
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -59,7 +66,11 @@ import kotlinx.coroutines.launch
 @ChatNavGraph
 @Destination
 @Composable
-fun ChatDetailsScreen(navigator: DestinationsNavigator, loggedInUserDetails: UsersBean) {
+fun ChatDetailsScreen(
+    navigator: DestinationsNavigator,
+    loggedInUserFirebaseId: String,
+    otherUserDetails: UsersBean
+) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
@@ -69,21 +80,26 @@ fun ChatDetailsScreen(navigator: DestinationsNavigator, loggedInUserDetails: Use
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
+                .background(
+                    ColorsHelper
+                        .lightGray()
+                        .copy(alpha = 0.05f)
+                )
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
-                    loggedInUserDetails,
-                    loggedInUserDetails,
+                    otherUserDetails,
                     navigator
                 )
             }
             ChatBubble(message = Message("hehehe", isUser = true))
             ChatDetailsBottomSection(
                 viewModel,
-                loggedInUserDetails,
-                loggedInUserDetails
+                loggedInUserFirebaseId,
+                otherUserDetails
             )
         }
+        HandleSendMessageState(viewModel = viewModel)
         LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
             if (viewModel.snackBarMessageState.value.isNotBlank()) {
                 coroutineScope.launch {
@@ -97,7 +113,6 @@ fun ChatDetailsScreen(navigator: DestinationsNavigator, loggedInUserDetails: Use
 
 @Composable
 private fun ChatDetailsTopSection(
-    loggedInUserDetails: UsersBean,
     otherUserDetails: UsersBean,
     navigator: DestinationsNavigator
 ) {
@@ -127,48 +142,132 @@ private fun ChatDetailsTopSection(
         SpacerWidth16()
         Column {
             TextBold16(text = otherUserDetails.name, color = MaterialTheme.colorScheme.onPrimary)
+            // TODO: 31/01/24 aryan handle online
             Text(text = "Online", color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp)
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
     viewModel: ChatDetailsViewModel,
-    loggedInUserDetails: UsersBean,
+    loggedInUserFirebaseId: String,
     otherUserDetails: UsersBean
 ) {
     Row(
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TransparentTextField(
+        val keyboardController = LocalSoftwareKeyboardController.current
+        BasicTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(32.dp))
                 .border(
-                    border = BorderStroke(1.dp, ColorsHelper.black()),
+                    border = BorderStroke(
+                        1.dp,
+                        ColorsHelper
+                            .black()
+                            .copy(alpha = 0.7f)
+                    ),
                     shape = RoundedCornerShape(32.dp)
-                ),
+                )
+                .background(MaterialTheme.colorScheme.onPrimary)
+                .padding(vertical = 12.dp, horizontal = 16.dp),
             value = viewModel.messageState.value,
             onValueChange = { text -> viewModel.messageState.value = text },
-            placeholder = {
-                Text(
-                    stringResource(id = R.string.message),
-                    color = ColorsHelper.gray()
-                )
+            decorationBox = {
+                if (viewModel.messageState.value.isBlank()) {
+                    Text(
+                        stringResource(id = R.string.message),
+                        color = ColorsHelper.gray(),
+                        fontSize = 14.sp
+                    )
+                } else {
+                    Text(
+                        viewModel.messageState.value,
+                        color = ColorsHelper.black(),
+                        fontSize = 14.sp
+                    )
+                }
             }
         )
-        IconButton(onClick = {
-            if (viewModel.messageState.value.isNotBlank()) {
-                viewModel.sendMessage()
+        SpacerWidth8()
+        if (!viewModel.isMessageSendingState.value) {
+            IconButton(
+                enabled = viewModel.messageState.value.isNotBlank(),
+                onClick = {
+                    if (viewModel.messageState.value.isNotBlank()) {
+                        keyboardController?.hide()
+                        viewModel.sendMessage(
+                            loggedInUserFirebaseId,
+                            otherUserDetails.firebaseUserId
+                        )
+                    }
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
+                )
+            ) {
+                Icon(
+                    modifier = Modifier.padding(10.dp),
+                    painter = painterResource(id = R.drawable.ic_send),
+                    contentDescription = stringResource(R.string.post_comment),
+                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
+                )
             }
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_send),
-                contentDescription = stringResource(R.string.post_comment)
+        } else {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(8.dp),
+                strokeWidth = 1.5.dp
             )
+        }
+    }
+}
+
+@Composable
+fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
+
+    val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
+
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+
+    when (sendMessageState.status) {
+        RequestStatusEnum.Loading -> {
+            viewModel.isMessageSendingState.value = true
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                viewModel.isMessageSendingState.value = false
+                viewModel.snackBarMessageState.value =
+                    sendMessageState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.ChatDetailsScreen.name,
+                    sendMessageState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            viewModel.isMessageSendingState.value = false
+            viewModel.messageState.value = ""
+        }
+
+        RequestStatusEnum.None -> {
+            // No need to handle this
         }
     }
 }
@@ -212,19 +311,4 @@ fun ChatBubble(message: Message) {
     }
 }
 
-
-class TriangleEdgeShape(val offset: Int) : Shape {
-    override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
-        layoutDirection: androidx.compose.ui.unit.LayoutDirection,
-        density: Density
-    ): Outline {
-        val trianglePath = Path().apply {
-            moveTo(x = 0f, y = size.height - offset)
-            lineTo(x = 0f, y = size.height)
-            lineTo(x = 0f + offset, y = size.height)
-        }
-        return Outline.Generic(path = trianglePath)
-    }
-}
 
