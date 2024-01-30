@@ -316,7 +316,7 @@ fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primary)
+                .background(if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary)
                 .padding(2.dp)
         ) {
             Text(
@@ -324,7 +324,7 @@ fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
                 fontWeight = FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(8.dp),
-                color = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary
+                color = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black()
             )
         }
         SpacerHeight2()
