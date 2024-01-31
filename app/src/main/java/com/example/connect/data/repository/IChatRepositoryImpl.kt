@@ -2,6 +2,7 @@ package com.example.connect.data.repository
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.connect.data.models.chats.ChatRemoteEntity
+import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IChatRepository
@@ -49,7 +50,12 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val chatRemoteEntity = snapshot.getValue(ChatRemoteEntity::class.java)
                     val chatDocumentId = snapshot.key
-                    if (chatRemoteEntity != null && chatDocumentId != null) {
+                    val whetherNotShowMessageToLoggedInUser =
+                        chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForEveryone.name
+                                || (chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForSender.name && chatRemoteEntity.senderId == loggedInUserFirebaseId)
+                                || (chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForReceiver.name && chatRemoteEntity.receiverId == loggedInUserFirebaseId)
+
+                    if (chatRemoteEntity != null && chatDocumentId != null && !whetherNotShowMessageToLoggedInUser) {
                         chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
                     }
                 }
@@ -57,9 +63,15 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                     val chatRemoteEntity = snapshot.getValue(ChatRemoteEntity::class.java)
                     val chatDocumentId = snapshot.key
+                    val whetherNotShowMessageToLoggedInUser =
+                        chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForEveryone.name
+                                || (chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForSender.name && chatRemoteEntity.senderId == loggedInUserFirebaseId)
+                                || (chatRemoteEntity?.deletedBy == MessageDeleteStatusEnum.DeletedForReceiver.name && chatRemoteEntity.receiverId == loggedInUserFirebaseId)
                     if (chatRemoteEntity != null && chatDocumentId != null) {
                         chatListState.removeIf { it.firebaseId == chatDocumentId }
-                        chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                        if (!whetherNotShowMessageToLoggedInUser) {
+                            chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                        }
                     }
                 }
 
