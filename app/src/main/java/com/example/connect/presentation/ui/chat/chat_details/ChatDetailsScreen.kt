@@ -89,6 +89,13 @@ fun ChatDetailsScreen(
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (!context.isNetworkAvailable()) {
+        viewModel.snackBarMessageState.value = stringResource(id = R.string.no_internet_connection)
+        FunctionHelper.vibrateDevice(context)
+        navigator.popBackStack()
+    }
+
     if (viewModel.listener == null) {
         viewModel.liveObserveChat(loggedInUserFirebaseId, otherUserDetails.firebaseUserId)
     }
@@ -240,6 +247,7 @@ fun ChatDetailsBottomSection(
                         } else {
                             viewModel.snackBarMessageState.value =
                                 context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
                         }
                     }
                 },
@@ -312,6 +320,7 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserFirebaseId: String) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -383,10 +392,16 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                     if (isMessageFromLoggedInUser) {
                         TextButton(
                             onClick = {
-                                viewModel.deleteMessage(
-                                    MessageDeleteStatusEnum.DeletedForEveryone.name,
-                                    message
-                                )
+                                if (context.isNetworkAvailable()) {
+                                    viewModel.deleteMessage(
+                                        MessageDeleteStatusEnum.DeletedForEveryone.name,
+                                        message
+                                    )
+                                } else {
+                                    viewModel.snackBarMessageState.value =
+                                        context.getString(R.string.no_internet_connection)
+                                    FunctionHelper.vibrateDevice(context)
+                                }
                                 showDeleteMessageDialog = false
                             }
                         ) {
@@ -395,20 +410,26 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                     }
                     TextButton(
                         onClick = {
-                            val deleteFor = when {
-                                message.deletedBy != MessageDeleteStatusEnum.DeletedForNone.name -> {
-                                    MessageDeleteStatusEnum.DeletedForEveryone.name
-                                }
+                            if (context.isNetworkAvailable()) {
+                                val deleteFor = when {
+                                    message.deletedBy != MessageDeleteStatusEnum.DeletedForNone.name -> {
+                                        MessageDeleteStatusEnum.DeletedForEveryone.name
+                                    }
 
-                                isMessageFromLoggedInUser -> {
-                                    MessageDeleteStatusEnum.DeletedForSender.name
-                                }
+                                    isMessageFromLoggedInUser -> {
+                                        MessageDeleteStatusEnum.DeletedForSender.name
+                                    }
 
-                                else -> {
-                                    MessageDeleteStatusEnum.DeletedForReceiver.name
+                                    else -> {
+                                        MessageDeleteStatusEnum.DeletedForReceiver.name
+                                    }
                                 }
+                                viewModel.deleteMessage(deleteFor, message)
+                            } else {
+                                viewModel.snackBarMessageState.value =
+                                    context.getString(R.string.no_internet_connection)
+                                FunctionHelper.vibrateDevice(context)
                             }
-                            viewModel.deleteMessage(deleteFor, message)
                             showDeleteMessageDialog = false
                         }
                     ) {
