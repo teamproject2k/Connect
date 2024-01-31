@@ -251,4 +251,8 @@ interface IUserRepository {
 
     suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
 
+    suspend fun updateUserLastActiveAtChatOnRemote(
+        lastActiveAtChat: Long,
+        loggedInUserFirebaseId: String
+    ): ResponseState<Nothing>
 }

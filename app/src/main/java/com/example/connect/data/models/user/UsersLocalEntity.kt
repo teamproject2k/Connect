@@ -27,7 +27,8 @@ data class UsersLocalEntity(
     val genderVisibility: String,
     val dobVisibility: String,
     val friendListVisibility: String,
-    val savedPosts: ArrayList<String> = arrayListOf()
+    val savedPosts: ArrayList<String> = arrayListOf(),
+    val lastActiveAt: Long
 ) {
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()
@@ -74,7 +75,8 @@ data class UsersLocalEntity(
             genderVisibility,
             dobVisibility,
             friendListVisibility,
-            savedPosts
+            savedPosts,
+            lastActiveAt
         )
     }
 }

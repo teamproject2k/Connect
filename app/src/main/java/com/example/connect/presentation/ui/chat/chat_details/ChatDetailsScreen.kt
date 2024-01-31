@@ -86,14 +86,17 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun ChatDetailsScreen(
-    navigator: DestinationsNavigator,
-    loggedInUserFirebaseId: String,
-    otherUserDetails: UsersBean
+    navigator: DestinationsNavigator, loggedInUser: UsersBean, otherUserDetails: UsersBean
 ) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (!viewModel.isDataInitialized) {
+        viewModel.loggedInUser = loggedInUser
+        viewModel.isDataInitialized = true
+    }
 
     if (!context.isNetworkAvailable()) {
         viewModel.snackBarMessageState.value = stringResource(id = R.string.no_internet_connection)
@@ -102,10 +105,9 @@ fun ChatDetailsScreen(
     }
 
     if (viewModel.listener == null) {
-        viewModel.liveObserveChat(loggedInUserFirebaseId, otherUserDetails.firebaseUserId)
+        viewModel.liveObserveChat(otherUserDetails.firebaseUserId)
     }
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -113,15 +115,12 @@ fun ChatDetailsScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
-                    otherUserDetails,
-                    navigator
+                    otherUserDetails, navigator
                 )
-                ChatListSection(viewModel, loggedInUserFirebaseId)
+                ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
             ChatDetailsBottomSection(
-                viewModel,
-                loggedInUserFirebaseId,
-                otherUserDetails
+                viewModel, otherUserDetails
             )
         }
         HandleSendMessageState(viewModel = viewModel)
@@ -162,15 +161,13 @@ fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: Str
 
 @Composable
 private fun ChatDetailsTopSection(
-    otherUserDetails: UsersBean,
-    navigator: DestinationsNavigator
+    otherUserDetails: UsersBean, navigator: DestinationsNavigator
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { navigator.popBackStack() }) {
             Icon(
@@ -200,9 +197,7 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel,
-    loggedInUserFirebaseId: String,
-    otherUserDetails: UsersBean
+    viewModel: ChatDetailsViewModel, otherUserDetails: UsersBean
 ) {
     val context = LocalContext.current
     Row(
@@ -226,7 +221,7 @@ fun ChatDetailsBottomSection(
                 if (viewModel.repliedOnChatState.value != null) {
                     RepliedOnLayout(
                         message = viewModel.repliedOnChatState.value!!,
-                        loggedInUserFirebaseId = loggedInUserFirebaseId,
+                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                         otherUserName = otherUserDetails.name,
                         showCancelIconButton = true,
                     ) {
@@ -258,23 +253,18 @@ fun ChatDetailsBottomSection(
         SpacerWidth8()
         if (!viewModel.isMessageSendingState.value) {
             IconButton(
-                enabled = viewModel.messageState.value.isNotBlank(),
-                onClick = {
+                enabled = viewModel.messageState.value.isNotBlank(), onClick = {
                     if (viewModel.messageState.value.isNotBlank()) {
                         keyboardController?.hide()
                         if (context.isNetworkAvailable()) {
-                            viewModel.sendMessage(
-                                loggedInUserFirebaseId,
-                                otherUserDetails.firebaseUserId
-                            )
+                            viewModel.sendMessage(otherUserDetails.firebaseUserId)
                         } else {
                             viewModel.snackBarMessageState.value =
                                 context.getString(R.string.no_internet_connection)
                             FunctionHelper.vibrateDevice(context)
                         }
                     }
-                },
-                colors = IconButtonDefaults.iconButtonColors(
+                }, colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
                 )
@@ -290,8 +280,7 @@ fun ChatDetailsBottomSection(
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(48.dp)
-                    .padding(8.dp),
-                strokeWidth = 1.5.dp
+                    .padding(8.dp), strokeWidth = 1.5.dp
             )
         }
     }
@@ -395,8 +384,7 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
             if (!isExceptionHandled) {
                 viewModel.isMessageSendingState.value = false
                 viewModel.snackBarMessageState.value =
-                    sendMessageState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                    sendMessageState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
@@ -430,11 +418,9 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp)
             .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = {
-                        showDeleteMessageDialog = true
-                    }
-                )
+                detectTapGestures(onLongPress = {
+                    showDeleteMessageDialog = true
+                })
             },
         horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
     ) {
@@ -442,9 +428,7 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
             modifier = Modifier
                 .clip(
                     if (isMessageFromLoggedInUser) RoundedCornerShape(
-                        topStart = 12.dp,
-                        topEnd = 12.dp,
-                        bottomStart = 12.dp
+                        topStart = 12.dp, topEnd = 12.dp, bottomStart = 12.dp
                     ) else RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp)
                 )
                 .background(
@@ -470,11 +454,9 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
     }
 
     if (showDeleteMessageDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showDeleteMessageDialog = false
-            }
-        ) {
+        AlertDialog(onDismissRequest = {
+            showDeleteMessageDialog = false
+        }) {
             Column {
                 Column(
                     modifier = Modifier
@@ -493,56 +475,49 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                     )
                     SpacerHeight16()
                     if (isMessageFromLoggedInUser) {
-                        TextButton(
-                            onClick = {
-                                if (context.isNetworkAvailable()) {
-                                    viewModel.deleteMessage(
-                                        MessageDeleteStatusEnum.DeletedForEveryone.name,
-                                        message
-                                    )
-                                } else {
-                                    viewModel.snackBarMessageState.value =
-                                        context.getString(R.string.no_internet_connection)
-                                    FunctionHelper.vibrateDevice(context)
-                                }
-                                showDeleteMessageDialog = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.delete_for_everyone))
-                        }
-                    }
-                    TextButton(
-                        onClick = {
+                        TextButton(onClick = {
                             if (context.isNetworkAvailable()) {
-                                val deleteFor = when {
-                                    message.deletedBy != MessageDeleteStatusEnum.DeletedForNone.name -> {
-                                        MessageDeleteStatusEnum.DeletedForEveryone.name
-                                    }
-
-                                    isMessageFromLoggedInUser -> {
-                                        MessageDeleteStatusEnum.DeletedForSender.name
-                                    }
-
-                                    else -> {
-                                        MessageDeleteStatusEnum.DeletedForReceiver.name
-                                    }
-                                }
-                                viewModel.deleteMessage(deleteFor, message)
+                                viewModel.deleteMessage(
+                                    MessageDeleteStatusEnum.DeletedForEveryone.name, message
+                                )
                             } else {
                                 viewModel.snackBarMessageState.value =
                                     context.getString(R.string.no_internet_connection)
                                 FunctionHelper.vibrateDevice(context)
                             }
                             showDeleteMessageDialog = false
+                        }) {
+                            Text(stringResource(R.string.delete_for_everyone))
                         }
-                    ) {
+                    }
+                    TextButton(onClick = {
+                        if (context.isNetworkAvailable()) {
+                            val deleteFor = when {
+                                message.deletedBy != MessageDeleteStatusEnum.DeletedForNone.name -> {
+                                    MessageDeleteStatusEnum.DeletedForEveryone.name
+                                }
+
+                                isMessageFromLoggedInUser -> {
+                                    MessageDeleteStatusEnum.DeletedForSender.name
+                                }
+
+                                else -> {
+                                    MessageDeleteStatusEnum.DeletedForReceiver.name
+                                }
+                            }
+                            viewModel.deleteMessage(deleteFor, message)
+                        } else {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.no_internet_connection)
+                            FunctionHelper.vibrateDevice(context)
+                        }
+                        showDeleteMessageDialog = false
+                    }) {
                         Text(stringResource(R.string.delete_for_me))
                     }
-                    TextButton(
-                        onClick = {
-                            showDeleteMessageDialog = false
-                        }
-                    ) {
+                    TextButton(onClick = {
+                        showDeleteMessageDialog = false
+                    }) {
                         Text(stringResource(id = R.string.cancel))
                     }
                 }
@@ -568,8 +543,7 @@ fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
         RequestStatusEnum.Exception -> {
             if (!isExceptionHandled) {
                 viewModel.snackBarMessageState.value =
-                    updateMessageState.message
-                        ?: stringResource(id = R.string.something_went_wrong)
+                    updateMessageState.message ?: stringResource(id = R.string.something_went_wrong)
                 LoggingHelper.logData(
                     LoggingLevelEnum.Error,
                     ConstantsHelper.ERROR_TAG,
