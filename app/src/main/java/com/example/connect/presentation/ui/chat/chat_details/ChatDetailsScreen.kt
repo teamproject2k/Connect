@@ -139,10 +139,10 @@ fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: Str
         items(viewModel.chatListState) { chat ->
             ChatBubble(viewModel, chat, loggedInUserFirebaseId)
         }
-    }
-    LaunchedEffect(Unit) {
         if (viewModel.chatListState.isNotEmpty()) {
-            lazyListState.animateScrollToItem(viewModel.chatListState.lastIndex)
+            coroutineScope.launch {
+                lazyListState.scrollToItem(viewModel.chatListState.lastIndex)
+            }
         }
     }
 }
