@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -49,12 +53,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
@@ -105,6 +112,7 @@ fun ChatDetailsScreen(
             )
         }
         HandleSendMessageState(viewModel = viewModel)
+        HandleDeleteMessageState(viewModel = viewModel)
         LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
             if (viewModel.snackBarMessageState.value.isNotBlank()) {
                 coroutineScope.launch {
@@ -126,7 +134,7 @@ fun ChatDetailsScreen(
 fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: String) {
     LazyColumn {
         items(viewModel.chatListState) { chat ->
-            ChatBubble(chat, loggedInUserFirebaseId)
+            ChatBubble(viewModel, chat, loggedInUserFirebaseId)
         }
     }
 }
@@ -168,7 +176,7 @@ private fun ChatDetailsTopSection(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
     viewModel: ChatDetailsViewModel,
@@ -254,7 +262,6 @@ fun ChatDetailsBottomSection(
 fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
-
     var isExceptionHandled by remember {
         mutableStateOf(false)
     }
@@ -292,13 +299,23 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
+fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserFirebaseId: String) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
+    var showDeleteMessageDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        showDeleteMessageDialog = true
+                    }
+                )
+            },
         horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
     ) {
         Box(
@@ -331,6 +348,103 @@ fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
             fontSize = 11.sp,
         )
     }
+
+    if (showDeleteMessageDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteMessageDialog = false
+            }
+        ) {
+            Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.onPrimary)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Start),
+                        text = stringResource(R.string.delete_message),
+                        fontSize = 14.sp,
+                        color = ColorsHelper.black()
+                    )
+                    SpacerHeight16()
+                    if (isMessageFromLoggedInUser) {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteMessage(
+                                    MessageDeleteStatusEnum.DeletedForEveryone.name,
+                                    message
+                                )
+                                showDeleteMessageDialog = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.delete_for_everyone))
+                        }
+                    }
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteMessage(
+                                MessageDeleteStatusEnum.DeletedForSender.name,
+                                message
+                            )
+                            showDeleteMessageDialog = false
+                        }
+                    ) {
+                        Text(stringResource(R.string.delete_for_me))
+                    }
+                    TextButton(
+                        onClick = {
+                            showDeleteMessageDialog = false
+                        }
+                    ) {
+                        Text(stringResource(id = R.string.cancel))
+                    }
+                }
+            }
+        }
+    }
 }
 
+@Composable
+fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
+    val updateMessageState = viewModel.deleteMessageStateFlow.collectAsState().value
+
+    var isExceptionHandled by remember {
+        mutableStateOf(false)
+    }
+
+    when (updateMessageState.status) {
+        RequestStatusEnum.Loading -> {
+            LoaderDialog(loadingText = stringResource(R.string.deleting_message))
+            isExceptionHandled = false
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isExceptionHandled) {
+                viewModel.snackBarMessageState.value =
+                    updateMessageState.message
+                        ?: stringResource(id = R.string.something_went_wrong)
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.ChatDetailsScreen.name,
+                    updateMessageState.message.toString()
+                )
+                isExceptionHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+
+        }
+
+        RequestStatusEnum.None -> {
+            // No need to handle this
+        }
+    }
+}
 

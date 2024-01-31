@@ -269,7 +269,7 @@ private fun ChatList(
                     navigator.navigate(
                         ChatDetailsScreenDestination(
                             viewModel.loggedInUserDetails.firebaseUserId,
-                            viewModel.loggedInUserDetails.copy(firebaseUserId = "OUbbPgo1mnUxIog93aqiFsaN07M2")
+                            viewModel.loggedInUserDetails.copy(firebaseUserId = "W7hF7ENqbbRP7c1Dc8StarkC1vF3")
                         )
                     )
                 }

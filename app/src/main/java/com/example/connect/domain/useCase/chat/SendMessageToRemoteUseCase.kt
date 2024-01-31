@@ -8,6 +8,6 @@ import javax.inject.Inject
 class SendMessageToRemoteUseCase @Inject constructor(private val repository: IChatRepository) {
 
     suspend operator fun invoke(message: ChatBean): ResponseState<Nothing> {
-        return repository.sendChatMessage(message)
+        return repository.sendChatMessageOnRemote(message)
     }
 }

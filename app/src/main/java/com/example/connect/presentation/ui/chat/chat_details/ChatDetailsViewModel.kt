@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.models.ChatBean
+import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.chat.LiveObserveChatListOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
+import com.example.connect.domain.useCase.chat.DeleteMessageOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -25,7 +27,8 @@ import javax.inject.Inject
 class ChatDetailsViewModel @Inject constructor(
     private val sendMessageToRemoteUseCase: SendMessageToRemoteUseCase,
     private val liveObserveChatListOnRemoteUseCase: LiveObserveChatListOnRemoteUseCase,
-    private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase
+    private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
+    private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase
 ) :
     BaseViewModel() {
 
@@ -40,6 +43,11 @@ class ChatDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
 
     val sendMessageStateFlow = _sendMessageStateFlow.asStateFlow()
+
+    private val _deleteMessageStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+
+    val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
     val onListenerErrorOccurredState = mutableStateOf("")
 
@@ -77,5 +85,19 @@ class ChatDetailsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
+    }
+
+    fun deleteMessage(deletedBy: String, message: ChatBean) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _deleteMessageStateFlow.value = ResponseState.loading()
+                val response =
+                    deleteMessageOnRemoteUseCase(deletedBy, message.firebaseId)
+                if (response.status == RequestStatusEnum.Success) {
+                    message.deletedBy = deletedBy
+                }
+                _deleteMessageStateFlow.value = response
+            }
+        }
     }
 }

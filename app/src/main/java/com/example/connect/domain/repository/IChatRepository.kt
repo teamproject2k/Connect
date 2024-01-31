@@ -18,5 +18,11 @@ interface IChatRepository {
 
     fun removeEventListener(eventListener: ChildEventListener)
 
-    suspend fun sendChatMessage(message: ChatBean): ResponseState<Nothing>
+    suspend fun sendChatMessageOnRemote(message: ChatBean): ResponseState<Nothing>
+
+    suspend fun updateMessageOnRemote(
+        deletedBy:String,
+        messageId: String
+    ): ResponseState<Nothing>
+
 }

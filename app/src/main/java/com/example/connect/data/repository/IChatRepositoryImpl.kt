@@ -86,8 +86,7 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
         firebaseDatabase.reference.removeEventListener(eventListener)
     }
 
-
-    override suspend fun sendChatMessage(message: ChatBean): ResponseState<Nothing> {
+    override suspend fun sendChatMessageOnRemote(message: ChatBean): ResponseState<Nothing> {
         return try {
             val id1 = message.senderId
             val id2 = message.receiverId
@@ -96,6 +95,22 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
                 .setValue(message.toChatRemoteEntity()).await()
             ResponseState.success(null)
         } catch (exception: Exception) {
+            ResponseState.error(exception.localizedMessage ?: "")
+        }
+    }
+
+    override suspend fun updateMessageOnRemote(
+        deletedBy: String,
+        messageId: String
+    ): ResponseState<Nothing> {
+        return try {
+            val storyDocumentReference =
+                firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(messageId)
+            storyDocumentReference.setValue(ChatRemoteEntity::deletedBy.name, deletedBy)
+            // Return a success response.
+            ResponseState.success(null)
+        } catch (exception: Exception) {
+            // Return an error response if an exception occurs.
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }

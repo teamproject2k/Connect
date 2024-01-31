@@ -241,4 +241,8 @@
     <string name="no_chats_found">No chats found</string>
     <string name="image">Image</string>
     <string name="video">Video</string>
+    <string name="delete_for_me">Delete for Me</string>
+    <string name="delete_for_everyone">Delete for Everyone</string>
+    <string name="deleting_message">Deleting Message</string>
+    <string name="delete_message">Delete Message?</string>
 </resources>
