@@ -222,7 +222,7 @@ fun ChatDetailsBottomSection(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (viewModel.repliedOnChatState.value != null) {
-                    RepliedOnLayout(
+                    RepliedOnUI(
                         message = viewModel.repliedOnChatState.value!!,
                         loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                         otherUserName = otherUserDetails.name,
@@ -293,7 +293,7 @@ fun ChatDetailsBottomSection(
 }
 
 @Composable
-fun RepliedOnLayout(
+fun RepliedOnUI(
     message: ChatBean,
     loggedInUserFirebaseId: String,
     otherUserName: String,
@@ -434,12 +434,15 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
             .pointerInput(Unit) {
                 detectDragGestures(onDrag = { change, dragAmount ->
                     change.consume()
-                    if (dragAmount.x > 0) {
+                    if (dragAmount.x > 5) {
                         //right swipe
                         translateX.value = dragAmount.x
                         viewModel.repliedOnChatState.value = message
                     }
                 }, onDragEnd = {
+                    if (translateX.value != 0.0f) {
+                        FunctionHelper.vibrateDevice(context, 100)
+                    }
                     translateX.value = 0.0f
                 })
             }
