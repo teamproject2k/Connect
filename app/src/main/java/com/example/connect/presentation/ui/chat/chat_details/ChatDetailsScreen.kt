@@ -89,14 +89,17 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun ChatDetailsScreen(
-    navigator: DestinationsNavigator,
-    loggedInUserFirebaseId: String,
-    otherUserDetails: UsersBean
+    navigator: DestinationsNavigator, loggedInUser: UsersBean, otherUserDetails: UsersBean
 ) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (!viewModel.isDataInitialized) {
+        viewModel.loggedInUser = loggedInUser
+        viewModel.isDataInitialized = true
+    }
 
     if (!context.isNetworkAvailable()) {
         viewModel.snackBarMessageState.value = stringResource(id = R.string.no_internet_connection)
@@ -105,10 +108,9 @@ fun ChatDetailsScreen(
     }
 
     if (viewModel.listener == null) {
-        viewModel.liveObserveChat(loggedInUserFirebaseId, otherUserDetails.firebaseUserId)
+        viewModel.liveObserveChat(otherUserDetails.firebaseUserId)
     }
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -116,15 +118,12 @@ fun ChatDetailsScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
-                    otherUserDetails,
-                    navigator
+                    otherUserDetails, navigator
                 )
-                ChatListSection(viewModel, loggedInUserFirebaseId)
+                ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
             ChatDetailsBottomSection(
-                viewModel,
-                loggedInUserFirebaseId,
-                otherUserDetails
+                viewModel, otherUserDetails
             )
         }
         HandleSendMessageState(viewModel = viewModel)
@@ -164,8 +163,7 @@ fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: Str
 
 @Composable
 private fun ChatDetailsTopSection(
-    otherUserDetails: UsersBean,
-    navigator: DestinationsNavigator
+    otherUserDetails: UsersBean, navigator: DestinationsNavigator
 ) {
     Row(
         modifier = Modifier
@@ -202,9 +200,7 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel,
-    loggedInUserFirebaseId: String,
-    otherUserDetails: UsersBean
+    viewModel: ChatDetailsViewModel, otherUserDetails: UsersBean
 ) {
     val context = LocalContext.current
     Row(
@@ -228,7 +224,7 @@ fun ChatDetailsBottomSection(
                 if (viewModel.repliedOnChatState.value != null) {
                     RepliedOnLayout(
                         message = viewModel.repliedOnChatState.value!!,
-                        loggedInUserFirebaseId = loggedInUserFirebaseId,
+                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                         otherUserName = otherUserDetails.name,
                         showCancelIconButton = true,
                     ) {
@@ -267,18 +263,14 @@ fun ChatDetailsBottomSection(
                     if (viewModel.messageState.value.isNotBlank()) {
                         keyboardController?.hide()
                         if (context.isNetworkAvailable()) {
-                            viewModel.sendMessage(
-                                loggedInUserFirebaseId,
-                                otherUserDetails.firebaseUserId
-                            )
+                            viewModel.sendMessage(otherUserDetails.firebaseUserId)
                         } else {
                             viewModel.snackBarMessageState.value =
                                 context.getString(R.string.no_internet_connection)
                             FunctionHelper.vibrateDevice(context)
                         }
                     }
-                },
-                colors = IconButtonDefaults.iconButtonColors(
+                }, colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
                 )
@@ -294,8 +286,7 @@ fun ChatDetailsBottomSection(
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(48.dp)
-                    .padding(8.dp),
-                strokeWidth = 1.5.dp
+                    .padding(8.dp), strokeWidth = 1.5.dp
             )
         }
     }

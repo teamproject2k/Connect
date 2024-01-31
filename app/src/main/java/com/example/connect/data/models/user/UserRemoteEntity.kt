@@ -23,9 +23,10 @@ data class UserRemoteEntity(
     val genderVisibility: String = VisibilityScopeEnum.Public.name,
     val dobVisibility: String = VisibilityScopeEnum.Public.name,
     val friendListVisibility: String = VisibilityScopeEnum.Public.name,
-    val savedPosts: ArrayList<String> = arrayListOf()
+    val savedPosts: ArrayList<String> = arrayListOf(),
+    val lastActiveAt: Long
 ) {
-    constructor() : this("1", "", "", "", "", "", -1, 0, 0, "", "")
+    constructor() : this("1", "", "", "", "", "", -1, 0, 0, "", "", lastActiveAt = 0)
 
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()
@@ -72,7 +73,8 @@ data class UserRemoteEntity(
             genderVisibility,
             dobVisibility,
             friendListVisibility,
-            savedPosts
+            savedPosts,
+            lastActiveAt
         )
     }
 }

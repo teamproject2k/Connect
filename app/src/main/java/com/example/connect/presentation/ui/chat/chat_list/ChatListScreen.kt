@@ -268,7 +268,7 @@ private fun ChatList(
                 ChatListItem(otherUser = chat.usersBean, chat = chat) {
                     navigator.navigate(
                         ChatDetailsScreenDestination(
-                            viewModel.loggedInUserDetails.firebaseUserId,
+                            viewModel.loggedInUserDetails,
                             viewModel.loggedInUserDetails.copy(firebaseUserId = "W7hF7ENqbbRP7c1Dc8StarkC1vF3")
                         )
                     )

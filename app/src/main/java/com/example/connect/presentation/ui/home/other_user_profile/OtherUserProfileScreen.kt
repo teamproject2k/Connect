@@ -80,6 +80,7 @@ import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
 import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.example.connect.presentation.ui.common.UserProfilePostSection
 import com.example.connect.presentation.ui.common.UserProfileUserInfoSection
+import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.example.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -193,10 +194,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
     HandleUnfriendAndBlockUserStateFlow(viewModel = viewModel)
     HandleLiveObserveOtherUsersStateFlow(viewModel)
     HandleLiveObserveCurrentUsersStateFlow(viewModel, homeSharedViewModel)
-    HandleUserDetailsState(
-        viewModel = viewModel,
-        homeSharedViewModel = homeSharedViewModel,
-    )
+    HandleUserDetailsState(viewModel = viewModel, homeSharedViewModel = homeSharedViewModel)
 }
 
 @Composable
@@ -262,7 +260,7 @@ private fun ProfileScreen(
                 viewModel.loggedInUserState.value.firebaseUserId
             )
             SpacerHeight24()
-            ActionButtonsSection(viewModel)
+            ActionButtonsSection(viewModel, navigator)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
             HandlePostDetailsState(viewModel, navigator, userDetails)
@@ -346,7 +344,8 @@ private fun ImageSection(
 
 @Composable
 private fun ActionButtonsSection(
-    viewModel: OtherUserProfileViewModel
+    viewModel: OtherUserProfileViewModel,
+    navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
     Row(
@@ -364,7 +363,12 @@ private fun ActionButtonsSection(
                     textColor = ColorsHelper.black(),
                     buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
                     onButtonClick = {
-                        // TODO: 16/12/23 aryan Navigate to chats screen
+                        navigator.navigate(
+                            ChatDetailsScreenDestination(
+                                viewModel.loggedInUserState.value,
+                                viewModel.otherUserState.value
+                            )
+                        )
                     }
                 )
             }

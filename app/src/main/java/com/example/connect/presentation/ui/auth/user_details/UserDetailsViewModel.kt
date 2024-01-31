@@ -87,7 +87,8 @@ class UserDetailsViewModel @Inject constructor(
                             "Connect User",
                             genderVisibility = VisibilityScopeEnum.Public.name,
                             dobVisibility = VisibilityScopeEnum.Public.name,
-                            friendListVisibility = VisibilityScopeEnum.Public.name
+                            friendListVisibility = VisibilityScopeEnum.Public.name,
+                            lastActiveAt = FunctionHelper.getCurrentTimeInMillis()
                         )
 
                         // Add the user to the remote database.
