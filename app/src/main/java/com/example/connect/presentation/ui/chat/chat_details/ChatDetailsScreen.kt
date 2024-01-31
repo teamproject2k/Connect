@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -152,7 +155,6 @@ fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: Str
             ChatBubble(viewModel, chat, loggedInUserFirebaseId)
         }
         if (viewModel.chatListState.isNotEmpty()) {
-            viewModel.repliedOnChatState.value = viewModel.chatListState[0]
             coroutineScope.launch {
                 lazyListState.scrollToItem(viewModel.chatListState.lastIndex)
             }
@@ -207,7 +209,7 @@ fun ChatDetailsBottomSection(
     val context = LocalContext.current
     Row(
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = if (viewModel.repliedOnChatState.value == null) Alignment.CenterVertically else Alignment.Bottom
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         Surface(
@@ -234,7 +236,9 @@ fun ChatDetailsBottomSection(
                     }
                 }
                 BasicTextField(
-                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    modifier = Modifier
+                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                        .fillMaxWidth(),
                     value = viewModel.messageState.value,
                     onValueChange = { text -> viewModel.messageState.value = text },
                     decorationBox = {
@@ -424,7 +428,7 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
+    val translateX = mutableFloatStateOf(0.0f)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -435,6 +439,21 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                         showDeleteMessageDialog = true
                     }
                 )
+            }
+            .pointerInput(Unit) {
+                detectDragGestures(onDrag = { change, dragAmount ->
+                    change.consume()
+                    if (dragAmount.x > 0) {
+                        //right swipe
+                        translateX.value = dragAmount.x
+                        viewModel.repliedOnChatState.value = message
+                    }
+                }, onDragEnd = {
+                    translateX.value = 0.0f
+                })
+            }
+            .graphicsLayer {
+                translationX = translateX.value
             },
         horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
     ) {
