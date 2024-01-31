@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -132,9 +133,16 @@ fun ChatDetailsScreen(
 
 @Composable
 fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: String) {
-    LazyColumn {
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    LazyColumn(state = lazyListState) {
         items(viewModel.chatListState) { chat ->
             ChatBubble(viewModel, chat, loggedInUserFirebaseId)
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (viewModel.chatListState.isNotEmpty()) {
+            lazyListState.animateScrollToItem(viewModel.chatListState.lastIndex)
         }
     }
 }
@@ -387,10 +395,20 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                     }
                     TextButton(
                         onClick = {
-                            viewModel.deleteMessage(
-                                MessageDeleteStatusEnum.DeletedForSender.name,
-                                message
-                            )
+                            val deleteFor = when {
+                                message.deletedBy != MessageDeleteStatusEnum.DeletedForNone.name -> {
+                                    MessageDeleteStatusEnum.DeletedForEveryone.name
+                                }
+
+                                isMessageFromLoggedInUser -> {
+                                    MessageDeleteStatusEnum.DeletedForSender.name
+                                }
+
+                                else -> {
+                                    MessageDeleteStatusEnum.DeletedForReceiver.name
+                                }
+                            }
+                            viewModel.deleteMessage(deleteFor, message)
                             showDeleteMessageDialog = false
                         }
                     ) {

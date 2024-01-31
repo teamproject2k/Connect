@@ -7,10 +7,10 @@ import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.chat.DeleteMessageOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.LiveObserveChatListOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
-import com.example.connect.domain.useCase.chat.DeleteMessageOnRemoteUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
@@ -92,7 +92,12 @@ class ChatDetailsViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _deleteMessageStateFlow.value = ResponseState.loading()
                 val response =
-                    deleteMessageOnRemoteUseCase(deletedBy, message.firebaseId)
+                    deleteMessageOnRemoteUseCase(
+                        deletedBy,
+                        message.senderId,
+                        message.receiverId,
+                        message.firebaseId
+                    )
                 if (response.status == RequestStatusEnum.Success) {
                     message.deletedBy = deletedBy
                 }

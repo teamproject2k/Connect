@@ -99,14 +99,18 @@ class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: Fire
         }
     }
 
-    override suspend fun updateMessageOnRemote(
+    override suspend fun deleteMessageOnRemote(
         deletedBy: String,
+        senderId: String,
+        receiverId: String,
         messageId: String
     ): ResponseState<Nothing> {
         return try {
-            val storyDocumentReference =
-                firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(messageId)
-            storyDocumentReference.setValue(ChatRemoteEntity::deletedBy.name, deletedBy)
+            val resultId =
+                if (senderId < receiverId) senderId + receiverId else receiverId + senderId
+            firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId)
+                .child(messageId)
+                .child(ChatRemoteEntity::deletedBy.name).setValue(deletedBy)
             // Return a success response.
             ResponseState.success(null)
         } catch (exception: Exception) {

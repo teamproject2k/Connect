@@ -5,11 +5,12 @@ import com.example.connect.domain.repository.IChatRepository
 import javax.inject.Inject
 
 class DeleteMessageOnRemoteUseCase @Inject constructor(private val repository: IChatRepository) {
-
     suspend operator fun invoke(
         deletedBy: String,
+        senderId: String,
+        receiverId: String,
         messageId: String
     ): ResponseState<Nothing> {
-        return repository.updateMessageOnRemote(deletedBy, messageId)
+        return repository.deleteMessageOnRemote(deletedBy, senderId, receiverId, messageId)
     }
 }

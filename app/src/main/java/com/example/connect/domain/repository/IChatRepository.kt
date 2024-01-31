@@ -20,8 +20,10 @@ interface IChatRepository {
 
     suspend fun sendChatMessageOnRemote(message: ChatBean): ResponseState<Nothing>
 
-    suspend fun updateMessageOnRemote(
+    suspend fun deleteMessageOnRemote(
         deletedBy:String,
+        senderId: String,
+        receiverId: String,
         messageId: String
     ): ResponseState<Nothing>
 
