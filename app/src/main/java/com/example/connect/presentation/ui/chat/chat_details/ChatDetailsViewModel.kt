@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -29,8 +30,7 @@ class ChatDetailsViewModel @Inject constructor(
     private val liveObserveChatListOnRemoteUseCase: LiveObserveChatListOnRemoteUseCase,
     private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
     private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase
-) :
-    BaseViewModel() {
+) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
     val messageState = mutableStateOf("")
@@ -50,6 +50,8 @@ class ChatDetailsViewModel @Inject constructor(
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
     val onListenerErrorOccurredState = mutableStateOf("")
+
+    var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
 
     fun sendMessage(loggedInUserFirebaseId: String, otherUserFirebaseUserId: String) {
         viewModelScope.launch {

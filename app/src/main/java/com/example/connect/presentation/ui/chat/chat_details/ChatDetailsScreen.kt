@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,8 +50,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -143,10 +148,11 @@ fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: Str
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(state = lazyListState) {
-        items(viewModel.chatListState) { chat ->
+        items(viewModel.chatListState, key = { it.firebaseId }) { chat ->
             ChatBubble(viewModel, chat, loggedInUserFirebaseId)
         }
         if (viewModel.chatListState.isNotEmpty()) {
+            viewModel.repliedOnChatState.value = viewModel.chatListState[0]
             coroutineScope.launch {
                 lazyListState.scrollToItem(viewModel.chatListState.lastIndex)
             }
@@ -205,33 +211,50 @@ fun ChatDetailsBottomSection(
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
+            tonalElevation = 6.dp, modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(32.dp))
+                .clip(
+                    if (viewModel.repliedOnChatState.value == null) RoundedCornerShape(32.dp) else RoundedCornerShape(
+                        bottomStart = 16.dp,
+                        bottomEnd = 16.dp,
+                        topStart = 6.dp,
+                        topEnd = 6.dp
+                    )
+                )
         ) {
-            BasicTextField(
-                modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
-                value = viewModel.messageState.value,
-                onValueChange = { text -> viewModel.messageState.value = text },
-                decorationBox = {
-                    if (viewModel.messageState.value.isBlank()) {
-                        Text(
-                            stringResource(id = R.string.message),
-                            color = ColorsHelper.gray(),
-                            fontSize = 14.sp
-                        )
-                    } else {
-                        Text(
-                            viewModel.messageState.value,
-                            color = ColorsHelper.black(),
-                            fontSize = 14.sp
-                        )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (viewModel.repliedOnChatState.value != null) {
+                    RepliedOnLayout(
+                        message = viewModel.repliedOnChatState.value!!,
+                        loggedInUserFirebaseId = loggedInUserFirebaseId,
+                        otherUserName = otherUserDetails.name,
+                        showCancelIconButton = true,
+                    ) {
+                        viewModel.repliedOnChatState.value = null
                     }
                 }
-            )
+                BasicTextField(
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    value = viewModel.messageState.value,
+                    onValueChange = { text -> viewModel.messageState.value = text },
+                    decorationBox = {
+                        if (viewModel.messageState.value.isBlank()) {
+                            Text(
+                                stringResource(id = R.string.message),
+                                color = ColorsHelper.gray(),
+                                fontSize = 14.sp
+                            )
+                        } else {
+                            Text(
+                                viewModel.messageState.value,
+                                color = ColorsHelper.black(),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                )
+            }
         }
-
         SpacerWidth8()
         if (!viewModel.isMessageSendingState.value) {
             IconButton(
@@ -271,6 +294,86 @@ fun ChatDetailsBottomSection(
                 strokeWidth = 1.5.dp
             )
         }
+    }
+}
+
+@Composable
+fun RepliedOnLayout(
+    message: ChatBean,
+    loggedInUserFirebaseId: String,
+    otherUserName: String,
+    showCancelIconButton: Boolean,
+    onCancelIconButtonClicked: () -> Unit
+) {
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(6.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(6.dp))
+            .background(ColorsHelper.chatBubbleOtherUserBg())
+    ) {
+        val (verticalDivider, topSection, messageText) = createRefs()
+        Box(
+            modifier = Modifier
+                .constrainAs(verticalDivider) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    width = Dimension.value(4.dp)
+                    height = Dimension.fillToConstraints
+                }
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Row(
+            modifier = Modifier
+                .constrainAs(topSection) {
+                    top.linkTo(parent.top, margin = 4.dp)
+                    bottom.linkTo(messageText.top)
+                    start.linkTo(verticalDivider.end, margin = 8.dp)
+                    end.linkTo(parent.end, margin = 8.dp)
+                    width = Dimension.fillToConstraints
+                }, verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (message.senderId == loggedInUserFirebaseId) stringResource(R.string.you) else otherUserName,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Start,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            if (showCancelIconButton) {
+                IconButton(
+                    onClick = {
+                        onCancelIconButtonClicked()
+                    },
+                    modifier = Modifier.size(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = stringResource(id = R.string.clear)
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = message.message,
+            modifier = Modifier
+                .constrainAs(messageText) {
+                    top.linkTo(topSection.bottom, margin = 4.dp)
+                    bottom.linkTo(parent.bottom, margin = 4.dp)
+                    start.linkTo(verticalDivider.end, margin = 8.dp)
+                    end.linkTo(parent.end, margin = 8.dp)
+                    width = Dimension.fillToConstraints
+                },
+            fontSize = 13.sp,
+            maxLines = 3,
+            textAlign = TextAlign.Start,
+            overflow = TextOverflow.Ellipsis,
+            lineHeight = 20.sp
+        )
+
     }
 }
 
