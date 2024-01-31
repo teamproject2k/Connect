@@ -120,7 +120,7 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(
                     otherUserDetails, navigator
                 )
-                ChatListSection(viewModel, loggedInUser.firebaseUserId)
+                ChatListSection(viewModel)
             }
             ChatDetailsBottomSection(
                 viewModel, otherUserDetails
@@ -146,12 +146,12 @@ fun ChatDetailsScreen(
 }
 
 @Composable
-fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: String) {
+fun ChatListSection(viewModel: ChatDetailsViewModel) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(state = lazyListState) {
         items(viewModel.chatListState, key = { it.firebaseId }) { chat ->
-            ChatBubble(viewModel, chat, loggedInUserFirebaseId)
+            ChatBubble(viewModel, chat, viewModel.loggedInUser.firebaseUserId)
         }
         if (viewModel.chatListState.isNotEmpty()) {
             coroutineScope.launch {
