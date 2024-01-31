@@ -1,9 +1,6 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +16,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -26,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,13 +90,8 @@ fun ChatDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .background(
-                    ColorsHelper
-                        .lightGray()
-                        .copy(alpha = 0.05f)
-                ), verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
                     otherUserDetails,
                     navigator
@@ -174,7 +168,7 @@ private fun ChatDetailsTopSection(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChatDetailsBottomSection(
     viewModel: ChatDetailsViewModel,
@@ -187,40 +181,34 @@ fun ChatDetailsBottomSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        BasicTextField(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(32.dp))
-                .border(
-                    border = BorderStroke(
-                        1.dp,
-                        ColorsHelper
-                            .black()
-                            .copy(alpha = 0.7f)
-                    ),
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .background(MaterialTheme.colorScheme.onPrimary)
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            value = viewModel.messageState.value,
-            onValueChange = { text -> viewModel.messageState.value = text },
-            decorationBox = {
-                if (viewModel.messageState.value.isBlank()) {
-                    Text(
-                        stringResource(id = R.string.message),
-                        color = ColorsHelper.gray(),
-                        fontSize = 14.sp
-                    )
-                } else {
-                    Text(
-                        viewModel.messageState.value,
-                        color = ColorsHelper.black(),
-                        fontSize = 14.sp
-                    )
+        ) {
+            BasicTextField(
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                value = viewModel.messageState.value,
+                onValueChange = { text -> viewModel.messageState.value = text },
+                decorationBox = {
+                    if (viewModel.messageState.value.isBlank()) {
+                        Text(
+                            stringResource(id = R.string.message),
+                            color = ColorsHelper.gray(),
+                            fontSize = 14.sp
+                        )
+                    } else {
+                        Text(
+                            viewModel.messageState.value,
+                            color = ColorsHelper.black(),
+                            fontSize = 14.sp
+                        )
+                    }
                 }
-            }
-        )
+            )
+        }
+
         SpacerWidth8()
         if (!viewModel.isMessageSendingState.value) {
             IconButton(
@@ -315,8 +303,16 @@ fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary)
+                .clip(
+                    if (isMessageFromLoggedInUser) RoundedCornerShape(
+                        topStart = 12.dp,
+                        topEnd = 12.dp,
+                        bottomStart = 12.dp
+                    ) else RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp)
+                )
+                .background(
+                    if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else ColorsHelper.chatBubbleOtherUserBg()
+                )
                 .padding(2.dp)
         ) {
             Text(
@@ -329,8 +325,9 @@ fun ChatBubble(message: ChatBean, loggedInUserFirebaseId: String) {
         }
         SpacerHeight2()
         Text(
-            text = FunctionHelper.getFormattedDateTime(message.sentAt, "dd-MM-yy, hh:mm a"),
+            text = FunctionHelper.getFormattedDateTime(message.sentAt, "dd/MM/yy, hh:mm a"),
             color = ColorsHelper.gray(),
+            fontWeight = FontWeight.Medium,
             fontSize = 11.sp,
         )
     }

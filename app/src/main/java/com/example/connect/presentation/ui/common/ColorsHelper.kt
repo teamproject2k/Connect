@@ -42,4 +42,11 @@ object ColorsHelper {
     fun red(): Color {
         return if (isSystemInDarkTheme()) Color(0xFFD32F2F) else Color(0xFFD32F2F)
     }
+
+
+    @Composable
+    fun chatBubbleOtherUserBg(): Color {
+        return if (isSystemInDarkTheme()) Color(0x26656565) else Color(0x26656565)
+
+    }
 }
