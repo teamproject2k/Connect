@@ -69,7 +69,8 @@ class ChatDetailsViewModel @Inject constructor(
                     sentAt,
                     MessageDeleteStatusEnum.DeletedForNone.name,
                     "",
-                    MediaTypeEnum.Text.name
+                    MediaTypeEnum.Text.name,
+                    repliedOnChatId = repliedOnChatState.value?.firebaseId
                 )
                 _sendMessageStateFlow.value = sendMessageToRemoteUseCase(message)
             }

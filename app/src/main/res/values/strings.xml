@@ -246,4 +246,5 @@
     <string name="deleting_message">Deleting Message</string>
     <string name="delete_message">Delete Message?</string>
     <string name="you">You</string>
+    <string name="search_friends">Search Friends</string>
 </resources>

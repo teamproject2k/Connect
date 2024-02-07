@@ -15,7 +15,8 @@ data class ChatLocalEntity(
     val modifiedAt: Long,
     val deletedBy: String,
     val mediaUrl: String,
-    val mediaType: String
+    val mediaType: String,
+    val repliedOnChatId: String? = null
 ) {
     fun toChatBean(): ChatBean {
         return ChatBean(
@@ -27,7 +28,8 @@ data class ChatLocalEntity(
             modifiedAt,
             deletedBy,
             mediaUrl,
-            mediaType
+            mediaType,
+            repliedOnChatId
         )
     }
 }

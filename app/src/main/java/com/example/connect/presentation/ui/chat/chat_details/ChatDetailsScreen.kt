@@ -1,7 +1,7 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -120,7 +121,11 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(
                     otherUserDetails, navigator
                 )
-                ChatListSection(viewModel, loggedInUser.firebaseUserId)
+                ChatListSection(
+                    viewModel,
+                    loggedInUser.firebaseUserId,
+                    otherUserName = otherUserDetails.name
+                )
             }
             ChatDetailsBottomSection(
                 viewModel, otherUserDetails
@@ -146,12 +151,16 @@ fun ChatDetailsScreen(
 }
 
 @Composable
-fun ChatListSection(viewModel: ChatDetailsViewModel, loggedInUserFirebaseId: String) {
+fun ChatListSection(
+    viewModel: ChatDetailsViewModel,
+    loggedInUserFirebaseId: String,
+    otherUserName: String
+) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(state = lazyListState) {
         items(viewModel.chatListState, key = { it.firebaseId }) { chat ->
-            ChatBubble(viewModel, chat, loggedInUserFirebaseId)
+            ChatBubble(viewModel, chat, loggedInUserFirebaseId, otherUserName = otherUserName)
         }
         if (viewModel.chatListState.isNotEmpty()) {
             coroutineScope.launch {
@@ -223,6 +232,7 @@ fun ChatDetailsBottomSection(
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (viewModel.repliedOnChatState.value != null) {
                     RepliedOnUI(
+                        modifier = Modifier.fillMaxWidth(),
                         message = viewModel.repliedOnChatState.value!!,
                         loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                         otherUserName = otherUserDetails.name,
@@ -294,18 +304,21 @@ fun ChatDetailsBottomSection(
 
 @Composable
 fun RepliedOnUI(
+    modifier: Modifier = Modifier,
     message: ChatBean,
     loggedInUserFirebaseId: String,
     otherUserName: String,
-    showCancelIconButton: Boolean,
-    onCancelIconButtonClicked: () -> Unit
+    senderNameColor: Color = MaterialTheme.colorScheme.primary,
+    messageColor: Color = Color.Unspecified,
+    senderMessageBackgroundColor: Color = ColorsHelper.chatBubbleOtherUserBg(),
+    showCancelIconButton: Boolean = true,
+    onCancelIconButtonClicked: () -> Unit = {}
 ) {
     ConstraintLayout(
-        modifier = Modifier
+        modifier = modifier
             .padding(6.dp)
-            .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
-            .background(ColorsHelper.chatBubbleOtherUserBg())
+            .background(senderMessageBackgroundColor)
     ) {
         val (verticalDivider, topSection, messageText) = createRefs()
         Box(
@@ -332,7 +345,7 @@ fun RepliedOnUI(
             Text(
                 text = if (message.senderId == loggedInUserFirebaseId) stringResource(R.string.you) else otherUserName,
                 modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.primary,
+                color = senderNameColor,
                 textAlign = TextAlign.Start,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
@@ -366,6 +379,7 @@ fun RepliedOnUI(
             maxLines = 3,
             textAlign = TextAlign.Start,
             overflow = TextOverflow.Ellipsis,
+            color = messageColor,
             lineHeight = 20.sp
         )
 
@@ -405,6 +419,7 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
         RequestStatusEnum.Success -> {
             viewModel.isMessageSendingState.value = false
             viewModel.messageState.value = ""
+            viewModel.repliedOnChatState.value = null
         }
 
         RequestStatusEnum.None -> {
@@ -415,7 +430,12 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserFirebaseId: String) {
+fun ChatBubble(
+    viewModel: ChatDetailsViewModel,
+    message: ChatBean,
+    loggedInUserFirebaseId: String,
+    otherUserName: String
+) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -427,31 +447,35 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = {
+                        FunctionHelper.vibrateDevice(context, 100)
                         showDeleteMessageDialog = true
                     }
                 )
             }
             .pointerInput(Unit) {
-                detectDragGestures(onDrag = { change, dragAmount ->
-                    change.consume()
-                    if (dragAmount.x > 5) {
-                        //right swipe
-                        translateX.value = dragAmount.x
-                        viewModel.repliedOnChatState.value = message
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        if (dragAmount > 5) {
+                            //right swipe
+                            translateX.value = dragAmount
+                            viewModel.repliedOnChatState.value = message
+                        }
+                    },
+                    onDragEnd = {
+                        if (translateX.value != 0.0f) {
+                            FunctionHelper.vibrateDevice(context, 100)
+                            translateX.value = 0.0f
+                        }
                     }
-                }, onDragEnd = {
-                    if (translateX.value != 0.0f) {
-                        FunctionHelper.vibrateDevice(context, 100)
-                    }
-                    translateX.value = 0.0f
-                })
+                )
             }
             .graphicsLayer {
                 translationX = translateX.value
             },
         horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .clip(
                     if (isMessageFromLoggedInUser) RoundedCornerShape(
@@ -461,10 +485,24 @@ fun ChatBubble(viewModel: ChatDetailsViewModel, message: ChatBean, loggedInUserF
                     ) else RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp)
                 )
                 .background(
-                    if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else ColorsHelper.chatBubbleOtherUserBg()
+                    if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary.copy(.8f) else ColorsHelper.chatBubbleOtherUserBg()
                 )
                 .padding(2.dp)
         ) {
+            val repliedOnMessage =
+                viewModel.chatListState.find { it.firebaseId == message.repliedOnChatId }
+            if (message.repliedOnChatId != null && repliedOnMessage != null) {
+                Column {
+                    RepliedOnUI(
+                        message = repliedOnMessage,
+                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
+                        senderNameColor = MaterialTheme.colorScheme.onPrimary,
+                        messageColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = .95f),
+                        otherUserName = otherUserName,
+                        showCancelIconButton = false
+                    )
+                }
+            }
             Text(
                 text = message.message,
                 fontWeight = FontWeight.Normal,

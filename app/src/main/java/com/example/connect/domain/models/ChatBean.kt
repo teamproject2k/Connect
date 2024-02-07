@@ -12,7 +12,8 @@ data class ChatBean(
     val modifiedAt: Long,
     var deletedBy: String,
     val mediaUrl: String,
-    val mediaType: String
+    val mediaType: String,
+    val repliedOnChatId: String?,
 ) {
     fun toChatRemoteEntity(): ChatRemoteEntity {
         return ChatRemoteEntity(
@@ -23,7 +24,8 @@ data class ChatBean(
             modifiedAt,
             deletedBy,
             mediaUrl,
-            mediaType
+            mediaType,
+            repliedOnChatId
         )
     }
 
@@ -37,7 +39,8 @@ data class ChatBean(
             modifiedAt,
             deletedBy,
             mediaUrl,
-            mediaType
+            mediaType,
+            repliedOnChatId
         )
     }
 }

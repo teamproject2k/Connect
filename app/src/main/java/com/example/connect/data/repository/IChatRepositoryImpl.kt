@@ -2,6 +2,7 @@ package com.example.connect.data.repository
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.connect.data.models.chats.ChatRemoteEntity
+import com.example.connect.data.models.user.UserRemoteEntity
 import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.network_request_response.ResponseState
@@ -11,12 +12,53 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class IChatRepositoryImpl @Inject constructor(private val firebaseDatabase: FirebaseDatabase) :
+class IChatRepositoryImpl @Inject constructor(
+    private val firebaseDatabase: FirebaseDatabase,
+    private val fireStore: FirebaseFirestore
+) :
     IChatRepository {
     override suspend fun getChatListFromRemote(loggedInUserFirebaseId: String) {
+        try {
+            val chatListSnapshot = firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY)
+                .endAt(loggedInUserFirebaseId)
+                .startAt(loggedInUserFirebaseId).get().await()
+            val loggedInUserDocument =
+                fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
+                    .get().await()
+            val loggedInUserBean =
+                loggedInUserDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
+            if (loggedInUserBean != null) {
+                chatListSnapshot.children.forEach { snapshot ->
+                    val chatKey = snapshot.key
+                    val otherUserFirebaseId = chatKey?.replace(loggedInUserFirebaseId, "")
+                    if (otherUserFirebaseId != null) {
+                        val otherUserSnapshot =
+                            fireStore.collection(FirebaseConstants.USER_KEY)
+                                .document(otherUserFirebaseId)
+                                .get().await()
+                        val otherUserBean =
+                            otherUserSnapshot.toObject(UserRemoteEntity::class.java)?.toUserBean()
+                        if (otherUserBean != null) {
+                            val chatMessages = snapshot.children.map {
+                                it.key?.let { it1 ->
+                                    it.getValue(ChatRemoteEntity::class.java)?.toChatBean(
+                                        it1
+                                    )
+                                }
+                            }
+                            val sortedChatMessages = chatMessages.sortedBy { it?.sentAt }
+                            val lastMessage = sortedChatMessages.last()
+                        }
+                    }
+                }
+            }
+        } catch (exception: Exception) {
+            // ResponseState.error(exception.localizedMessage ?: "")
+        }
 //        try {
 //            val chatListResponse =
 //                fireStore.collection(FirebaseConstants.INTERACTIONS_KEY)

@@ -10,7 +10,8 @@ data class ChatRemoteEntity(
     val modifiedAt: Long,
     val deletedBy: String,
     val mediaUrl: String,
-    val mediaType: String
+    val mediaType: String,
+    val repliedOnChatId: String? = null
 ) {
     constructor() : this("", "", "", 0, 0, "", "", "")
 
@@ -24,7 +25,8 @@ data class ChatRemoteEntity(
             modifiedAt,
             deletedBy,
             mediaUrl,
-            mediaType
+            mediaType,
+            repliedOnChatId
         )
     }
 }

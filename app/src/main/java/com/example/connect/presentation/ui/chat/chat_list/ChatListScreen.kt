@@ -49,7 +49,7 @@ import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.ChatBean
-import com.example.connect.domain.models.ChatWithUserDetails
+import com.example.connect.domain.models.ChatWithUserAndCountBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.chat.base_screen.ChatActivity
@@ -60,6 +60,7 @@ import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight4
 import com.example.connect.presentation.ui.common.SpacerWidth6
 import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestination
+import com.example.connect.presentation.ui.destinations.SearchFriendsScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
@@ -93,9 +94,10 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         floatingActionButton = {
-
             FloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    navigator.navigate(SearchFriendsScreenDestination(viewModel.loggedInUserDetails))
+                },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -162,10 +164,11 @@ fun HandleChatListSectionState(
         }
 
         RequestStatusEnum.Success -> {
-            val chatList = arrayListOf<ChatWithUserDetails>()
+            val chatList = arrayListOf<ChatWithUserAndCountBean>()
             chatList.add(
-                ChatWithUserDetails(
+                ChatWithUserAndCountBean(
                     viewModel.loggedInUserDetails,
+                    2,
                     ChatBean(
                         "1",
                         "1",
@@ -175,13 +178,15 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        MediaTypeEnum.Text.name
+                        MediaTypeEnum.Text.name,
+                        null
                     )
                 )
             )
             chatList.add(
-                ChatWithUserDetails(
+                ChatWithUserAndCountBean(
                     viewModel.loggedInUserDetails,
+                    3,
                     ChatBean(
                         "1",
                         "1",
@@ -191,13 +196,15 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        MediaTypeEnum.Image.name
+                        MediaTypeEnum.Image.name,
+                        null
                     )
                 )
             )
             chatList.add(
-                ChatWithUserDetails(
+                ChatWithUserAndCountBean(
                     viewModel.loggedInUserDetails,
+                    10,
                     ChatBean(
                         "1",
                         "1",
@@ -207,13 +214,15 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        MediaTypeEnum.TextImage.name
+                        MediaTypeEnum.TextImage.name,
+                        null
                     )
                 )
             )
             chatList.add(
-                ChatWithUserDetails(
+                ChatWithUserAndCountBean(
                     viewModel.loggedInUserDetails,
+                    0,
                     ChatBean(
                         "1",
                         "1",
@@ -223,13 +232,15 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        MediaTypeEnum.Video.name
+                        MediaTypeEnum.Video.name,
+                        null
                     )
                 )
             )
             chatList.add(
-                ChatWithUserDetails(
+                ChatWithUserAndCountBean(
                     viewModel.loggedInUserDetails,
+                    9,
                     ChatBean(
                         "1",
                         "1",
@@ -239,7 +250,8 @@ fun HandleChatListSectionState(
                         1,
                         "1",
                         "a",
-                        MediaTypeEnum.TextVideo.name
+                        MediaTypeEnum.TextVideo.name,
+                        null
                     )
                 )
             )
@@ -254,7 +266,7 @@ fun HandleChatListSectionState(
 
 @Composable
 private fun ChatList(
-    chatList: MutableList<ChatWithUserDetails>?,
+    chatList: MutableList<ChatWithUserAndCountBean>?,
     viewModel: ChatListViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -264,12 +276,12 @@ private fun ChatList(
         }
     } else {
         LazyColumn {
-            items(chatList) { chat ->
-                ChatListItem(otherUser = chat.usersBean, chat = chat) {
+            items(chatList) { userLastMessageAndCount ->
+                ChatListItem(userLastMessageAndCount) {
                     navigator.navigate(
                         ChatDetailsScreenDestination(
                             viewModel.loggedInUserDetails,
-                            viewModel.loggedInUserDetails.copy(firebaseUserId = "W7hF7ENqbbRP7c1Dc8StarkC1vF3")
+                            viewModel.loggedInUserDetails.copy(firebaseUserId = "OUbbPgo1mnUxIog93aqiFsaN07M2")
                         )
                     )
                 }
@@ -280,9 +292,7 @@ private fun ChatList(
 
 @Composable
 private fun ChatListItem(
-    otherUser: UsersBean,
-    chat: ChatWithUserDetails,
-    onItemClick: () -> (Unit)
+    chatMetaData: ChatWithUserAndCountBean, onItemClick: () -> (Unit)
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.clickable {
@@ -296,8 +306,8 @@ private fun ChatListItem(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape),
-                model = otherUser.profilePhoto,
-                contentDescription = otherUser.name,
+                model = chatMetaData.userDetails.profilePhoto,
+                contentDescription = chatMetaData.userDetails.name,
                 contentScale = ContentScale.Crop,
                 error = painterResource(id = R.drawable.ic_default_user)
             )
@@ -310,14 +320,14 @@ private fun ChatListItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         modifier = Modifier.weight(1f),
-                        text = otherUser.name,
+                        text = chatMetaData.userDetails.name,
                         fontWeight = FontWeight(500),
                         color = ColorsHelper.black(),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
                     Text(
-                        text = FunctionHelper.getTimeAgo(chat.chatsBean.modifiedAt, context),
+                        text = FunctionHelper.getTimeAgo(chatMetaData.lastMessage.sentAt, context),
                         fontSize = 12.sp,
                         color = ColorsHelper.gray(),
                         fontWeight = FontWeight.Medium
@@ -329,29 +339,29 @@ private fun ChatListItem(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val isTextPresent =
-                        chat.chatsBean.mediaType == MediaTypeEnum.Text.name || chat.chatsBean.mediaType == MediaTypeEnum.TextImage.name || chat.chatsBean.mediaType == MediaTypeEnum.TextVideo.name
-                    val isLastMessageSeen = false
+                        chatMetaData.lastMessage.mediaType == MediaTypeEnum.Text.name || chatMetaData.lastMessage.mediaType == MediaTypeEnum.TextImage.name || chatMetaData.lastMessage.mediaType == MediaTypeEnum.TextVideo.name
                     if (isTextPresent) {
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = chat.chatsBean.message,
+                            text = chatMetaData.lastMessage.message,
                             fontSize = 13.sp,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
-                            fontWeight = if (isLastMessageSeen) null else FontWeight.Medium,
-                            color = if (isLastMessageSeen) Color.Unspecified else MaterialTheme.colorScheme.primary
+                            fontWeight = if (chatMetaData.unreadMessageCount == 0) null else FontWeight.Medium,
+                            color = if (chatMetaData.unreadMessageCount == 0) Color.Unspecified else MaterialTheme.colorScheme.primary
                         )
                     } else {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
-                            val isImageFile = chat.chatsBean.mediaType == MediaTypeEnum.Image.name
+                            val isImageFile =
+                                chatMetaData.lastMessage.mediaType == MediaTypeEnum.Image.name
                             Icon(
                                 imageVector = if (isImageFile) Icons.Default.Image else Icons.Default.VideoCall,
-                                contentDescription = chat.chatsBean.mediaType,
+                                contentDescription = chatMetaData.lastMessage.mediaType,
                                 modifier = Modifier.size(18.dp),
-                                tint = if (isLastMessageSeen) ColorsHelper.gray() else MaterialTheme.colorScheme.primary
+                                tint = if (chatMetaData.unreadMessageCount == 0) ColorsHelper.gray() else MaterialTheme.colorScheme.primary
                             )
                             SpacerWidth6()
                             Text(
@@ -361,25 +371,25 @@ private fun ChatListItem(
                                 fontSize = 13.sp,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                fontWeight = if (isLastMessageSeen) null else FontWeight.Medium,
-                                color = if (isLastMessageSeen) Color.Unspecified else MaterialTheme.colorScheme.primary
+                                fontWeight = if (chatMetaData.unreadMessageCount == 0) null else FontWeight.Medium,
+                                color = if (chatMetaData.unreadMessageCount == 0) Color.Unspecified else MaterialTheme.colorScheme.primary
                             )
                         }
                     }
-
-                    // TODO: rethink on this logic
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "3",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
+                    if (chatMetaData.unreadMessageCount != 0) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (chatMetaData.unreadMessageCount > 9) "9+" else chatMetaData.unreadMessageCount.toString(),
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
             }
@@ -387,3 +397,4 @@ private fun ChatListItem(
         DividerLightGrayAlpha50()
     }
 }
+
