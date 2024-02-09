@@ -67,7 +67,7 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
-import com.example.connect.presentation.ui.common.BottomSheetItem
+import com.example.connect.presentation.ui.common.IconTextRowSection
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.ExpandedImage
 import com.example.connect.presentation.ui.common.LoaderDialog
@@ -599,14 +599,14 @@ private fun BottomSheetSection(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentUserUiEnum.Friends.name) {
-            BottomSheetItem(
+            IconTextRowSection(
                 imageVector = Icons.Default.PersonRemove,
                 text = stringResource(R.string.unfriend_user)
             ) {
                 viewModel.unfriendUser()
                 onBottomSheetStateClick()
             }
-            BottomSheetItem(
+            IconTextRowSection(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.unfriend_and_block_user)
             ) {
@@ -614,7 +614,7 @@ private fun BottomSheetSection(
                 onBottomSheetStateClick()
             }
         } else if (viewModel.statusWithCurrentUserState.value != StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name) {
-            BottomSheetItem(
+            IconTextRowSection(
                 imageVector = Icons.Default.PersonOff,
                 text = stringResource(R.string.block_user)
             ) {

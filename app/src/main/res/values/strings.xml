@@ -247,4 +247,6 @@
     <string name="delete_message">Delete Message?</string>
     <string name="you">You</string>
     <string name="search_friends">Search Friends</string>
+    <string name="privacy">Privacy</string>
+    <string name="expand_icon">Expand icon</string>
 </resources>

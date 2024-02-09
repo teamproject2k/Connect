@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun BottomSheetItem(imageVector: ImageVector, text: String, onClick: () -> Unit) {
+fun IconTextRowSection(imageVector: ImageVector, text: String, onClick: () -> Unit) {
     Column {
         Row(
             modifier = Modifier
