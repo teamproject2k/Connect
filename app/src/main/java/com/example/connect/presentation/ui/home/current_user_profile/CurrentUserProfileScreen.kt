@@ -13,19 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,15 +50,12 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.utils.FirebaseErrorCodes
 import com.example.connect.presentation.base.BaseActivity
-import com.example.connect.presentation.ui.common.BottomSheetItem
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.ColorsHelper.warning
 import com.example.connect.presentation.ui.common.ExpandedImage
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight12
 import com.example.connect.presentation.ui.common.SpacerHeight24
-import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.UserProfileFriendsListLoadingSection
 import com.example.connect.presentation.ui.common.UserProfileFriendsListSection
 import com.example.connect.presentation.ui.common.UserProfilePostLoadingSection
@@ -85,7 +76,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @HomeNavGraph
 @Destination
 @Composable
@@ -95,13 +85,6 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    var showBottomSheet by remember {
-        mutableStateOf(false)
-    }
-    val currentActivity = LocalActivity.current as BaseActivity
-    var showLogoutDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     if (!viewModel.isDataInitialized) {
         viewModel.init(sharedViewModel.usersDetails)
@@ -128,39 +111,11 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.TopCenter
         ) {
-            ProfileScreen(viewModel.loggedInUserDetailsState.value, viewModel, navigator) {
-                showBottomSheet = true
-            }
+            ProfileScreen(viewModel.loggedInUserDetailsState.value, viewModel, navigator)
             PullRefreshIndicator(
                 refreshing = refreshing,
                 refreshState = pullRefreshState
             )
-        }
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false }, shape = RoundedCornerShape(
-                    topEnd = ConstantsHelper.BottomSheetRoundness,
-                    topStart = ConstantsHelper.BottomSheetRoundness
-                )
-            ) {
-                BottomSheetSection(
-                    Modifier.padding(bottom = ConstantsHelper.NavigationBarHeight),
-                    navigator,
-                    showLogoutDialog = { showDialog: Boolean -> showLogoutDialog = showDialog }
-                ) {
-                    showBottomSheet = false
-                }
-            }
-        }
-    }
-    if (showLogoutDialog) {
-        TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
-            subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
-            imageVector = Icons.Default.Warning,
-            iconTint = warning(),
-            onCancel = { showLogoutDialog = false }) {
-            currentActivity.logout()
-            showLogoutDialog = false
         }
     }
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
@@ -185,36 +140,10 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-private fun BottomSheetSection(
-    modifier: Modifier,
-    navigator: DestinationsNavigator,
-    showLogoutDialog: (Boolean) -> (Unit),
-    onBottomSheetStateClick: () -> Unit
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        BottomSheetItem(
-            imageVector = Icons.Default.Settings,
-            text = stringResource(R.string.settings_and_privacy)
-        ) {
-            onBottomSheetStateClick()
-            navigator.navigate(SettingsAndPrivacyScreenDestination)
-        }
-        BottomSheetItem(
-            imageVector = Icons.Default.Logout,
-            text = stringResource(id = R.string.logout)
-        ) {
-            showLogoutDialog(true)
-            onBottomSheetStateClick()
-        }
-    }
-}
-
-@Composable
 private fun ProfileScreen(
     loggedInUserDetails: UsersBean,
     viewModel: CurrentUserProfileViewModel,
-    navigator: DestinationsNavigator,
-    onOptionsMenuClick: () -> Unit
+    navigator: DestinationsNavigator
 ) {
     Column(
         modifier = Modifier
@@ -222,7 +151,7 @@ private fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageSection(loggedInUserDetails, navigator, onOptionsMenuClick)
+        ImageSection(loggedInUserDetails, navigator)
         SpacerHeight12()
         UserProfileUserInfoSection(loggedInUserDetails, loggedInUserDetails.firebaseUserId)
         SpacerHeight24()
@@ -232,9 +161,7 @@ private fun ProfileScreen(
 }
 
 @Composable
-private fun ImageSection(
-    loggedInUserDetails: UsersBean, navigator: DestinationsNavigator, onOptionsMenuClick: () -> Unit
-) {
+private fun ImageSection(loggedInUserDetails: UsersBean, navigator: DestinationsNavigator) {
     var isProfilePhotoExpanded by remember {
         mutableStateOf(false)
     }
@@ -279,7 +206,7 @@ private fun ImageSection(
         )
 
         IconButton(onClick = {
-            onOptionsMenuClick()
+            navigator.navigate(SettingsAndPrivacyScreenDestination)
         },
             colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.background),
             modifier = Modifier.constrainAs(moreOptionsRef) {
@@ -288,8 +215,8 @@ private fun ImageSection(
             }
         ) {
             Image(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.more_options)
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.settings_and_privacy)
             )
         }
 

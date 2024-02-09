@@ -2,14 +2,28 @@ package com.example.connect.presentation.ui.home.settings_and_privacy
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LockPerson
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,10 +51,15 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.base.BaseActivity
 import com.example.connect.presentation.ui.common.AppTopAppBar
-import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
+import com.example.connect.presentation.ui.common.ColorsHelper
+import com.example.connect.presentation.ui.common.DividerLightGrayAlpha40
+import com.example.connect.presentation.ui.common.IconTextRowSection
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.SpacerWidth12
+import com.example.connect.presentation.ui.common.TitleMessageIconOkCancelDialog
 import com.example.connect.presentation.ui.common.VisibilityItem
 import com.example.connect.presentation.ui.common.VisibilityScopeBottomSheetItem
 import com.example.connect.presentation.ui.destinations.BlockedListScreenDestination
@@ -66,6 +85,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: SettingsAndPrivacyViewModel = hiltViewModel()
     val context = LocalContext.current
+    val currentActivity = LocalActivity.current as BaseActivity
 
     if (viewModel.isFirstTimeSetup) {
         viewModel.setUpData(homeSharedViewModel.usersDetails, context)
@@ -74,6 +94,12 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = SnackbarHostState()
 
+    var showLogoutDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showPrivacyDropdownSection by rememberSaveable {
+        mutableStateOf(false)
+    }
     var showGenderBottomSheet by remember {
         mutableStateOf(false)
     }
@@ -92,44 +118,79 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
         )
     }, snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
         ) {
-            SettingsAndPrivacySectionWithVisibilityItem(
-                itemName = stringResource(id = R.string.gender_privacy),
-                drawableId = viewModel.genderVisibilityState.value.drawableId,
-                scopeName = viewModel.genderVisibilityState.value.scopeName
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize()
             ) {
-                showGenderBottomSheet = true
+                PrivacySection(showPrivacyDropdownSection) {
+                    showPrivacyDropdownSection = !showPrivacyDropdownSection
+                }
+                if (showPrivacyDropdownSection) {
+                    SettingsAndPrivacySectionWithVisibilityItem(
+                        itemName = stringResource(id = R.string.gender_privacy),
+                        drawableId = viewModel.genderVisibilityState.value.drawableId,
+                        scopeName = viewModel.genderVisibilityState.value.scopeName
+                    ) {
+                        showGenderBottomSheet = true
+                    }
+                    DividerLightGrayAlpha40()
+                    SettingsAndPrivacySectionWithVisibilityItem(
+                        itemName = stringResource(id = R.string.date_of_birth_privacy),
+                        drawableId = viewModel.dobVisibilityState.value.drawableId,
+                        scopeName = viewModel.dobVisibilityState.value.scopeName
+                    ) {
+                        showDobBottomSheet = true
+                    }
+                    DividerLightGrayAlpha40()
+                    SettingsAndPrivacySectionWithVisibilityItem(
+                        itemName = stringResource(id = R.string.friend_list_privacy),
+                        drawableId = viewModel.friendListVisibilityState.value.drawableId,
+                        scopeName = viewModel.friendListVisibilityState.value.scopeName
+                    ) {
+                        showFriendListBottomSheet = true
+                    }
+                    Divider()
+                }
             }
-            DividerLightGrayAlpha50()
-            SettingsAndPrivacySectionWithVisibilityItem(
-                itemName = stringResource(id = R.string.date_of_birth_privacy),
-                drawableId = viewModel.dobVisibilityState.value.drawableId,
-                scopeName = viewModel.dobVisibilityState.value.scopeName
+            IconTextRowSection(
+                imageVector = Icons.Default.Bookmarks,
+                text = stringResource(id = R.string.saved_posts)
             ) {
-                showDobBottomSheet = true
-            }
-            DividerLightGrayAlpha50()
-            SettingsAndPrivacySectionWithVisibilityItem(
-                itemName = stringResource(id = R.string.friend_list_privacy),
-                drawableId = viewModel.friendListVisibilityState.value.drawableId,
-                scopeName = viewModel.friendListVisibilityState.value.scopeName
-            ) {
-                showFriendListBottomSheet = true
-            }
-            DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.saved_posts)) {
                 navigator.navigate(SavedPostsScreenDestination())
             }
-            DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.blocked_users)) {
+            IconTextRowSection(
+                imageVector = Icons.Default.PersonOff,
+                text = stringResource(id = R.string.blocked_users)
+            ) {
                 navigator.navigate(BlockedListScreenDestination())
             }
-            DividerLightGrayAlpha50()
-            SettingsAndPrivacyClickableItem(itemName = stringResource(id = R.string.requested_users)) {
+            IconTextRowSection(
+                imageVector = Icons.Default.PersonSearch,
+                text = stringResource(id = R.string.requested_users)
+            ) {
                 navigator.navigate(RequestedListScreenDestination())
             }
-            DividerLightGrayAlpha50()
+            IconTextRowSection(
+                imageVector = Icons.Default.Logout,
+                text = stringResource(id = R.string.logout)
+            ) {
+                showLogoutDialog = true
+            }
+            if (showLogoutDialog) {
+                TitleMessageIconOkCancelDialog(title = stringResource(id = R.string.logout),
+                    subTitle = stringResource(id = R.string.do_you_really_want_to_logout_from_the_app),
+                    imageVector = Icons.Default.Warning,
+                    iconTint = ColorsHelper.warning(),
+                    onCancel = { showLogoutDialog = false }) {
+                    currentActivity.logout()
+                    showLogoutDialog = false
+                }
+            }
             if (showGenderBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showGenderBottomSheet = false },
@@ -200,6 +261,35 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
+fun PrivacySection(
+    showPrivacyDropdownSection: Boolean,
+    updateShowPrivacyDropdownSection: () -> Unit
+) {
+    Column(modifier = Modifier.clickable { updateShowPrivacyDropdownSection() }) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 6.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                imageVector = Icons.Default.LockPerson,
+                contentDescription = stringResource(id = R.string.privacy)
+            )
+            SpacerWidth12()
+            Text(modifier = Modifier.weight(1f), text = stringResource(id = R.string.privacy))
+            IconButton(onClick = { updateShowPrivacyDropdownSection() }) {
+                Icon(
+                    imageVector = if (showPrivacyDropdownSection) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = stringResource(R.string.expand_icon)
+                )
+            }
+        }
+        Divider()
+    }
+}
+
+@Composable
 private fun SettingsAndPrivacySectionWithVisibilityItem(
     itemName: String,
     @DrawableRes drawableId: Int,
@@ -208,6 +298,7 @@ private fun SettingsAndPrivacySectionWithVisibilityItem(
 ) {
     Row(
         modifier = Modifier
+            .padding(vertical = 2.dp, horizontal = 8.dp)
             .fillMaxWidth()
             .clickable { onItemClick() }
             .padding(16.dp),
@@ -226,27 +317,6 @@ private fun SettingsAndPrivacySectionWithVisibilityItem(
         ) {
             onItemClick()
         }
-    }
-}
-
-@Composable
-private fun SettingsAndPrivacyClickableItem(
-    itemName: String,
-    onItemClick: () -> (Unit)
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                onItemClick()
-            }
-            .padding(16.dp)
-    ) {
-        Text(
-            text = itemName,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp
-        )
     }
 }
 
