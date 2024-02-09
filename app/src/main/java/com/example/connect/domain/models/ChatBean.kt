@@ -30,8 +30,10 @@ data class ChatBean(
     }
 
     fun toChatLocalEntity(): ChatLocalEntity {
+        val chatId = if (senderId > receiverId) "$receiverId$senderId" else "$senderId$receiverId"
         return ChatLocalEntity(
             firebaseId,
+            chatId,
             senderId,
             receiverId,
             message,
