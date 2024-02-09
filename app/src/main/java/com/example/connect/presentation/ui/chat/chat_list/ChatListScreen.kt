@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,9 @@ import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestina
 import com.example.connect.presentation.ui.destinations.SearchFriendsScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
+import com.example.connect.presentation.ui.pull_refresh.PullRefreshIndicator
+import com.example.connect.presentation.ui.pull_refresh.pullRefresh
+import com.example.connect.presentation.ui.pull_refresh.rememberPullRefreshState
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -91,6 +95,19 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
             activity.finish()
         }
     }
+    var refreshing by rememberSaveable { mutableStateOf(false) }
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = {
+            refreshing = true
+            if (context.isNetworkAvailable()) {
+                viewModel.getChatList()
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.no_internet_connection)
+                FunctionHelper.vibrateDevice(context)
+            }
+            refreshing = false
+        })
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         floatingActionButton = {
@@ -109,12 +126,18 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
         topBar = {
             AppTopAppBar(title = stringResource(id = R.string.chats))
         }) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
             HandleChatListSectionState(viewModel, navigator)
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                refreshState = pullRefreshState
+            )
         }
     }
     LaunchedEffect(viewModel.snackBarMessageState.value) {

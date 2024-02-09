@@ -51,7 +51,6 @@ class IChatRepositoryImpl @Inject constructor(
                                 }
                             }
                             val sortedChatMessages = chatMessages.sortedBy { it?.sentAt }
-                            val lastMessage = sortedChatMessages.last()
                         }
                     }
                 }
