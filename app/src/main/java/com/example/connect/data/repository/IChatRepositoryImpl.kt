@@ -3,6 +3,7 @@ package com.example.connect.data.repository
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.example.connect.data.models.chats.ChatRemoteEntity
 import com.example.connect.data.models.user.UserRemoteEntity
+import com.example.connect.data.utils.DataFunctionHelper
 import com.example.connect.domain.enums.MessageDeleteStatusEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.network_request_response.ResponseState
@@ -159,8 +160,7 @@ class IChatRepositoryImpl @Inject constructor(
         messageId: String
     ): ResponseState<Nothing> {
         return try {
-            val resultId =
-                if (senderId < receiverId) senderId + receiverId else receiverId + senderId
+            val resultId = DataFunctionHelper.getSortedChatId(senderId, receiverId)
             firebaseDatabase.reference.child(FirebaseConstants.CHATS_KEY).child(resultId)
                 .child(messageId)
                 .child(ChatRemoteEntity::deletedBy.name).setValue(deletedBy)

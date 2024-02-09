@@ -2,6 +2,7 @@ package com.example.connect.domain.models
 
 import com.example.connect.data.models.chats.ChatLocalEntity
 import com.example.connect.data.models.chats.ChatRemoteEntity
+import com.example.connect.data.utils.DataFunctionHelper
 
 data class ChatBean(
     val firebaseId: String,
@@ -30,10 +31,9 @@ data class ChatBean(
     }
 
     fun toChatLocalEntity(): ChatLocalEntity {
-        val chatId = if (senderId > receiverId) "$receiverId$senderId" else "$senderId$receiverId"
         return ChatLocalEntity(
             firebaseId,
-            chatId,
+            DataFunctionHelper.getSortedChatId(senderId, receiverId),
             senderId,
             receiverId,
             message,
