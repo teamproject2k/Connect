@@ -93,7 +93,7 @@ fun ChatDetailsScreen(
     navigator: DestinationsNavigator, loggedInUser: UsersBean, otherUserDetails: UsersBean
 ) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -338,13 +338,13 @@ fun RepliedOnUI(
                     top.linkTo(parent.top, margin = 4.dp)
                     bottom.linkTo(messageText.top)
                     start.linkTo(verticalDivider.end, margin = 8.dp)
-                    end.linkTo(parent.end, margin = 8.dp)
-                    width = Dimension.fillToConstraints
-                }, verticalAlignment = Alignment.CenterVertically
+                    width = Dimension.preferredWrapContent
+                },
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = if (message.senderId == loggedInUserFirebaseId) stringResource(R.string.you) else otherUserName,
-                modifier = Modifier.weight(1f),
+                modifier = if (showCancelIconButton) Modifier.weight(1f) else Modifier,
                 color = senderNameColor,
                 textAlign = TextAlign.Start,
                 fontSize = 14.sp,
@@ -355,7 +355,9 @@ fun RepliedOnUI(
                     onClick = {
                         onCancelIconButtonClicked()
                     },
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(16.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
@@ -372,8 +374,7 @@ fun RepliedOnUI(
                     top.linkTo(topSection.bottom, margin = 4.dp)
                     bottom.linkTo(parent.bottom, margin = 4.dp)
                     start.linkTo(verticalDivider.end, margin = 8.dp)
-                    end.linkTo(parent.end, margin = 8.dp)
-                    width = Dimension.fillToConstraints
+                    width = Dimension.preferredWrapContent
                 },
             fontSize = 13.sp,
             maxLines = 3,
@@ -382,7 +383,6 @@ fun RepliedOnUI(
             color = messageColor,
             lineHeight = 20.sp
         )
-
     }
 }
 

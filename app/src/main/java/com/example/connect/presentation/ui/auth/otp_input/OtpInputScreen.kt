@@ -96,7 +96,7 @@ fun OTPScreen(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     viewModel.mobileNumber = mobileNumber
     viewModel.verificationId = verificationId
     viewModel.countryCode = countryCode
@@ -486,8 +486,7 @@ private fun HandleBackPressed(navigator: DestinationsNavigator) {
  * @param context The context of the activity.
  */
 private fun handleButtonClick(viewModel: OtpInputViewModel, context: Context) {
-    val otpValidationResponseCode = Validator.isValidOTP(viewModel.otpState.value)
-    when (otpValidationResponseCode) {
+    when (Validator.isValidOTP(viewModel.otpState.value)) {
         0 -> {
             if (context.isNetworkAvailable()) {
                 viewModel.verifyOTP(viewModel.verificationId)

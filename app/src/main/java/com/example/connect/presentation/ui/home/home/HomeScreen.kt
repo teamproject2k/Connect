@@ -110,7 +110,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val viewModel: HomeViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(activity)
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     var refreshing by rememberSaveable { mutableStateOf(false) }
 
     val pullRefreshState =

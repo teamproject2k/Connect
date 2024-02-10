@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -62,7 +63,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: MobileNumberInputViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     HandleSendOTPState(viewModel, navigator, context)
     HandleGetUserDetailsState(viewModel, navigator, context)
@@ -279,9 +280,7 @@ private fun handleButtonClick(
     viewModel: MobileNumberInputViewModel,
     context: Context
 ) {
-    val mobileNumberValidationResponseCode =
-        Validator.isValidMobileNumber(viewModel.userMobileNumberState.value)
-    when (mobileNumberValidationResponseCode) {
+    when (Validator.isValidMobileNumber(viewModel.userMobileNumberState.value)) {
         0 -> {
             if (context.isNetworkAvailable()) {
                 viewModel.sharedPreference.mobileNumber = viewModel.userMobileNumberState.value

@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -94,7 +95,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
         val mediaType = FunctionHelper.getMediaType(contentResolver, uri)

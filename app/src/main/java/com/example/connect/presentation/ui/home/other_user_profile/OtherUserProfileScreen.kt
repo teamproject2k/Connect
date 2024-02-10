@@ -101,7 +101,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: UsersBean) {
     val viewModel: OtherUserProfileViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)

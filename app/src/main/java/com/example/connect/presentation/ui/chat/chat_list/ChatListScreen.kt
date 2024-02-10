@@ -83,9 +83,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     val viewModel: ChatListViewModel = hiltViewModel()
     val activity = (LocalActivity.current as ChatActivity)
     val context = LocalContext.current
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
+    val snackBarHostState = remember { SnackbarHostState() }
     if (!viewModel.isDetailsInitialized) {
         val userDetails =
             activity.intent.parcelable<UsersBean>(ConstantsHelper.USER_DETAILS_KEY)

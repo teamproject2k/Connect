@@ -92,7 +92,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     var showLogoutDialog by rememberSaveable {
         mutableStateOf(false)

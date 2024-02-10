@@ -96,7 +96,7 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
         mutableStateOf(false)
     }
 
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val mediaResultLauncher = mediaPicker { uri: Uri ->
         val contentResolver = context.contentResolver
         val mediaType = FunctionHelper.getMediaType(contentResolver, uri)

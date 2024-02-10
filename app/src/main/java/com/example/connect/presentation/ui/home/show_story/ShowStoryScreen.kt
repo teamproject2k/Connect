@@ -113,7 +113,7 @@ fun ShowStoryScreen(
 ) {
     val viewModel: ShowStoryViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     if (!viewModel.areDetailsInitialized) {
         viewModel.init(allBeanStoriesWithUsersList, currentStoryIndex)

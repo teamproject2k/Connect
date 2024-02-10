@@ -86,7 +86,7 @@ import kotlinx.coroutines.launch
 fun SavedPostsScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: SavedPostsViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 

@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 fun SearchScreen(navigator: DestinationsNavigator) {
     val viewModel: SearchUserViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var refreshing by rememberSaveable { mutableStateOf(false) }

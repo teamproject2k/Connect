@@ -57,9 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchFriendsScreen(navigator: DestinationsNavigator, loggedInUser: UsersBean) {
     val viewModel: SearchFriendsViewModel = hiltViewModel()
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var refreshing by rememberSaveable { mutableStateOf(false) }

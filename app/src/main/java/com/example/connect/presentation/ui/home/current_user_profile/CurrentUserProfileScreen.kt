@@ -82,7 +82,7 @@ import kotlinx.coroutines.launch
 fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     val viewModel: CurrentUserProfileViewModel = hiltViewModel()
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 

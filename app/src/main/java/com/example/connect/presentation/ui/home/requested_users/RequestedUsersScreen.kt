@@ -58,9 +58,7 @@ import kotlinx.coroutines.launch
 fun RequestedListScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: RequestedUsersViewModel = hiltViewModel()
-    val snackBarHostState = remember {
-        SnackbarHostState()
-    }
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var refreshing by rememberSaveable { mutableStateOf(false) }

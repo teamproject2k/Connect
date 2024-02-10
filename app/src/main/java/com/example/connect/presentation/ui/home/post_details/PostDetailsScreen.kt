@@ -141,7 +141,7 @@ fun PostDetailsScreen(
         )
         navigator.popBackStack()
     }
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         modifier = Modifier.fillMaxSize()

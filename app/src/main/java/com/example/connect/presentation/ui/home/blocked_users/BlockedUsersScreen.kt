@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 fun BlockedListScreen(navigator: DestinationsNavigator) {
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: BlockedUsersViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var refreshing by rememberSaveable { mutableStateOf(false) }

@@ -78,7 +78,7 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
     if (!viewModel.isDataInitialized) {
         viewModel.initializeData(defaultSelectedTab)
     }
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     var refreshing by rememberSaveable { mutableStateOf(false) }

@@ -82,7 +82,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: UserDetailsViewModel = hiltViewModel()
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     HandleAddUserState(viewModel = viewModel, context = context)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(

@@ -113,7 +113,7 @@ fun EditProfileScreen(
         }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = remember { SnackbarHostState() }
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
