@@ -30,13 +30,14 @@ interface IChatRepository {
         messageId: String
     ): ResponseState<Nothing>
 
-
     suspend fun addChatMetaDataToLocal(chatMetaDataList: List<ChatMetaDataBean>): LongArray
 
-
-    suspend fun addChatListToLocalUseCase(chatList: List<ChatBean>): LongArray
-
+    suspend fun addChatListToLocal(chatList: List<ChatBean>): LongArray
 
     suspend fun getUserWithLastMessageWithUnreadCount(loggedInUserFirebaseId: String): List<ChatWithUserAndCountBean>
 
+    suspend fun updateLastSeenAtOnLocal(
+        chatId: String,
+        lastSeenAt: Long
+    ): Int
 }

@@ -206,7 +206,7 @@ class IChatRepositoryImpl @Inject constructor(
             .insertChatMetaDataList(chatMetaDataList.map { it.toChatMetaDataLocalEntity() })
     }
 
-    override suspend fun addChatListToLocalUseCase(chatList: List<ChatBean>): LongArray {
+    override suspend fun addChatListToLocal(chatList: List<ChatBean>): LongArray {
         return appDatabase.getChatDao()
             .insertChatMessagesList(chatList.map { it.toChatLocalEntity() })
     }
@@ -238,5 +238,9 @@ class IChatRepositoryImpl @Inject constructor(
             }
         }
         return chatWithUserAndCountList
+    }
+
+    override suspend fun updateLastSeenAtOnLocal(chatId: String, lastSeenAt: Long): Int {
+        return appDatabase.getChatMetaDataDao().updateChatListLastSeen(chatId, lastSeenAt)
     }
 }

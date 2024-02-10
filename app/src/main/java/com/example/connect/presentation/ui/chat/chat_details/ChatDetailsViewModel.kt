@@ -13,16 +13,20 @@ import com.example.connect.domain.useCase.chat.DeleteMessageOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.LiveObserveChatListOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
-import com.example.connect.domain.useCase.user.UpdateUserLastActiveAtChatOnRemoteUseCase
+import com.example.connect.domain.useCase.chat.UpdateLastSeenAtOnLocalUseCase
+import com.example.connect.domain.utils.DomainFunctionHelper
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.database.ChildEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -32,13 +36,14 @@ class ChatDetailsViewModel @Inject constructor(
     private val liveObserveChatListOnRemoteUseCase: LiveObserveChatListOnRemoteUseCase,
     private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
     private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase,
-    private val updateUserLastActiveAtChatOnRemoteUseCase: UpdateUserLastActiveAtChatOnRemoteUseCase
+    private val updateLastSeenAtOnLocalUseCase: UpdateLastSeenAtOnLocalUseCase
 ) :
     BaseViewModel() {
 
     var isDataInitialized = false
     var listener: ChildEventListener? = null
     lateinit var loggedInUser: UsersBean
+    lateinit var otherUser: UsersBean
     val isMessageSendingState = mutableStateOf(false)
     val snackBarMessageState = mutableStateOf("")
     val messageState = mutableStateOf("")
@@ -55,7 +60,7 @@ class ChatDetailsViewModel @Inject constructor(
 
     var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
 
-    fun sendMessage(otherUserFirebaseUserId: String) {
+    fun sendMessage() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendMessageStateFlow.value = ResponseState.loading()
@@ -63,7 +68,7 @@ class ChatDetailsViewModel @Inject constructor(
                 val message = ChatBean(
                     firebaseId = "",
                     senderId = loggedInUser.firebaseUserId,
-                    receiverId = otherUserFirebaseUserId,
+                    receiverId = otherUser.firebaseUserId,
                     messageState.value,
                     sentAt,
                     sentAt,
@@ -77,32 +82,31 @@ class ChatDetailsViewModel @Inject constructor(
         }
     }
 
-    fun liveObserveChat(otherUserFirebaseUserId: String) {
+    fun liveObserveChat() {
         listener = liveObserveChatListOnRemoteUseCase(
             loggedInUser.firebaseUserId,
-            otherUserFirebaseUserId,
+            otherUser.firebaseUserId,
             chatListState
         ) { errorMessage: String ->
             onListenerErrorOccurredState.value = errorMessage
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
-        super.onCleared()
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val updatedLastActiveAt = FunctionHelper.getCurrentTimeInMillis()
-                val response = updateUserLastActiveAtChatOnRemoteUseCase(
-                    updatedLastActiveAt,
-                    loggedInUser.firebaseUserId
+        runBlocking {
+            GlobalScope.launch {
+                updateLastSeenAtOnLocalUseCase(
+                    DomainFunctionHelper.getSortedChatId(
+                        loggedInUser.firebaseUserId,
+                        otherUser.firebaseUserId
+                    ),
+                    FunctionHelper.getCurrentTimeInMillis()
                 )
-                if (response.status == RequestStatusEnum.Success) {
-                    loggedInUser.lastActiveAt = updatedLastActiveAt
-
-                }
-            }
+            }.join()
         }
+        super.onCleared()
     }
 
     fun deleteMessage(deletedBy: String, message: ChatBean) {

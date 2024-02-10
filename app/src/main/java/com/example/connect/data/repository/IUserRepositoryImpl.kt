@@ -912,16 +912,4 @@ class IUserRepositoryImpl @Inject constructor(
         return getUserFRBRList(loggedInUserFirebaseId, 3)
     }
 
-    override suspend fun updateUserLastActiveAtChatOnRemote(
-        lastActiveAtChat: Long,
-        loggedInUserFirebaseId: String
-    ): ResponseState<Nothing> {
-        return try {
-            fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
-                .update(UserRemoteEntity::lastActiveAt.name, lastActiveAtChat)
-            ResponseState.success(null)
-        } catch (exception: Exception) {
-            ResponseState.error(exception.localizedMessage ?: "")
-        }
-    }
 }

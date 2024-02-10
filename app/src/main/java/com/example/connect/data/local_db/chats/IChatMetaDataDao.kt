@@ -12,13 +12,11 @@ interface IChatMetaDataDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertChatMetaDataList(chatMetaDataList: List<ChatMetaDataLocalEntity>): LongArray
 
-
     @Query("SELECT * FROM chat_meta_data WHERE isChatDeleted=0 ORDER BY lastSeenChatAt DESC")
     fun getAllChatMetaDatList(): List<ChatMetaDataLocalEntity>
 
     @Query("UPDATE chat_meta_data SET lastSeenChatAt = :lastSeen WHERE chatId = :chatMetaDataId")
-    fun updateChatListLastSeen(chatMetaDataId: String, lastSeen: Long)
-
+    fun updateChatListLastSeen(chatMetaDataId: String, lastSeen: Long) : Int
 
     @Query("UPDATE chat_meta_data SET isChatDeleted = :isDeleted WHERE chatId = :chatMetaDataId")
     fun updateChatListDeleted(chatMetaDataId: String, isDeleted: Boolean)

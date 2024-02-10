@@ -99,6 +99,7 @@ fun ChatDetailsScreen(
 
     if (!viewModel.isDataInitialized) {
         viewModel.loggedInUser = loggedInUser
+        viewModel.otherUser = otherUserDetails
         viewModel.isDataInitialized = true
     }
 
@@ -109,7 +110,7 @@ fun ChatDetailsScreen(
     }
 
     if (viewModel.listener == null) {
-        viewModel.liveObserveChat(otherUserDetails.firebaseUserId)
+        viewModel.liveObserveChat()
     }
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(
@@ -119,16 +120,15 @@ fun ChatDetailsScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(
-                    otherUserDetails, navigator
+                    viewModel, navigator
                 )
                 ChatListSection(
                     viewModel,
-                    loggedInUser.firebaseUserId,
-                    otherUserName = otherUserDetails.name
+                    loggedInUser.firebaseUserId
                 )
             }
             ChatDetailsBottomSection(
-                viewModel, otherUserDetails
+                viewModel
             )
         }
         HandleSendMessageState(viewModel = viewModel)
@@ -153,14 +153,18 @@ fun ChatDetailsScreen(
 @Composable
 fun ChatListSection(
     viewModel: ChatDetailsViewModel,
-    loggedInUserFirebaseId: String,
-    otherUserName: String
+    loggedInUserFirebaseId: String
 ) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(state = lazyListState) {
         items(viewModel.chatListState, key = { it.firebaseId }) { chat ->
-            ChatBubble(viewModel, chat, loggedInUserFirebaseId, otherUserName = otherUserName)
+            ChatBubble(
+                viewModel,
+                chat,
+                loggedInUserFirebaseId,
+                otherUserName = viewModel.otherUser.name
+            )
         }
         if (viewModel.chatListState.isNotEmpty()) {
             coroutineScope.launch {
@@ -172,7 +176,7 @@ fun ChatListSection(
 
 @Composable
 private fun ChatDetailsTopSection(
-    otherUserDetails: UsersBean, navigator: DestinationsNavigator
+    viewModel: ChatDetailsViewModel, navigator: DestinationsNavigator
 ) {
     Row(
         modifier = Modifier
@@ -192,14 +196,14 @@ private fun ChatDetailsTopSection(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape),
-            model = otherUserDetails.profilePhoto,
-            contentDescription = otherUserDetails.name,
+            model = viewModel.otherUser.profilePhoto,
+            contentDescription = viewModel.otherUser.name,
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user)
         )
         SpacerWidth16()
         Column {
-            TextBold16(text = otherUserDetails.name, color = MaterialTheme.colorScheme.onPrimary)
+            TextBold16(text = viewModel.otherUser.name, color = MaterialTheme.colorScheme.onPrimary)
             // TODO: 31/01/24 aryan handle online
             Text(text = "Online", color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp)
         }
@@ -209,7 +213,7 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel, otherUserDetails: UsersBean
+    viewModel: ChatDetailsViewModel
 ) {
     val context = LocalContext.current
     Row(
@@ -235,7 +239,7 @@ fun ChatDetailsBottomSection(
                         modifier = Modifier.fillMaxWidth(),
                         message = viewModel.repliedOnChatState.value!!,
                         loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
-                        otherUserName = otherUserDetails.name,
+                        otherUserName = viewModel.otherUser.name,
                         showCancelIconButton = true,
                     ) {
                         viewModel.repliedOnChatState.value = null
@@ -273,7 +277,7 @@ fun ChatDetailsBottomSection(
                     if (viewModel.messageState.value.isNotBlank()) {
                         keyboardController?.hide()
                         if (context.isNetworkAvailable()) {
-                            viewModel.sendMessage(otherUserDetails.firebaseUserId)
+                            viewModel.sendMessage()
                         } else {
                             viewModel.snackBarMessageState.value =
                                 context.getString(R.string.no_internet_connection)
