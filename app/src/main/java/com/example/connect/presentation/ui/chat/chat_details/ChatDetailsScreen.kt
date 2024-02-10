@@ -332,6 +332,7 @@ fun RepliedOnUI(
         )
         Row(
             modifier = Modifier
+                .padding(end = 8.dp)
                 .constrainAs(topSection) {
                     top.linkTo(parent.top, margin = 4.dp)
                     bottom.linkTo(messageText.top)
@@ -368,6 +369,7 @@ fun RepliedOnUI(
         Text(
             text = message.message,
             modifier = Modifier
+                .padding(end = 8.dp)
                 .constrainAs(messageText) {
                     top.linkTo(topSection.bottom, margin = 4.dp)
                     bottom.linkTo(parent.bottom, margin = 4.dp)
