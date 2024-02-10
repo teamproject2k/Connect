@@ -83,15 +83,18 @@ class ChatDetailsViewModel @Inject constructor(
     }
 
     fun liveObserveChat() {
-        listener = liveObserveChatListOnRemoteUseCase(
-            loggedInUser.firebaseUserId,
-            otherUser.firebaseUserId,
-            chatListState
-        ) { errorMessage: String ->
-            onListenerErrorOccurredState.value = errorMessage
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                listener = liveObserveChatListOnRemoteUseCase(
+                    loggedInUser.firebaseUserId,
+                    otherUser.firebaseUserId,
+                    chatListState
+                ) { errorMessage: String ->
+                    onListenerErrorOccurredState.value = errorMessage
+                }
+            }
         }
     }
-
 
     fun deleteMessage(deletedBy: String, message: ChatBean) {
         viewModelScope.launch {
@@ -125,7 +128,7 @@ class ChatDetailsViewModel @Inject constructor(
                     FunctionHelper.getCurrentTimeInMillis()
                 )
             }.join()
-            //super.onCleared()
+            super.onCleared()
         }
     }
 }

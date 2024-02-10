@@ -18,6 +18,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -62,7 +65,6 @@ class IChatRepositoryImpl @Inject constructor(
             ResponseState.error(exception.localizedMessage ?: "")
         }
     }
-
 
     private suspend fun getChatData(
         chatListSnapshot: DataSnapshot,
@@ -126,6 +128,12 @@ class IChatRepositoryImpl @Inject constructor(
                         )
                     ) {
                         chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                        CoroutineScope(Dispatchers.IO).launch {
+                            appDatabase.getChatDao()
+                                .insertMessage(
+                                    chatRemoteEntity.toChatBean(chatDocumentId).toChatLocalEntity()
+                                )
+                        }
                     }
                 }
 
@@ -142,6 +150,13 @@ class IChatRepositoryImpl @Inject constructor(
                             )
                         ) {
                             chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                            CoroutineScope(Dispatchers.IO).launch {
+                                appDatabase.getChatDao()
+                                    .insertMessage(
+                                        chatRemoteEntity.toChatBean(chatDocumentId)
+                                            .toChatLocalEntity()
+                                    )
+                            }
                         }
                     }
                 }
@@ -160,7 +175,6 @@ class IChatRepositoryImpl @Inject constructor(
                 override fun onCancelled(error: DatabaseError) {
                     onError(error.message)
                 }
-
 
             })
     }

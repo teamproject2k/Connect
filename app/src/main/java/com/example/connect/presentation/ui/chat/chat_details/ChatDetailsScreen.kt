@@ -119,17 +119,10 @@ fun ChatDetailsScreen(
                 .padding(it)
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                ChatDetailsTopSection(
-                    viewModel, navigator
-                )
-                ChatListSection(
-                    viewModel,
-                    loggedInUser.firebaseUserId
-                )
+                ChatDetailsTopSection(viewModel, navigator)
+                ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
-            ChatDetailsBottomSection(
-                viewModel
-            )
+            ChatDetailsBottomSection(viewModel)
         }
         HandleSendMessageState(viewModel = viewModel)
         HandleDeleteMessageState(viewModel = viewModel)
