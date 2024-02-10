@@ -2,7 +2,7 @@ package com.example.connect.domain.models
 
 import com.example.connect.data.models.chats.ChatLocalEntity
 import com.example.connect.data.models.chats.ChatRemoteEntity
-import com.example.connect.data.utils.DataFunctionHelper
+import com.example.connect.domain.utils.DomainFunctionHelper
 
 data class ChatBean(
     val firebaseId: String,
@@ -33,7 +33,7 @@ data class ChatBean(
     fun toChatLocalEntity(): ChatLocalEntity {
         return ChatLocalEntity(
             firebaseId,
-            DataFunctionHelper.getSortedChatId(senderId, receiverId),
+            DomainFunctionHelper.getSortedChatId(senderId, receiverId),
             senderId,
             receiverId,
             message,

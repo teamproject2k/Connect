@@ -49,7 +49,6 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.ChatWithUserAndCountBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -99,13 +98,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            if (context.isNetworkAvailable()) {
-                viewModel.getChatList()
-            } else {
-                viewModel.snackBarMessageState.value =
-                    context.getString(R.string.no_internet_connection)
-                FunctionHelper.vibrateDevice(context)
-            }
+            viewModel.getChatList(true, context.isNetworkAvailable())
             refreshing = false
         })
     Scaffold(
@@ -148,12 +141,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     }
 
     LaunchedEffect(Unit) {
-        if (context.isNetworkAvailable()) {
-            viewModel.getChatList()
-        } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
-        }
+        viewModel.getChatList(false, context.isNetworkAvailable())
     }
 }
 
@@ -187,98 +175,11 @@ fun HandleChatListSectionState(
         }
 
         RequestStatusEnum.Success -> {
-            val chatList = arrayListOf<ChatWithUserAndCountBean>()
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    2,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Text.name,
-                        null
-                    )
-                )
+            ChatList(
+                chatList = getChatListState.data ?: mutableListOf(),
+                viewModel = viewModel,
+                navigator = navigator
             )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    3,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Image.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    10,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.TextImage.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    0,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Video.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    9,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.TextVideo.name,
-                        null
-                    )
-                )
-            )
-            ChatList(chatList, viewModel, navigator)
         }
 
         RequestStatusEnum.None -> {
@@ -294,7 +195,7 @@ private fun ChatList(
     navigator: DestinationsNavigator
 ) {
     if (chatList.isNullOrEmpty()) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_chats_found))
         }
     } else {
@@ -408,7 +309,7 @@ private fun ChatListItem(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = if (chatMetaData.unreadMessageCount > 9) "9+" else chatMetaData.unreadMessageCount.toString(),
+                                text = if (chatMetaData.unreadMessageCount > 100) "100+" else chatMetaData.unreadMessageCount.toString(),
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
