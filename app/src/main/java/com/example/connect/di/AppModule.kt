@@ -137,9 +137,10 @@ class AppModule {
     @Singleton
     fun getIChatRepository(
         firebaseDatabase: FirebaseDatabase,
-        fireStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
+        appDatabase: AppDatabase
     ): IChatRepository =
-        IChatRepositoryImpl(firebaseDatabase, fireStore)
+        IChatRepositoryImpl(firebaseDatabase, fireStore, appDatabase)
 
     @Provides
     @Singleton

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,7 +50,6 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
-import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.ChatWithUserAndCountBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
@@ -59,7 +59,9 @@ import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight4
+import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
+import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchFriendsScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -97,13 +99,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
             refreshing = true
-            if (context.isNetworkAvailable()) {
-                viewModel.getChatList()
-            } else {
-                viewModel.snackBarMessageState.value =
-                    context.getString(R.string.no_internet_connection)
-                FunctionHelper.vibrateDevice(context)
-            }
+            viewModel.getChatList(true, context.isNetworkAvailable())
             refreshing = false
         })
     Scaffold(
@@ -146,12 +142,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     }
 
     LaunchedEffect(Unit) {
-        if (context.isNetworkAvailable()) {
-            viewModel.getChatList()
-        } else {
-            viewModel.snackBarMessageState.value =
-                context.getString(R.string.no_internet_connection)
-        }
+        viewModel.getChatList(false, context.isNetworkAvailable())
     }
 }
 
@@ -167,6 +158,7 @@ fun HandleChatListSectionState(
     when (getChatListState.status) {
         RequestStatusEnum.Loading -> {
             isExceptionHandled = false
+            ChatListLoading()
         }
 
         RequestStatusEnum.Exception -> {
@@ -185,103 +177,87 @@ fun HandleChatListSectionState(
         }
 
         RequestStatusEnum.Success -> {
-            val chatList = arrayListOf<ChatWithUserAndCountBean>()
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    2,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Text.name,
-                        null
-                    )
-                )
+            ChatList(
+                chatList = getChatListState.data ?: mutableListOf(),
+                viewModel = viewModel,
+                navigator = navigator
             )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    3,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Image.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    10,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.TextImage.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    0,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.Video.name,
-                        null
-                    )
-                )
-            )
-            chatList.add(
-                ChatWithUserAndCountBean(
-                    viewModel.loggedInUserDetails,
-                    9,
-                    ChatBean(
-                        "1",
-                        "1",
-                        "1",
-                        "Hello How are you",
-                        1,
-                        1,
-                        "1",
-                        "a",
-                        MediaTypeEnum.TextVideo.name,
-                        null
-                    )
-                )
-            )
-            ChatList(chatList, viewModel, navigator)
         }
 
         RequestStatusEnum.None -> {
             // do not handle this
         }
+    }
+}
+
+
+@Composable
+private fun ChatListLoading() {
+    LazyColumn {
+        items(10) {
+            ChatListLoadingItem()
+        }
+    }
+}
+
+
+@Composable
+private fun ChatListLoadingItem() {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .shimmer(),
+                model = null,
+                contentDescription = null,
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .weight(4f)
+                            .height(16.dp)
+                            .shimmer()
+                    )
+                    SpacerWidth12()
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(12.dp)
+                            .shimmer()
+                    )
+                }
+                SpacerHeight4()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(13.dp)
+                            .shimmer()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .shimmer(),
+                    )
+                }
+            }
+        }
+        DividerLightGrayAlpha50()
     }
 }
 
@@ -292,7 +268,7 @@ private fun ChatList(
     navigator: DestinationsNavigator
 ) {
     if (chatList.isNullOrEmpty()) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_chats_found))
         }
     } else {
@@ -302,7 +278,7 @@ private fun ChatList(
                     navigator.navigate(
                         ChatDetailsScreenDestination(
                             viewModel.loggedInUserDetails,
-                            viewModel.loggedInUserDetails.copy(firebaseUserId = "OUbbPgo1mnUxIog93aqiFsaN07M2")
+                            userLastMessageAndCount.userDetails
                         )
                     )
                 }
@@ -406,7 +382,7 @@ private fun ChatListItem(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = if (chatMetaData.unreadMessageCount > 9) "9+" else chatMetaData.unreadMessageCount.toString(),
+                                text = if (chatMetaData.unreadMessageCount > 100) "100+" else chatMetaData.unreadMessageCount.toString(),
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )

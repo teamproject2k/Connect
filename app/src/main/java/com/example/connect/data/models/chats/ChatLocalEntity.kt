@@ -1,21 +1,10 @@
 package com.example.connect.data.models.chats
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.connect.domain.models.ChatBean
 
-@Entity(
-    tableName = "chat",
-    foreignKeys = [
-        ForeignKey(
-            entity = ChatMetaDataLocalEntity::class,
-            parentColumns = ["chatId"],
-            childColumns = ["chatId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-)
+@Entity(tableName = "chat")
 data class ChatLocalEntity(
     @PrimaryKey
     val firebaseId: String,

@@ -8,6 +8,6 @@ import androidx.room.PrimaryKey
 data class ChatMetaDataLocalEntity(
     @PrimaryKey
     val chatId: String,
-    val lastSeenChatId: Long,
+    val lastSeenChatAt: Long,
     val isChatDeleted: Boolean = false
 )

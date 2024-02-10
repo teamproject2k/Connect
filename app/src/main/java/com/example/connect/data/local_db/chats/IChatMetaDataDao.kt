@@ -9,11 +9,14 @@ import com.example.connect.data.models.chats.ChatMetaDataLocalEntity
 
 @Dao
 interface IChatMetaDataDao {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertChatMetaData(chatMetaDataLocalEntity: ChatMetaDataLocalEntity): Long
+    fun insertChatMetaDataList(chatMetaDataList: List<ChatMetaDataLocalEntity>): LongArray
 
-    @Query("UPDATE chat_meta_data SET lastSeenChatId = :lastSeen WHERE chatId = :chatMetaDataId")
+
+    @Query("SELECT * FROM chat_meta_data WHERE isChatDeleted=0 ORDER BY lastSeenChatAt DESC")
+    fun getAllChatMetaDatList(): List<ChatMetaDataLocalEntity>
+
+    @Query("UPDATE chat_meta_data SET lastSeenChatAt = :lastSeen WHERE chatId = :chatMetaDataId")
     fun updateChatListLastSeen(chatMetaDataId: String, lastSeen: Long)
 
 
