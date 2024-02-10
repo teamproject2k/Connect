@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -58,7 +59,9 @@ import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.example.connect.presentation.ui.common.LocalActivity
 import com.example.connect.presentation.ui.common.SpacerHeight4
+import com.example.connect.presentation.ui.common.SpacerWidth12
 import com.example.connect.presentation.ui.common.SpacerWidth6
+import com.example.connect.presentation.ui.common.shimmer
 import com.example.connect.presentation.ui.destinations.ChatDetailsScreenDestination
 import com.example.connect.presentation.ui.destinations.SearchFriendsScreenDestination
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -157,6 +160,7 @@ fun HandleChatListSectionState(
     when (getChatListState.status) {
         RequestStatusEnum.Loading -> {
             isExceptionHandled = false
+            ChatListLoading()
         }
 
         RequestStatusEnum.Exception -> {
@@ -185,6 +189,77 @@ fun HandleChatListSectionState(
         RequestStatusEnum.None -> {
             // do not handle this
         }
+    }
+}
+
+
+@Composable
+private fun ChatListLoading() {
+    LazyColumn {
+        items(10) {
+            ChatListLoadingItem()
+        }
+    }
+}
+
+
+@Composable
+private fun ChatListLoadingItem() {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .shimmer(),
+                model = null,
+                contentDescription = null,
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .weight(4f)
+                            .height(16.dp)
+                            .shimmer()
+                    )
+                    SpacerWidth12()
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(12.dp)
+                            .shimmer()
+                    )
+                }
+                SpacerHeight4()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(13.dp)
+                            .shimmer()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .shimmer(),
+                    )
+                }
+            }
+        }
+        DividerLightGrayAlpha50()
     }
 }
 
