@@ -313,6 +313,7 @@ fun RepliedOnUI(
     loggedInUserFirebaseId: String,
     otherUserName: String,
     senderNameColor: Color = MaterialTheme.colorScheme.primary,
+    dividerColor: Color = MaterialTheme.colorScheme.primary,
     messageColor: Color = Color.Unspecified,
     senderMessageBackgroundColor: Color = ColorsHelper.chatBubbleOtherUserBg(),
     showCancelIconButton: Boolean = true,
@@ -334,7 +335,7 @@ fun RepliedOnUI(
                     width = Dimension.value(4.dp)
                     height = Dimension.fillToConstraints
                 }
-                .background(MaterialTheme.colorScheme.primary)
+                .background(dividerColor)
         )
         Row(
             modifier = Modifier
@@ -500,8 +501,9 @@ fun ChatBubble(
                     RepliedOnUI(
                         message = repliedOnMessage,
                         loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
-                        senderNameColor = MaterialTheme.colorScheme.onPrimary,
-                        messageColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = .95f),
+                        senderNameColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black(),
+                        dividerColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else ColorsHelper.gray(),
+                        messageColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black(),
                         otherUserName = otherUserName,
                         showCancelIconButton = false
                     )
