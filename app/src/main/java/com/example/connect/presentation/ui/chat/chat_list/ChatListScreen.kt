@@ -272,7 +272,7 @@ private fun ChatList(
             Text(text = stringResource(R.string.no_chats_found))
         }
     } else {
-        LazyColumn {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(chatList) { userLastMessageAndCount ->
                 ChatListItem(userLastMessageAndCount) {
                     navigator.navigate(

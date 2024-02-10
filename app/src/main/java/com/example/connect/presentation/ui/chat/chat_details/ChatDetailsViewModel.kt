@@ -92,22 +92,6 @@ class ChatDetailsViewModel @Inject constructor(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    override fun onCleared() {
-        listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
-        runBlocking {
-            GlobalScope.launch {
-                updateLastSeenAtOnLocalUseCase(
-                    DomainFunctionHelper.getSortedChatId(
-                        loggedInUser.firebaseUserId,
-                        otherUser.firebaseUserId
-                    ),
-                    FunctionHelper.getCurrentTimeInMillis()
-                )
-            }.join()
-        }
-        super.onCleared()
-    }
 
     fun deleteMessage(deletedBy: String, message: ChatBean) {
         viewModelScope.launch {
@@ -125,6 +109,23 @@ class ChatDetailsViewModel @Inject constructor(
                 }
                 _deleteMessageStateFlow.value = response
             }
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun onCleared() {
+        listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
+        runBlocking {
+            GlobalScope.launch {
+                updateLastSeenAtOnLocalUseCase(
+                    DomainFunctionHelper.getSortedChatId(
+                        loggedInUser.firebaseUserId,
+                        otherUser.firebaseUserId
+                    ),
+                    FunctionHelper.getCurrentTimeInMillis()
+                )
+            }.join()
+            //super.onCleared()
         }
     }
 }

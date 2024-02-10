@@ -87,7 +87,8 @@ class AppModule {
             AppDatabase::class.java,
             "com.example.connect.app_database"
         )
-        return database.build()
+        return database
+            .build()
     }
 
     @Provides
