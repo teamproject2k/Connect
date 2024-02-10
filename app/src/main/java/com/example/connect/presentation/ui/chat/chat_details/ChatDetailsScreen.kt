@@ -98,9 +98,7 @@ fun ChatDetailsScreen(
     val context = LocalContext.current
 
     if (!viewModel.isDataInitialized) {
-        viewModel.loggedInUser = loggedInUser
-        viewModel.otherUser = otherUserDetails
-        viewModel.isDataInitialized = true
+        viewModel.initializeData(loggedInUser, otherUserDetails)
     }
 
     if (!context.isNetworkAvailable()) {
