@@ -13,6 +13,7 @@ import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.repository.IChatRepository
 import com.example.connect.domain.utils.DomainFunctionHelper
 import com.example.connect.domain.utils.FirebaseConstants
+import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -127,13 +128,19 @@ class IChatRepositoryImpl @Inject constructor(
                             loggedInUserFirebaseId
                         )
                     ) {
-                        chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
                         CoroutineScope(Dispatchers.IO).launch {
                             appDatabase.getChatDao()
                                 .insertMessage(
                                     chatRemoteEntity.toChatBean(chatDocumentId).toChatLocalEntity()
                                 )
+                            appDatabase.getChatMetaDataDao().updateChatListLastSeen(
+                                DomainFunctionHelper.getSortedChatId(
+                                    loggedInUserFirebaseId,
+                                    otherUserFirebaseId
+                                ), FunctionHelper.getCurrentTimeInMillis()
+                            )
                         }
+                        chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
                     }
                 }
 
@@ -149,14 +156,20 @@ class IChatRepositoryImpl @Inject constructor(
                                 loggedInUserFirebaseId
                             )
                         ) {
-                            chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
                             CoroutineScope(Dispatchers.IO).launch {
                                 appDatabase.getChatDao()
                                     .insertMessage(
                                         chatRemoteEntity.toChatBean(chatDocumentId)
                                             .toChatLocalEntity()
                                     )
+                                appDatabase.getChatMetaDataDao().updateChatListLastSeen(
+                                    DomainFunctionHelper.getSortedChatId(
+                                        loggedInUserFirebaseId,
+                                        otherUserFirebaseId
+                                    ), FunctionHelper.getCurrentTimeInMillis()
+                                )
                             }
+                            chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
                         }
                     }
                 }

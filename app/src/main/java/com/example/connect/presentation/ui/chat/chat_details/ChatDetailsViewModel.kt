@@ -20,13 +20,10 @@ import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.utils.FunctionHelper
 import com.google.firebase.database.ChildEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -59,6 +56,23 @@ class ChatDetailsViewModel @Inject constructor(
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
     var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
+
+    fun initializeData(loggedInUserDetails: UsersBean, otherUserDetails: UsersBean) {
+        this.loggedInUser = loggedInUserDetails
+        this.otherUser = otherUserDetails
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                updateLastSeenAtOnLocalUseCase(
+                    DomainFunctionHelper.getSortedChatId(
+                        loggedInUser.firebaseUserId,
+                        otherUser.firebaseUserId
+                    ),
+                    FunctionHelper.getCurrentTimeInMillis()
+                )
+            }
+        }
+        isDataInitialized = true
+    }
 
     fun sendMessage() {
         viewModelScope.launch {
@@ -115,20 +129,7 @@ class ChatDetailsViewModel @Inject constructor(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
-        runBlocking {
-            GlobalScope.launch {
-                updateLastSeenAtOnLocalUseCase(
-                    DomainFunctionHelper.getSortedChatId(
-                        loggedInUser.firebaseUserId,
-                        otherUser.firebaseUserId
-                    ),
-                    FunctionHelper.getCurrentTimeInMillis()
-                )
-            }.join()
-            super.onCleared()
-        }
     }
 }
