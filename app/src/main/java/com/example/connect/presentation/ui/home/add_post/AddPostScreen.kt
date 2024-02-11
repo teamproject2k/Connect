@@ -42,25 +42,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
-import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.AppTopAppBar
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.IconTextSection
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.ShowSelectedImage
+import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.TransparentTextField
 import com.example.connect.presentation.ui.common.UserDetailsSection
 import com.example.connect.presentation.ui.common.VisibilityItem
@@ -278,32 +276,6 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
             }
         }
     }
-}
-
-@Composable
-private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit) {
-    AsyncImage(
-        model = selectedMediaData.uri,
-        contentDescription = stringResource(R.string.post_image),
-        modifier = Modifier.fillMaxWidth(),
-        contentScale = ContentScale.Crop,
-        onError = {
-            onError()
-        }
-    )
-}
-
-@Composable
-private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
-    val screenHeight = context.resources.displayMetrics.heightPixels
-    GetPlayerView(
-        context = context,
-        uri = selectedMediaData.uri.toString(),
-        height = (screenHeight * .5).toInt()
-    ) { exoPlayer, _ ->
-        exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
-    }
-
 }
 
 @Composable

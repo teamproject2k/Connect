@@ -119,7 +119,7 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(viewModel, navigator)
                 ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
-            ChatDetailsBottomSection(viewModel)
+            ChatDetailsBottomSection(viewModel, navigator)
         }
         HandleSendMessageState(viewModel = viewModel)
         HandleDeleteMessageState(viewModel = viewModel)
@@ -203,7 +203,8 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel
+    viewModel: ChatDetailsViewModel,
+    navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
     Row(

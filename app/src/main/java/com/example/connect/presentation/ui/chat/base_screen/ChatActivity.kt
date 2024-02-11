@@ -13,7 +13,6 @@ import com.example.connect.presentation.ui.theme.ConnectTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class ChatActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -59,17 +59,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
 import androidx.palette.graphics.Palette
-import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
-import com.example.connect.presentation.ui.common.GetPlayerView
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.LocalActivity
+import com.example.connect.presentation.ui.common.ShowSelectedImage
+import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TransparentTextField
@@ -120,7 +119,8 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
                 .fillMaxSize()
         ) {
             MainContentSection(
-                viewModel, Modifier
+                viewModel,
+                Modifier
                     .weight(1f)
                     .fillMaxSize(),
                 navigator
@@ -318,26 +318,6 @@ private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ShowSelectedImage(selectedMediaData: MediaData, onError: () -> Unit) {
-    AsyncImage(
-        model = selectedMediaData.uri,
-        contentDescription = stringResource(R.string.story_image),
-        modifier = Modifier.fillMaxWidth(),
-        contentScale = ContentScale.Crop,
-        onError = {
-            onError()
-        }
-    )
-}
-
-@Composable
-private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
-    GetPlayerView(context = context, uri = selectedMediaData.uri.toString()) { exoPlayer, _ ->
-        exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
     }
 }
 
