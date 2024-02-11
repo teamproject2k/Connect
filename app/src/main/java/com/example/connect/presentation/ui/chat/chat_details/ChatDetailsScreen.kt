@@ -106,7 +106,6 @@ fun ChatDetailsScreen(
         FunctionHelper.vibrateDevice(context)
         navigator.popBackStack()
     }
-
     if (viewModel.listener == null) {
         viewModel.liveObserveChat()
     }
