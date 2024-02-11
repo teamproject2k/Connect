@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -66,7 +67,6 @@ import com.example.connect.presentation.ui.common.ChatBottomSection
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.RepliedOnUI
-import com.example.connect.presentation.ui.common.ShowSelectedImage
 import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight2
@@ -74,6 +74,7 @@ import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.destinations.AddMediaScreenDestination
+import com.example.connect.presentation.ui.destinations.ShowMediaScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ChatNavGraph
@@ -162,7 +163,7 @@ fun ChatDetailsScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 ChatDetailsTopSection(viewModel, navigator)
-                ChatListSection(viewModel, loggedInUser.firebaseUserId)
+                ChatListSection(viewModel, loggedInUser.firebaseUserId, navigator)
             }
             ChatBottomSection(
                 messageState = viewModel.messageState,
@@ -207,12 +208,11 @@ fun ChatDetailsScreen(
     }
 }
 
-
-
 @Composable
 fun ChatListSection(
     viewModel: ChatDetailsViewModel,
-    loggedInUserFirebaseId: String
+    loggedInUserFirebaseId: String,
+    navigator: DestinationsNavigator
 ) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -222,7 +222,8 @@ fun ChatListSection(
                 viewModel,
                 chat,
                 loggedInUserFirebaseId,
-                otherUserName = viewModel.otherUser.name
+                otherUserName = viewModel.otherUser.name,
+                navigator
             )
         }
         if (viewModel.chatListState.isNotEmpty()) {
@@ -321,7 +322,8 @@ fun ChatBubble(
     viewModel: ChatDetailsViewModel,
     message: ChatBean,
     loggedInUserFirebaseId: String,
-    otherUserName: String
+    otherUserName: String,
+    navigator: DestinationsNavigator
 ) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
@@ -382,13 +384,20 @@ fun ChatBubble(
         ) {
             if (message.mediaUrl.isNotBlank()) {
                 if (message.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
-//                    ShowSelectedImage(selectedMediaData = selectedMedia) {
-//                        viewModel.selectedMediaState.value = null
-//                        viewModel.snackBarMessageState.value =
-//                            context.getString(R.string.something_went_wrong)
-//                    }
+                    AsyncImage(
+                        model = message.mediaUrl,
+                        contentDescription = stringResource(R.string.story_image),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { navigator.navigate(ShowMediaScreenDestination(message)) },
+                        contentScale = ContentScale.Crop,
+                        onError = {
+                            viewModel.snackBarMessageState.value =
+                                context.getString(R.string.something_went_wrong)
+                        }
+                    )
                 } else {
-                    //ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
+                 //   ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
                 }
             }
             val repliedOnMessage =

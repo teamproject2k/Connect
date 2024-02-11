@@ -7,12 +7,10 @@ annotation class AuthenticationNavGraph(
     val start: Boolean = false
 )
 
-
 @NavGraph
 annotation class HomeNavGraph(
     val start: Boolean = false
 )
-
 
 @NavGraph
 annotation class ChatNavGraph(

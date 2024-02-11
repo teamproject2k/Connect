@@ -1,4 +1,4 @@
-package com.example.connect.domain.useCase.upload_file
+package com.example.connect.domain.useCase.file
 
 import android.net.Uri
 import com.example.connect.domain.network_request_response.ResponseState
