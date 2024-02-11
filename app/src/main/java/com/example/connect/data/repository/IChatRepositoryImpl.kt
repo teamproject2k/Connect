@@ -67,6 +67,14 @@ class IChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteAllChats(): Int {
+        return appDatabase.getChatDao().deleteAllChats()
+    }
+
+    override suspend fun deleteChat(chatBean: ChatBean): Int {
+        return appDatabase.getChatDao().deleteChat(chatBean.toChatLocalEntity())
+    }
+
     private suspend fun getChatData(
         chatListSnapshot: DataSnapshot,
         loggedInUserFirebaseId: String
@@ -149,27 +157,31 @@ class IChatRepositoryImpl @Inject constructor(
                     val chatDocumentId = snapshot.key
                     if (chatRemoteEntity != null && chatDocumentId != null) {
                         chatListState.removeIf { it.firebaseId == chatDocumentId }
-                        if (!DataFunctionHelper.whetherNotToShowChatToLoggedInUser(
-                                chatRemoteEntity.deletedBy,
-                                chatRemoteEntity.senderId,
-                                chatRemoteEntity.receiverId,
-                                loggedInUserFirebaseId
-                            )
-                        ) {
-                            CoroutineScope(Dispatchers.IO).launch {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            if (!DataFunctionHelper.whetherNotToShowChatToLoggedInUser(
+                                    chatRemoteEntity.deletedBy,
+                                    chatRemoteEntity.senderId,
+                                    chatRemoteEntity.receiverId,
+                                    loggedInUserFirebaseId
+                                )
+                            ) {
                                 appDatabase.getChatDao()
                                     .insertMessage(
                                         chatRemoteEntity.toChatBean(chatDocumentId)
                                             .toChatLocalEntity()
                                     )
-                                appDatabase.getChatMetaDataDao().updateChatListLastSeen(
-                                    DomainFunctionHelper.getSortedChatId(
-                                        loggedInUserFirebaseId,
-                                        otherUserFirebaseId
-                                    ), FunctionHelper.getCurrentTimeInMillis()
+                                chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                            } else {
+                                appDatabase.getChatDao().deleteChat(
+                                    chatRemoteEntity.toChatBean(chatDocumentId).toChatLocalEntity()
                                 )
                             }
-                            chatListState.add(chatRemoteEntity.toChatBean(chatDocumentId))
+                            appDatabase.getChatMetaDataDao().updateChatListLastSeen(
+                                DomainFunctionHelper.getSortedChatId(
+                                    loggedInUserFirebaseId,
+                                    otherUserFirebaseId
+                                ), FunctionHelper.getCurrentTimeInMillis()
+                            )
                         }
                     }
                 }
@@ -251,9 +263,12 @@ class IChatRepositoryImpl @Inject constructor(
                 )
             }
             val lastMessage =
-                appDatabase.getChatDao().getLastMessage(chatMetaData.chatId, loggedInUserFirebaseId)
+                appDatabase.getChatDao().getLastMessage(chatMetaData.chatId)
             val unreadMessageCount = appDatabase.getChatDao()
-                .getUnreadMessageCount(chatMetaData.chatId, chatMetaData.lastSeenChatAt)
+                .getUnreadMessageCount(
+                    chatMetaData.chatId,
+                    chatMetaData.lastSeenChatAt,
+                )
             if (user != null && lastMessage != null) {
                 chatWithUserAndCountList.add(
                     ChatWithUserAndCountBean(

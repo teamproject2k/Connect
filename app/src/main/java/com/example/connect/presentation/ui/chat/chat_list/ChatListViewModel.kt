@@ -9,6 +9,7 @@ import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.chat.AddChatMessagesListToLocalUseCase
 import com.example.connect.domain.useCase.chat.AddChatMetaDataListToLocalUseCase
+import com.example.connect.domain.useCase.chat.DeleteAllChatsFromLocalUseCase
 import com.example.connect.domain.useCase.chat.GetChatListFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.GetUserWithLastMessageWithUnreadCountFromLocalUseCase
 import com.example.connect.domain.useCase.user.AddUserListToLocalUseCase
@@ -28,7 +29,8 @@ class ChatListViewModel @Inject constructor(
     private val addChatMetaDataListToLocalUseCase: AddChatMetaDataListToLocalUseCase,
     private val addChatMessagesListToLocalUseCase: AddChatMessagesListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
-    private val getUserWithLastMessageWithUnreadCountFromLocalUseCase: GetUserWithLastMessageWithUnreadCountFromLocalUseCase
+    private val getUserWithLastMessageWithUnreadCountFromLocalUseCase: GetUserWithLastMessageWithUnreadCountFromLocalUseCase,
+    private val deleteAllChatsFromLocalUseCase: DeleteAllChatsFromLocalUseCase
 
 ) : BaseViewModel() {
 
@@ -71,6 +73,7 @@ class ChatListViewModel @Inject constructor(
                                 it.chatList
                             }
                             addChatMetaDataListToLocalUseCase(chatMetaDataBeanList)
+                            deleteAllChatsFromLocalUseCase()
                             addChatMessagesListToLocalUseCase(chatMessageList)
                             addUserListToLocalUseCase(response.data.map { it.userDetails })
                         }

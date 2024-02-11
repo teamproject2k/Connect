@@ -12,6 +12,12 @@ interface IChatRepository {
 
     suspend fun getChatListFromRemote(loggedInUserFirebaseId: String): ResponseState<ArrayList<UserWithChatListBean>>
 
+
+    suspend fun deleteAllChats(): Int
+
+
+    suspend fun deleteChat(chatBean: ChatBean): Int
+
     fun liveObserveChat(
         loggedInUserFirebaseId: String,
         otherUserFirebaseId: String,

@@ -9,12 +9,12 @@ import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
+import com.example.connect.domain.useCase.chat.DeleteChatFromLocalUseCase
 import com.example.connect.domain.useCase.chat.DeleteMessageOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.LiveObserveChatListOnRemoteUseCase
 import com.example.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
 import com.example.connect.domain.useCase.chat.UpdateLastSeenAtOnLocalUseCase
-import com.example.connect.domain.useCase.chat.UpdateMessageOnLocalUseCase
 import com.example.connect.domain.utils.DomainFunctionHelper
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -35,7 +35,7 @@ class ChatDetailsViewModel @Inject constructor(
     private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
     private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase,
     private val updateLastSeenAtOnLocalUseCase: UpdateLastSeenAtOnLocalUseCase,
-    private val updateMessageOnLocalUseCase: UpdateMessageOnLocalUseCase
+    private val deleteChatFromLocalUseCase: DeleteChatFromLocalUseCase
 ) :
     BaseViewModel() {
 
@@ -124,8 +124,7 @@ class ChatDetailsViewModel @Inject constructor(
                         message.firebaseId
                     )
                 if (response.status == RequestStatusEnum.Success) {
-                    message.deletedBy = deletedBy
-                    updateMessageOnLocalUseCase(message)
+                    deleteChatFromLocalUseCase(message)
                 }
                 _deleteMessageStateFlow.value = response
             }
