@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 @ChatNavGraph
 @Destination
 @Composable
-fun AddMediaScreen() {
+fun AddMediaScreen(message: String) {
     val viewModel: AddMediaViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current

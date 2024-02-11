@@ -1,6 +1,7 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -76,6 +78,7 @@ import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold16
+import com.example.connect.presentation.ui.destinations.AddMediaScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -243,17 +246,29 @@ fun ChatDetailsBottomSection(
                     value = viewModel.messageState.value,
                     onValueChange = { text -> viewModel.messageState.value = text },
                     decorationBox = {
-                        if (viewModel.messageState.value.isBlank()) {
-                            Text(
-                                stringResource(id = R.string.message),
-                                color = ColorsHelper.gray(),
-                                fontSize = 14.sp
-                            )
-                        } else {
-                            Text(
-                                viewModel.messageState.value,
-                                color = ColorsHelper.black(),
-                                fontSize = 14.sp
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (viewModel.messageState.value.isBlank()) {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    text = stringResource(id = R.string.message),
+                                    color = ColorsHelper.gray(),
+                                    fontSize = 14.sp
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    text = viewModel.messageState.value,
+                                    color = ColorsHelper.black(),
+                                    fontSize = 14.sp
+                                )
+                            }
+                            Icon(
+                                modifier = Modifier.clickable {
+                                    navigator.navigate(AddMediaScreenDestination(viewModel.messageState.value))
+                                },
+                                imageVector = Icons.Default.Attachment,
+                                contentDescription = stringResource(id = R.string.add_media),
+                                tint = ColorsHelper.gray()
                             )
                         }
                     }
