@@ -18,6 +18,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.example.connect.R
+import com.example.connect.domain.enums.MediaStateChangeEnum
 import com.example.connect.presentation.utils.FunctionHelper.getExoPlayer
 
 @OptIn(UnstableApi::class)
@@ -30,7 +31,7 @@ fun GetPlayerView(
     height: Int = ViewGroup.LayoutParams.MATCH_PARENT,
     width: Int = ViewGroup.LayoutParams.MATCH_PARENT,
     playWhenReady: Boolean = false,
-    onStateChange: ((isError: Boolean) -> Unit)? = null,
+    onStateChange: ((changedState: MediaStateChangeEnum) -> Unit)? = null,
     onUpdate: (ExoPlayer, PlayerView) -> Unit
 ) {
     val exoPlayer = remember {
@@ -51,14 +52,18 @@ fun GetPlayerView(
             if (onStateChange != null) {
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
-                        onStateChange(true)
+                        onStateChange(MediaStateChangeEnum.Error)
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         super.onPlaybackStateChanged(playbackState)
                         when (playbackState) {
                             Player.STATE_READY -> {
-                                onStateChange(false)
+                                onStateChange(MediaStateChangeEnum.Success)
+                            }
+
+                            Player.STATE_BUFFERING -> {
+                                onStateChange(MediaStateChangeEnum.Loading)
                             }
 
                             else -> {
@@ -87,3 +92,5 @@ fun GetPlayerView(
         }
     }
 }
+
+
