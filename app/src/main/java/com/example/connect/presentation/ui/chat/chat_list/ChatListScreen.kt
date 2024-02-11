@@ -382,8 +382,8 @@ private fun ChatListItem(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = if (chatMetaData.unreadMessageCount > 100) "100+" else chatMetaData.unreadMessageCount.toString(),
-                                fontSize = 14.sp,
+                                text = if (chatMetaData.unreadMessageCount > 9) "9+" else chatMetaData.unreadMessageCount.toString(),
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
