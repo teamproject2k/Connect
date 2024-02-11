@@ -389,7 +389,7 @@ fun UserStories(
                 viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue]
             if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
                 viewModel.addUserToSeenList(
-                    story.storyFirebaseId,
+                    story,
                     loggedInUserFirebaseId,
                     FunctionHelper.getCurrentTimeInMillis()
                 )

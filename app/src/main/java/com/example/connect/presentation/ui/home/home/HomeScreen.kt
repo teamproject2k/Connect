@@ -274,7 +274,7 @@ private fun StoryUiSection(
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            itemsIndexed(allStoriesWithUserBeanList) { index, storiesWithUser ->
+            itemsIndexed(allStoriesWithUserBeanList) { index, _ ->
                 StoryItem(
                     index,
                     allStoriesWithUserBeanList,

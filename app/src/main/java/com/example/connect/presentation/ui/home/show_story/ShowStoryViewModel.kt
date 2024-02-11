@@ -8,6 +8,7 @@ import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoriesWithUserBean
 import com.example.connect.domain.models.StoryBean
+import com.example.connect.domain.models.StorySeenByBean
 import com.example.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
@@ -15,6 +16,7 @@ import com.example.connect.domain.useCase.story.AddUserToSeenListInRemoteUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryFromLocalUseCase
 import com.example.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
 import com.example.connect.domain.useCase.story.GetSeenListFromRemoteUseCase
+import com.example.connect.domain.useCase.story.UpdateStoryOnLocalUseCase
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.utils.ConstantsHelper
@@ -31,7 +33,8 @@ class ShowStoryViewModel @Inject constructor(
     private val deleteStoryInRemoteUseCase: DeleteStoryInRemoteUseCase,
     private val deleteStoryFromLocalUseCase: DeleteStoryFromLocalUseCase,
     private val getSeenListFromRemoteUseCase: GetSeenListFromRemoteUseCase,
-    private val addUserToSeenListInRemoteUseCase: AddUserToSeenListInRemoteUseCase
+    private val addUserToSeenListInRemoteUseCase: AddUserToSeenListInRemoteUseCase,
+    private val updateStoryOnLocalUseCase: UpdateStoryOnLocalUseCase
 ) :
     BaseViewModel() {
 
@@ -79,12 +82,16 @@ class ShowStoryViewModel @Inject constructor(
         }
     }
 
-    fun addUserToSeenList(storyId: String, loggedInUserFirebaseId: String, seenAt: Long) {
+    fun addUserToSeenList(story: StoryBean, loggedInUserFirebaseId: String, seenAt: Long) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addUserToSeenListStateFlow.value = ResponseState.loading()
                 val response =
-                    addUserToSeenListInRemoteUseCase(storyId, loggedInUserFirebaseId, seenAt)
+                    addUserToSeenListInRemoteUseCase(
+                        story.storyFirebaseId,
+                        loggedInUserFirebaseId,
+                        seenAt
+                    )
                 if (response.status == RequestStatusEnum.Exception) {
                     LoggingHelper.logData(
                         LoggingLevelEnum.Error,
@@ -92,6 +99,9 @@ class ShowStoryViewModel @Inject constructor(
                         ScreenNameEnum.ShowStoryViewModel.name,
                         response.message.toString()
                     )
+                } else {
+                    story.seenBy.add(StorySeenByBean(loggedInUserFirebaseId, seenAt))
+                    updateStoryOnLocalUseCase(story)
                 }
                 _addUserToSeenListStateFlow.value = response
             }

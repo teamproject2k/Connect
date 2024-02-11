@@ -17,7 +17,11 @@ interface IStoryRepository {
         storySeenAt: Long
     ): ResponseState<Nothing>
 
-    suspend fun getSeenListFromRemote(storyId: String, loggedInUserFirebaseId: String): ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>>
+    suspend fun getSeenListFromRemote(
+        storyId: String,
+        loggedInUserFirebaseId: String
+    ): ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>>
+
     suspend fun deleteStoryInRemote(storyId: String): ResponseState<Nothing>
 
     suspend fun getAllStoriesFromLocal(): List<StoryBean>
@@ -29,4 +33,7 @@ interface IStoryRepository {
     suspend fun deleteStoryFromLocal(storyId: String): Int
 
     suspend fun addStoryToLocal(story: StoryBean): Long
+
+
+    suspend fun updateStoryOnLocal(story: StoryBean): Int
 }
