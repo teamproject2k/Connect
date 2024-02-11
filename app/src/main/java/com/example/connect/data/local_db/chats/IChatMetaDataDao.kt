@@ -20,4 +20,5 @@ interface IChatMetaDataDao {
 
     @Query("UPDATE chat_meta_data SET isChatDeleted = :isDeleted WHERE chatId = :chatMetaDataId")
     fun updateChatListDeleted(chatMetaDataId: String, isDeleted: Boolean)
+
 }

@@ -40,4 +40,6 @@ interface IChatRepository {
         chatId: String,
         lastSeenAt: Long
     ): Int
+
+    suspend fun updateChatOnLocal(chatBean: ChatBean): Int
 }

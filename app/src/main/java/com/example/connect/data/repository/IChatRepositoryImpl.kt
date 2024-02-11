@@ -270,4 +270,8 @@ class IChatRepositoryImpl @Inject constructor(
     override suspend fun updateLastSeenAtOnLocal(chatId: String, lastSeenAt: Long): Int {
         return appDatabase.getChatMetaDataDao().updateChatListLastSeen(chatId, lastSeenAt)
     }
+
+    override suspend fun updateChatOnLocal(chatBean: ChatBean): Int {
+        return appDatabase.getChatDao().updateMessage(chatBean.toChatLocalEntity())
+    }
 }

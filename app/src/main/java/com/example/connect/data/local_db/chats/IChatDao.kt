@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.connect.data.models.chats.ChatLocalEntity
-import com.example.connect.domain.models.ChatBean
 
 
 @Dao
@@ -22,4 +22,6 @@ interface IChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertMessage(message: ChatLocalEntity): Long
 
+    @Update
+    fun updateMessage(message: ChatLocalEntity): Int
 }

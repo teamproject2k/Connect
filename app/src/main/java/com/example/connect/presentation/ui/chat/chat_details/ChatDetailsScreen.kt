@@ -84,6 +84,8 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.ShowSelectedImage
+import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
@@ -605,6 +607,17 @@ fun ChatBubble(
                 )
                 .padding(2.dp)
         ) {
+            if (message.mediaUrl.isNotBlank()) {
+                if (message.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
+//                    ShowSelectedImage(selectedMediaData = selectedMedia) {
+//                        viewModel.selectedMediaState.value = null
+//                        viewModel.snackBarMessageState.value =
+//                            context.getString(R.string.something_went_wrong)
+//                    }
+                } else {
+                    //ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
+                }
+            }
             val repliedOnMessage =
                 viewModel.chatListState.find { it.firebaseId == message.repliedOnChatId }
             if (message.repliedOnChatId != null && repliedOnMessage != null) {

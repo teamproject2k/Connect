@@ -14,6 +14,7 @@ import com.example.connect.domain.useCase.chat.LiveObserveChatListOnRemoteUseCas
 import com.example.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
 import com.example.connect.domain.useCase.chat.UpdateLastSeenAtOnLocalUseCase
+import com.example.connect.domain.useCase.chat.UpdateMessageOnLocalUseCase
 import com.example.connect.domain.utils.DomainFunctionHelper
 import com.example.connect.presentation.base.BaseViewModel
 import com.example.connect.presentation.ui.enums.MediaTypeEnum
@@ -33,7 +34,8 @@ class ChatDetailsViewModel @Inject constructor(
     private val liveObserveChatListOnRemoteUseCase: LiveObserveChatListOnRemoteUseCase,
     private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
     private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase,
-    private val updateLastSeenAtOnLocalUseCase: UpdateLastSeenAtOnLocalUseCase
+    private val updateLastSeenAtOnLocalUseCase: UpdateLastSeenAtOnLocalUseCase,
+    private val updateMessageOnLocalUseCase: UpdateMessageOnLocalUseCase
 ) :
     BaseViewModel() {
 
@@ -123,6 +125,7 @@ class ChatDetailsViewModel @Inject constructor(
                     )
                 if (response.status == RequestStatusEnum.Success) {
                     message.deletedBy = deletedBy
+                    updateMessageOnLocalUseCase(message)
                 }
                 _deleteMessageStateFlow.value = response
             }
