@@ -3,6 +3,7 @@ package com.example.connect.presentation.ui.chat.chat_details
 import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.speech.RecognizerIntent
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,7 +69,6 @@ import com.example.connect.presentation.ui.common.ChatBottomSection
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
 import com.example.connect.presentation.ui.common.RepliedOnUI
-import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
@@ -75,6 +76,7 @@ import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.destinations.AddMediaScreenDestination
 import com.example.connect.presentation.ui.destinations.ShowMediaScreenDestination
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
 import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ChatNavGraph
@@ -264,7 +266,6 @@ private fun ChatDetailsTopSection(
         SpacerWidth16()
         Column {
             TextBold16(text = viewModel.otherUser.name, color = MaterialTheme.colorScheme.onPrimary)
-            // TODO: 31/01/24 aryan handle online
             Text(
                 text = viewModel.loggedInUser.connectUserId,
                 color = MaterialTheme.colorScheme.onPrimary,
@@ -327,6 +328,7 @@ fun ChatBubble(
 ) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
+    var isImageLoadingError by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val translateX = mutableFloatStateOf(0.0f)
     Column(
@@ -383,21 +385,37 @@ fun ChatBubble(
                 .padding(2.dp)
         ) {
             if (message.mediaUrl.isNotBlank()) {
-                if (message.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
-                    AsyncImage(
-                        model = message.mediaUrl,
-                        contentDescription = stringResource(R.string.story_image),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { navigator.navigate(ShowMediaScreenDestination(message)) },
-                        contentScale = ContentScale.Crop,
-                        onError = {
-                            viewModel.snackBarMessageState.value =
-                                context.getString(R.string.something_went_wrong)
+                if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) {
+                    if (isImageLoadingError) {
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .background(ColorsHelper.lightGray()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = stringResource(R.string.couldn_t_load_image))
                         }
-                    )
+                    } else {
+                        AsyncImage(
+                            model = message.mediaUrl,
+                            contentDescription = stringResource(R.string.story_image),
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clickable { navigator.navigate(ShowMediaScreenDestination(message)) },
+                            contentScale = ContentScale.Crop,
+                            onLoading = {
+                                isImageLoadingError = false
+                            },
+                            onSuccess = {
+                                isImageLoadingError = false
+                            },
+                            onError = {
+                                isImageLoadingError = true
+                            }
+                        )
+                    }
                 } else {
-                 //   ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
+                    //   ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
                 }
             }
             val repliedOnMessage =

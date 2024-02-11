@@ -83,7 +83,6 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: UserDetailsViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
-    HandleAddUserState(viewModel = viewModel, context = context)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -127,6 +126,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
             viewModel.snackBarMessageState.value = ""
         }
     }
+    HandleAddUserState(viewModel = viewModel, context = context)
 }
 
 @Composable
@@ -206,7 +206,6 @@ private fun GenderPickerSection(viewModel: UserDetailsViewModel) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DOBPickerSection(viewModel: UserDetailsViewModel) {
@@ -282,8 +281,8 @@ private fun HandleAddUserState(
                 viewModel.sharedPreference.isUserDetailsEntered = true
                 val intent = Intent(context, HomeActivity::class.java)
                 context.startActivity(intent)
-                LocalActivity.current.finish()
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.NotLoading
+                LocalActivity.current.finish()
                 isResponseHandled = true
             }
         }

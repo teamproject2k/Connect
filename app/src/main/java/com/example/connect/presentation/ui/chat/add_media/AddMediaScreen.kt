@@ -130,7 +130,6 @@ fun AddMediaScreen(
             )
         }
     }
-    HandleSendMessageState(viewModel = viewModel, navigator = navigator)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -139,6 +138,7 @@ fun AddMediaScreen(
             }
         }
     }
+    HandleSendMessageState(viewModel = viewModel, navigator = navigator)
 }
 
 @Composable

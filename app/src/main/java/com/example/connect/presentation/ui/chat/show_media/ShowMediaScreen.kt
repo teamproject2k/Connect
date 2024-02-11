@@ -58,10 +58,10 @@ fun ShowMediaScreen(navigator: DestinationsNavigator, message: ChatBean) {
                     }
                 )
             } else {
-                ShowSelectedVideo(
-                    selectedMediaData = message.mediaUrl,
-                    context = context
-                )
+//                ShowSelectedVideo(
+//                    selectedMediaData = message.mediaUrl,
+//                    context = context
+//                )
             }
         }
     }

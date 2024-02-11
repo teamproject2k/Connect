@@ -65,8 +65,6 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
     val viewModel: MobileNumberInputViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    HandleSendOTPState(viewModel, navigator, context)
-    HandleGetUserDetailsState(viewModel, navigator, context)
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
     ) {
@@ -113,6 +111,8 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
             viewModel.snackBarMessageState.value = ""
         }
     }
+    HandleSendOTPState(viewModel, navigator, context)
+    HandleGetUserDetailsState(viewModel, navigator, context)
 }
 
 @Composable

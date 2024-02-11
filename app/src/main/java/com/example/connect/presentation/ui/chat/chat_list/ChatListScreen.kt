@@ -140,7 +140,6 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
             viewModel.snackBarMessageState.value = ""
         }
     }
-
     LaunchedEffect(Unit) {
         viewModel.getChatList(false, context.isNetworkAvailable())
     }

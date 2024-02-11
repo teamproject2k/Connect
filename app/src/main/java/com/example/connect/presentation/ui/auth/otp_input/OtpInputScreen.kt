@@ -100,10 +100,6 @@ fun OTPScreen(
     viewModel.mobileNumber = mobileNumber
     viewModel.verificationId = verificationId
     viewModel.countryCode = countryCode
-    HandleVerifyOTPState(viewModel, navigator, context)
-    HandleUserDetailsState(viewModel, navigator, context)
-    HandleResendOTPState(viewModel, context)
-    HandleBackPressed(navigator)
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -166,6 +162,10 @@ fun OTPScreen(
             viewModel.snackBarMessageState.value = ""
         }
     }
+    HandleVerifyOTPState(viewModel, navigator, context)
+    HandleUserDetailsState(viewModel, navigator, context)
+    HandleResendOTPState(viewModel, context)
+    HandleBackPressed(navigator)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

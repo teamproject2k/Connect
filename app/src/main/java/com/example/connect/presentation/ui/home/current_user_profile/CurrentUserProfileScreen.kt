@@ -181,7 +181,7 @@ private fun ImageSection(loggedInUserDetails: UsersBean, navigator: Destinations
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop
         )
         AsyncImage(
             model = loggedInUserDetails.profilePhoto,
@@ -334,11 +334,10 @@ private fun HandlePostListSectionState(
         }
 
         RequestStatusEnum.None -> {
-            //no need to handle it
+            // no need to handle it
         }
     }
 }
-
 
 @Composable
 fun HandleUserDetailsState(
