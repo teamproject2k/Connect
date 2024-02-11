@@ -78,7 +78,7 @@
     <string name="post_image">Post Image</string>
     <string name="add_image">Add Image</string>
     <string name="add_video">Add Video</string>
-    <string name="an_otp_will_be_send_to_the_below_entered_mobile_number">An OTP will be send to the below entered mobile number.</string>
+    <string name="an_otp_will_be_sent_to_the_below_entered_mobile_number">An OTP will be sent to the below entered mobile number.</string>
     <string name="please_either_attach_image_video_or_add_some_description">Please either attach image/video or add some description</string>
     <string name="try_again">Try Again</string>
     <string name="home">Home</string>

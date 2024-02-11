@@ -81,7 +81,7 @@ fun MobileNumberInputScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.log_in),
                 buildAnnotatedString {
                     append(
-                        stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
+                        stringResource(R.string.an_otp_will_be_sent_to_the_below_entered_mobile_number)
                     )
                 }
             )
@@ -134,7 +134,7 @@ private fun HandleGetUserDetailsState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 if (userDetailsState.data == null) {
-                    navigator.navigate(UserDetailsScreenDestination())
+                    navigator.navigate(UserDetailsScreenDestination)
                     navigator.popBackStack()
                 } else {
                     viewModel.sharedPreference.isUserDetailsEntered = true
@@ -177,7 +177,6 @@ private fun HandleSendOTPState(
     navigator: DestinationsNavigator,
     context: Context
 ) {
-
     var isResponseHandled by rememberSaveable {
         mutableStateOf(false)
     }

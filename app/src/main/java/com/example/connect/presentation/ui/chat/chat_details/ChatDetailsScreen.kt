@@ -131,7 +131,9 @@ fun ChatDetailsScreen(
             navigator.navigate(
                 AddMediaScreenDestination(
                     viewModel.messageState.value,
-                    media
+                    media,
+                    viewModel.loggedInUser,
+                    viewModel.otherUser
                 )
             )
         }
@@ -272,7 +274,11 @@ private fun ChatDetailsTopSection(
         Column {
             TextBold16(text = viewModel.otherUser.name, color = MaterialTheme.colorScheme.onPrimary)
             // TODO: 31/01/24 aryan handle online
-            Text(text = "Online", color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp)
+            Text(
+                text = viewModel.loggedInUser.connectUserId,
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 12.sp
+            )
         }
     }
 }
@@ -400,7 +406,8 @@ fun ChatDetailsBottomSection(
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(48.dp)
-                    .padding(8.dp), strokeWidth = 1.5.dp
+                    .padding(8.dp),
+                strokeWidth = 1.5.dp
             )
         }
     }
@@ -565,7 +572,7 @@ fun ChatBubble(
                     onHorizontalDrag = { change, dragAmount ->
                         change.consume()
                         if (dragAmount > 5) {
-                            //right swipe
+                            // right swipe
                             translateX.value = dragAmount
                             viewModel.repliedOnChatState.value = message
                         }

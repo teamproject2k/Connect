@@ -49,7 +49,6 @@ class MobileNumberInputViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()
 
-
     /**
      * Sends an OTP to the user's mobile number.
      */

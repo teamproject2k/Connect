@@ -66,7 +66,6 @@ fun TopPageSection(
     }
 }
 
-
 @Preview(showSystemUi = true)
 @Composable
 fun PreviewTopPageSection() {
@@ -77,7 +76,7 @@ fun PreviewTopPageSection() {
             stringResource(R.string.log_in),
             buildAnnotatedString {
                 append(
-                    stringResource(R.string.an_otp_will_be_send_to_the_below_entered_mobile_number)
+                    stringResource(R.string.an_otp_will_be_sent_to_the_below_entered_mobile_number)
                 )
             }
         )
