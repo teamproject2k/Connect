@@ -349,10 +349,10 @@ private fun getColorListFromStories(
     loggedInUserFirebaseId: String
 ): List<List<Color>> {
     val colorList = mutableListOf<List<Color>>()
-    val numberOfStoriesSeen = 0
-//        currentUserStories.count {
-////            it.seenList.map { list -> list.first }.contains(loggedInUserFirebaseId)
-//        }
+    val numberOfStoriesSeen =
+        currentUserStories.count {
+            it.seenBy.map { list -> list.seenUserId }.contains(loggedInUserFirebaseId)
+        }
 
     repeat(numberOfStoriesSeen) {
         colorList.add(listOf(Color.Gray, Color.LightGray))

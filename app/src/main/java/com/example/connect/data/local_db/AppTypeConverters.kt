@@ -1,6 +1,7 @@
 package com.example.connect.data.local_db
 
 import androidx.room.TypeConverter
+import com.example.connect.data.models.story.StorySeenByLocalEntity
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 
@@ -29,6 +30,21 @@ class AppTypeConverters {
         return Gson().fromJson(
             stringOfList,
             object : TypeToken<ArrayList<String>>() {}.type
+        )
+    }
+
+
+    @TypeConverter
+    fun fromListOfStorySeenByLocalEntityToString(listOfStorySeenBy: List<StorySeenByLocalEntity>): String {
+        return Gson().toJson(listOfStorySeenBy)
+    }
+
+
+    @TypeConverter
+    fun toListOfStorySeenByLocalEntityFromString(stringOfList: String): List<StorySeenByLocalEntity> {
+        return Gson().fromJson(
+            stringOfList,
+            object : TypeToken<List<StorySeenByLocalEntity>>() {}.type
         )
     }
 }

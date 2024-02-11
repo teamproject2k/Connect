@@ -147,6 +147,7 @@ class AddStoryViewModel @Inject constructor(
                     captionOffset,
                     colorGradientString,
                     selectedMediaState.value?.mediaDuration ?: 0,
+                    arrayListOf(),
                     false
                 )
 

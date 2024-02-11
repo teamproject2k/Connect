@@ -29,6 +29,7 @@ data class StoryRemoteEntity(
             textOffset,
             backgroundGradientColor,
             videoLength,
+            seenBy.map { it.toStorySeenByBean() } as ArrayList,
             whetherDeleted
         )
     }
