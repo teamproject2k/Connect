@@ -2,13 +2,10 @@ package com.example.connect.data.models.story
 
 import com.example.connect.domain.models.StorySeenByBean
 
-data class StorySeenByRemoteEntity(
+data class StorySeenByLocalEntity(
     val seenUserId: String,
     val seenTime: Long
 ) {
-    constructor() : this("", 0)
-
-
     fun toStorySeenByBean(): StorySeenByBean {
         return StorySeenByBean(seenUserId, seenTime)
     }

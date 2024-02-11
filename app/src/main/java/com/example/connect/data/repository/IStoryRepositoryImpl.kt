@@ -195,4 +195,8 @@ class IStoryRepositoryImpl @Inject constructor(
         return appDatabase.getStoryDao().insertStory(story.toStoryLocalEntity())
     }
 
+    override suspend fun updateStoryOnLocal(story: StoryBean): Int {
+        return appDatabase.getStoryDao().updateStoryOnLocalUseCase(story.toStoryLocalEntity())
+    }
+
 }

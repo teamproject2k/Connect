@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
+import com.example.connect.domain.enums.MediaStateChangeEnum
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.StoriesWithUserBean
@@ -385,16 +386,18 @@ fun UserStories(
             viewModel = viewModel,
             story = currentStory,
         ) {
-            val story =
-                viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue]
-            if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
-                viewModel.addUserToSeenList(
-                    story.storyFirebaseId,
-                    loggedInUserFirebaseId,
-                    FunctionHelper.getCurrentTimeInMillis()
-                )
+            if (it) {
+                val story =
+                    viewModel.allStoriesWithUsersList[viewModel.userStoriesIndexState.intValue].storiesList[viewModel.currentStoryIndexState.intValue]
+                if (story.createdByUserFirebaseId != loggedInUserFirebaseId) {
+                    viewModel.addUserToSeenList(
+                        story,
+                        loggedInUserFirebaseId,
+                        FunctionHelper.getCurrentTimeInMillis()
+                    )
+                }
             }
-            isMediaLoaded = true
+            isMediaLoaded = it
         }
     }
 }
@@ -403,7 +406,7 @@ fun UserStories(
 fun StoryUi(
     viewModel: ShowStoryViewModel,
     story: StoryBean,
-    onMediaLoaded: () -> Unit
+    onMediaLoaded: (isLoaded: Boolean) -> Unit
 ) {
     val context = LocalContext.current
     Box(
@@ -411,10 +414,10 @@ fun StoryUi(
             .fillMaxSize(),
     ) {
         if (story.mediaType == MediaTypeEnum.Text.name) {
-            onMediaLoaded()
+            onMediaLoaded(true)
         }
         MediaSection(story, viewModel, context) {
-            onMediaLoaded()
+            onMediaLoaded(it)
         }
         StoryCaptionField(story)
     }
@@ -577,7 +580,7 @@ private fun MediaSection(
     story: StoryBean,
     viewModel: ShowStoryViewModel,
     context: Context,
-    onMediaLoaded: () -> Unit
+    onMediaLoaded: (isLoaded: Boolean) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         if (story.mediaType == MediaTypeEnum.Image.name || story.mediaType == MediaTypeEnum.TextImage.name) {
@@ -585,11 +588,11 @@ private fun MediaSection(
                 viewModel.snackBarMessageState.value =
                     context.getString(R.string.something_went_wrong)
             }) {
-                onMediaLoaded()
+                onMediaLoaded(it)
             }
         } else if (story.mediaType == MediaTypeEnum.Video.name || story.mediaType == MediaTypeEnum.TextVideo.name) {
             ShowStoryVideo(videoUrl = story.mediaUrl, viewModel, context = context) {
-                onMediaLoaded()
+                onMediaLoaded(it)
             }
         }
     }
@@ -615,7 +618,11 @@ private fun StoryCaptionField(story: StoryBean) {
 }
 
 @Composable
-private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded: () -> Unit) {
+private fun ShowStoryImage(
+    imageUrl: String,
+    onError: () -> Unit,
+    onMediaLoaded: (isLoaded: Boolean) -> Unit
+) {
     var isImageLoading by remember {
         mutableStateOf(false)
     }
@@ -626,6 +633,7 @@ private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded:
             contentScale = ContentScale.Crop,
             onLoading = {
                 isImageLoading = true
+                onMediaLoaded(false)
             },
             onError = {
                 isImageLoading = false
@@ -633,7 +641,7 @@ private fun ShowStoryImage(imageUrl: String, onError: () -> Unit, onMediaLoaded:
             },
             onSuccess = {
                 isImageLoading = false
-                onMediaLoaded()
+                onMediaLoaded(true)
             }
         )
         if (isImageLoading) {
@@ -647,19 +655,27 @@ private fun ShowStoryVideo(
     videoUrl: String,
     viewModel: ShowStoryViewModel,
     context: Context,
-    onMediaLoaded: () -> Unit
+    onMediaLoaded: (isLoaded: Boolean) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         GetPlayerView(
             context = context,
             uri = videoUrl,
             loadingColorRes = R.color.white,
-            onStateChange = { isError ->
-                if (isError) {
-                    viewModel.snackBarMessageState.value =
-                        context.getString(R.string.something_went_wrong)
-                } else {
-                    onMediaLoaded()
+            onStateChange = { changedState ->
+                when (changedState) {
+                    MediaStateChangeEnum.Error -> {
+                        viewModel.snackBarMessageState.value =
+                            context.getString(R.string.something_went_wrong)
+                    }
+
+                    MediaStateChangeEnum.Loading -> {
+                        onMediaLoaded(false)
+                    }
+
+                    else -> {
+                        onMediaLoaded(true)
+                    }
                 }
             }) { _, _ ->
         }

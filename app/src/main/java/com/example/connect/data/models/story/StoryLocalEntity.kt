@@ -17,6 +17,7 @@ data class StoryLocalEntity(
     val textOffset: String,
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
+    val seenBy: List<StorySeenByLocalEntity>,
     val whetherDeleted: Boolean = false
 ) {
     fun toStoryBean(): StoryBean {
@@ -31,6 +32,7 @@ data class StoryLocalEntity(
             textOffset,
             backgroundGradientColor,
             videoLength,
+            seenBy.map { it.toStorySeenByBean() } as ArrayList,
             whetherDeleted
         )
     }

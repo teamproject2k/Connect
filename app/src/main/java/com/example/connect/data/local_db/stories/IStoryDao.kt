@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.connect.data.models.story.StoryLocalEntity
 
 @Dao
@@ -23,5 +24,9 @@ interface IStoryDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertStory(storyLocalEntity: StoryLocalEntity): Long
+
+
+    @Update
+    fun updateStoryOnLocalUseCase(story: StoryLocalEntity): Int
 
 }

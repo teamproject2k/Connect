@@ -18,6 +18,7 @@ data class StoryBean(
     val textOffset: String,
     val backgroundGradientColor: String,
     val videoLength: Long = 0,
+    val seenBy: ArrayList<StorySeenByBean>,
     val whetherDeleted: Boolean = false
 ) : Parcelable {
     fun toStoryRemoteEntity(): StoryRemoteEntity {
@@ -30,7 +31,7 @@ data class StoryBean(
             textColor,
             textOffset,
             backgroundGradientColor,
-            arrayListOf(),
+            seenBy.map { it.toStoryRemoteEntity() } as ArrayList,
             videoLength,
             whetherDeleted
         )
@@ -48,6 +49,7 @@ data class StoryBean(
             textOffset,
             backgroundGradientColor,
             videoLength,
+            seenBy.map { it.toStoryLocalEntity() } as ArrayList,
             whetherDeleted
         )
     }
