@@ -1,7 +1,7 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -78,8 +79,10 @@ import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
 import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold16
+import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.destinations.AddMediaScreenDestination
 import com.example.connect.presentation.ui.enums.ScreenNameEnum
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
@@ -104,6 +107,27 @@ fun ChatDetailsScreen(
         viewModel.initializeData(loggedInUser, otherUserDetails)
     }
 
+
+    val mediaPickerLauncher = mediaPicker {
+        val mediaType = FunctionHelper.getMediaType(context.contentResolver, uri = it)
+        if (mediaType != null) {
+            val media = MediaData(
+                it,
+                mediaType,
+                if (mediaType == ConstantsHelper.MEDIA_TYPE_VIDEO) FunctionHelper.getVideoDuration(
+                    context.contentResolver,
+                    it
+                ) else null
+            )
+            navigator.navigate(
+                AddMediaScreenDestination(
+                    viewModel.messageState.value,
+                    media
+                )
+            )
+        }
+    }
+
     if (!context.isNetworkAvailable()) {
         viewModel.snackBarMessageState.value = stringResource(id = R.string.no_internet_connection)
         FunctionHelper.vibrateDevice(context)
@@ -122,7 +146,9 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(viewModel, navigator)
                 ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
-            ChatDetailsBottomSection(viewModel, navigator)
+            ChatDetailsBottomSection(viewModel) {
+                mediaPickerLauncher.launch(PickVisualMediaRequest())
+            }
         }
         HandleSendMessageState(viewModel = viewModel)
         HandleDeleteMessageState(viewModel = viewModel)
@@ -206,8 +232,7 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel,
-    navigator: DestinationsNavigator
+    viewModel: ChatDetailsViewModel, onMediaPickRequest: () -> Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -241,7 +266,7 @@ fun ChatDetailsBottomSection(
                 }
                 BasicTextField(
                     modifier = Modifier
-                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                        .padding(vertical = 8.dp, horizontal = 16.dp)
                         .fillMaxWidth(),
                     value = viewModel.messageState.value,
                     onValueChange = { text -> viewModel.messageState.value = text },
@@ -262,14 +287,19 @@ fun ChatDetailsBottomSection(
                                     fontSize = 14.sp
                                 )
                             }
-                            Icon(
-                                modifier = Modifier.clickable {
-                                    navigator.navigate(AddMediaScreenDestination(viewModel.messageState.value))
-                                },
-                                imageVector = Icons.Default.Attachment,
-                                contentDescription = stringResource(id = R.string.add_media),
-                                tint = ColorsHelper.gray()
-                            )
+                            IconButton(
+                                onClick = { onMediaPickRequest() },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .rotate(45f),
+                                    imageVector = Icons.Default.Attachment,
+                                    contentDescription = stringResource(id = R.string.add_media),
+                                    tint = ColorsHelper.gray()
+                                )
+                            }
                         }
                     }
                 )
