@@ -1,6 +1,14 @@
 package com.example.connect.presentation.ui.chat.chat_details
 
+import android.Manifest
+import android.app.Activity.RESULT_OK
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -21,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -107,7 +117,6 @@ fun ChatDetailsScreen(
         viewModel.initializeData(loggedInUser, otherUserDetails)
     }
 
-
     val mediaPickerLauncher = mediaPicker {
         val mediaType = FunctionHelper.getMediaType(context.contentResolver, uri = it)
         if (mediaType != null) {
@@ -128,6 +137,28 @@ fun ChatDetailsScreen(
         }
     }
 
+    val speechRecognizerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            val text =
+                data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.get(0)
+            if (text != null) {
+                viewModel.messageState.value = text
+            }
+        }
+    }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                speechRecognizerLauncher.launch(getIntentForSpeech(context))
+            } else {
+                viewModel.snackBarMessageState.value =
+                    context.getString(R.string.audio_permission_not_granted_please_grant_it_from_settings)
+            }
+        }
+
     if (!context.isNetworkAvailable()) {
         viewModel.snackBarMessageState.value = stringResource(id = R.string.no_internet_connection)
         FunctionHelper.vibrateDevice(context)
@@ -146,8 +177,12 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(viewModel, navigator)
                 ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
-            ChatDetailsBottomSection(viewModel) {
+            ChatDetailsBottomSection(viewModel, onMediaPickRequest = {
                 mediaPickerLauncher.launch(PickVisualMediaRequest())
+            }, onSpeechRecognizerRequest = {
+                speechRecognizerLauncher.launch(getIntentForSpeech(context))
+            }) {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
         }
         HandleSendMessageState(viewModel = viewModel)
@@ -166,6 +201,19 @@ fun ChatDetailsScreen(
                 navigator.popBackStack()
             }
         }
+    }
+}
+
+private fun getIntentForSpeech(context: Context): Intent {
+    return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        putExtra(
+            RecognizerIntent.EXTRA_PROMPT,
+            context.getString(R.string.speak_to_enter_message)
+        )
     }
 }
 
@@ -232,7 +280,10 @@ private fun ChatDetailsTopSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel, onMediaPickRequest: () -> Unit
+    viewModel: ChatDetailsViewModel,
+    onMediaPickRequest: () -> Unit,
+    onSpeechRecognizerRequest: () -> Unit,
+    onAudioPermissionRequest: () -> Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -308,9 +359,14 @@ fun ChatDetailsBottomSection(
         SpacerWidth8()
         if (!viewModel.isMessageSendingState.value) {
             IconButton(
-                enabled = viewModel.messageState.value.isNotBlank(),
                 onClick = {
-                    if (viewModel.messageState.value.isNotBlank()) {
+                    if (viewModel.messageState.value.isBlank()) {
+                        if (checkAudioPermissionGranted(context)) {
+                            onSpeechRecognizerRequest()
+                        } else {
+                            onAudioPermissionRequest()
+                        }
+                    } else {
                         keyboardController?.hide()
                         if (context.isNetworkAvailable()) {
                             viewModel.sendMessage()
@@ -325,12 +381,20 @@ fun ChatDetailsBottomSection(
                     disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
                 )
             ) {
-                Icon(
-                    modifier = Modifier.padding(10.dp),
-                    painter = painterResource(id = R.drawable.ic_send),
-                    contentDescription = stringResource(R.string.post_comment),
-                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
-                )
+                if (viewModel.messageState.value.isBlank()) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = stringResource(R.string.mic),
+                        tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
+                    )
+                } else {
+                    Icon(
+                        modifier = Modifier.padding(10.dp),
+                        painter = painterResource(id = R.drawable.ic_send),
+                        contentDescription = stringResource(R.string.post_comment),
+                        tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
+                    )
+                }
             }
         } else {
             CircularProgressIndicator(
@@ -341,6 +405,7 @@ fun ChatDetailsBottomSection(
         }
     }
 }
+
 
 @Composable
 fun RepliedOnUI(
@@ -683,5 +748,13 @@ fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
             // No need to handle this
         }
     }
+}
+
+
+private fun checkAudioPermissionGranted(context: Context): Boolean {
+    return ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.RECORD_AUDIO
+    ) == PackageManager.PERMISSION_GRANTED
 }
 

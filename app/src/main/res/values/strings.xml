@@ -250,4 +250,7 @@
     <string name="privacy">Privacy</string>
     <string name="expand_icon">Expand icon</string>
     <string name="upload_media">Upload Media</string>
+    <string name="mic">mic</string>
+    <string name="speak_to_enter_message">Speak to enter message</string>
+    <string name="audio_permission_not_granted_please_grant_it_from_settings">Audio Permission not granted, Please grant it from settings</string>
 </resources>
