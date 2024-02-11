@@ -1,9 +1,13 @@
 package com.example.connect.domain.models
 
+import android.os.Parcelable
 import com.example.connect.data.models.chats.ChatLocalEntity
 import com.example.connect.data.models.chats.ChatRemoteEntity
 import com.example.connect.domain.utils.DomainFunctionHelper
+import kotlinx.parcelize.Parcelize
 
+
+@Parcelize
 data class ChatBean(
     val firebaseId: String,
     val senderId: String,
@@ -15,7 +19,7 @@ data class ChatBean(
     val mediaUrl: String,
     val mediaType: String,
     val repliedOnChatId: String?,
-) {
+) : Parcelable {
     fun toChatRemoteEntity(): ChatRemoteEntity {
         return ChatRemoteEntity(
             senderId,

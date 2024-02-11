@@ -8,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -49,6 +45,7 @@ import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.logger.LoggingHelper
 import com.example.connect.domain.logger.LoggingLevelEnum
+import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.presentation.ui.chat.chat_details.RepliedOnUI
@@ -75,7 +72,8 @@ fun AddMediaScreen(
     message: String,
     mediaData: MediaData,
     loggedInUser: UsersBean,
-    otherUsersBean: UsersBean
+    otherUsersBean: UsersBean,
+    repliedOnChatMedia: ChatBean?
 ) {
     val viewModel: AddMediaViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -99,11 +97,15 @@ fun AddMediaScreen(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            MediaSection(viewModel = viewModel, context = context, mediaData)
-            AddMediaBottomSection(viewModel = viewModel) {}
+            MediaSection(
+                context = context,
+                mediaData,
+                modifier = Modifier.weight(1f)
+            )
+            AddMediaBottomSection(viewModel = viewModel, repliedOnChatMedia) {}
         }
     }
-    HandleSendMessageState(viewModel = viewModel, navigator = navigator)
+    //HandleSendMessageState(viewModel = viewModel)
     LaunchedEffect(key1 = viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             coroutineScope.launch {
@@ -115,10 +117,13 @@ fun AddMediaScreen(
 }
 
 @Composable
-private fun MediaSection(viewModel: AddMediaViewModel, context: Context, selectedMedia: MediaData) {
+private fun MediaSection(
+    context: Context,
+    selectedMedia: MediaData,
+    modifier: Modifier
+) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .padding(16.dp), contentAlignment = Alignment.Center
     ) {
         if (selectedMedia.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
@@ -140,41 +145,42 @@ private fun MediaSection(viewModel: AddMediaViewModel, context: Context, selecte
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddMediaBottomSection(
-    viewModel: AddMediaViewModel, onMediaPickRequest: () -> Unit
+    viewModel: AddMediaViewModel, repliedOnChatMedia: ChatBean?, onMediaPickRequest: () -> Unit
 ) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
-     //   verticalAlignment = if (viewModel.repliedOnChatState.value == null) Alignment.CenterVertically else Alignment.Bottom
+        modifier = Modifier
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            .fillMaxWidth(),
+        verticalAlignment = if (repliedOnChatMedia == null) Alignment.CenterVertically else Alignment.Bottom
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         Surface(
             tonalElevation = 6.dp, modifier = Modifier
                 .weight(1f)
-             //   .clip(
-//                    if (viewModel.repliedOnChatState.value == null) RoundedCornerShape(32.dp) else RoundedCornerShape(
-//                        bottomStart = 16.dp,
-//                        bottomEnd = 16.dp,
-//                        topStart = 6.dp,
-//                        topEnd = 6.dp
-//                    )
-              //  )
+                .clip(
+                    if (repliedOnChatMedia == null) RoundedCornerShape(32.dp) else RoundedCornerShape(
+                        bottomStart = 16.dp,
+                        bottomEnd = 16.dp,
+                        topStart = 6.dp,
+                        topEnd = 6.dp
+                    )
+                )
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-//                if (viewModel.repliedOnChatState.value != null) {
-//                    RepliedOnUI(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        message = viewModel.repliedOnChatState.value!!,
-//                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
-//                        otherUserName = viewModel.otherUser.name,
-//                        showCancelIconButton = true,
-//                    ) {
-                    //    viewModel.repliedOnChatState.value = null
-                  //  }
+                if (repliedOnChatMedia != null) {
+                    RepliedOnUI(
+                        modifier = Modifier.fillMaxWidth(),
+                        message = repliedOnChatMedia,
+                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
+                        otherUserName = viewModel.otherUser.name,
+                        showCancelIconButton = false,
+                    ) {
+                    }
                 }
                 BasicTextField(
                     modifier = Modifier
-                        .padding(vertical = 8.dp, horizontal = 16.dp)
+                        .padding(vertical = 12.dp, horizontal = 16.dp)
                         .fillMaxWidth(),
                     value = viewModel.messageState.value,
                     onValueChange = { text -> viewModel.messageState.value = text },
@@ -195,19 +201,6 @@ fun AddMediaBottomSection(
                                     fontSize = 14.sp
                                 )
                             }
-                            IconButton(
-                                onClick = { onMediaPickRequest() },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .rotate(45f),
-                                    imageVector = Icons.Default.Attachment,
-                                    contentDescription = stringResource(id = R.string.add_media),
-                                    tint = ColorsHelper.gray()
-                                )
-                            }
                         }
                     }
                 )
@@ -219,7 +212,7 @@ fun AddMediaBottomSection(
                 enabled = viewModel.messageState.value.isNotBlank(),
                 onClick = {
                     if (viewModel.messageState.value.isNotBlank()) {
-                  //      keyboardController?.hide()
+                        keyboardController?.hide()
                         if (context.isNetworkAvailable()) {
                             viewModel.sendMessage()
                         } else {
@@ -247,7 +240,7 @@ fun AddMediaBottomSection(
                     .padding(8.dp),
                 strokeWidth = 1.5.dp
             )
-   //     }
+        }
     }
 }
 
@@ -284,7 +277,7 @@ fun HandleSendMessageState(viewModel: AddMediaViewModel, navigator: Destinations
         RequestStatusEnum.Success -> {
             viewModel.isMessageSendingState.value = false
             viewModel.messageState.value = ""
-          //  viewModel.repliedOnChatState.value = null
+            //  viewModel.repliedOnChatState.value = null
             navigator.popBackStack()
         }
 

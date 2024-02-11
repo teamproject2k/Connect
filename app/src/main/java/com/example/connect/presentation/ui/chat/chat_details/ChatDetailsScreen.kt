@@ -133,7 +133,8 @@ fun ChatDetailsScreen(
                     viewModel.messageState.value,
                     media,
                     viewModel.loggedInUser,
-                    viewModel.otherUser
+                    viewModel.otherUser,
+                    viewModel.repliedOnChatState.value
                 )
             )
         }
