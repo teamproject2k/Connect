@@ -1,8 +1,10 @@
 package com.example.connect.presentation.utils
 
+import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
@@ -14,6 +16,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.ui.graphics.Color
@@ -714,5 +717,31 @@ object FunctionHelper {
     inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
         SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
         else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
+    }
+
+    fun getIntentForSpeech(context: Context): Intent {
+        return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(
+                RecognizerIntent.EXTRA_PROMPT,
+                context.getString(R.string.speak_to_enter_message)
+            )
+        }
+    }
+
+
+    fun checkAudioPermissionGranted(context: Context): Boolean {
+        return checkPermissionGranted(context, Manifest.permission.RECORD_AUDIO)
+    }
+
+
+    private fun checkPermissionGranted(context: Context, permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

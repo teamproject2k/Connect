@@ -2,9 +2,6 @@ package com.example.connect.presentation.ui.chat.chat_details
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -12,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,23 +20,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Attachment
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,26 +42,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -82,14 +62,15 @@ import com.example.connect.domain.logger.LoggingLevelEnum
 import com.example.connect.domain.models.ChatBean
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
+import com.example.connect.presentation.ui.common.ChatBottomSection
 import com.example.connect.presentation.ui.common.ColorsHelper
 import com.example.connect.presentation.ui.common.LoaderDialog
+import com.example.connect.presentation.ui.common.RepliedOnUI
 import com.example.connect.presentation.ui.common.ShowSelectedImage
 import com.example.connect.presentation.ui.common.ShowSelectedVideo
 import com.example.connect.presentation.ui.common.SpacerHeight16
 import com.example.connect.presentation.ui.common.SpacerHeight2
 import com.example.connect.presentation.ui.common.SpacerWidth16
-import com.example.connect.presentation.ui.common.SpacerWidth8
 import com.example.connect.presentation.ui.common.TextBold16
 import com.example.connect.presentation.ui.common.mediaPicker
 import com.example.connect.presentation.ui.destinations.AddMediaScreenDestination
@@ -98,6 +79,7 @@ import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.ChatNavGraph
 import com.example.connect.presentation.utils.ConstantsHelper
 import com.example.connect.presentation.utils.FunctionHelper
+import com.example.connect.presentation.utils.FunctionHelper.getIntentForSpeech
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 import com.example.connect.presentation.utils.FunctionHelper.showToast
 import com.ramcosta.composedestinations.annotation.Destination
@@ -182,13 +164,29 @@ fun ChatDetailsScreen(
                 ChatDetailsTopSection(viewModel, navigator)
                 ChatListSection(viewModel, loggedInUser.firebaseUserId)
             }
-            ChatDetailsBottomSection(viewModel, onMediaPickRequest = {
-                mediaPickerLauncher.launch(PickVisualMediaRequest())
-            }, onSpeechRecognizerRequest = {
-                speechRecognizerLauncher.launch(getIntentForSpeech(context))
-            }) {
-                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }
+            ChatBottomSection(
+                messageState = viewModel.messageState,
+                messageSendingState = viewModel.isMessageSendingState,
+                loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
+                otherUserName = viewModel.otherUser.name,
+                repliedOnChatBean = viewModel.repliedOnChatState.value,
+                onRemoveRepliedOnChatRequest = { viewModel.repliedOnChatState.value = null },
+                onSpeechRecognizerRequest = {
+                    speechRecognizerLauncher.launch(getIntentForSpeech(context))
+                },
+                onAudioPermissionRequest = {
+                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                },
+                onSendMessage = { viewModel.sendMessage() },
+                onNoInternetError = {
+                    viewModel.snackBarMessageState.value =
+                        context.getString(R.string.no_internet_connection)
+                },
+                showPickMediaIcon = true,
+                onMediaPickRequest = {
+                    mediaPickerLauncher.launch(PickVisualMediaRequest())
+                }
+            )
         }
         HandleSendMessageState(viewModel = viewModel)
         HandleDeleteMessageState(viewModel = viewModel)
@@ -209,18 +207,7 @@ fun ChatDetailsScreen(
     }
 }
 
-private fun getIntentForSpeech(context: Context): Intent {
-    return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-        putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
-        putExtra(
-            RecognizerIntent.EXTRA_PROMPT,
-            context.getString(R.string.speak_to_enter_message)
-        )
-    }
-}
+
 
 @Composable
 fun ChatListSection(
@@ -283,224 +270,6 @@ private fun ChatDetailsTopSection(
                 fontSize = 12.sp
             )
         }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun ChatDetailsBottomSection(
-    viewModel: ChatDetailsViewModel,
-    onMediaPickRequest: () -> Unit,
-    onSpeechRecognizerRequest: () -> Unit,
-    onAudioPermissionRequest: () -> Unit
-) {
-    val context = LocalContext.current
-    Row(
-        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
-        verticalAlignment = if (viewModel.repliedOnChatState.value == null) Alignment.CenterVertically else Alignment.Bottom
-    ) {
-        val keyboardController = LocalSoftwareKeyboardController.current
-        Surface(
-            tonalElevation = 6.dp, modifier = Modifier
-                .weight(1f)
-                .clip(
-                    if (viewModel.repliedOnChatState.value == null) RoundedCornerShape(32.dp) else RoundedCornerShape(
-                        bottomStart = 16.dp,
-                        bottomEnd = 16.dp,
-                        topStart = 6.dp,
-                        topEnd = 6.dp
-                    )
-                )
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (viewModel.repliedOnChatState.value != null) {
-                    RepliedOnUI(
-                        modifier = Modifier.fillMaxWidth(),
-                        message = viewModel.repliedOnChatState.value!!,
-                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
-                        otherUserName = viewModel.otherUser.name,
-                        showCancelIconButton = true,
-                    ) {
-                        viewModel.repliedOnChatState.value = null
-                    }
-                }
-                BasicTextField(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp, horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    value = viewModel.messageState.value,
-                    onValueChange = { text -> viewModel.messageState.value = text },
-                    decorationBox = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (viewModel.messageState.value.isBlank()) {
-                                Text(
-                                    modifier = Modifier.weight(1f),
-                                    text = stringResource(id = R.string.message),
-                                    color = ColorsHelper.gray(),
-                                    fontSize = 14.sp
-                                )
-                            } else {
-                                Text(
-                                    modifier = Modifier.weight(1f),
-                                    text = viewModel.messageState.value,
-                                    color = ColorsHelper.black(),
-                                    fontSize = 14.sp
-                                )
-                            }
-                            IconButton(
-                                onClick = { onMediaPickRequest() },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .rotate(45f),
-                                    imageVector = Icons.Default.Attachment,
-                                    contentDescription = stringResource(id = R.string.add_media),
-                                    tint = ColorsHelper.gray()
-                                )
-                            }
-                        }
-                    }
-                )
-            }
-        }
-        SpacerWidth8()
-        if (!viewModel.isMessageSendingState.value) {
-            IconButton(
-                onClick = {
-                    if (viewModel.messageState.value.isBlank()) {
-                        if (checkAudioPermissionGranted(context)) {
-                            onSpeechRecognizerRequest()
-                        } else {
-                            onAudioPermissionRequest()
-                        }
-                    } else {
-                        keyboardController?.hide()
-                        if (context.isNetworkAvailable()) {
-                            viewModel.sendMessage()
-                        } else {
-                            viewModel.snackBarMessageState.value =
-                                context.getString(R.string.no_internet_connection)
-                            FunctionHelper.vibrateDevice(context)
-                        }
-                    }
-                }, colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
-                )
-            ) {
-                if (viewModel.messageState.value.isBlank()) {
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = stringResource(R.string.mic),
-                        tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
-                    )
-                } else {
-                    Icon(
-                        modifier = Modifier.padding(10.dp),
-                        painter = painterResource(id = R.drawable.ic_send),
-                        contentDescription = stringResource(R.string.post_comment),
-                        tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f)
-                    )
-                }
-            }
-        } else {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp),
-                strokeWidth = 1.5.dp
-            )
-        }
-    }
-}
-
-
-@Composable
-fun RepliedOnUI(
-    modifier: Modifier = Modifier,
-    message: ChatBean,
-    loggedInUserFirebaseId: String,
-    otherUserName: String,
-    senderNameColor: Color = MaterialTheme.colorScheme.primary,
-    dividerColor: Color = MaterialTheme.colorScheme.primary,
-    messageColor: Color = Color.Unspecified,
-    senderMessageBackgroundColor: Color = ColorsHelper.chatBubbleOtherUserBg(),
-    showCancelIconButton: Boolean = true,
-    onCancelIconButtonClicked: () -> Unit = {}
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .padding(6.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(senderMessageBackgroundColor)
-    ) {
-        val (verticalDivider, topSection, messageText) = createRefs()
-        Box(
-            modifier = Modifier
-                .constrainAs(verticalDivider) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    width = Dimension.value(4.dp)
-                    height = Dimension.fillToConstraints
-                }
-                .background(dividerColor)
-        )
-        Row(
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .constrainAs(topSection) {
-                    top.linkTo(parent.top, margin = 4.dp)
-                    bottom.linkTo(messageText.top)
-                    start.linkTo(verticalDivider.end, margin = 8.dp)
-                    width = Dimension.preferredWrapContent
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = if (message.senderId == loggedInUserFirebaseId) stringResource(R.string.you) else otherUserName,
-                modifier = if (showCancelIconButton) Modifier.weight(1f) else Modifier,
-                color = senderNameColor,
-                textAlign = TextAlign.Start,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            if (showCancelIconButton) {
-                IconButton(
-                    onClick = {
-                        onCancelIconButtonClicked()
-                    },
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .size(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Cancel,
-                        contentDescription = stringResource(id = R.string.clear)
-                    )
-                }
-            }
-        }
-
-        Text(
-            text = message.message,
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .constrainAs(messageText) {
-                    top.linkTo(topSection.bottom, margin = 4.dp)
-                    bottom.linkTo(parent.bottom, margin = 4.dp)
-                    start.linkTo(verticalDivider.end, margin = 8.dp)
-                    width = Dimension.preferredWrapContent
-                },
-            fontSize = 13.sp,
-            maxLines = 3,
-            textAlign = TextAlign.Start,
-            overflow = TextOverflow.Ellipsis,
-            color = messageColor,
-            lineHeight = 20.sp
-        )
     }
 }
 
@@ -600,7 +369,11 @@ fun ChatBubble(
                         topStart = 12.dp,
                         topEnd = 12.dp,
                         bottomStart = 12.dp
-                    ) else RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp)
+                    ) else RoundedCornerShape(
+                        topStart = 12.dp,
+                        topEnd = 12.dp,
+                        bottomEnd = 12.dp
+                    )
                 )
                 .background(
                     if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary.copy(.8f) else ColorsHelper.chatBubbleOtherUserBg()
@@ -771,11 +544,4 @@ fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
     }
 }
 
-
-private fun checkAudioPermissionGranted(context: Context): Boolean {
-    return ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.RECORD_AUDIO
-    ) == PackageManager.PERMISSION_GRANTED
-}
 
