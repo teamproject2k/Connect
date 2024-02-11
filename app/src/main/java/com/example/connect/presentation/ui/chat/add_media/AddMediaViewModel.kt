@@ -9,7 +9,7 @@ import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
 import com.example.connect.domain.useCase.chat.SendMessageToRemoteUseCase
-import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
+import com.example.connect.domain.useCase.file.UploadFileToRemoteUseCase
 import com.example.connect.domain.utils.DomainFunctionHelper
 import com.example.connect.domain.utils.FirebaseConstants
 import com.example.connect.presentation.base.BaseViewModel

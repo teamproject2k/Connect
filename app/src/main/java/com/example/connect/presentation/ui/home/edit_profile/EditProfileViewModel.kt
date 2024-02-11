@@ -12,7 +12,7 @@ import com.example.connect.data.models.user.UsersLocalEntity
 import com.example.connect.domain.models.UsersBean
 import com.example.connect.domain.network_request_response.RequestStatusEnum
 import com.example.connect.domain.network_request_response.ResponseState
-import com.example.connect.domain.useCase.upload_file.UploadFileToRemoteUseCase
+import com.example.connect.domain.useCase.file.UploadFileToRemoteUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnLocalUseCase
 import com.example.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
 import com.example.connect.domain.utils.FirebaseConstants
