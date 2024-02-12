@@ -3,7 +3,6 @@ package com.example.connect.presentation.ui.chat.chat_details
 import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.speech.RecognizerIntent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.connect.R
@@ -401,7 +401,17 @@ fun ChatBubble(
                             contentDescription = stringResource(R.string.story_image),
                             modifier = Modifier
                                 .size(100.dp)
-                                .clickable { navigator.navigate(ShowMediaScreenDestination(message)) },
+                                .clickable {
+                                    val mediaType =
+                                        if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) ConstantsHelper.MEDIA_TYPE_IMAGE else if (message.mediaType == MediaTypeEnum.Video.name || message.mediaType == MediaTypeEnum.TextVideo.name) ConstantsHelper.MEDIA_TYPE_VIDEO else ""
+                                    if (mediaType.isNotBlank()) {
+                                        navigator.navigate(
+                                            ShowMediaScreenDestination(
+                                                MediaData(message.mediaUrl.toUri(), mediaType)
+                                            )
+                                        )
+                                    }
+                                },
                             contentScale = ContentScale.Crop,
                             onLoading = {
                                 isImageLoadingError = false
