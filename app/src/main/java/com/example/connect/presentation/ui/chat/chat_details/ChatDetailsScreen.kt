@@ -169,6 +169,7 @@ fun ChatDetailsScreen(
             }
             ChatBottomSection(
                 messageState = viewModel.messageState,
+                mediaDataState = mutableStateOf(null),
                 messageSendingState = viewModel.isMessageSendingState,
                 loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                 otherUserName = viewModel.otherUser.name,

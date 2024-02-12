@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.connect.R
 import com.example.connect.domain.models.ChatBean
+import com.example.connect.presentation.ui.models.MediaData
 import com.example.connect.presentation.utils.FunctionHelper.checkAudioPermissionGranted
 import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 
@@ -39,6 +40,7 @@ import com.example.connect.presentation.utils.FunctionHelper.isNetworkAvailable
 @Composable
 fun ChatBottomSection(
     messageState: MutableState<String>,
+    mediaDataState: MutableState<MediaData?>,
     messageSendingState: MutableState<Boolean>,
     loggedInUserFirebaseId: String,
     otherUserName: String,
@@ -121,7 +123,7 @@ fun ChatBottomSection(
         if (!messageSendingState.value) {
             IconButton(
                 onClick = {
-                    if (messageState.value.isBlank()) {
+                    if (messageState.value.isBlank() && mediaDataState.value == null) {
                         if (checkAudioPermissionGranted(context)) {
                             onSpeechRecognizerRequest()
                         } else {
@@ -140,7 +142,7 @@ fun ChatBottomSection(
                     disabledContainerColor = ColorsHelper.gray().copy(alpha = 0.6f)
                 )
             ) {
-                if (messageState.value.isBlank()) {
+                if (messageState.value.isBlank() && mediaDataState.value == null) {
                     Icon(
                         imageVector = Icons.Default.Mic,
                         contentDescription = stringResource(R.string.mic),

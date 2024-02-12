@@ -110,6 +110,7 @@ fun AddMediaScreen(
             )
             ChatBottomSection(
                 messageState = viewModel.messageState,
+                mediaDataState = mutableStateOf(mediaData),
                 messageSendingState = viewModel.isMessageSendingState,
                 loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                 otherUserName = viewModel.otherUser.name,
