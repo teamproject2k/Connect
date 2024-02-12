@@ -1,5 +1,6 @@
 package com.example.connect.presentation.ui.chat.show_media
 
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,10 +41,6 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun ShowMediaScreen(navigator: DestinationsNavigator, mediaData: MediaData) {
     val snackBarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    var currentMediaState by remember {
-        mutableStateOf(MediaStateChangeEnum.Loading.name)
-    }
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
@@ -51,57 +51,88 @@ fun ShowMediaScreen(navigator: DestinationsNavigator, mediaData: MediaData) {
         }) {
         Box(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(it)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
         ) {
             if (mediaData.mediaType == ConstantsHelper.MEDIA_TYPE_IMAGE) {
-                if (currentMediaState == MediaStateChangeEnum.Error.name) {
-                    Text(
-                        text = stringResource(id = R.string.couldn_t_load_image),
-                        modifier = Modifier.fillMaxSize(),
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    AsyncImage(
-                        model = mediaData.uri,
-                        contentDescription = stringResource(id = R.string.uploaded_media),
-                        contentScale = ContentScale.Crop,
-                        onLoading = {
-                            currentMediaState = MediaStateChangeEnum.Loading.name
-                        },
-                        onError = {
-                            currentMediaState = MediaStateChangeEnum.Error.name
-                        },
-                        onSuccess = {
-                            currentMediaState = MediaStateChangeEnum.Success.name
-                        }
-                    )
-                }
-
+                HandleImageSection(mediaUrl = mediaData.uri.toString())
             } else if (mediaData.mediaType == ConstantsHelper.MEDIA_TYPE_VIDEO) {
-                if (currentMediaState == MediaStateChangeEnum.Error.name) {
-                    Text(
-                        text = stringResource(id = R.string.couldn_t_load_image),
-                        modifier = Modifier.fillMaxSize(),
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    GetPlayerView(
-                        context = context,
-                        uri = mediaData.uri.toString(),
-                        onStateChange = {
-                            if (it == MediaStateChangeEnum.Error) {
-                                currentMediaState = MediaStateChangeEnum.Error.name
-                            }
-                        }
-                    ) { _, _ ->
-                    }
+                HandleVideoSection(mediaUrl = mediaData.uri.toString())
+            }
+        }
+
+    }
+}
+
+@Composable
+fun HandleVideoSection(mediaUrl: String) {
+    var currentVideoState by remember {
+        mutableStateOf(MediaStateChangeEnum.Loading.name)
+    }
+    val context = LocalContext.current
+    if (currentVideoState == MediaStateChangeEnum.Error.name) {
+        Text(
+            text = stringResource(id = R.string.couldn_t_load_video),
+            modifier = Modifier.fillMaxSize(),
+            textAlign = TextAlign.Center
+        )
+    } else {
+        GetPlayerView(
+            context = context,
+            uri = mediaUrl,
+            onStateChange = {
+                currentVideoState = it.name
+            }
+        ) { _, _ ->
+        }
+    }
+}
+
+@Composable
+fun HandleImageSection(mediaUrl: String) {
+    var currentImageState by remember {
+        mutableStateOf(MediaStateChangeEnum.Loading.name)
+    }
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) {
+            detectTransformGestures { _, pan, zoom, _ ->
+                scale *= zoom
+                offset += pan
+            }
+        }
+        .graphicsLayer(
+            scaleX = scale,
+            scaleY = scale,
+            translationX = offset.x,
+            translationY = offset.y
+        ), contentAlignment = Alignment.Center) {
+        if (currentImageState == MediaStateChangeEnum.Error.name) {
+            Text(
+                text = stringResource(id = R.string.couldn_t_load_image),
+                modifier = Modifier.fillMaxSize(),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            AsyncImage(
+                model = mediaUrl,
+                contentDescription = stringResource(id = R.string.uploaded_media),
+                contentScale = ContentScale.Crop,
+                onLoading = {
+                    currentImageState = MediaStateChangeEnum.Loading.name
+                },
+                onError = {
+                    currentImageState = MediaStateChangeEnum.Error.name
+                },
+                onSuccess = {
+                    currentImageState = MediaStateChangeEnum.Success.name
                 }
-            }
-            if (currentMediaState == MediaStateChangeEnum.Loading.name) {
-                CircularProgressIndicator()
-            }
+            )
+        }
+        if (currentImageState == MediaStateChangeEnum.Loading.name) {
+            CircularProgressIndicator()
         }
     }
 }

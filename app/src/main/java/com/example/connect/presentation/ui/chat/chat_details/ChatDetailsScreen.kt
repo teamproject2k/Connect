@@ -277,7 +277,6 @@ private fun ChatDetailsTopSection(
 
 @Composable
 fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
-
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -425,7 +424,33 @@ fun ChatBubble(
                         )
                     }
                 } else {
-                    //   ShowSelectedVideo(selectedMediaData = message.mediaUrl, context = context)
+                    AsyncImage(
+                        model = message.mediaUrl,
+                        contentDescription = stringResource(R.string.story_image),
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clickable {
+                                val mediaType =
+                                    if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) ConstantsHelper.MEDIA_TYPE_IMAGE else if (message.mediaType == MediaTypeEnum.Video.name || message.mediaType == MediaTypeEnum.TextVideo.name) ConstantsHelper.MEDIA_TYPE_VIDEO else ""
+                                if (mediaType.isNotBlank()) {
+                                    navigator.navigate(
+                                        ShowMediaScreenDestination(
+                                            MediaData(message.mediaUrl.toUri(), mediaType)
+                                        )
+                                    )
+                                }
+                            },
+                        contentScale = ContentScale.Crop,
+                        onLoading = {
+                            isImageLoadingError = false
+                        },
+                        onSuccess = {
+                            isImageLoadingError = false
+                        },
+                        onError = {
+                            isImageLoadingError = true
+                        }
+                    )
                 }
             }
             val repliedOnMessage =

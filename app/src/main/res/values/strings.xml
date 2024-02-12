@@ -254,5 +254,6 @@
     <string name="speak_to_enter_message">Speak to enter message</string>
     <string name="audio_permission_not_granted_please_grant_it_from_settings">Audio Permission not granted, Please grant it from settings</string>
     <string name="couldn_t_load_image">Couldn\'t load image</string>
+    <string name="couldn_t_load_video">Couldn\'t load video</string>
     <string name="uploaded_media">Uploaded Media</string>
 </resources>
