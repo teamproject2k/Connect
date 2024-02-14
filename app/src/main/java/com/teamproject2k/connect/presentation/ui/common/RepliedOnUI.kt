@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.decode.VideoFrameDecoder
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.models.ChatBean
 import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum
@@ -108,14 +112,36 @@ fun RepliedOnUI(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (message.mediaUrl.isNotBlank()) {
-                AsyncImage(
-                    model = message.mediaUrl,
-                    contentDescription = stringResource(id = R.string.image),
-                    contentScale = ContentScale.Crop,
+                Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = message.mediaUrl,
+                        imageLoader = ImageLoader.Builder(LocalContext.current)
+                            .components {
+                                if (message.mediaType == MediaTypeEnum.Video.name || message.mediaType == MediaTypeEnum.TextVideo.name) {
+                                    add(VideoFrameDecoder.Factory())
+                                }
+                            }
+                            .build(),
+                        contentDescription = stringResource(id = R.string.image),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                    if (message.mediaType == MediaTypeEnum.TextVideo.name || message.mediaType == MediaTypeEnum.Video.name) {
+                        Icon(
+                            imageVector = Icons.Default.PlayCircle,
+                            contentDescription = stringResource(
+                                id = R.string.play_video
+                            )
+                        )
+                    }
+                }
                 SpacerWidth6()
             }
             Text(

@@ -49,6 +49,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class AppModule {
 
+
     @Provides
     @Singleton
     fun getFirebaseAuth(): FirebaseAuth {
@@ -60,7 +61,7 @@ class AppModule {
     @Provides
     @Singleton
     fun getSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("com.example.connect_shared_pref", MODE_PRIVATE)
+        return context.getSharedPreferences("${context.packageName}.shared_pref", MODE_PRIVATE)
     }
 
     @Provides
@@ -85,7 +86,7 @@ class AppModule {
         val database = Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "com.example.connect.app_database"
+            "${context.packageName}.app_database"
         )
         return database.build()
     }
