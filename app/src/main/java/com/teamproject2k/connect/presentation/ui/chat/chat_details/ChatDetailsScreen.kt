@@ -443,6 +443,11 @@ fun ChatBubble(
                 }
             }
         }
+        Text(
+            text = FunctionHelper.getFormattedDateTime(message.sentAt, "dd-MM-yy  hh:mm a"),
+            fontSize = 12.sp,
+            color = ColorsHelper.gray()
+        )
     }
     if (showDeleteMessageDialog) {
         AlertDialog(
