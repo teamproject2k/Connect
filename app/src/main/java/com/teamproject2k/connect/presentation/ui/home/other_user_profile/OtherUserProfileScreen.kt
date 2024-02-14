@@ -1,5 +1,6 @@
 package com.teamproject2k.connect.presentation.ui.home.other_user_profile
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,7 @@ import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
+import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.ExpandedImage
 import com.teamproject2k.connect.presentation.ui.common.IconTextRowSection
@@ -82,7 +84,6 @@ import com.teamproject2k.connect.presentation.ui.common.UserProfileFriendsListSe
 import com.teamproject2k.connect.presentation.ui.common.UserProfilePostLoadingSection
 import com.teamproject2k.connect.presentation.ui.common.UserProfilePostSection
 import com.teamproject2k.connect.presentation.ui.common.UserProfileUserInfoSection
-import com.teamproject2k.connect.presentation.ui.destinations.ChatDetailsScreenDestination
 import com.teamproject2k.connect.presentation.ui.enums.ScreenNameEnum
 import com.teamproject2k.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.teamproject2k.connect.presentation.ui.home.base_screen.HomeSharedViewModel
@@ -260,7 +261,7 @@ private fun ProfileScreen(
                 viewModel.loggedInUserState.value.firebaseUserId
             )
             SpacerHeight24()
-            ActionButtonsSection(viewModel, navigator)
+            ActionButtonsSection(viewModel)
             SpacerHeight24()
             HandleFriendListSection(viewModel = viewModel, navigator)
             HandlePostDetailsState(viewModel, navigator, userDetails)
@@ -343,10 +344,7 @@ private fun ImageSection(
 }
 
 @Composable
-private fun ActionButtonsSection(
-    viewModel: OtherUserProfileViewModel,
-    navigator: DestinationsNavigator
-) {
+private fun ActionButtonsSection(viewModel: OtherUserProfileViewModel) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -363,12 +361,12 @@ private fun ActionButtonsSection(
                     textColor = ColorsHelper.black(),
                     buttonBackgroundColor = ColorsHelper.grayButtonBackground(),
                     onButtonClick = {
-                        navigator.navigate(
-                            ChatDetailsScreenDestination(
-                                viewModel.loggedInUserState.value,
-                                viewModel.otherUserState.value
-                            )
+                        val intent = Intent(context, ChatActivity::class.java)
+                        intent.putExtra(
+                            ConstantsHelper.USER_DETAILS_KEY,
+                            viewModel.loggedInUserState.value
                         )
+                        context.startActivity(intent)
                     }
                 )
             }
