@@ -62,14 +62,10 @@ class ChatDetailsViewModel @Inject constructor(
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
     var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
-
-    init {
-        sharedPreference.isChatDetailScreenOpen = true
-    }
-
     fun initializeData(loggedInUserDetails: UsersBean, otherUserDetails: UsersBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
+        sharedPreference.isChatDetailScreenOpen = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 updateLastSeenAtOnLocalUseCase(
