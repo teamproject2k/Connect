@@ -7,7 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -372,31 +372,28 @@ fun ChatBubble(
                     )
                 }
                 .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onHorizontalDrag = { change, dragAmount ->
-                            change.consume()
-                            if (dragAmount > 5) {
-                                // right swipe
-                                translateX.value = dragAmount
-                                viewModel.repliedOnChatState.value = message
-                            }
-                        },
-                        onDragEnd = {
-                            if (translateX.value != 0.0f) {
-                                FunctionHelper.vibrateDevice(context, 100)
-                                translateX.value = 0.0f
-                            }
+                    detectDragGestures(onDrag = { change, dragAmount ->
+                        change.consume()
+                        if (dragAmount.x > 10 && dragAmount.y == 0f) {
+                            // right swipe
+                            translateX.value = dragAmount.x
                         }
-                    )
+                    }, onDragEnd = {
+                        if (translateX.value != 0.0f) {
+                            viewModel.repliedOnChatState.value = message
+                            FunctionHelper.vibrateDevice(context, 100)
+                            translateX.value = 0.0f
+                        }
+                    }, onDragCancel = {
+                        translateX.value = 0.0f
+                    })
                 }
                 .graphicsLayer {
                     translationX = translateX.value
                 }
                 .padding(horizontal = 6.dp, vertical = 4.dp)
             Column(
-                modifier = if (message.mediaUrl.isNotBlank()) baseModifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f) else baseModifier
+                modifier = baseModifier
             ) {
                 if (message.repliedOnChatId != null) {
                     val repliedOnMessage =
