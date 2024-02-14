@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.AsyncImage
 import com.example.connect.R
 import com.example.connect.domain.models.ChatBean
+import com.example.connect.presentation.ui.enums.MediaTypeEnum
 
 @Composable
 fun RepliedOnUI(
@@ -37,15 +40,14 @@ fun RepliedOnUI(
     senderNameColor: Color = MaterialTheme.colorScheme.primary,
     dividerColor: Color = MaterialTheme.colorScheme.primary,
     messageColor: Color = Color.Unspecified,
-    senderMessageBackgroundColor: Color = ColorsHelper.chatBubbleOtherUserBg(),
+    repliedOnUiBackgroundColor: Color = ColorsHelper.chatBubbleOtherUserBg(),
     showCancelIconButton: Boolean = true,
     onCancelIconButtonClicked: () -> Unit = {}
 ) {
     ConstraintLayout(
         modifier = modifier
-            .padding(6.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(senderMessageBackgroundColor)
+            .background(repliedOnUiBackgroundColor)
     ) {
         val (verticalDivider, topSection, messageText) = createRefs()
         Box(
@@ -94,23 +96,43 @@ fun RepliedOnUI(
                 }
             }
         }
-
-        Text(
-            text = message.message,
+        Row(
             modifier = Modifier
-                .padding(end = 8.dp)
+                .padding(end = 8.dp, top = if (message.mediaUrl.isNotBlank()) 2.dp else 0.dp)
                 .constrainAs(messageText) {
                     top.linkTo(topSection.bottom, margin = 4.dp)
                     bottom.linkTo(parent.bottom, margin = 4.dp)
                     start.linkTo(verticalDivider.end, margin = 8.dp)
                     width = Dimension.preferredWrapContent
                 },
-            fontSize = 13.sp,
-            maxLines = 3,
-            textAlign = TextAlign.Start,
-            overflow = TextOverflow.Ellipsis,
-            color = messageColor,
-            lineHeight = 20.sp
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (message.mediaUrl.isNotBlank()) {
+                AsyncImage(
+                    model = message.mediaUrl,
+                    contentDescription = stringResource(id = R.string.image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+                SpacerWidth6()
+            }
+            Text(
+                text = message.message.ifBlank {
+                    message.mediaType.replace(
+                        MediaTypeEnum.Text.name,
+                        ""
+                    )
+                },
+                fontSize = 13.sp,
+                maxLines = 3,
+                textAlign = TextAlign.Start,
+                overflow = TextOverflow.Ellipsis,
+                color = messageColor,
+                lineHeight = 20.sp
+            )
+        }
+
     }
 }
