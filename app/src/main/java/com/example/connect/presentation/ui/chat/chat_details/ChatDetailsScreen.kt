@@ -7,7 +7,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -223,7 +224,15 @@ fun ChatListSection(
                 loggedInUserFirebaseId,
                 otherUserName = viewModel.otherUser.name,
                 navigator
-            )
+            ) {
+                coroutineScope.launch {
+                    val repliedOnMessage =
+                        viewModel.chatListState.find { it.firebaseId == chat.repliedOnChatId }
+                    if (repliedOnMessage != null) {
+                        lazyListState.scrollToItem(viewModel.chatListState.indexOf(repliedOnMessage))
+                    }
+                }
+            }
         }
         if (viewModel.chatListState.isNotEmpty()) {
             coroutineScope.launch {
@@ -320,7 +329,8 @@ fun ChatBubble(
     message: ChatBean,
     loggedInUserFirebaseId: String,
     otherUserName: String,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    onRepliedOnClicked: () -> Unit
 ) {
     val isMessageFromLoggedInUser = message.senderId == loggedInUserFirebaseId
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
@@ -330,6 +340,26 @@ fun ChatBubble(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(onHorizontalDrag = { change, dragAmount ->
+                    change.consume()
+                    if (dragAmount > 10) {
+                        // right swipe
+                        translateX.value = dragAmount
+                    }
+                }, onDragEnd = {
+                    if (translateX.value != 0.0f) {
+                        viewModel.repliedOnChatState.value = message
+                        FunctionHelper.vibrateDevice(context, 100)
+                        translateX.value = 0.0f
+                    }
+                }, onDragCancel = {
+                    translateX.value = 0.0f
+                })
+            }
+            .graphicsLayer {
+                translationX = translateX.value
+            }
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start
     ) {
@@ -371,26 +401,25 @@ fun ChatBubble(
                         }
                     )
                 }
-                .pointerInput(Unit) {
-                    detectDragGestures(onDrag = { change, dragAmount ->
-                        change.consume()
-                        if (dragAmount.x > 10 && dragAmount.y == 0f) {
-                            // right swipe
-                            translateX.value = dragAmount.x
-                        }
-                    }, onDragEnd = {
-                        if (translateX.value != 0.0f) {
-                            viewModel.repliedOnChatState.value = message
-                            FunctionHelper.vibrateDevice(context, 100)
-                            translateX.value = 0.0f
-                        }
-                    }, onDragCancel = {
-                        translateX.value = 0.0f
-                    })
-                }
-                .graphicsLayer {
-                    translationX = translateX.value
-                }
+//                .pointerInput(Unit) {
+//                    detectDragGestures(onDrag = { change, dragAmount ->
+//                        if (dragAmount.x > 10 && dragAmount.y == 0f) {
+//                            // right swipe
+//                            translateX.value = dragAmount.x
+//                        }
+//                    }, onDragEnd = {
+//                        if (translateX.value != 0.0f) {
+//                            viewModel.repliedOnChatState.value = message
+//                            FunctionHelper.vibrateDevice(context, 100)
+//                            translateX.value = 0.0f
+//                        }
+//                    }, onDragCancel = {
+//                        translateX.value = 0.0f
+//                    })
+//                }
+//                .graphicsLayer {
+//                    translationX = translateX.value
+//                }
                 .padding(horizontal = 6.dp, vertical = 4.dp)
             Column(
                 modifier = baseModifier
@@ -400,6 +429,9 @@ fun ChatBubble(
                         viewModel.chatListState.find { it.firebaseId == message.repliedOnChatId }
                     if (repliedOnMessage != null) {
                         RepliedOnUI(
+                            modifier = Modifier.clickable {
+                                onRepliedOnClicked()
+                            },
                             message = repliedOnMessage,
                             loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
                             senderNameColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black(),
@@ -428,161 +460,6 @@ fun ChatBubble(
             }
         }
     }
-//    Column(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(horizontal = 12.dp, vertical = 8.dp)
-//            .pointerInput(Unit) {
-//                detectTapGestures(
-//                    onLongPress = {
-//                        FunctionHelper.vibrateDevice(context, 100)
-//                        showDeleteMessageDialog = true
-//                    }
-//                )
-//            }
-//            .pointerInput(Unit) {
-//                detectHorizontalDragGestures(
-//                    onHorizontalDrag = { change, dragAmount ->
-//                        change.consume()
-//                        if (dragAmount > 5) {
-//                            // right swipe
-//                            translateX.value = dragAmount
-//                            viewModel.repliedOnChatState.value = message
-//                        }
-//                    },
-//                    onDragEnd = {
-//                        if (translateX.value != 0.0f) {
-//                            FunctionHelper.vibrateDevice(context, 100)
-//                            translateX.value = 0.0f
-//                        }
-//                    }
-//                )
-//            }
-//            .graphicsLayer {
-//                translationX = translateX.value
-//            },
-//        horizontalAlignment = if (isMessageFromLoggedInUser) Alignment.End else Alignment.Start,
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .clip(
-//                    if (isMessageFromLoggedInUser) RoundedCornerShape(
-//                        topStart = 12.dp,
-//                        topEnd = 12.dp,
-//                        bottomStart = 12.dp
-//                    ) else RoundedCornerShape(
-//                        topStart = 12.dp,
-//                        topEnd = 12.dp,
-//                        bottomEnd = 12.dp
-//                    )
-//                )
-//                .background(
-//                    if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary.copy(.8f) else ColorsHelper.chatBubbleOtherUserBg()
-//                )
-//                .padding(2.dp)
-//        ) {
-//            if (message.mediaUrl.isNotBlank()) {
-//                if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) {
-//                    if (isImageLoadingError) {
-//                        Box(
-//                            modifier = Modifier
-//                                .size(100.dp)
-//                                .background(ColorsHelper.lightGray()),
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text(text = stringResource(R.string.couldn_t_load_image))
-//                        }
-//                    } else {
-//                        AsyncImage(
-//                            model = message.mediaUrl,
-//                            contentDescription = stringResource(R.string.story_image),
-//                            modifier = Modifier
-//                                .size(100.dp)
-//                                .clickable {
-//                                    val mediaType =
-//                                        if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) ConstantsHelper.MEDIA_TYPE_IMAGE else if (message.mediaType == MediaTypeEnum.Video.name || message.mediaType == MediaTypeEnum.TextVideo.name) ConstantsHelper.MEDIA_TYPE_VIDEO else ""
-//                                    if (mediaType.isNotBlank()) {
-//                                        navigator.navigate(
-//                                            ShowMediaScreenDestination(
-//                                                MediaData(message.mediaUrl.toUri(), mediaType)
-//                                            )
-//                                        )
-//                                    }
-//                                },
-//                            contentScale = ContentScale.Crop,
-//                            onLoading = {
-//                                isImageLoadingError = false
-//                            },
-//                            onSuccess = {
-//                                isImageLoadingError = false
-//                            },
-//                            onError = {
-//                                isImageLoadingError = true
-//                            }
-//                        )
-//                    }
-//                } else {
-//                    AsyncImage(
-//                        model = message.mediaUrl,
-//                        contentDescription = stringResource(R.string.story_image),
-//                        modifier = Modifier
-//                            .size(100.dp)
-//                            .clickable {
-//                                val mediaType =
-//                                    if (message.mediaType == MediaTypeEnum.Image.name || message.mediaType == MediaTypeEnum.TextImage.name) ConstantsHelper.MEDIA_TYPE_IMAGE else if (message.mediaType == MediaTypeEnum.Video.name || message.mediaType == MediaTypeEnum.TextVideo.name) ConstantsHelper.MEDIA_TYPE_VIDEO else ""
-//                                if (mediaType.isNotBlank()) {
-//                                    navigator.navigate(
-//                                        ShowMediaScreenDestination(
-//                                            MediaData(message.mediaUrl.toUri(), mediaType)
-//                                        )
-//                                    )
-//                                }
-//                            },
-//                        contentScale = ContentScale.Crop,
-//                        onLoading = {
-//                            isImageLoadingError = false
-//                        },
-//                        onSuccess = {
-//                            isImageLoadingError = false
-//                        },
-//                        onError = {
-//                            isImageLoadingError = true
-//                        }
-//                    )
-//                }
-//            }
-//            val repliedOnMessage =
-//                viewModel.chatListState.find { it.firebaseId == message.repliedOnChatId }
-//            if (message.repliedOnChatId != null && repliedOnMessage != null) {
-//                Column {
-//                    RepliedOnUI(
-//                        message = repliedOnMessage,
-//                        loggedInUserFirebaseId = viewModel.loggedInUser.firebaseUserId,
-//                        senderNameColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black(),
-//                        dividerColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.primary else ColorsHelper.gray(),
-//                        messageColor = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black(),
-//                        otherUserName = otherUserName,
-//                        showCancelIconButton = false
-//                    )
-//                }
-//            }
-//            Text(
-//                text = message.message,
-//                fontWeight = FontWeight.Normal,
-//                style = MaterialTheme.typography.bodyMedium,
-//                modifier = Modifier.padding(8.dp),
-//                color = if (isMessageFromLoggedInUser) MaterialTheme.colorScheme.onPrimary else ColorsHelper.black()
-//            )
-//        }
-//        SpacerHeight2()
-//        Text(
-//            text = FunctionHelper.getFormattedDateTime(message.sentAt, "dd/MM/yy, hh:mm a"),
-//            color = ColorsHelper.gray(),
-//            fontWeight = FontWeight.Medium,
-//            fontSize = 11.sp,
-//        )
-//    }
-
     if (showDeleteMessageDialog) {
         AlertDialog(
             onDismissRequest = {
