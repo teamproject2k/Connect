@@ -9,9 +9,9 @@ import com.teamproject2k.connect.domain.models.ChatBean
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.chat.SendMessageToRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.fcm.SendFCMUseCase
-import com.teamproject2k.connect.domain.useCase.file.UploadFileToRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.chat.SendMessageToRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
+import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.presentation.base.BaseViewModel

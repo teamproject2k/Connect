@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.user.GetLoggedInUserFriendListFromRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.user.GetLoggedInUserReceivedFriendRequestListFromRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.user.UpdateUserOnLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetLoggedInUserFriendListFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetLoggedInUserReceivedFriendRequestListFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.user.UpdateUserOnLocalUseCase
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

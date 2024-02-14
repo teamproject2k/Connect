@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.device.GetDeviceIdFromRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.user.AddUserToLocalUseCase
-import com.teamproject2k.connect.domain.useCase.user.GetUserDetailsFromLocalUseCase
-import com.teamproject2k.connect.domain.useCase.user.GetUserDetailsFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.device.GetDeviceIdFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.user.AddUserToLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetUserDetailsFromLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetUserDetailsFromRemoteUseCase
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.utils.FunctionHelper.isNetworkAvailable

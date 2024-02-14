@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.PostBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.file.UploadFileToRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.posts.AddPostToLocalUseCase
-import com.teamproject2k.connect.domain.useCase.posts.UploadPostToRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.posts.AddPostToLocalUseCase
+import com.teamproject2k.connect.domain.use_case.posts.UploadPostToRemoteUseCase
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum

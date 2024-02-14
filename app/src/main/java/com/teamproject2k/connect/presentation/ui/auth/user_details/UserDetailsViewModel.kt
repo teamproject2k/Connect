@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.fcm.GetFCMTokenUseCase
-import com.teamproject2k.connect.domain.useCase.user.AddUserToLocalUseCase
-import com.teamproject2k.connect.domain.useCase.user.AddUserToRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.user.GetUsersCountFromNameInitialsFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.fcm.GetFCMTokenUseCase
+import com.teamproject2k.connect.domain.use_case.user.AddUserToLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.AddUserToRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetUsersCountFromNameInitialsFromRemoteUseCase
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.ui.enums.ButtonStateEnum

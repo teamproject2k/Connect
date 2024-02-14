@@ -284,18 +284,18 @@ private fun ChatDetailsTopSection(
 @Composable
 fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
-    var isExceptionHandled by remember {
+    var isResponseHandled by remember {
         mutableStateOf(false)
     }
 
     when (sendMessageState.status) {
         RequestStatusEnum.Loading -> {
             viewModel.isMessageSendingState.value = true
-            isExceptionHandled = false
+            isResponseHandled = false
         }
 
         RequestStatusEnum.Exception -> {
-            if (!isExceptionHandled) {
+            if (!isResponseHandled) {
                 viewModel.isMessageSendingState.value = false
                 viewModel.snackBarMessageState.value =
                     sendMessageState.message
@@ -306,14 +306,17 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
                     ScreenNameEnum.ChatDetailsScreen.name,
                     sendMessageState.message.toString()
                 )
-                isExceptionHandled = true
+                isResponseHandled = true
             }
         }
 
         RequestStatusEnum.Success -> {
-            viewModel.isMessageSendingState.value = false
-            viewModel.messageState.value = ""
-            viewModel.repliedOnChatState.value = null
+            if (!isResponseHandled) {
+                viewModel.isMessageSendingState.value = false
+                viewModel.messageState.value = ""
+                viewModel.repliedOnChatState.value = null
+                isResponseHandled = true
+            }
         }
 
         RequestStatusEnum.None -> {

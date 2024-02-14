@@ -9,8 +9,8 @@ import com.teamproject2k.connect.data.models.user.UsersLocalEntity
 import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.user.UpdateUserDetailsOnLocalUseCase
-import com.teamproject2k.connect.domain.useCase.user.UpdateUserDetailsOnRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnRemoteUseCase
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.ui.models.VisibilityScope

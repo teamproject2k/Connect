@@ -12,11 +12,11 @@ import com.teamproject2k.connect.domain.models.StorySeenByBean
 import com.teamproject2k.connect.domain.models.StorySeenTimeWithUserDetailsBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
-import com.teamproject2k.connect.domain.useCase.story.AddUserToSeenListInRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.story.DeleteStoryFromLocalUseCase
-import com.teamproject2k.connect.domain.useCase.story.DeleteStoryInRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.story.GetSeenListFromRemoteUseCase
-import com.teamproject2k.connect.domain.useCase.story.UpdateStoryOnLocalUseCase
+import com.teamproject2k.connect.domain.use_case.story.AddUserToSeenListInRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.story.DeleteStoryFromLocalUseCase
+import com.teamproject2k.connect.domain.use_case.story.DeleteStoryInRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.story.GetSeenListFromRemoteUseCase
+import com.teamproject2k.connect.domain.use_case.story.UpdateStoryOnLocalUseCase
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.ui.enums.ScreenNameEnum
 import com.teamproject2k.connect.presentation.utils.ConstantsHelper
