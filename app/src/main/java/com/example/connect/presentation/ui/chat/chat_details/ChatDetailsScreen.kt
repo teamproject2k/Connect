@@ -401,25 +401,6 @@ fun ChatBubble(
                         }
                     )
                 }
-//                .pointerInput(Unit) {
-//                    detectDragGestures(onDrag = { change, dragAmount ->
-//                        if (dragAmount.x > 10 && dragAmount.y == 0f) {
-//                            // right swipe
-//                            translateX.value = dragAmount.x
-//                        }
-//                    }, onDragEnd = {
-//                        if (translateX.value != 0.0f) {
-//                            viewModel.repliedOnChatState.value = message
-//                            FunctionHelper.vibrateDevice(context, 100)
-//                            translateX.value = 0.0f
-//                        }
-//                    }, onDragCancel = {
-//                        translateX.value = 0.0f
-//                    })
-//                }
-//                .graphicsLayer {
-//                    translationX = translateX.value
-//                }
                 .padding(horizontal = 6.dp, vertical = 4.dp)
             Column(
                 modifier = baseModifier
