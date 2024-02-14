@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.connect"
+    namespace = "com.teamproject2k.connect"
     compileSdk = ConfigData.compileSdk
     packaging {
         resources {
@@ -18,7 +18,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId = "com.example.connect"
+        applicationId = "com.teamproject2k.connect"
         minSdk = ConfigData.minSdk
         targetSdk = ConfigData.compileSdk
         versionCode = 1
