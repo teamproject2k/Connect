@@ -26,6 +26,11 @@ class BaseApp : Application() {
             getString(R.string.friend_request_channel),
             NotificationManager.IMPORTANCE_HIGH
         )
+        val chatMessageChannel = NotificationChannel(
+            NotificationsConstantHelper.CHAT_MESSAGE_CHANNEL_ID,
+            getString(R.string.chat_messages),
+            NotificationManager.IMPORTANCE_HIGH
+        )
         val defaultNotificationChannel = NotificationChannel(
             NotificationsConstantHelper.DEFAULT_CHANNEL_ID,
             getString(R.string.app_name),
@@ -35,6 +40,7 @@ class BaseApp : Application() {
         notificationManager.createNotificationChannels(
             listOf(
                 friendRequestChannel,
+                chatMessageChannel,
                 defaultNotificationChannel
             )
         )

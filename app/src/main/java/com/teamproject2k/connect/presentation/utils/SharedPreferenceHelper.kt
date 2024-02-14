@@ -8,6 +8,7 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
         private const val IS_USER_DETAILS_ENTERED = "is_user_detail_entered"
         private const val DEVICE_ID = "device_id"
         private const val MOBILE_NUMBER = "mobile_number"
+        private const val IS_CHAT_DETAIL_SCREEN_OPEN = "is_chat_detail_screen_open"
     }
 
 
@@ -52,6 +53,15 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
         set(mobileNumber) {
             val editor = sharedPreferences.edit()
             editor.putString(MOBILE_NUMBER, mobileNumber)
+            editor.apply()
+        }
+
+
+    var isChatDetailScreenOpen: Boolean
+        get() = sharedPreferences.getBoolean(IS_CHAT_DETAIL_SCREEN_OPEN, false)
+        set(updatedValue) {
+            val editor = sharedPreferences.edit()
+            editor.putBoolean(IS_CHAT_DETAIL_SCREEN_OPEN, updatedValue)
             editor.apply()
         }
 }

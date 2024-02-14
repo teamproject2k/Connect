@@ -178,7 +178,7 @@ fun ChatDetailsScreen(
                 onAudioPermissionRequest = {
                     permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 },
-                onSendMessage = { viewModel.sendMessage() },
+                onSendMessage = { viewModel.sendMessage(context) },
                 onNoInternetError = {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)

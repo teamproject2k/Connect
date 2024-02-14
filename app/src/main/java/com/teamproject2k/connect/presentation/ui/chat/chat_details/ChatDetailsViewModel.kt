@@ -1,5 +1,6 @@
 package com.teamproject2k.connect.presentation.ui.chat.chat_details
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,10 +17,12 @@ import com.teamproject2k.connect.domain.useCase.chat.LiveObserveChatListOnRemote
 import com.teamproject2k.connect.domain.useCase.chat.RemoveLiveObserveListenerFromRemoteUseCase
 import com.teamproject2k.connect.domain.useCase.chat.SendMessageToRemoteUseCase
 import com.teamproject2k.connect.domain.useCase.chat.UpdateLastSeenAtOnLocalUseCase
+import com.teamproject2k.connect.domain.useCase.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
+import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +38,8 @@ class ChatDetailsViewModel @Inject constructor(
     private val removeLiveObserveListenerFromRemoteUseCase: RemoveLiveObserveListenerFromRemoteUseCase,
     private val deleteMessageOnRemoteUseCase: DeleteMessageOnRemoteUseCase,
     private val updateLastSeenAtOnLocalUseCase: UpdateLastSeenAtOnLocalUseCase,
-    private val deleteChatFromLocalUseCase: DeleteChatFromLocalUseCase
+    private val deleteChatFromLocalUseCase: DeleteChatFromLocalUseCase,
+    private val sendFCMUseCase: SendFCMUseCase
 ) :
     BaseViewModel() {
 
@@ -59,6 +63,10 @@ class ChatDetailsViewModel @Inject constructor(
 
     var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
 
+    init {
+        sharedPreference.isChatDetailScreenOpen = true
+    }
+
     fun initializeData(loggedInUserDetails: UsersBean, otherUserDetails: UsersBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
@@ -76,7 +84,7 @@ class ChatDetailsViewModel @Inject constructor(
         isDataInitialized = true
     }
 
-    fun sendMessage() {
+    fun sendMessage(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendMessageStateFlow.value = ResponseState.loading()
@@ -93,7 +101,25 @@ class ChatDetailsViewModel @Inject constructor(
                     MediaTypeEnum.Text.name,
                     repliedOnChatId = repliedOnChatState.value?.firebaseId
                 )
-                _sendMessageStateFlow.value = sendMessageToRemoteUseCase(message)
+                val response = sendMessageToRemoteUseCase(message)
+                if (response.status == RequestStatusEnum.Success) {
+                    val data = hashMapOf(
+                        Pair(
+                            NotificationsConstantHelper.TITLE,
+                            otherUser.name
+                        ),
+                        Pair(
+                            NotificationsConstantHelper.MESSAGE,
+                            message.message
+                        )
+                    )
+                    sendFCMUseCase(
+                        FunctionHelper.getAccessToken(context),
+                        data,
+                        otherUser.fcmToken
+                    )
+                }
+                _sendMessageStateFlow.value = response
             }
         }
     }
@@ -133,5 +159,6 @@ class ChatDetailsViewModel @Inject constructor(
 
     override fun onCleared() {
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
+        sharedPreference.isChatDetailScreenOpen = false
     }
 }

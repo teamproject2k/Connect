@@ -122,7 +122,7 @@ fun AddMediaScreen(
                 onAudioPermissionRequest = {
                     permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 },
-                onSendMessage = { viewModel.sendMessage(mediaData) },
+                onSendMessage = { viewModel.sendMessage(mediaData, context) },
                 onNoInternetError = {
                     viewModel.snackBarMessageState.value =
                         context.getString(R.string.no_internet_connection)

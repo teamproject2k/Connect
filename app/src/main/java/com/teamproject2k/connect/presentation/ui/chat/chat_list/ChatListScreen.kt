@@ -50,6 +50,7 @@ import coil.compose.AsyncImage
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
+import com.teamproject2k.connect.domain.enums.MediaStateChangeEnum
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatWithUserAndCountBean
@@ -291,6 +292,9 @@ private fun ChatListItem(
     chatMetaData: ChatWithUserAndCountBean, onItemClick: () -> (Unit)
 ) {
     val context = LocalContext.current
+    var currentImageState by remember {
+        mutableStateOf(MediaStateChangeEnum.Loading.name)
+    }
     Column(modifier = Modifier.clickable {
         onItemClick()
     }) {
@@ -298,10 +302,20 @@ private fun ChatListItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(16.dp)
         ) {
+            val baseImageModifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
             AsyncImage(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape),
+                modifier = if (currentImageState == MediaStateChangeEnum.Loading.name) baseImageModifier.shimmer() else baseImageModifier,
+                onLoading = {
+                    currentImageState = MediaStateChangeEnum.Loading.name
+                },
+                onSuccess = {
+                    currentImageState = MediaStateChangeEnum.Success.name
+                },
+                onError = {
+                    currentImageState = MediaStateChangeEnum.Error.name
+                },
                 model = chatMetaData.userDetails.profilePhoto,
                 contentDescription = chatMetaData.userDetails.name,
                 contentScale = ContentScale.Crop,

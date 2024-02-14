@@ -1,5 +1,6 @@
 package com.teamproject2k.connect.presentation.ui.chat.add_media
 
+import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -9,6 +10,7 @@ import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
 import com.teamproject2k.connect.domain.network_request_response.ResponseState
 import com.teamproject2k.connect.domain.useCase.chat.SendMessageToRemoteUseCase
+import com.teamproject2k.connect.domain.useCase.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.useCase.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
@@ -17,6 +19,7 @@ import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum
 import com.teamproject2k.connect.presentation.ui.models.MediaData
 import com.teamproject2k.connect.presentation.utils.ConstantsHelper
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
+import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +31,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddMediaViewModel @Inject constructor(
     private val sendMessageToRemoteUseCase: SendMessageToRemoteUseCase,
-    private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase
+    private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
+    private val sendFCMUseCase: SendFCMUseCase
 ) : BaseViewModel() {
 
     val snackBarMessageState = mutableStateOf("")
@@ -56,11 +60,11 @@ class AddMediaViewModel @Inject constructor(
         isDataInitialized = true
     }
 
-    fun sendMessage(mediaData: MediaData) {
+    fun sendMessage(mediaData: MediaData, context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _sendMessageStateFlow.value = ResponseState.loading()
-                val response = uploadFileToRemoteUseCase(
+                val uploadMediaResponse = uploadFileToRemoteUseCase(
                     mediaData.uri,
                     "${FirebaseConstants.CHATS_KEY}/${
                         DomainFunctionHelper.getSortedChatId(
@@ -69,7 +73,7 @@ class AddMediaViewModel @Inject constructor(
                         )
                     }/${FunctionHelper.getCurrentTimeInMillis()}"
                 )
-                if (response.status == RequestStatusEnum.Success && response.data != null) {
+                if (uploadMediaResponse.status == RequestStatusEnum.Success && uploadMediaResponse.data != null) {
                     val mediaType = if (messageState.value.isNotBlank()) {
                         when (mediaData.mediaType) {
                             ConstantsHelper.MEDIA_TYPE_IMAGE -> {
@@ -100,13 +104,37 @@ class AddMediaViewModel @Inject constructor(
                         sentAt,
                         sentAt,
                         MessageDeleteStatusEnum.DeletedForNone.name,
-                        response.data,
+                        uploadMediaResponse.data,
                         mediaType,
                         repliedOnChatId = repliedOnChatMediaState.value?.firebaseId
                     )
-                    _sendMessageStateFlow.value = sendMessageToRemoteUseCase(message)
+                    val response = sendMessageToRemoteUseCase(message)
+                    if (response.status == RequestStatusEnum.Success) {
+                        val data = hashMapOf(
+                            Pair(
+                                NotificationsConstantHelper.TITLE,
+                                otherUser.name
+                            ),
+                            Pair(
+                                NotificationsConstantHelper.MESSAGE,
+                                message.message.ifBlank {
+                                    mediaType.replace(
+                                        MediaTypeEnum.Text.name,
+                                        ""
+                                    )
+                                }
+                            )
+                        )
+                        sendFCMUseCase(
+                            FunctionHelper.getAccessToken(context),
+                            data,
+                            otherUser.fcmToken
+                        )
+                    }
+                    _sendMessageStateFlow.value = response
                 } else {
-                    _sendMessageStateFlow.value = ResponseState.error(response.message ?: "")
+                    _sendMessageStateFlow.value =
+                        ResponseState.error(uploadMediaResponse.message ?: "")
                 }
             }
         }

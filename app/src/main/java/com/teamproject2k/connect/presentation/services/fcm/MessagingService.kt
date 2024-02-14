@@ -8,12 +8,13 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.teamproject2k.connect.R
+import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.home.base_screen.HomeActivity
 import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
+import com.teamproject2k.connect.presentation.utils.SharedPreferenceHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,7 +25,7 @@ open class MessagingService : FirebaseMessagingService() {
 
 
     @Inject
-    protected lateinit var firebaseAuth: FirebaseAuth
+    protected lateinit var sharedPreferenceHelper: SharedPreferenceHelper
 
 
     // no need to handle onNewToken as the firebase user is null after clear data so it will not send the token
@@ -63,6 +64,19 @@ open class MessagingService : FirebaseMessagingService() {
                     )
                 }
 
+                NotificationTypesEnum.ChatMessages.name -> {
+                    if (!sharedPreferenceHelper.isChatDetailScreenOpen) {
+                        val title = dataMessage[NotificationsConstantHelper.TITLE]
+                        val message = dataMessage[NotificationsConstantHelper.MESSAGE]
+                        showNotification(
+                            NotificationsConstantHelper.CHAT_MESSAGE_CHANNEL_ID,
+                            title,
+                            message ?: getString(R.string.send_you_a_message),
+                            type
+                        )
+                    }
+                }
+
                 else -> {
                     val title = dataMessage[NotificationsConstantHelper.TITLE]
                     val message = dataMessage[NotificationsConstantHelper.MESSAGE]
@@ -83,8 +97,14 @@ open class MessagingService : FirebaseMessagingService() {
         message: String,
         notificationType: String?
     ) {
-        val intent = Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        intent.putExtra(NotificationTypesEnum::class.simpleName, notificationType)
+        val activity =
+            if (notificationType != NotificationTypesEnum.ChatMessages.name) HomeActivity::class.java else ChatActivity::class.java
+        val intent = Intent(
+            this, activity
+        ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtra(
+            NotificationTypesEnum::class.simpleName, notificationType
+        )
         val flags =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

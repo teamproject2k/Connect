@@ -257,4 +257,6 @@
     <string name="couldn_t_load_video">Couldn\'t load video</string>
     <string name="uploaded_media">Uploaded Media</string>
     <string name="couldn_t_load_media">Couldn\'t load media</string>
+    <string name="chat_messages">Chat Messages</string>
+    <string name="send_you_a_message">send you a message</string>
 </resources>
