@@ -1,7 +1,7 @@
 package com.teamproject2k.connect.domain.repository
 
 import com.google.firebase.auth.FirebaseUser
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IAuthenticationRepository {

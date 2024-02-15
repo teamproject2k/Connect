@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IAuthenticationRepository
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes

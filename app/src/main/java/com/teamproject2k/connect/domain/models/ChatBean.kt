@@ -18,7 +18,7 @@ data class ChatBean(
     var deletedBy: String,
     val mediaUrl: String,
     val mediaType: String,
-    val repliedOnChatId: String?,
+    val repliedOnChatId: String?
 ) : Parcelable {
     fun toChatRemoteEntity(): ChatRemoteEntity {
         return ChatRemoteEntity(

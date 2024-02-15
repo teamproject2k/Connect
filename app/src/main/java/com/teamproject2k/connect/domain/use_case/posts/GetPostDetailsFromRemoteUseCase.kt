@@ -1,7 +1,7 @@
 package com.teamproject2k.connect.domain.use_case.posts
 
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IPostRepository
 import javax.inject.Inject
 

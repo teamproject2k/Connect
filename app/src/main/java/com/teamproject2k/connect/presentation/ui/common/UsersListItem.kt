@@ -8,13 +8,13 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 
 @Composable
-fun UsersListItem(usersBean: UsersBean, onClick: () -> Unit) {
+fun UsersListItem(userBean: UserBean, onClick: () -> Unit) {
     Column {
         UserDetailsSection(
-            user = usersBean,
+            user = userBean,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {

@@ -5,7 +5,6 @@ import com.teamproject2k.connect.data.models.post.PostLocalEntity
 import com.teamproject2k.connect.data.models.post.PostRemoteEntity
 import kotlinx.parcelize.Parcelize
 
-
 @Parcelize
 data class PostBean(
     var postFirebaseId: String,

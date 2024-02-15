@@ -70,8 +70,8 @@ import com.teamproject2k.connect.domain.enums.MessageDeleteStatusEnum
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.ChatBottomSection
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
@@ -98,7 +98,7 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun ChatDetailsScreen(
-    navigator: DestinationsNavigator, loggedInUser: UsersBean, otherUserDetails: UsersBean
+    navigator: DestinationsNavigator, loggedInUser: UserBean, otherUserDetails: UserBean
 ) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }

@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.ChildEventListener
 import com.teamproject2k.connect.domain.enums.MessageDeleteStatusEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.chat.DeleteChatFromLocalUseCase
 import com.teamproject2k.connect.domain.use_case.chat.DeleteMessageOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.chat.LiveObserveChatListOnRemoteUseCase
@@ -43,8 +43,8 @@ class ChatDetailsViewModel @Inject constructor(
 ) :
     BaseViewModel() {
 
-    lateinit var loggedInUser: UsersBean
-    lateinit var otherUser: UsersBean
+    lateinit var loggedInUser: UserBean
+    lateinit var otherUser: UserBean
 
     var isDataInitialized = false
     var listener: ChildEventListener? = null
@@ -64,7 +64,7 @@ class ChatDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
-    fun initializeData(loggedInUserDetails: UsersBean, otherUserDetails: UsersBean) {
+    fun initializeData(loggedInUserDetails: UserBean, otherUserDetails: UserBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
         sharedPreference.isChatDetailScreenOpen = true

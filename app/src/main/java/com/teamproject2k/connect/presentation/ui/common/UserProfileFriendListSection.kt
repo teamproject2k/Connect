@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.presentation.ui.destinations.CurrentUserProfileScreenDestination
 import com.teamproject2k.connect.presentation.ui.destinations.FriendsAndPendingScreenDestination
 import com.teamproject2k.connect.presentation.ui.destinations.OtherUserProfileScreenDestination
@@ -28,7 +28,7 @@ import com.teamproject2k.connect.presentation.utils.ConstantsHelper
 @Composable
 fun UserProfileFriendsListSection(
     navigator: DestinationsNavigator,
-    friendsList: List<UsersBean>?,
+    friendsList: List<UserBean>?,
     loggedInUserFirebaseId: String,
     isLoggedInUser: Boolean = false
 ) {

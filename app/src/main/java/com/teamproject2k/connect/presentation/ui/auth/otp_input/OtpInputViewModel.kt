@@ -3,9 +3,9 @@ package com.teamproject2k.connect.presentation.ui.auth.otp_input
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.auth.SendOtpUseCase
 import com.teamproject2k.connect.domain.use_case.auth.VerifyOtpUseCase
 import com.teamproject2k.connect.domain.use_case.device.UpdateDeviceIdOnLocalUseCase
@@ -56,7 +56,7 @@ class OtpInputViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val verifyOtpStateFlow: StateFlow<ResponseState<FirebaseUser?>> get() = _verifyOtpStateFlow
 
-    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
+    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UserBean?>> =
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()
 

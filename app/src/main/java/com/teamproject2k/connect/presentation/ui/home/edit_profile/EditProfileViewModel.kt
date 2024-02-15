@@ -9,9 +9,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
 import com.teamproject2k.connect.data.models.user.UsersLocalEntity
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnRemoteUseCase
@@ -37,7 +37,7 @@ class EditProfileViewModel @Inject constructor(
 ) :
     BaseViewModel() {
 
-    lateinit var userDetails: UsersBean
+    lateinit var userDetails: UserBean
     lateinit var userNameState: MutableState<String>
     lateinit var connectUserIdState: MutableState<String>
     lateinit var userBioState: MutableState<String>
@@ -61,7 +61,7 @@ class EditProfileViewModel @Inject constructor(
      *
      * @param userDetails The user details to initialize the states with.
      */
-    fun initializeData(userDetails: UsersBean) {
+    fun initializeData(userDetails: UserBean) {
         // Initialize the user details.
         this.userDetails = userDetails
 

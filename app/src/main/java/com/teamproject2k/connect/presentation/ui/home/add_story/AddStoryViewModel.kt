@@ -7,8 +7,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.StoryBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.story.AddStoryToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.story.AddStoryToRemoteUseCase

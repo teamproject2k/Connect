@@ -2,9 +2,9 @@ package com.teamproject2k.connect.presentation.ui.auth.mobile_number
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.auth.SendOtpUseCase
 import com.teamproject2k.connect.domain.use_case.device.UpdateDeviceIdOnLocalUseCase
 import com.teamproject2k.connect.domain.use_case.device.UpdateDeviceIdOnRemoteUseCase
@@ -46,7 +46,7 @@ class MobileNumberInputViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val sendOtpUIStateFlow = _sendOtpUIStateFlow.asStateFlow()
 
-    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
+    private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UserBean?>> =
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()
 

@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.CommentBean
 import com.teamproject2k.connect.domain.models.CommentWithUserBean
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.posts.AddCommentOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddLikeForCommentOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddLikeOnRemoteUseCase
@@ -87,7 +87,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deletePostStateFlow = _deletePostStateFlow.asStateFlow()
 
-    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow = _getAllCommentsStateFlow.asStateFlow()
 
@@ -103,7 +103,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
-    fun initialize(context: Context, post: PostBean, loggedInUsersBean: UsersBean) {
+    fun initialize(context: Context, post: PostBean, loggedInUserBean: UserBean) {
         this.post = post
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
         val postVisibility =
@@ -112,9 +112,9 @@ class PostDetailsViewModel @Inject constructor(
             currentPostVisibilityState = mutableStateOf(postVisibility)
         }
         isPostLikedByLoggedInUserState =
-            mutableStateOf(post.likedBy.contains(loggedInUsersBean.firebaseUserId))
+            mutableStateOf(post.likedBy.contains(loggedInUserBean.firebaseUserId))
         isPostSavedByLoggedInUserState =
-            mutableStateOf(loggedInUsersBean.savedPosts.contains(post.postFirebaseId))
+            mutableStateOf(loggedInUserBean.savedPosts.contains(post.postFirebaseId))
         isDataInitialized = true
     }
 
@@ -171,18 +171,18 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun savePost(loggedInUsersBean: UsersBean) {
+    fun savePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
                     savePostOnRemoteUseCase(
-                        loggedInUsersBean.firebaseUserId,
+                        loggedInUserBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.add(post.postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.add(post.postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = true
                     }
@@ -198,18 +198,18 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun unSavePost(loggedInUsersBean: UsersBean) {
+    fun unSavePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
                     unSavePostFromRemoteUseCase(
-                        loggedInUsersBean.firebaseUserId,
+                        loggedInUserBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.remove(post.postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = false
                     }
@@ -243,7 +243,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun addComment(loggedInUser: UsersBean) {
+    fun addComment(loggedInUser: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()

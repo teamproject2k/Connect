@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.enums.MessageDeleteStatusEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.chat.SendMessageToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
@@ -35,8 +35,8 @@ class AddMediaViewModel @Inject constructor(
     private val sendFCMUseCase: SendFCMUseCase
 ) : BaseViewModel() {
 
-    lateinit var loggedInUser: UsersBean
-    lateinit var otherUser: UsersBean
+    lateinit var loggedInUser: UserBean
+    lateinit var otherUser: UserBean
 
     var isDataInitialized = false
 
@@ -58,8 +58,8 @@ class AddMediaViewModel @Inject constructor(
      */
     fun initializeData(
         message: String,
-        loggedInUserDetails: UsersBean,
-        otherUserDetails: UsersBean,
+        loggedInUserDetails: UserBean,
+        otherUserDetails: UserBean,
         repliedOnChatMedia: ChatBean?
     ) {
         // Assigning the provided user details and message to the respective variables.

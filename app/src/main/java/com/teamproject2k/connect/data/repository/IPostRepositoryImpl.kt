@@ -13,8 +13,8 @@ import com.teamproject2k.connect.domain.models.CommentBean
 import com.teamproject2k.connect.domain.models.CommentWithUserBean
 import com.teamproject2k.connect.domain.models.PostBean
 import com.teamproject2k.connect.domain.models.PostWithUserDetailsBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IPostRepository
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
@@ -151,7 +151,7 @@ class IPostRepositoryImpl @Inject constructor(
     ): ResponseState<List<PostWithUserDetailsBean>> {
         val postsWithUsersList = arrayListOf<PostWithUserDetailsBean>()
         val postList = arrayListOf<PostBean>()
-        val usersList = arrayListOf<UsersBean>()
+        val usersList = arrayListOf<UserBean>()
         val loggedInUser: UserRemoteEntity?
         return try {
             val loggedInUserDocument =
@@ -398,7 +398,7 @@ class IPostRepositoryImpl @Inject constructor(
                 .await()
             val parentChildMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
             val commentList = arrayListOf<CommentBean>()
-            val userList = arrayListOf<UsersBean>()
+            val userList = arrayListOf<UserBean>()
             val loggedInUserDocument = fireStore.collection(FirebaseConstants.USER_KEY)
                 .document(loggedInUserFirebaseId).get().await()
             val loggedInUser = loggedInUserDocument.toObject(UserRemoteEntity::class.java)

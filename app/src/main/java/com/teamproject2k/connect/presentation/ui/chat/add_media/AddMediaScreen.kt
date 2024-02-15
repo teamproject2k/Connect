@@ -36,8 +36,8 @@ import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.ChatBottomSection
 import com.teamproject2k.connect.presentation.ui.common.GetPlayerView
@@ -56,8 +56,8 @@ fun AddMediaScreen(
     navigator: DestinationsNavigator,
     message: String,
     mediaData: MediaData,
-    loggedInUser: UsersBean,
-    otherUsersBean: UsersBean,
+    loggedInUser: UserBean,
+    otherUserBean: UserBean,
     repliedOnChatMedia: ChatBean?
 ) {
     val viewModel: AddMediaViewModel = hiltViewModel()
@@ -66,7 +66,7 @@ fun AddMediaScreen(
     val snackBarHostState = remember { SnackbarHostState() }
 
     if (!viewModel.isDataInitialized) {
-        viewModel.initializeData(message, loggedInUser, otherUsersBean, repliedOnChatMedia)
+        viewModel.initializeData(message, loggedInUser, otherUserBean, repliedOnChatMedia)
     }
     val speechRecognizerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()

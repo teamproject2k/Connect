@@ -10,8 +10,8 @@ import com.teamproject2k.connect.domain.models.StoriesWithUserBean
 import com.teamproject2k.connect.domain.models.StoryBean
 import com.teamproject2k.connect.domain.models.StorySeenByBean
 import com.teamproject2k.connect.domain.models.StorySeenTimeWithUserDetailsBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.story.AddUserToSeenListInRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.story.DeleteStoryFromLocalUseCase
 import com.teamproject2k.connect.domain.use_case.story.DeleteStoryInRemoteUseCase

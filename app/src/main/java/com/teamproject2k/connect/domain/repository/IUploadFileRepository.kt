@@ -1,7 +1,7 @@
 package com.teamproject2k.connect.domain.repository
 
 import android.net.Uri
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 
 interface IUploadFileRepository {
     /**

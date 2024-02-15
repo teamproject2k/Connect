@@ -2,7 +2,7 @@ package com.teamproject2k.connect.data.repository
 
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IUploadFileRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

@@ -2,8 +2,8 @@ package com.teamproject2k.connect.presentation.ui.home.search_user
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.user.GetAllUsersNotInListFromRemoteUseCase
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,11 +22,11 @@ class SearchUserViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    private val _searchUserStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+    private val _searchUserStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
         MutableStateFlow(ResponseState.none())
     val searchUserStateFlow = _searchUserStateFlow.asStateFlow()
 
-    fun getAllUsers(currentUser: UsersBean) {
+    fun getAllUsers(currentUser: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val fetchDetailsNotForList = arrayListOf<String>()

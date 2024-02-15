@@ -33,8 +33,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.SearchBarAndUserListUiLoading
 import com.teamproject2k.connect.presentation.ui.common.SearchUi
@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 @ChatNavGraph
 @Destination
 @Composable
-fun SearchFriendsScreen(navigator: DestinationsNavigator, loggedInUser: UsersBean) {
+fun SearchFriendsScreen(navigator: DestinationsNavigator, loggedInUser: UserBean) {
     val viewModel: SearchFriendsViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -111,7 +111,7 @@ fun SearchFriendsScreen(navigator: DestinationsNavigator, loggedInUser: UsersBea
 
 @Composable
 private fun HandleSearchFriendsState(
-    loggedInUser: UsersBean,
+    loggedInUser: UserBean,
     viewModel: SearchFriendsViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -149,17 +149,16 @@ private fun HandleSearchFriendsState(
     }
 }
 
-
 @Composable
 private fun CreateUi(
-    loggedInUser: UsersBean,
-    usersList: List<UsersBean>,
+    loggedInUser: UserBean,
+    usersList: List<UserBean>,
     navigator: DestinationsNavigator
 ) {
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
-    val filteredUserList = mutableListOf<UsersBean>()
+    val filteredUserList = mutableListOf<UserBean>()
     if (searchQuery.isBlank()) {
         filteredUserList.addAll(usersList)
     } else {
@@ -191,7 +190,7 @@ private fun CreateUi(
             items(filteredUserList, key = {
                 it.firebaseUserId
             }) { user ->
-                UsersListItem(usersBean = user) {
+                UsersListItem(userBean = user) {
                     navigator.navigate(ChatDetailsScreenDestination(loggedInUser, user))
                 }
             }

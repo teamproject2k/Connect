@@ -1,4 +1,4 @@
-package com.teamproject2k.connect.domain.network_request_response
+package com.teamproject2k.connect.domain.network_utils
 
 enum class RequestStatusEnum {
     Success,

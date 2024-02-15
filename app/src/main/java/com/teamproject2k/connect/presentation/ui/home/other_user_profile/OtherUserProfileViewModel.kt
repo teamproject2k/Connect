@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ListenerRegistration
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.use_case.posts.DeleteAllPostOfUserFromLocalUseCase
 import com.teamproject2k.connect.domain.use_case.posts.DeleteOnlyFriendsOnlyPostOfUserFromLocalUseCase
@@ -63,15 +63,15 @@ class OtherUserProfileViewModel @Inject constructor(
 
     private lateinit var liveObserveOtherUserListener: ListenerRegistration
     private lateinit var liveObserveLoggedInUserListener: ListenerRegistration
-    lateinit var otherUserState: MutableState<UsersBean>
-    lateinit var loggedInUserState: MutableState<UsersBean>
+    lateinit var otherUserState: MutableState<UserBean>
+    lateinit var loggedInUserState: MutableState<UserBean>
 
     var isDataInitialized = false
 
     val snackBarMessageState = mutableStateOf("")
     val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
 
-    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
         MutableStateFlow(ResponseState.none())
     val friendsDetailsStateFlow = _friendsDetailsStateFlow.asStateFlow()
 
@@ -111,17 +111,17 @@ class OtherUserProfileViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val unfriendAndBlockUserStateFlow = _unfriendAndBlockUserStateFlow.asStateFlow()
 
-    private val _liveObserveOtherUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+    private val _liveObserveOtherUserDetailsStateFlow: MutableStateFlow<ResponseState<UserBean>> =
         MutableStateFlow(ResponseState.none())
     val liveObserveRequiredUserDetailsStateFlow =
         _liveObserveOtherUserDetailsStateFlow.asStateFlow()
 
-    private val _liveObserveLoggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+    private val _liveObserveLoggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UserBean>> =
         MutableStateFlow(ResponseState.none())
     val liveObserveLoggedInUserDetailsStateFlow =
         _liveObserveLoggedInUserDetailsStateFlow.asStateFlow()
 
-    private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, UsersBean>>> =
+    private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Pair<UserBean, UserBean>>> =
         MutableStateFlow(ResponseState.none())
     val userDetailsStateFlow = _userDetailsStateFlow.asStateFlow()
 
@@ -131,7 +131,7 @@ class OtherUserProfileViewModel @Inject constructor(
      * @param currentUser The current user.
      * @param requestedUser The requested user.
      */
-    fun initializeData(currentUser: UsersBean, requestedUser: UsersBean) {
+    fun initializeData(currentUser: UserBean, requestedUser: UserBean) {
         // Set the current user state.
         loggedInUserState = mutableStateOf(currentUser)
 
@@ -669,7 +669,7 @@ class OtherUserProfileViewModel @Inject constructor(
      *
      * @param updatedDetails The updated details of the required user.
      */
-    fun updateOtherUser(updatedDetails: UsersBean) {
+    fun updateOtherUser(updatedDetails: UserBean) {
         // Reset the live data state.
         _liveObserveOtherUserDetailsStateFlow.value = ResponseState.none()
 
@@ -686,7 +686,7 @@ class OtherUserProfileViewModel @Inject constructor(
      *
      * @param updatedDetails The updated details of the current user.
      */
-    fun updateLoggedInUser(updatedDetails: UsersBean) {
+    fun updateLoggedInUser(updatedDetails: UserBean) {
         // Reset the live data value to none.
         _liveObserveLoggedInUserDetailsStateFlow.value = ResponseState.none()
         // Update the current user state with the updated details.

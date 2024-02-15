@@ -7,7 +7,7 @@ import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class UsersBean(
+data class UserBean(
     val firebaseUserId: String,
     val connectUserId: String,
     val fcmToken: String,

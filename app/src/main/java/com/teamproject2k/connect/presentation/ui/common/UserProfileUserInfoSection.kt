@@ -13,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 
 @Composable
-fun UserProfileUserInfoSection(userDetails: UsersBean, loggedInUserFirebaseId: String) {
+fun UserProfileUserInfoSection(userDetails: UserBean, loggedInUserFirebaseId: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

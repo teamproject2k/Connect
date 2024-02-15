@@ -11,12 +11,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.teamproject2k.connect.R
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 
 @Composable
 fun UserProfileFriendItem(
     modifier: Modifier = Modifier,
-    friendDetails: UsersBean?,
+    friendDetails: UserBean?,
     showShimmer: Boolean = false,
     onClick: () -> Unit = {}
 ) {

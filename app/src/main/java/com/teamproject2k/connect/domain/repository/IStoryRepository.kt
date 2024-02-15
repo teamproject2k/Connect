@@ -3,7 +3,7 @@ package com.teamproject2k.connect.domain.repository
 import com.teamproject2k.connect.domain.models.StoriesWithUserBean
 import com.teamproject2k.connect.domain.models.StoryBean
 import com.teamproject2k.connect.domain.models.StorySeenTimeWithUserDetailsBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 
 interface IStoryRepository {
     suspend fun addStoryToRemote(story: StoryBean): ResponseState<String>

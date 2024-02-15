@@ -52,7 +52,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.ui.common.AppOutlinedTextField
 import com.teamproject2k.connect.presentation.ui.common.LoaderButton

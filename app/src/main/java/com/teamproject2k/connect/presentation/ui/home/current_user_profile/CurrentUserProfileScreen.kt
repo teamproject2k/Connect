@@ -48,8 +48,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.base.BaseActivity
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
@@ -141,7 +141,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
 
 @Composable
 private fun ProfileScreen(
-    loggedInUserDetails: UsersBean,
+    loggedInUserDetails: UserBean,
     viewModel: CurrentUserProfileViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -161,7 +161,7 @@ private fun ProfileScreen(
 }
 
 @Composable
-private fun ImageSection(loggedInUserDetails: UsersBean, navigator: DestinationsNavigator) {
+private fun ImageSection(loggedInUserDetails: UserBean, navigator: DestinationsNavigator) {
     var isProfilePhotoExpanded by remember {
         mutableStateOf(false)
     }
@@ -245,7 +245,7 @@ private fun ImageSection(loggedInUserDetails: UsersBean, navigator: Destinations
 @Composable
 private fun HandleFriendListSectionState(
     viewModel: CurrentUserProfileViewModel,
-    userDetails: UsersBean,
+    userDetails: UserBean,
     navigator: DestinationsNavigator
 ) {
     val friendsDetailsState = viewModel.friendsDetailsStateFlow.collectAsState().value
@@ -292,7 +292,7 @@ private fun HandleFriendListSectionState(
 private fun HandlePostListSectionState(
     viewModel: CurrentUserProfileViewModel,
     navigator: DestinationsNavigator,
-    userDetails: UsersBean,
+    userDetails: UserBean,
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {

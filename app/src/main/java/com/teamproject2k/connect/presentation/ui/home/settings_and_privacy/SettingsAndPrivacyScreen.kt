@@ -51,8 +51,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.base.BaseActivity
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
@@ -81,7 +81,6 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
-
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: SettingsAndPrivacyViewModel = hiltViewModel()
     val context = LocalContext.current
@@ -261,7 +260,7 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun PrivacySection(
+private fun PrivacySection(
     showPrivacyDropdownSection: Boolean,
     updateShowPrivacyDropdownSection: () -> Unit
 ) {
@@ -324,7 +323,7 @@ private fun SettingsAndPrivacySectionWithVisibilityItem(
 private fun GenderVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
-    userDetails: UsersBean,
+    userDetails: UserBean,
     context: Context,
     onDismissRequest: () -> Unit
 ) {
@@ -350,7 +349,7 @@ private fun GenderVisibilityScopeBottomSheet(
 private fun DobVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
-    userDetails: UsersBean,
+    userDetails: UserBean,
     context: Context,
     onDismissRequest: () -> Unit
 ) {
@@ -376,7 +375,7 @@ private fun DobVisibilityScopeBottomSheet(
 private fun FriendListVisibilityScopeBottomSheet(
     modifier: Modifier,
     viewModel: SettingsAndPrivacyViewModel,
-    userDetails: UsersBean,
+    userDetails: UserBean,
     context: Context,
     onDismissRequest: () -> Unit
 ) {
@@ -402,7 +401,7 @@ private fun FriendListVisibilityScopeBottomSheet(
 }
 
 @Composable
-fun HandleUpdateGenderVisibilityState(
+private fun HandleUpdateGenderVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context
@@ -449,7 +448,7 @@ fun HandleUpdateGenderVisibilityState(
 }
 
 @Composable
-fun HandleUpdateDobVisibilityState(
+private fun HandleUpdateDobVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context
@@ -496,7 +495,7 @@ fun HandleUpdateDobVisibilityState(
 }
 
 @Composable
-fun HandleUpdateFriendListVisibilityState(
+private fun HandleUpdateFriendListVisibilityState(
     viewModel: SettingsAndPrivacyViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     context: Context

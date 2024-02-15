@@ -4,9 +4,9 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.user.GetLoggedInUserFriendListFromRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.GetLoggedInUserReceivedFriendRequestListFromRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserOnLocalUseCase
@@ -32,11 +32,11 @@ class FriendsAndPendingViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-    private val _getFriendsListStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
+    private val _getFriendsListStateFlow: MutableStateFlow<ResponseState<Pair<UserBean, List<UserBean>>>> =
         MutableStateFlow(ResponseState.none())
     val getFriendsListStateFlow = _getFriendsListStateFlow.asStateFlow()
 
-    private val _getPendingFriendRequestListStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
+    private val _getPendingFriendRequestListStateFlow: MutableStateFlow<ResponseState<Pair<UserBean, List<UserBean>>>> =
         MutableStateFlow(ResponseState.none())
     val getPendingFriendRequestListStateFlow = _getPendingFriendRequestListStateFlow.asStateFlow()
 

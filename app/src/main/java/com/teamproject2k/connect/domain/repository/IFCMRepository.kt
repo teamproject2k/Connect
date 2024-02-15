@@ -1,16 +1,14 @@
 package com.teamproject2k.connect.domain.repository
 
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 
 interface IFCMRepository {
-
     /**
      * Gets the Firebase Cloud Messaging (FCM) token.
      *
      * @return A [ResponseState] containing the FCM token or an error.
      */
     suspend fun getFCMToken(): ResponseState<String>
-
 
     /**
      * Sends a FCM message to a specific token.

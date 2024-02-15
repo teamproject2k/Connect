@@ -3,7 +3,7 @@ package com.teamproject2k.connect.data.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamproject2k.connect.data.local_db.AppDatabase
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IDeviceIdRepository
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes

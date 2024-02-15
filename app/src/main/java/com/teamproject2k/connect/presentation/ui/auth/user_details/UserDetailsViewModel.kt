@@ -3,9 +3,9 @@ package com.teamproject2k.connect.presentation.ui.auth.user_details
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.fcm.GetFCMTokenUseCase
 import com.teamproject2k.connect.domain.use_case.user.AddUserToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.AddUserToRemoteUseCase
@@ -72,7 +72,7 @@ class UserDetailsViewModel @Inject constructor(
                     val fcmTokenResponseState = getFCMTokenUseCase()
                     if (fcmTokenResponseState.status == RequestStatusEnum.Success && !fcmTokenResponseState.data.isNullOrBlank()) {
                         // Create a user object with the user's information.
-                        val user = UsersBean(
+                        val user = UserBean(
                             fireBaseAuth.currentUser!!.uid,
                             getUserId(
                                 lowerCaseUserNameWithoutAnyExtraSpace,

@@ -72,8 +72,8 @@ import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.CommentWithUserBean
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.DividerLightGrayAlpha40
@@ -118,7 +118,7 @@ import com.teamproject2k.connect.presentation.utils.HomeNavGraph
 fun PostDetailsScreen(
     navigator: DestinationsNavigator,
     postDetails: PostBean,
-    postedByDetails: UsersBean
+    postedByDetails: UserBean
 ) {
     val viewModel: PostDetailsViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
@@ -255,8 +255,8 @@ fun PostDetailsScreen(
 
 @Composable
 private fun PostDetails(
-    usersDetails: UsersBean,
-    loggedInUser: UsersBean,
+    usersDetails: UserBean,
+    loggedInUser: UserBean,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator,
     onBottomSheetItemClick: () -> Unit
@@ -373,7 +373,7 @@ fun PostDetailsDropDownSection(
 @Composable
 private fun PostBottomSection(
     viewModel: PostDetailsViewModel,
-    loggedInUser: UsersBean,
+    loggedInUser: UserBean,
     context: Context,
     navigator: DestinationsNavigator,
     onBottomSheetItemClick: () -> Unit
@@ -917,7 +917,7 @@ fun CommentItem(
 @Composable
 fun AddCommentSection(
     viewModel: PostDetailsViewModel,
-    loggedInUser: UsersBean
+    loggedInUser: UserBean
 ) {
     val context = LocalContext.current
     val isReply = viewModel.commentedOnState.value != null

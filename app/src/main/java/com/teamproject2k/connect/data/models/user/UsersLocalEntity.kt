@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.teamproject2k.connect.data.local_db.TableNames
 import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 
 @Entity(tableName = TableNames.USERS_TABLE_NAME)
@@ -30,7 +30,7 @@ data class UsersLocalEntity(
     val savedPosts: ArrayList<String> = arrayListOf(),
     val lastActiveAt: Long
 ) {
-    fun toUserBean(): UsersBean {
+    fun toUserBean(): UserBean {
         val friendList = mutableListOf<String>()
         val requestedFriendRequestList = mutableListOf<String>()
         val receivedFriendRequestList = mutableListOf<String>()
@@ -54,7 +54,7 @@ data class UsersLocalEntity(
                 }
             }
         }
-        return UsersBean(
+        return UserBean(
             firebaseUserId,
             connectUserId,
             fcmToken,

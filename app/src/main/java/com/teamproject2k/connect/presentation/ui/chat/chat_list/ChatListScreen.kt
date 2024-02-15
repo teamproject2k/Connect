@@ -54,8 +54,8 @@ import com.teamproject2k.connect.domain.enums.MediaStateChangeEnum
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatWithUserAndCountBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
@@ -89,7 +89,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     val snackBarHostState = remember { SnackbarHostState() }
     if (!viewModel.isDetailsInitialized) {
         val userDetails =
-            activity.intent.parcelable<UsersBean>(ConstantsHelper.USER_DETAILS_KEY)
+            activity.intent.parcelable<UserBean>(ConstantsHelper.USER_DETAILS_KEY)
         if (userDetails != null) {
             viewModel.initializeData(userDetails)
         } else {

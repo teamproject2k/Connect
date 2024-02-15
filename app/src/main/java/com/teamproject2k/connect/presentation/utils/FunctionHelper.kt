@@ -31,7 +31,7 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.ui.enums.StatusWithCurrentUserUiEnum
 import com.teamproject2k.connect.presentation.ui.models.VisibilityScope
@@ -423,35 +423,35 @@ object FunctionHelper {
     /**
      * Gets the status of the current user with the requested user.
      *
-     * @param currentUsersBean The current user's bean.
-     * @param requiredUsersBean The required user's bean.
+     * @param currentUserBean The current user's bean.
+     * @param requiredUserBean The required user's bean.
      * @return The status of the current user with the requested user.
      */
     fun getStatusWithCurrentUser(
-        currentUsersBean: UsersBean,
-        requiredUsersBean: UsersBean
+        currentUserBean: UserBean,
+        requiredUserBean: UserBean
     ): String {
         // Check if the required user is a friend of the current user.
-        if (currentUsersBean.friendList.contains(requiredUsersBean.firebaseUserId)) {
+        if (currentUserBean.friendList.contains(requiredUserBean.firebaseUserId)) {
             return StatusWithCurrentUserUiEnum.Friends.name
         }
 
         // Check if the required user has blocked the current user.
-        if (currentUsersBean.blockedUsersList.contains(requiredUsersBean.firebaseUserId)) {
+        if (currentUserBean.blockedUsersList.contains(requiredUserBean.firebaseUserId)) {
             return StatusWithCurrentUserUiEnum.BlockedByCurrentUser.name
         }
 
-        if (requiredUsersBean.blockedUsersList.contains(currentUsersBean.firebaseUserId)) {
+        if (requiredUserBean.blockedUsersList.contains(currentUserBean.firebaseUserId)) {
             return StatusWithCurrentUserUiEnum.BlockedByOtherUser.name
         }
 
         // Check if the required user has sent a friend request to the current user.
-        if (currentUsersBean.receivedFriendRequestList.contains(requiredUsersBean.firebaseUserId)) {
+        if (currentUserBean.receivedFriendRequestList.contains(requiredUserBean.firebaseUserId)) {
             return StatusWithCurrentUserUiEnum.RequestedByOtherUser.name
         }
 
         // Check if the current user has sent a friend request to the required user.
-        if (currentUsersBean.requestedFriendRequestList.contains(requiredUsersBean.firebaseUserId)) {
+        if (currentUserBean.requestedFriendRequestList.contains(requiredUserBean.firebaseUserId)) {
             return StatusWithCurrentUserUiEnum.RequestedByCurrentUser.name
         }
 

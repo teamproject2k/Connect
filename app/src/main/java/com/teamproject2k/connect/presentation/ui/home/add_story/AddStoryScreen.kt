@@ -65,7 +65,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
@@ -158,7 +158,6 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
         }
     }
 }
-
 
 @Composable
 private fun HandleAddStorySection(
@@ -415,6 +414,16 @@ private fun BottomSection(
     }
 }
 
+/**
+ * Handles the button click event for adding a story.
+ * If neither caption nor media is provided, displays a Snackbar message indicating the requirement.
+ * If network is available, initiates the upload of the user story.
+ * If network is not available, displays a Snackbar message indicating the absence of internet connection
+ * and vibrates the device.
+ * @param viewModel The AddStoryViewModel instance.
+ * @param context The context of the application.
+ * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+ */
 private fun handleButtonClick(
     viewModel: AddStoryViewModel,
     context: Context,

@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.teamproject2k.connect.R
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 
 @Composable
 fun UserDetailsSection(
-    user: UsersBean,
+    user: UserBean,
     modifier: Modifier = Modifier
 ) {
     Row(

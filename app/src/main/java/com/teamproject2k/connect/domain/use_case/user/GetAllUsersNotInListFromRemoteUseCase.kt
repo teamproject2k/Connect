@@ -1,7 +1,7 @@
 package com.teamproject2k.connect.domain.use_case.user
 
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
@@ -17,7 +17,7 @@ class GetAllUsersNotInListFromRemoteUseCase @Inject constructor(private val repo
     suspend operator fun invoke(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
-    ): ResponseState<ArrayList<UsersBean>> {
+    ): ResponseState<ArrayList<UserBean>> {
         return repository.getAllUsersNotInListFromRemote(excludeUserIdList, loggedInUserFirebaseId)
     }
 }

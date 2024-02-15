@@ -1,4 +1,4 @@
-package com.teamproject2k.connect.domain.network_request_response
+package com.teamproject2k.connect.domain.network_utils
 
 data class ResponseState<out T>(val status: RequestStatusEnum, val data: T?, val message: String?) {
     companion object {

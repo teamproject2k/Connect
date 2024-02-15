@@ -1,8 +1,8 @@
 package com.teamproject2k.connect.domain.repository
 
 import com.google.firebase.firestore.ListenerRegistration
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IUserRepository {
@@ -12,7 +12,7 @@ interface IUserRepository {
      * @param userId The user ID.
      * @return The response state.
      */
-    suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?>
+    suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UserBean?>
 
     /**
      * Gets the number of users with the given name from remote.
@@ -28,7 +28,7 @@ interface IUserRepository {
      * @param userDetails The user details.
      * @return The response state.
      */
-    suspend fun addUserToRemote(userDetails: UsersBean): ResponseState<Nothing>
+    suspend fun addUserToRemote(userDetails: UserBean): ResponseState<Nothing>
 
     /**
      * Adds the user to the local database.
@@ -36,7 +36,7 @@ interface IUserRepository {
      * @param userDetails The user details.
      * @return The row ID of the inserted row.
      */
-    suspend fun addUserToLocal(userDetails: UsersBean): Long
+    suspend fun addUserToLocal(userDetails: UserBean): Long
 
 
     /**
@@ -45,7 +45,7 @@ interface IUserRepository {
      * @param fireBaseId The user's Firebase ID.
      * @return The user details, or null if the user is not found.
      */
-    suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean?
+    suspend fun getUserDetailsFromLocal(fireBaseId: String): UserBean?
 
     /**
      * Gets user details from local database by ids from remote.
@@ -53,7 +53,7 @@ interface IUserRepository {
      * @param idList The list of user ids.
      * @return A response state containing the list of user details, or an error if the request failed.
      */
-    suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UsersBean>>
+    suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UserBean>>
 
     /**
      * Updates the user details on the remote server.
@@ -88,7 +88,7 @@ interface IUserRepository {
     suspend fun getAllUsersNotInListFromRemote(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
-    ): ResponseState<ArrayList<UsersBean>>
+    ): ResponseState<ArrayList<UserBean>>
 
     /**
      * Sends a friend request to the specified user.
@@ -207,9 +207,8 @@ interface IUserRepository {
      * @return The listener registration.
      */
     suspend fun liveObserveUserFromRemote(
-        firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
+        firebaseUserId: String, userObserverStateFlow: MutableStateFlow<ResponseState<UserBean>>
     ): ListenerRegistration
-
 
     suspend fun savePostOnRemote(
         loggedInUserFirebaseId: String,
@@ -221,7 +220,6 @@ interface IUserRepository {
         postFirebaseId: String
     ): ResponseState<Nothing>
 
-
     suspend fun updateFCMTokenOnRemote(
         loggedInUserFirebaseId: String,
         fcmToken: String
@@ -229,26 +227,21 @@ interface IUserRepository {
 
     suspend fun updateFCMTokenOnLocal(loggedInUserFirebaseId: String, updatedToken: String): Int
 
-
     suspend fun updateSavedPostOnLocal(loggedInUserFirebaseId: String, savedPost: List<String>): Int
 
-    suspend fun updateUserOnLocal(userDetails: UsersBean): Int
+    suspend fun updateUserOnLocal(userDetails: UserBean): Int
 
+    suspend fun addUserListToLocal(userList: List<UserBean>): LongArray
 
-    suspend fun addUserListToLocal(userList: List<UsersBean>): LongArray
-
-    suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UsersBean>
-
+    suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UserBean>
 
     suspend fun deleteAllUsersFromLocalExceptInList(exceptList: List<String>): Int
 
+    suspend fun getLoggedInUserReceivedFriendRequestListFromRemote(userFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>>
 
-    suspend fun getLoggedInUserReceivedFriendRequestListFromRemote(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+    suspend fun getLoggedInUserFriendListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>>
 
-    suspend fun getLoggedInUserFriendListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
+    suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>>
 
-    suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
-
-    suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>>
-
+    suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>>
 }
