@@ -16,8 +16,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.teamproject2k.connect.BuildConfig
 import com.teamproject2k.connect.data.local_db.AppDatabase
 import com.teamproject2k.connect.data.remote.IRemoteRepository
+import com.teamproject2k.connect.data.repository.IAppLocalRepositoryImpl
 import com.teamproject2k.connect.data.repository.IAuthenticationRepositoryImpl
 import com.teamproject2k.connect.data.repository.IChatRepositoryImpl
 import com.teamproject2k.connect.data.repository.IDeviceIdRepositoryImpl
@@ -26,6 +28,7 @@ import com.teamproject2k.connect.data.repository.IPostRepositoryImpl
 import com.teamproject2k.connect.data.repository.IStoryRepositoryImpl
 import com.teamproject2k.connect.data.repository.IUploadRepositoryImpl
 import com.teamproject2k.connect.data.repository.IUserRepositoryImpl
+import com.teamproject2k.connect.domain.repository.IAppLocalRepository
 import com.teamproject2k.connect.domain.repository.IAuthenticationRepository
 import com.teamproject2k.connect.domain.repository.IChatRepository
 import com.teamproject2k.connect.domain.repository.IDeviceIdRepository
@@ -48,7 +51,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-
 
     @Provides
     @Singleton
@@ -145,14 +147,26 @@ class AppModule {
 
     @Provides
     @Singleton
+    fun getIAppLocalRepository(
+        appDatabase: AppDatabase
+    ): IAppLocalRepository =
+        IAppLocalRepositoryImpl(appDatabase)
+
+    @Provides
+    @Singleton
     fun getOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
-        val chuckerInterceptor = ChuckerInterceptor.Builder(context)
-            .collector(ChuckerCollector(context))
-            .alwaysReadResponseBody(true)
-            .build()
-        return OkHttpClient.Builder()
-            .addInterceptor(chuckerInterceptor)
-            .build()
+        return if (BuildConfig.DEBUG) {
+            val chuckerInterceptor = ChuckerInterceptor.Builder(context)
+                .collector(ChuckerCollector(context))
+                .alwaysReadResponseBody(true)
+                .build()
+            OkHttpClient.Builder()
+                .addInterceptor(chuckerInterceptor)
+                .build()
+        } else {
+            OkHttpClient.Builder()
+                .build()
+        }
     }
 
     @Provides

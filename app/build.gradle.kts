@@ -12,6 +12,9 @@ plugins {
 android {
     namespace = "com.teamproject2k.connect"
     compileSdk = ConfigData.compileSdk
+    buildFeatures {
+        buildConfig = true
+    }
     packaging {
         resources {
             excludes.add("META-INF/*")

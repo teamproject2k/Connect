@@ -16,9 +16,13 @@ interface IChatMetaDataDao {
     fun getAllChatMetaDatList(): List<ChatMetaDataLocalEntity>
 
     @Query("UPDATE chat_meta_data SET lastSeenChatAt = :lastSeen WHERE chatId = :chatMetaDataId")
-    fun updateChatListLastSeen(chatMetaDataId: String, lastSeen: Long) : Int
+    fun updateChatListLastSeen(chatMetaDataId: String, lastSeen: Long): Int
 
     @Query("UPDATE chat_meta_data SET isChatDeleted = :isDeleted WHERE chatId = :chatMetaDataId")
     fun updateChatListDeleted(chatMetaDataId: String, isDeleted: Boolean)
+
+
+    @Query("DELETE FROM chat_meta_data")
+    fun deleteAllChatMetaData()
 
 }
