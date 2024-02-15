@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.chats
 
 import com.teamproject2k.connect.domain.models.ChatBean
 
+
+@Suppress("unused")
 data class ChatRemoteEntity(
     val senderId: String,
     val receiverId: String,

@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.post
 
 import com.teamproject2k.connect.domain.models.PostBean
 
+
+@Suppress("unused")
 data class PostRemoteEntity(
     val createdByUserFirebaseId: String,
     val mediaUrl: String,

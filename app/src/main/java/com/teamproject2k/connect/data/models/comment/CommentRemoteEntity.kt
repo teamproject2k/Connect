@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.comment
 
 import com.teamproject2k.connect.domain.models.CommentBean
 
+
+@Suppress("unused")
 data class CommentRemoteEntity(
     val createdAt: Long,
     val commentedBy: String,

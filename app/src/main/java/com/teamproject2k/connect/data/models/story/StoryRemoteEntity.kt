@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.story
 
 import com.teamproject2k.connect.domain.models.StoryBean
 
+
+@Suppress("unused")
 data class StoryRemoteEntity(
     val createdByUserFirebaseId: String,
     val mediaUrl: String,

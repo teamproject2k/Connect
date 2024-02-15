@@ -5,6 +5,7 @@ import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 
+@Suppress("unused")
 data class UserRemoteEntity(
     val firebaseUserId: String,
     val connectUserId: String,
