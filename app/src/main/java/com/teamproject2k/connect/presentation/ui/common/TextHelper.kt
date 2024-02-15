@@ -32,7 +32,12 @@ fun TextBold13(text: String, modifier: Modifier = Modifier, color: Color = Color
 }
 
 @Composable
-fun TextBold14(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified,alignment: TextAlign?=null) {
+fun TextBold14(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    alignment: TextAlign? = null
+) {
     Text(
         text = text,
         modifier = modifier,
@@ -44,7 +49,7 @@ fun TextBold14(text: String, modifier: Modifier = Modifier, color: Color = Color
 }
 
 @Composable
-fun TextBold16(text: String, color: Color = Color.Unspecified, modifier: Modifier = Modifier) {
+fun TextBold16(text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified) {
     Text(
         text = text,
         modifier = modifier,

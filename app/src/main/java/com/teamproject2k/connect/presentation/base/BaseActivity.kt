@@ -15,7 +15,6 @@ abstract class BaseActivity : ComponentActivity() {
     @Inject
     lateinit var sharedPreferences: SharedPreferenceHelper
 
-
     fun logout() {
         sharedPreferences.isUserDetailsEntered = false
         firebaseAuth.signOut()

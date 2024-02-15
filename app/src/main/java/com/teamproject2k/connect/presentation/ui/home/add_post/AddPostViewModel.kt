@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
 @HiltViewModel
 class AddPostViewModel @Inject constructor(
     private val uploadPostToRemoteUseCase: UploadPostToRemoteUseCase,

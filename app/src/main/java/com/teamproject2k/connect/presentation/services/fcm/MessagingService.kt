@@ -27,9 +27,7 @@ open class MessagingService : FirebaseMessagingService() {
     @Inject
     protected lateinit var sharedPreferenceHelper: SharedPreferenceHelper
 
-
     // no need to handle onNewToken as the firebase user is null after clear data so it will not send the token
-
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)

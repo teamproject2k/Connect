@@ -27,7 +27,6 @@ fun LoaderFullScreen(loadingText: String = stringResource(id = R.string.please_w
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewFullScreenLoaderDialog() {

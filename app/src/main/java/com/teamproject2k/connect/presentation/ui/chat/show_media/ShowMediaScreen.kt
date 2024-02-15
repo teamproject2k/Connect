@@ -60,7 +60,6 @@ fun ShowMediaScreen(navigator: DestinationsNavigator, mediaData: MediaData) {
                 HandleVideoSection(mediaUrl = mediaData.uri.toString())
             }
         }
-
     }
 }
 

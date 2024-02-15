@@ -74,7 +74,6 @@ import com.teamproject2k.connect.presentation.ui.models.BottomAppBarItemData
 import com.teamproject2k.connect.presentation.utils.ConstantsHelper
 import com.teamproject2k.connect.presentation.utils.FunctionHelper.showToast
 
-
 @Composable
 fun HomeActivityScreen(screenToNavigate: String) {
     val viewModel = hiltViewModel<HomeSharedViewModel>()

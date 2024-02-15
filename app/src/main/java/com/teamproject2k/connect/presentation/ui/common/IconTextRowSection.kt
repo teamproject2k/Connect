@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun IconTextRowSection(imageVector: ImageVector, text: String, onClick: () -> Unit) {
     Column {

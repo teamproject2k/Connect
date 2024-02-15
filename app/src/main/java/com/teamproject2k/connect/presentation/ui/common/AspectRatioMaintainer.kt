@@ -21,7 +21,6 @@ fun getHeightToMaintainAspectRatio(
     return singleItemHeight * noOfRows + itemsVerticalPadding * (noOfRows - 1) + verticalPadding * 2
 }
 
-
 @Composable
 fun getWidthToMaintainAspectRatio(
     horizontalPadding: Dp,

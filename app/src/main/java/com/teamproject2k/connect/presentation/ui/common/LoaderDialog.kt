@@ -18,7 +18,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.teamproject2k.connect.R
 
-
 @Composable
 fun LoaderDialog(loadingText: String = stringResource(R.string.loading)) {
     Dialog(

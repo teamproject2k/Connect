@@ -13,7 +13,6 @@ import com.teamproject2k.connect.presentation.utils.FunctionHelper
 import com.teamproject2k.connect.presentation.utils.FunctionHelper.getFileSize
 import com.teamproject2k.connect.presentation.utils.FunctionHelper.showToast
 
-
 @Composable
 fun mediaPicker(
     maxMediaSize: Long = ConstantsHelper.MAX_ALLOWED_FILE_SIZE,

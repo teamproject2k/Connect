@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
 @HiltViewModel
 class HomeSharedViewModel @Inject constructor(
     private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase,

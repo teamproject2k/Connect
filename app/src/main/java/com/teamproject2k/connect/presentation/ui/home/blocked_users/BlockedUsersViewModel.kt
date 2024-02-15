@@ -29,7 +29,6 @@ class BlockedUsersViewModel @Inject constructor(
 
     val snackBarMessageState = mutableStateOf("")
 
-
     fun getBlockedUsers(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {

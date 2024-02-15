@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.teamproject2k.connect.R
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogoutAlertDialog(onDismiss: () -> Unit) {
