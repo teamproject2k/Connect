@@ -56,4 +56,8 @@ interface IUsersDao {
     @Query("DELETE FROM users WHERE firebaseUserId NOT IN (:exceptList)")
     fun deleteAllUsersExcept(exceptList: List<String>): Int
 
+
+    @Query("DELETE FROM users")
+    fun deleteAllUsers()
+
 }

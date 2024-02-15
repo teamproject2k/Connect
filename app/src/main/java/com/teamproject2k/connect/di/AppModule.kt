@@ -18,6 +18,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.teamproject2k.connect.data.local_db.AppDatabase
 import com.teamproject2k.connect.data.remote.IRemoteRepository
+import com.teamproject2k.connect.data.repository.IAppLocalRepositoryImpl
 import com.teamproject2k.connect.data.repository.IAuthenticationRepositoryImpl
 import com.teamproject2k.connect.data.repository.IChatRepositoryImpl
 import com.teamproject2k.connect.data.repository.IDeviceIdRepositoryImpl
@@ -26,6 +27,7 @@ import com.teamproject2k.connect.data.repository.IPostRepositoryImpl
 import com.teamproject2k.connect.data.repository.IStoryRepositoryImpl
 import com.teamproject2k.connect.data.repository.IUploadRepositoryImpl
 import com.teamproject2k.connect.data.repository.IUserRepositoryImpl
+import com.teamproject2k.connect.domain.repository.IAppLocalRepository
 import com.teamproject2k.connect.domain.repository.IAuthenticationRepository
 import com.teamproject2k.connect.domain.repository.IChatRepository
 import com.teamproject2k.connect.domain.repository.IDeviceIdRepository
@@ -48,7 +50,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-
 
     @Provides
     @Singleton
@@ -142,6 +143,13 @@ class AppModule {
         appDatabase: AppDatabase
     ): IChatRepository =
         IChatRepositoryImpl(firebaseDatabase, fireStore, appDatabase)
+
+    @Provides
+    @Singleton
+    fun getIAppLocalRepository(
+        appDatabase: AppDatabase
+    ): IAppLocalRepository =
+        IAppLocalRepositoryImpl(appDatabase)
 
     @Provides
     @Singleton
