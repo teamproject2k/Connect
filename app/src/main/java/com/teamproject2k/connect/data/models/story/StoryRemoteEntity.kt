@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.story
 
 import com.teamproject2k.connect.domain.models.StoryBean
 
+
+@Suppress("unused")
 data class StoryRemoteEntity(
     val createdByUserFirebaseId: String,
     val mediaUrl: String,
@@ -15,7 +17,19 @@ data class StoryRemoteEntity(
     val videoLength: Long = 0,
     val whetherDeleted: Boolean = false
 ) {
-    constructor() : this("", "", "", 0, "", "", "", "", arrayListOf(), 0, false)
+    constructor() : this(
+        createdByUserFirebaseId = "",
+        mediaUrl = "",
+        caption = "",
+        createdAt = 0,
+        mediaType = "",
+        textColor = "",
+        textOffset = "",
+        backgroundGradientColor = "",
+        seenBy = arrayListOf(),
+        videoLength = 0,
+        whetherDeleted = false
+    )
 
     fun toStoryBean(storyId: String): StoryBean {
         return StoryBean(

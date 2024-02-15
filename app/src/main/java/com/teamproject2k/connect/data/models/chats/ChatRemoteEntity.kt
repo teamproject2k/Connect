@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.chats
 
 import com.teamproject2k.connect.domain.models.ChatBean
 
+
+@Suppress("unused")
 data class ChatRemoteEntity(
     val senderId: String,
     val receiverId: String,
@@ -13,7 +15,16 @@ data class ChatRemoteEntity(
     val mediaType: String,
     val repliedOnChatId: String? = null
 ) {
-    constructor() : this("", "", "", 0, 0, "", "", "")
+    constructor() : this(
+        senderId = "",
+        receiverId = "",
+        message = "",
+        sentAt = 0,
+        modifiedAt = 0,
+        deletedBy = "",
+        mediaUrl = "",
+        mediaType = ""
+    )
 
     fun toChatBean(firebaseId: String): ChatBean {
         return ChatBean(

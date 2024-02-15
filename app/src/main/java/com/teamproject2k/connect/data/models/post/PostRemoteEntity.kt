@@ -2,6 +2,8 @@ package com.teamproject2k.connect.data.models.post
 
 import com.teamproject2k.connect.domain.models.PostBean
 
+
+@Suppress("unused")
 data class PostRemoteEntity(
     val createdByUserFirebaseId: String,
     val mediaUrl: String,
@@ -13,7 +15,17 @@ data class PostRemoteEntity(
     val likedBy: ArrayList<String>,
     val whetherDeleted: Boolean
 ) {
-    constructor() : this("", "", "", 0, "", "", 0, arrayListOf(), false)
+    constructor() : this(
+        createdByUserFirebaseId = "",
+        mediaUrl = "",
+        caption = "",
+        createdAt = 0,
+        postVisibilityScope = "",
+        postContentType = "",
+        commentCount = 0,
+        likedBy = arrayListOf(),
+        whetherDeleted = false
+    )
 
     fun toPostBean(id: String): PostBean {
         return PostBean(

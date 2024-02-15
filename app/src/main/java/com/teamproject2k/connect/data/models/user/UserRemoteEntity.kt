@@ -5,6 +5,7 @@ import com.teamproject2k.connect.domain.models.UsersBean
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 
+@Suppress("unused")
 data class UserRemoteEntity(
     val firebaseUserId: String,
     val connectUserId: String,
@@ -26,7 +27,19 @@ data class UserRemoteEntity(
     val savedPosts: ArrayList<String> = arrayListOf(),
     val lastActiveAt: Long
 ) {
-    constructor() : this("1", "", "", "", "", "", -1, 0, 0, "", "", lastActiveAt = 0)
+    constructor() : this(
+        firebaseUserId = "1",
+        connectUserId = "",
+        fcmToken = "",
+        mobileNumber = "",
+        name = "",
+        gender = "",
+        dateOfBirth = -1,
+        createdAt = 0,
+        modifiedAt = 0,
+        currentLoggedInDeviceId = "",
+        bio = "", lastActiveAt = 0
+    )
 
     fun toUserBean(): UsersBean {
         val friendList = mutableListOf<String>()
