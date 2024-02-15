@@ -16,6 +16,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.teamproject2k.connect.BuildConfig
 import com.teamproject2k.connect.data.local_db.AppDatabase
 import com.teamproject2k.connect.data.remote.IRemoteRepository
 import com.teamproject2k.connect.data.repository.IAppLocalRepositoryImpl
@@ -154,13 +155,18 @@ class AppModule {
     @Provides
     @Singleton
     fun getOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
-        val chuckerInterceptor = ChuckerInterceptor.Builder(context)
-            .collector(ChuckerCollector(context))
-            .alwaysReadResponseBody(true)
-            .build()
-        return OkHttpClient.Builder()
-            .addInterceptor(chuckerInterceptor)
-            .build()
+        return if (BuildConfig.DEBUG) {
+            val chuckerInterceptor = ChuckerInterceptor.Builder(context)
+                .collector(ChuckerCollector(context))
+                .alwaysReadResponseBody(true)
+                .build()
+            OkHttpClient.Builder()
+                .addInterceptor(chuckerInterceptor)
+                .build()
+        } else {
+            OkHttpClient.Builder()
+                .build()
+        }
     }
 
     @Provides
