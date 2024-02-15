@@ -732,16 +732,14 @@ object FunctionHelper {
         }
     }
 
-
     fun checkAudioPermissionGranted(context: Context): Boolean {
-        return checkPermissionGranted(context, Manifest.permission.RECORD_AUDIO)
+        return Manifest.permission.RECORD_AUDIO.checkPermissionGranted(context)
     }
 
-
-    private fun checkPermissionGranted(context: Context, permission: String): Boolean {
+    private fun String.checkPermissionGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            permission
+            this
         ) == PackageManager.PERMISSION_GRANTED
     }
 }

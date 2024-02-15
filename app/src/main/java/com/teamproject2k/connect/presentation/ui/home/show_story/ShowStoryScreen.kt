@@ -223,7 +223,6 @@ fun StorySeenListSection(storySeenList: List<StorySeenTimeWithUserDetailsBean>) 
                 StorySeenListItem(it)
             }
         }
-
     }
 }
 
