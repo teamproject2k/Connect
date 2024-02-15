@@ -31,11 +31,13 @@ class UserDetailsViewModel @Inject constructor(
     private val getFCMTokenUseCase: GetFCMTokenUseCase
 ) :
     BaseViewModel() {
-    val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
-    val userNameState = mutableStateOf("")
+
     val selectedDOBState = mutableLongStateOf(-1)
+    val snackBarMessageState = mutableStateOf("")
+    val userNameState = mutableStateOf("")
     val selectedGenderState = mutableStateOf("")
+    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
+
     private val _addUserStateFlow: MutableStateFlow<ResponseState<Int>> =
         MutableStateFlow(ResponseState.none())
     val addUserStateFlow = _addUserStateFlow.asStateFlow()

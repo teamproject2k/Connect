@@ -116,8 +116,8 @@ fun ShowStoryScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    if (!viewModel.areDetailsInitialized) {
-        viewModel.init(allBeanStoriesWithUsersList, currentStoryIndex)
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(allBeanStoriesWithUsersList, currentStoryIndex)
     }
 
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {

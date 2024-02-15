@@ -20,12 +20,11 @@ class LikedByViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
 ) : BaseViewModel() {
 
+    val snackBarMessageState = mutableStateOf("")
+
     private val _getLikedByUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val getLikedByUsersStateFlow = _getLikedByUsersStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
 
     /**
      * Gets the liked by users.

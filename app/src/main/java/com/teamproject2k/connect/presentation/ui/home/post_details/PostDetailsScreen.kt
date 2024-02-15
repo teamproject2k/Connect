@@ -128,7 +128,7 @@ fun PostDetailsScreen(
         mutableStateOf(false)
     }
 
-    if (!viewModel.isInitialized) {
+    if (!viewModel.isDataInitialized) {
         viewModel.initialize(context, postDetails, homeSharedViewModel.usersDetails)
     }
 

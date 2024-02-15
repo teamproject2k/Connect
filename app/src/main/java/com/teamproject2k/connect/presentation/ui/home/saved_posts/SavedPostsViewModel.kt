@@ -50,24 +50,20 @@ class SavedPostsViewModel @Inject constructor(
 
     ) : BaseViewModel() {
 
+    val snackBarMessageState = mutableStateOf("")
+    var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetailsBean>()
+
     private val _getSavedPostsWithUsersStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val getSavedPostsWithUsersStateFlow = _getSavedPostsWithUsersStateFlow.asStateFlow()
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
 
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-
-    var postListWithUserDetailsListState = mutableStateListOf<PostWithUserDetailsBean>()
 
     fun getSavedPosts(
         loggedInUserFirebaseId: String,

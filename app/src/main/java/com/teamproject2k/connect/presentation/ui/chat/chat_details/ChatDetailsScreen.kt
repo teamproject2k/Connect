@@ -209,7 +209,7 @@ fun ChatDetailsScreen(
 }
 
 @Composable
-fun ChatListSection(
+private fun ChatListSection(
     viewModel: ChatDetailsViewModel,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
@@ -282,7 +282,7 @@ private fun ChatDetailsTopSection(
 }
 
 @Composable
-fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
+private fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
@@ -327,7 +327,7 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatBubble(
+private fun ChatBubble(
     viewModel: ChatDetailsViewModel,
     message: ChatBean,
     loggedInUserFirebaseId: String,
@@ -532,7 +532,7 @@ fun ChatBubble(
 }
 
 @Composable
-fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
+private fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
     var mediaLoadingState by remember {
         mutableStateOf("")
     }
@@ -588,7 +588,7 @@ fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
 }
 
 @Composable
-fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
+private fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
     val updateMessageState = viewModel.deleteMessageStateFlow.collectAsState().value
 
     var isExceptionHandled by remember {

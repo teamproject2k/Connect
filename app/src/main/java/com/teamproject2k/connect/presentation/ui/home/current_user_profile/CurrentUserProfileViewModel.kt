@@ -37,28 +37,25 @@ class CurrentUserProfileViewModel @Inject constructor(
     private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase
 ) : BaseViewModel() {
 
-    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
-        MutableStateFlow(ResponseState.none())
-
-    val friendsDetailsStateFlow = _friendsDetailsStateFlow.asStateFlow()
-
-    private val _loggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
-        MutableStateFlow(ResponseState.none())
-
-    val loggedInUserDetailsStateFlow = _loggedInUserDetailsStateFlow.asStateFlow()
-
-    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
-        MutableStateFlow(ResponseState.none())
-
-    val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-
     lateinit var loggedInUserDetailsState: MutableState<UsersBean>
 
     var isDataInitialized = false
 
-    fun init(loggedInUserDetails: UsersBean) {
+    val snackBarMessageState = mutableStateOf("")
+
+    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+        MutableStateFlow(ResponseState.none())
+    val friendsDetailsStateFlow = _friendsDetailsStateFlow.asStateFlow()
+
+    private val _loggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+        MutableStateFlow(ResponseState.none())
+    val loggedInUserDetailsStateFlow = _loggedInUserDetailsStateFlow.asStateFlow()
+
+    private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
+        MutableStateFlow(ResponseState.none())
+    val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
+
+    fun initializeData(loggedInUserDetails: UsersBean) {
         this.loggedInUserDetailsState = mutableStateOf(loggedInUserDetails)
         isDataInitialized = true
     }
@@ -127,7 +124,6 @@ class CurrentUserProfileViewModel @Inject constructor(
                         _loggedInUserDetailsStateFlow.value =
                             ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                     }
-
                 } else if (getUserDetailsResponse.data == null) {
                     _loggedInUserDetailsStateFlow.value =
                         ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)

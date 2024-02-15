@@ -55,19 +55,32 @@ class PostDetailsViewModel @Inject constructor(
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase
 ) : BaseViewModel() {
 
+    lateinit var post: PostBean
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
+    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
+    lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
+    lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
+
+    var isDataInitialized = false
+    var isCommentDataFetched: Boolean = false
+
+    val forceRecomposeState = mutableIntStateOf(0)
+    val getCommentListState = mutableIntStateOf(-1)
+    val commentTextState = mutableStateOf("")
+    val repliedCommentPosterConnectIdState = mutableStateOf("")
+    val isSendingCommentState = mutableStateOf(false)
+    var showDeletePostAlertDialogState = mutableStateOf(false)
+    val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
+
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
 
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
     var commentDataMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
-
-
     val snackBarMessageState = mutableStateOf("")
 
     private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
@@ -90,33 +103,6 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
-    val commentTextState = mutableStateOf("")
-
-    val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
-
-    val forceRecomposeState = mutableIntStateOf(0)
-
-    val repliedCommentPosterConnectIdState = mutableStateOf("")
-    var isInitialized = false
-
-    lateinit var post: PostBean
-
-    val isSendingCommentState = mutableStateOf(false)
-
-    lateinit var postVisibilityScopeList: List<VisibilityScope>
-
-    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
-
-    lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
-
-    lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
-
-    val getCommentListState = mutableIntStateOf(-1)
-
-    var isCommentDataFetched: Boolean = false
-
-    var showDeletePostAlertDialogState = mutableStateOf(false)
-
     fun initialize(context: Context, post: PostBean, loggedInUsersBean: UsersBean) {
         this.post = post
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
@@ -129,7 +115,7 @@ class PostDetailsViewModel @Inject constructor(
             mutableStateOf(post.likedBy.contains(loggedInUsersBean.firebaseUserId))
         isPostSavedByLoggedInUserState =
             mutableStateOf(loggedInUsersBean.savedPosts.contains(post.postFirebaseId))
-        isInitialized = true
+        isDataInitialized = true
     }
 
     fun addLikeOnPost(loggedInUserFirebaseId: String) {

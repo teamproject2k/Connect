@@ -34,31 +34,23 @@ class AddStoryViewModel @Inject constructor(
     private val addStoryToLocalUseCase: AddStoryToLocalUseCase
 ) : BaseViewModel() {
 
-    val snackBarMessageState = mutableStateOf("")
-
-    private val _uploadStoryStateFlow: MutableStateFlow<ResponseState<Nothing>> =
-        MutableStateFlow(ResponseState.none())
-
-    val uploadStoryStateFlow = _uploadStoryStateFlow.asStateFlow()
-
-    val captionTextState = mutableStateOf("")
-    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
-
-    var gradientColorList: List<List<Color>> = FunctionHelper.getStoryBackgroundColorList()
-    var storyBackgroundColorState: MutableState<List<Color>> =
-        mutableStateOf(gradientColorList[0])
-
-    var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
-
-    val captionOffsetXState = mutableFloatStateOf(0f)
-    val captionOffsetYState = mutableFloatStateOf(0f)
-
     lateinit var colorOnMediaState: MutableState<Color>
 
     var isDataInitialized = false
-
     var isFirstTimePlaced = true
+    var textColorList: List<Color> = FunctionHelper.getStoryTextColorList()
+    var gradientColorList: List<List<Color>> = FunctionHelper.getStoryBackgroundColorList()
 
+    val snackBarMessageState = mutableStateOf("")
+    val captionTextState = mutableStateOf("")
+    val captionOffsetXState = mutableFloatStateOf(0f)
+    val captionOffsetYState = mutableFloatStateOf(0f)
+    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
+    var storyBackgroundColorState: MutableState<List<Color>> = mutableStateOf(gradientColorList[0])
+
+    private val _uploadStoryStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val uploadStoryStateFlow = _uploadStoryStateFlow.asStateFlow()
 
     fun initData(textColor: Color) {
         this.colorOnMediaState = mutableStateOf(textColor)
@@ -170,5 +162,4 @@ class AddStoryViewModel @Inject constructor(
             }
         }
     }
-
 }

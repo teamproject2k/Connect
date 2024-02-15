@@ -87,7 +87,7 @@ fun CurrentUserProfileScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
 
     if (!viewModel.isDataInitialized) {
-        viewModel.init(sharedViewModel.usersDetails)
+        viewModel.initializeData(sharedViewModel.usersDetails)
     }
     var refreshing by rememberSaveable { mutableStateOf(false) }
 

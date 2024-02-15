@@ -18,11 +18,9 @@ import com.teamproject2k.connect.presentation.utils.SharedPreferenceHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 @AndroidEntryPoint
 open class MessagingService : FirebaseMessagingService() {
-
 
     @Inject
     protected lateinit var sharedPreferenceHelper: SharedPreferenceHelper
@@ -123,5 +121,4 @@ open class MessagingService : FirebaseMessagingService() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, notificationBuilder.build())
     }
-
 }

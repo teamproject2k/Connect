@@ -42,16 +42,20 @@ class OtpInputViewModel @Inject constructor(
     private val updateFcmTokenOnLocalUseCase: UpdateFcmTokenOnLocalUseCase
 ) :
     BaseViewModel() {
-    val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
-    val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTP_CHAR_COUNT))
-    val showTimerState = mutableStateOf(true)
+
     lateinit var verificationId: String
     lateinit var mobileNumber: String
     lateinit var countryCode: String
+
+    val snackBarMessageState = mutableStateOf("")
+    val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTP_CHAR_COUNT))
+    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
+    val showTimerState = mutableStateOf(true)
+
     private val _verifyOtpStateFlow: MutableStateFlow<ResponseState<FirebaseUser?>> =
         MutableStateFlow(ResponseState.none())
     val verifyOtpStateFlow: StateFlow<ResponseState<FirebaseUser?>> get() = _verifyOtpStateFlow
+
     private val _getUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean?>> =
         MutableStateFlow(ResponseState.none())
     val getUserDetailsStateFlow = _getUserDetailsStateFlow.asStateFlow()

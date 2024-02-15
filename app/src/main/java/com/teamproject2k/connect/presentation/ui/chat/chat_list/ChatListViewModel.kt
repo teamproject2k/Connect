@@ -34,20 +34,18 @@ class ChatListViewModel @Inject constructor(
 
 ) : BaseViewModel() {
 
+    lateinit var loggedInUserDetails: UsersBean
+
+    private var isChatListFetched: Boolean = false
+    var isDetailsInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
 
     private val _getChatListStateFlow: MutableStateFlow<ResponseState<MutableList<ChatWithUserAndCountBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val getChatListStateFlow = _getChatListStateFlow.asStateFlow()
 
-    var isDetailsInitialized = false
-    lateinit var loggedInUserDetails: UsersBean
-
-
-    private var isChatListFetched: Boolean = false
-
-    fun initData(loggedInUserDetails: UsersBean) {
+    fun initializeData(loggedInUserDetails: UsersBean) {
         this.loggedInUserDetails = loggedInUserDetails
         isDetailsInitialized = true
     }
@@ -98,5 +96,4 @@ class ChatListViewModel @Inject constructor(
             }
         }
     }
-
 }

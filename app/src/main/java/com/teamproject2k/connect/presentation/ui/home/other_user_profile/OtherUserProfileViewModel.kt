@@ -61,86 +61,69 @@ class OtherUserProfileViewModel @Inject constructor(
     private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase
 ) : BaseViewModel() {
 
+    private lateinit var liveObserveOtherUserListener: ListenerRegistration
+    private lateinit var liveObserveLoggedInUserListener: ListenerRegistration
+    lateinit var otherUserState: MutableState<UsersBean>
+    lateinit var loggedInUserState: MutableState<UsersBean>
+
     var isDataInitialized = false
 
     val snackBarMessageState = mutableStateOf("")
+    val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
 
     private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val friendsDetailsStateFlow = _friendsDetailsStateFlow.asStateFlow()
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
     private val _sendFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val sendFriendRequestStateFlow = _sendFriendRequestStateFlow.asStateFlow()
 
     private val _acceptFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val acceptFriendRequestStateFlow = _acceptFriendRequestStateFlow.asStateFlow()
 
     private val _withdrawFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val withdrawFriendRequestStateFlow = _withdrawFriendRequestStateFlow.asStateFlow()
 
     private val _removeFriendRequestStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val removeFriendRequestStateFlow = _removeFriendRequestStateFlow.asStateFlow()
 
     private val _unBlockUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val unBlockUserStateFlow = _unBlockUserStateFlow.asStateFlow()
 
     private val _blockUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val blockUserStateFlow = _blockUserStateFlow.asStateFlow()
 
     private val _unfriendUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val unfriendUserStateFlow = _unfriendUserStateFlow.asStateFlow()
 
     private val _unfriendAndBlockUserStateFlow: MutableStateFlow<ResponseState<List<Nothing>>> =
         MutableStateFlow(ResponseState.none())
-
     val unfriendAndBlockUserStateFlow = _unfriendAndBlockUserStateFlow.asStateFlow()
 
     private val _liveObserveOtherUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
         MutableStateFlow(ResponseState.none())
-
     val liveObserveRequiredUserDetailsStateFlow =
         _liveObserveOtherUserDetailsStateFlow.asStateFlow()
 
     private val _liveObserveLoggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
         MutableStateFlow(ResponseState.none())
-
-    val liveObserveCurrentUserDetailsStateFlow =
+    val liveObserveLoggedInUserDetailsStateFlow =
         _liveObserveLoggedInUserDetailsStateFlow.asStateFlow()
 
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val userDetailsStateFlow = _userDetailsStateFlow.asStateFlow()
-
-    val statusWithCurrentUserState: MutableState<String> = mutableStateOf("")
-
-    private lateinit var liveObserveOtherUserListener: ListenerRegistration
-
-    private lateinit var liveObserveLoggedInUserListener: ListenerRegistration
-
-    lateinit var otherUserState: MutableState<UsersBean>
-
-    lateinit var loggedInUserState: MutableState<UsersBean>
 
     /**
      * Initializes the data for the profile screen.

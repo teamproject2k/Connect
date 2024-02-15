@@ -36,9 +36,8 @@ class EditProfileViewModel @Inject constructor(
     private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase,
 ) :
     BaseViewModel() {
-    private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
-        MutableStateFlow(ResponseState.none())
-    val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
+
+    lateinit var userDetails: UsersBean
     lateinit var userNameState: MutableState<String>
     lateinit var connectUserIdState: MutableState<String>
     lateinit var userBioState: MutableState<String>
@@ -46,18 +45,23 @@ class EditProfileViewModel @Inject constructor(
     lateinit var selectedGenderState: MutableState<String>
     lateinit var profilePhotoState: MutableState<MediaData?>
     lateinit var coverPhotoState: MutableState<MediaData?>
-    lateinit var userDetails: UsersBean
+
     var isProfileUri = true
+    var isDataInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
-    var isDataInitialized = false
+
+    private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
 
     /**
      * Initializes the states of the user profile.
      *
      * @param userDetails The user details to initialize the states with.
      */
-    fun init(userDetails: UsersBean) {
+    fun initializeData(userDetails: UsersBean) {
         // Initialize the user details.
         this.userDetails = userDetails
 

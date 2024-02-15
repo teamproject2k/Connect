@@ -23,12 +23,11 @@ class RequestedUsersViewModel @Inject constructor(
 
 ) : BaseViewModel() {
 
+    val snackBarMessageState = mutableStateOf("")
+
     private val _getRequestedUsersStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
-
     val getRequestedUsersStateFlow = _getRequestedUsersStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
 
     /**
      * Gets the details of the requested users.

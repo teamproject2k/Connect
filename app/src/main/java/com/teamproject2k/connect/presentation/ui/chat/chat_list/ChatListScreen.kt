@@ -91,7 +91,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
         val userDetails =
             activity.intent.parcelable<UsersBean>(ConstantsHelper.USER_DETAILS_KEY)
         if (userDetails != null) {
-            viewModel.initData(userDetails)
+            viewModel.initializeData(userDetails)
         } else {
             activity.finish()
         }
@@ -147,7 +147,7 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun HandleChatListSectionState(
+private fun HandleChatListSectionState(
     viewModel: ChatListViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -190,7 +190,6 @@ fun HandleChatListSectionState(
     }
 }
 
-
 @Composable
 private fun ChatListLoading() {
     LazyColumn {
@@ -199,7 +198,6 @@ private fun ChatListLoading() {
         }
     }
 }
-
 
 @Composable
 private fun ChatListLoadingItem() {

@@ -203,7 +203,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {
-    val liveObserverState = viewModel.liveObserveCurrentUserDetailsStateFlow.collectAsState().value
+    val liveObserverState = viewModel.liveObserveLoggedInUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
         RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data

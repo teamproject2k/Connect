@@ -36,10 +36,11 @@ class MobileNumberInputViewModel @Inject constructor(
     private val updateFcmTokenOnLocalUseCase: UpdateFcmTokenOnLocalUseCase
 ) :
     BaseViewModel() {
+
     val userMobileNumberState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
-    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
     val selectedCountryCodeState = mutableStateOf("+91")
+    val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
 
     private val _sendOtpUIStateFlow: MutableStateFlow<ResponseState<Pair<String, String>>> =
         MutableStateFlow(ResponseState.none())

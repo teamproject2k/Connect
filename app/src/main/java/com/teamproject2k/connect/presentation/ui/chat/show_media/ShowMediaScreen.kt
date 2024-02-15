@@ -64,7 +64,7 @@ fun ShowMediaScreen(navigator: DestinationsNavigator, mediaData: MediaData) {
 }
 
 @Composable
-fun HandleVideoSection(mediaUrl: String) {
+private fun HandleVideoSection(mediaUrl: String) {
     var currentVideoState by remember {
         mutableStateOf(MediaStateChangeEnum.Loading.name)
     }
@@ -88,7 +88,7 @@ fun HandleVideoSection(mediaUrl: String) {
 }
 
 @Composable
-fun HandleImageSection(mediaUrl: String) {
+private fun HandleImageSection(mediaUrl: String) {
     var currentImageState by remember {
         mutableStateOf(MediaStateChangeEnum.Loading.name)
     }

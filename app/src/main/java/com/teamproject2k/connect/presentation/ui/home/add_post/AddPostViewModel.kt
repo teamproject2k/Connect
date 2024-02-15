@@ -31,13 +31,16 @@ class AddPostViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
     private val addPostToLocalUseCase: AddPostToLocalUseCase
 ) : BaseViewModel() {
-    val captionTextState = mutableStateOf("")
-    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
-    lateinit var postVisibilityScopeList: List<VisibilityScope>
 
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
+
     var isFirstTimeSetup = true
+
+    val captionTextState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
+    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
+
     private val _uploadPostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val uploadPostStateFlow: StateFlow<ResponseState<Nothing>> get() = _uploadPostStateFlow

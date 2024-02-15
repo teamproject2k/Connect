@@ -309,7 +309,6 @@ private fun HandleAddUserState(
     }
 }
 
-
 /**
  * Handles the button click event in the [UserDetailsScreen].
  *

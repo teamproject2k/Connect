@@ -22,12 +22,11 @@ class BlockedUsersViewModel @Inject constructor(
     private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase
 ) : BaseViewModel() {
 
+    val snackBarMessageState = mutableStateOf("")
+
     private val _getBlockedUsersStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
-
     val getBlockedUsersStateFlow = _getBlockedUsersStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
 
     fun getBlockedUsers(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.

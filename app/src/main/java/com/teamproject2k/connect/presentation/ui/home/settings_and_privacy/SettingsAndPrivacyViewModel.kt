@@ -28,12 +28,17 @@ class SettingsAndPrivacyViewModel @Inject constructor(
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
     private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase
 ) : BaseViewModel() {
+
     lateinit var genderVisibilityScopeList: List<VisibilityScope>
     lateinit var dobVisibilityScopeList: List<VisibilityScope>
     lateinit var friendListVisibilityScopeList: List<VisibilityScope>
     lateinit var genderVisibilityState: MutableState<VisibilityScope>
     lateinit var dobVisibilityState: MutableState<VisibilityScope>
     lateinit var friendListVisibilityState: MutableState<VisibilityScope>
+
+    var isFirstTimeSetup = true
+
+    val snackBarMessageState = mutableStateOf("")
 
     private val _updateGenderVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
@@ -46,9 +51,6 @@ class SettingsAndPrivacyViewModel @Inject constructor(
     private val _updateFriendListVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
     val updateFriendListVisibilityStateFlow = _updateFriendListVisibilityStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-    var isFirstTimeSetup = true
 
     /**
      * Sets up the data for the user details screen.

@@ -28,20 +28,17 @@ class FriendsAndPendingViewModel @Inject constructor(
 
     lateinit var selectedTabIndexState: MutableIntState
 
+    var isDataInitialized: Boolean = false
+
+    val snackBarMessageState = mutableStateOf("")
+
     private val _getFriendsListStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
-
     val getFriendsListStateFlow = _getFriendsListStateFlow.asStateFlow()
 
     private val _getPendingFriendRequestListStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
         MutableStateFlow(ResponseState.none())
-
     val getPendingFriendRequestListStateFlow = _getPendingFriendRequestListStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-
-    var isDataInitialized: Boolean = false
-
 
     fun initializeData(defaultSelectedTab: Int) {
         selectedTabIndexState = mutableIntStateOf(defaultSelectedTab)

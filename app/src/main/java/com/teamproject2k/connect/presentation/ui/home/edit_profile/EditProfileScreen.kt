@@ -98,7 +98,7 @@ fun EditProfileScreen(
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.init(sharedViewModel.usersDetails)
+        viewModel.initializeData(sharedViewModel.usersDetails)
     }
     val context = LocalContext.current
     val imageResultLauncher =

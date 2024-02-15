@@ -169,7 +169,7 @@ private fun MediaSection(
 }
 
 @Composable
-fun HandleSendMessageState(viewModel: AddMediaViewModel, navigator: DestinationsNavigator) {
+private fun HandleSendMessageState(viewModel: AddMediaViewModel, navigator: DestinationsNavigator) {
 
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
     var isExceptionHandled by remember {

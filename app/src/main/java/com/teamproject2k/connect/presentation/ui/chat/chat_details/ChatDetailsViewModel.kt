@@ -43,15 +43,18 @@ class ChatDetailsViewModel @Inject constructor(
 ) :
     BaseViewModel() {
 
-    var isDataInitialized = false
-    var listener: ChildEventListener? = null
     lateinit var loggedInUser: UsersBean
     lateinit var otherUser: UsersBean
+
+    var isDataInitialized = false
+    var listener: ChildEventListener? = null
+
     val isMessageSendingState = mutableStateOf(false)
     val snackBarMessageState = mutableStateOf("")
     val messageState = mutableStateOf("")
     val onListenerErrorOccurredState = mutableStateOf("")
     val chatListState = mutableStateListOf<ChatBean>()
+    var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
 
     private val _sendMessageStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
@@ -61,7 +64,6 @@ class ChatDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
-    var repliedOnChatState: MutableState<ChatBean?> = mutableStateOf(null)
     fun initializeData(loggedInUserDetails: UsersBean, otherUserDetails: UsersBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
@@ -120,41 +122,65 @@ class ChatDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Initiates a live observation of the chat between the logged-in user and another user on the remote server.
+     * This function sets up a listener to observe changes in the chat list and updates the UI accordingly.
+     */
     fun liveObserveChat() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                // Initiating a live observation of the chat list on the remote server.
+                // The listener observes changes in the chat list and updates the chatListState accordingly.
                 listener = liveObserveChatListOnRemoteUseCase(
                     loggedInUser.firebaseUserId,
                     otherUser.firebaseUserId,
                     chatListState
                 ) { errorMessage: String ->
+                    // Handling errors that occur during the observation process by updating onListenerErrorOccurredState.
                     onListenerErrorOccurredState.value = errorMessage
                 }
             }
         }
     }
 
+    /**
+     * Deletes a message from the remote server and updates the local database accordingly.
+     * @param deletedBy The identifier of the user who initiated the deletion.
+     * @param message The message to be deleted.
+     */
     fun deleteMessage(deletedBy: String, message: ChatBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                _deleteMessageStateFlow.value = ResponseState.loading()
-                val response =
-                    deleteMessageOnRemoteUseCase(
-                        deletedBy,
-                        message.senderId,
-                        message.receiverId,
-                        message.firebaseId
-                    )
+                _deleteMessageStateFlow.value = ResponseState.loading() // Setting loading state.
+
+                // Deleting the message from the remote server.
+                val response = deleteMessageOnRemoteUseCase(
+                    deletedBy,
+                    message.senderId,
+                    message.receiverId,
+                    message.firebaseId
+                )
+
+                // If deletion on the remote server was successful, delete the message from the local database.
                 if (response.status == RequestStatusEnum.Success) {
                     deleteChatFromLocalUseCase(message)
                 }
-                _deleteMessageStateFlow.value = response
+
+                _deleteMessageStateFlow.value = response // Setting response state.
             }
         }
     }
 
+    /**
+     * Called when the ViewModel is being cleared and will no longer be used.
+     * This function removes the live observation listener from the remote server
+     * and updates the status indicating whether the chat detail screen is open in shared preferences.
+     */
     override fun onCleared() {
+        // Removing the live observation listener from the remote server, if it exists.
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
+
+        // Updating the status indicating whether the chat detail screen is open in shared preferences.
         sharedPreference.isChatDetailScreenOpen = false
     }
 }

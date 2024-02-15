@@ -20,12 +20,11 @@ class SearchUserViewModel @Inject constructor(
     private val getAllUsersNotInListFromRemoteUseCase: GetAllUsersNotInListFromRemoteUseCase
 ) : BaseViewModel() {
 
+    val snackBarMessageState = mutableStateOf("")
+
     private val _searchUserStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val searchUserStateFlow = _searchUserStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
 
     fun getAllUsers(currentUser: UsersBean) {
         viewModelScope.launch {

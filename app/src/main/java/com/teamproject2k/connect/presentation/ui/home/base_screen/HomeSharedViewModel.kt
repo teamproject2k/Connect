@@ -29,18 +29,18 @@ class HomeSharedViewModel @Inject constructor(
     private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
 ) :
     BaseViewModel() {
+
     lateinit var usersDetails: UsersBean
+
+    val isBottomBarHiddenState = mutableStateOf(false)
+
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
 
     private val _deviceIdStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val deviceIdStateFlow: StateFlow<ResponseState<Nothing>> get() = _deviceIdStateFlow
-
-    val isBottomBarHiddenState = mutableStateOf(false)
 
     /**
      * Gets the device ID from the remote server.

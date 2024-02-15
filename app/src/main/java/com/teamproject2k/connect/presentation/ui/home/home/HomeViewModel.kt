@@ -57,34 +57,27 @@ class HomeViewModel @Inject constructor(
     private val deleteAllStoriesFromLocalUseCase: DeleteAllStoriesFromLocalUseCase
 ) : BaseViewModel() {
 
+    private var isPostListFromRemoteFetched: Boolean = false
+    private var isStoryListFetchedFromRemote: Boolean = false
+
+    val snackBarMessageState = mutableStateOf("")
+    val postListWithUsersState = mutableStateListOf<PostWithUserDetailsBean>()
+
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
     private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<ArrayList<StoriesWithUserBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val storyDetailsStateFlow = _storyDetailsStateFlow.asStateFlow()
-
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
 
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-
-    private var isPostListFromRemoteFetched: Boolean = false
-
-    private var isStoryListFetchedFromRemote: Boolean = false
-
-    val postListWithUsersState = mutableStateListOf<PostWithUserDetailsBean>()
 
     fun getStoryDetailsWithUserDetails(
         loggedInUserFirebaseId: String,

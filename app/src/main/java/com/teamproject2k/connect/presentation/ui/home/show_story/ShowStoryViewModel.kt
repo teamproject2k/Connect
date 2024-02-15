@@ -38,6 +38,17 @@ class ShowStoryViewModel @Inject constructor(
 ) :
     BaseViewModel() {
 
+    lateinit var allStoriesWithUsersList: ArrayList<StoriesWithUserBean>
+    lateinit var currentStoryIndexState: MutableIntState
+    lateinit var userStoriesIndexState: MutableIntState
+
+    var isDataInitialized = false
+
+    val snackBarMessageState = mutableStateOf("")
+    var showStorySeenListBottomSheetState = mutableStateOf(false)
+    val isDropdownMenuVisibleState = mutableStateOf(false)
+    val pauseTimerState = mutableStateOf(false)
+
     private val _getSeenListStateFlow: MutableStateFlow<ResponseState<ArrayList<StorySeenTimeWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
     val getSeenListStateFlow = _getSeenListStateFlow.asStateFlow()
@@ -49,27 +60,14 @@ class ShowStoryViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteStoryStateFlow = _deleteStoryStateFlow.asStateFlow()
 
-    val snackBarMessageState = mutableStateOf("")
-    var areDetailsInitialized = false
-
-    var showStorySeenListBottomSheetState = mutableStateOf(false)
-
-    val isDropdownMenuVisibleState = mutableStateOf(false)
-
-    lateinit var allStoriesWithUsersList: ArrayList<StoriesWithUserBean>
-    lateinit var currentStoryIndexState: MutableIntState
-    lateinit var userStoriesIndexState: MutableIntState
-
-    val pauseTimerState = mutableStateOf(false)
-
-    fun init(
+    fun initializeData(
         allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>,
         currentStoryIndex: Int
     ) {
         this.allStoriesWithUsersList = allBeanStoriesWithUsersList
         this.userStoriesIndexState = mutableIntStateOf(currentStoryIndex)
         this.currentStoryIndexState = mutableIntStateOf(0)
-        areDetailsInitialized = true
+        isDataInitialized = true
     }
 
     fun getSeenList(storyId: String, loggedInUserFirebaseId: String) {
