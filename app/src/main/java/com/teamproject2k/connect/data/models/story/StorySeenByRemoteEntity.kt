@@ -6,7 +6,7 @@ data class StorySeenByRemoteEntity(
     val seenUserId: String,
     val seenTime: Long
 ) {
-    constructor() : this("", 0)
+    constructor() : this(seenUserId = "", seenTime = 0)
 
 
     fun toStorySeenByBean(): StorySeenByBean {

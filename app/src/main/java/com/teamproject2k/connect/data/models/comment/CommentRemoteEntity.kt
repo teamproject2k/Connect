@@ -13,7 +13,17 @@ data class CommentRemoteEntity(
     val whetherDeleted: Boolean,
     val likedBy: ArrayList<String>
 ) {
-    constructor() : this(0L, "", "", "", "", "", "", false, arrayListOf())
+    constructor() : this(
+        createdAt = 0L,
+        commentedBy = "",
+        parentCommentId = "",
+        repliedOnCommentId = "",
+        repliedOnUserId = "",
+        postFirebaseId = "",
+        commentMessage = "",
+        whetherDeleted = false,
+        likedBy = arrayListOf()
+    )
 
     fun toCommentBean(commentId: String): CommentBean {
         return CommentBean(
