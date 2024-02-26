@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.enums.MessageDeleteStatusEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.chat.SendMessageToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
@@ -35,29 +35,39 @@ class AddMediaViewModel @Inject constructor(
     private val sendFCMUseCase: SendFCMUseCase
 ) : BaseViewModel() {
 
+    lateinit var loggedInUser: UserBean
+    lateinit var otherUser: UserBean
+
+    var isDataInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
     val messageState = mutableStateOf("")
-    var isDataInitialized = false
     val isMessageSendingState = mutableStateOf(false)
-    lateinit var loggedInUser: UsersBean
-    lateinit var otherUser: UsersBean
     var repliedOnChatMediaState: MutableState<ChatBean?> = mutableStateOf(null)
 
     private val _sendMessageStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val sendMessageStateFlow = _sendMessageStateFlow.asStateFlow()
 
+    /**
+     * Initializes the data required for chat interaction.
+     * @param message The message string to be displayed in the chat.
+     * @param loggedInUserDetails Details of the user who is currently logged in.
+     * @param otherUserDetails Details of the other user involved in the chat.
+     * @param repliedOnChatMedia Optional parameter representing the media (if any) that the message is a reply to.
+     */
     fun initializeData(
         message: String,
-        loggedInUserDetails: UsersBean,
-        otherUserDetails: UsersBean,
+        loggedInUserDetails: UserBean,
+        otherUserDetails: UserBean,
         repliedOnChatMedia: ChatBean?
     ) {
+        // Assigning the provided user details and message to the respective variables.
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
-        messageState.value = message
-        this.repliedOnChatMediaState.value = repliedOnChatMedia
-        isDataInitialized = true
+        messageState.value = message // Setting the message state.
+        this.repliedOnChatMediaState.value = repliedOnChatMedia // Setting the replied-on chat media state.
+        isDataInitialized = true // Marking that data has been initialized.
     }
 
     fun sendMessage(mediaData: MediaData, context: Context) {

@@ -67,7 +67,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.AppOutlinedTextField
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.LoaderButton
@@ -98,7 +98,7 @@ fun EditProfileScreen(
     val sharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val viewModel: EditProfileViewModel = hiltViewModel()
     if (!viewModel.isDataInitialized) {
-        viewModel.init(sharedViewModel.usersDetails)
+        viewModel.initializeData(sharedViewModel.usersDetails)
     }
     val context = LocalContext.current
     val imageResultLauncher =
@@ -606,18 +606,15 @@ private fun handleButtonClick(
  */
 private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
     var result = true
-    // Check if any of the required fields are empty.
     if (
         viewModel.userNameState.value.isBlank()
         || viewModel.selectedGenderState.value.isBlank()
         || viewModel.userBioState.value.isBlank()
         || viewModel.selectedDOBState.longValue == -1L
     ) {
-        // If any of the fields are empty, set the result to false.
         result = false
     }
 
-    // If all of the required fields are filled out, check if any of the values have changed.
     if (result) {
         if (
             viewModel.userNameState.value == viewModel.userDetails.name
@@ -625,23 +622,18 @@ private fun isButtonEnabled(viewModel: EditProfileViewModel): Boolean {
             && viewModel.selectedDOBState.longValue == viewModel.userDetails.dateOfBirth
             && viewModel.userBioState.value == viewModel.userDetails.bio
         ) {
-            // If none of the values have changed, set the result to false.
             result = false
         }
     }
-    // Check if the profile photo has changed.
     if (viewModel.profilePhotoState.value?.uri.toString()
             .isNotBlank() && viewModel.profilePhotoState.value?.uri.toString() != viewModel.userDetails.profilePhoto
     ) {
-        // If the profile photo has changed, set the result to true.
         result = true
     }
-    // Check if the cover photo has changed.
 
     if (viewModel.coverPhotoState.value?.uri.toString()
             .isNotBlank() && viewModel.coverPhotoState.value?.uri.toString() != viewModel.userDetails.coverPhoto
     ) {
-        // If the cover photo has changed, set the result to true.
         result = true
     }
 

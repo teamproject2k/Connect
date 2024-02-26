@@ -77,8 +77,8 @@ import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.StoriesWithUserBean
 import com.teamproject2k.connect.domain.models.StoryBean
 import com.teamproject2k.connect.domain.models.StorySeenTimeWithUserDetailsBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.DividerLightGrayAlpha50
 import com.teamproject2k.connect.presentation.ui.common.GetPlayerView
@@ -116,8 +116,8 @@ fun ShowStoryScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    if (!viewModel.areDetailsInitialized) {
-        viewModel.init(allBeanStoriesWithUsersList, currentStoryIndex)
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(allBeanStoriesWithUsersList, currentStoryIndex)
     }
 
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
@@ -162,7 +162,7 @@ fun ShowStoryScreen(
 }
 
 @Composable
-fun ShowStoryBottomSheet(viewModel: ShowStoryViewModel) {
+private fun ShowStoryBottomSheet(viewModel: ShowStoryViewModel) {
     val getSeenListState =
         viewModel.getSeenListStateFlow.collectAsState().value
     var isResponseHandled by remember {
@@ -205,7 +205,7 @@ fun ShowStoryBottomSheet(viewModel: ShowStoryViewModel) {
 }
 
 @Composable
-fun StorySeenListSection(storySeenList: List<StorySeenTimeWithUserDetailsBean>) {
+private fun StorySeenListSection(storySeenList: List<StorySeenTimeWithUserDetailsBean>) {
     LazyColumn {
         if (storySeenList.isEmpty()) {
             item {
@@ -227,7 +227,7 @@ fun StorySeenListSection(storySeenList: List<StorySeenTimeWithUserDetailsBean>) 
 }
 
 @Composable
-fun StorySeenListItem(storySeenTimeWithUserDetailsBean: StorySeenTimeWithUserDetailsBean) {
+private fun StorySeenListItem(storySeenTimeWithUserDetailsBean: StorySeenTimeWithUserDetailsBean) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
@@ -248,12 +248,11 @@ fun StorySeenListItem(storySeenTimeWithUserDetailsBean: StorySeenTimeWithUserDet
         }
         DividerLightGrayAlpha50()
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun StoryMainSection(
+private fun StoryMainSection(
     viewModel: ShowStoryViewModel,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
@@ -281,7 +280,7 @@ fun StoryMainSection(
         UserStories(
             viewModel = viewModel,
             storyList = currentStoriesWithUser.storiesList,
-            storyPoster = currentStoriesWithUser.usersBean,
+            storyPoster = currentStoriesWithUser.userBean,
             navigator = navigator,
             loggedInUserFirebaseId
         )
@@ -290,10 +289,10 @@ fun StoryMainSection(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun UserStories(
+private fun UserStories(
     viewModel: ShowStoryViewModel,
     storyList: ArrayList<StoryBean>,
-    storyPoster: UsersBean,
+    storyPoster: UserBean,
     navigator: DestinationsNavigator,
     loggedInUserFirebaseId: String
 ) {
@@ -402,7 +401,7 @@ fun UserStories(
 }
 
 @Composable
-fun StoryUi(
+private fun StoryUi(
     viewModel: ShowStoryViewModel,
     story: StoryBean,
     onMediaLoaded: (isLoaded: Boolean) -> Unit
@@ -424,7 +423,7 @@ fun StoryUi(
 
 @Composable
 private fun StoryTopSection(
-    storyPoster: UsersBean,
+    storyPoster: UserBean,
     story: StoryBean,
     context: Context,
     modifier: Modifier = Modifier,
@@ -505,7 +504,7 @@ private fun StoryTopSection(
 }
 
 @Composable
-fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel, loggedInUserFirebaseId: String) {
+private fun ShowStoryDropDownSection(viewModel: ShowStoryViewModel, loggedInUserFirebaseId: String) {
     var showDeleteStoryAlertDialog by remember {
         mutableStateOf(false)
     }
@@ -682,7 +681,7 @@ private fun ShowStoryVideo(
 }
 
 @Composable
-fun LinearIndicator(
+private fun LinearIndicator(
     modifier: Modifier,
     currentPageIndex: Int,
     progressBarIndex: Int,
@@ -731,9 +730,8 @@ fun LinearIndicator(
     )
 }
 
-
 @Composable
-fun HandleDeleteStoryState(viewModel: ShowStoryViewModel, navigator: DestinationsNavigator) {
+private fun HandleDeleteStoryState(viewModel: ShowStoryViewModel, navigator: DestinationsNavigator) {
     val deleteStoryState =
         viewModel.deleteStoryStateFlow.collectAsState().value
     var isResponseHandled by remember {

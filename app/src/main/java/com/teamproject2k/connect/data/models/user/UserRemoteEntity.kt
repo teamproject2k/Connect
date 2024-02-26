@@ -1,7 +1,7 @@
 package com.teamproject2k.connect.data.models.user
 
 import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
-import com.teamproject2k.connect.domain.models.UsersBean
+import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 
@@ -41,7 +41,7 @@ data class UserRemoteEntity(
         bio = "", lastActiveAt = 0
     )
 
-    fun toUserBean(): UsersBean {
+    fun toUserBean(): UserBean {
         val friendList = mutableListOf<String>()
         val requestedFriendRequestList = mutableListOf<String>()
         val receivedFriendRequestList = mutableListOf<String>()
@@ -65,7 +65,7 @@ data class UserRemoteEntity(
                 }
             }
         }
-        return UsersBean(
+        return UserBean(
             firebaseUserId,
             connectUserId,
             fcmToken,

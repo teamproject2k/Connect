@@ -3,9 +3,9 @@ package com.teamproject2k.connect.presentation.ui.home.base_screen
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.device.GetDeviceIdFromRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.AddUserToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.GetUserDetailsFromLocalUseCase
@@ -29,18 +29,18 @@ class HomeSharedViewModel @Inject constructor(
     private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
 ) :
     BaseViewModel() {
-    lateinit var usersDetails: UsersBean
+
+    lateinit var usersDetails: UserBean
+
+    val isBottomBarHiddenState = mutableStateOf(false)
+
     private val _userDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val userDetailsStateFlow: StateFlow<ResponseState<Nothing>> get() = _userDetailsStateFlow
 
     private val _deviceIdStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val deviceIdStateFlow: StateFlow<ResponseState<Nothing>> get() = _deviceIdStateFlow
-
-    val isBottomBarHiddenState = mutableStateOf(false)
 
     /**
      * Gets the device ID from the remote server.

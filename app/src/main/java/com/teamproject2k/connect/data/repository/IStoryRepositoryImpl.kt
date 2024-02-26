@@ -10,8 +10,8 @@ import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.teamproject2k.connect.domain.models.StoriesWithUserBean
 import com.teamproject2k.connect.domain.models.StoryBean
 import com.teamproject2k.connect.domain.models.StorySeenTimeWithUserDetailsBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IStoryRepository
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
@@ -39,9 +39,9 @@ class IStoryRepositoryImpl @Inject constructor(
             val loggedInUserDocument =
                 fireStore.collection(FirebaseConstants.USER_KEY).document(loggedInUserFirebaseId)
                     .get().await()
-            val userList = arrayListOf<UsersBean>()
+            val userList = arrayListOf<UserBean>()
             val storyList = arrayListOf<StoryBean>()
-            val userToStoryListMap = mutableMapOf<UsersBean, ArrayList<StoryBean>>()
+            val userToStoryListMap = mutableMapOf<UserBean, ArrayList<StoryBean>>()
             val loggedInUser =
                 loggedInUserDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
             if (loggedInUser != null) {

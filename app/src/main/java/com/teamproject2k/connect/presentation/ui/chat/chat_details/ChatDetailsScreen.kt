@@ -70,8 +70,8 @@ import com.teamproject2k.connect.domain.enums.MessageDeleteStatusEnum
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.ChatBottomSection
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
@@ -98,7 +98,7 @@ import kotlinx.coroutines.launch
 @Destination
 @Composable
 fun ChatDetailsScreen(
-    navigator: DestinationsNavigator, loggedInUser: UsersBean, otherUserDetails: UsersBean
+    navigator: DestinationsNavigator, loggedInUser: UserBean, otherUserDetails: UserBean
 ) {
     val viewModel: ChatDetailsViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -209,7 +209,7 @@ fun ChatDetailsScreen(
 }
 
 @Composable
-fun ChatListSection(
+private fun ChatListSection(
     viewModel: ChatDetailsViewModel,
     loggedInUserFirebaseId: String,
     navigator: DestinationsNavigator
@@ -282,7 +282,7 @@ private fun ChatDetailsTopSection(
 }
 
 @Composable
-fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
+private fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
     val sendMessageState = viewModel.sendMessageStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)
@@ -327,7 +327,7 @@ fun HandleSendMessageState(viewModel: ChatDetailsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatBubble(
+private fun ChatBubble(
     viewModel: ChatDetailsViewModel,
     message: ChatBean,
     loggedInUserFirebaseId: String,
@@ -532,7 +532,7 @@ fun ChatBubble(
 }
 
 @Composable
-fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
+private fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
     var mediaLoadingState by remember {
         mutableStateOf("")
     }
@@ -588,7 +588,7 @@ fun HandleMessageMediaSection(mediaUrl: String, mediaType: String) {
 }
 
 @Composable
-fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
+private fun HandleDeleteMessageState(viewModel: ChatDetailsViewModel) {
     val updateMessageState = viewModel.deleteMessageStateFlow.collectAsState().value
 
     var isExceptionHandled by remember {

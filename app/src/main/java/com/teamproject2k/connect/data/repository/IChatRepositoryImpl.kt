@@ -14,7 +14,7 @@ import com.teamproject2k.connect.domain.models.ChatBean
 import com.teamproject2k.connect.domain.models.ChatMetaDataBean
 import com.teamproject2k.connect.domain.models.ChatWithUserAndCountBean
 import com.teamproject2k.connect.domain.models.UserWithChatListBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IChatRepository
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.domain.utils.FirebaseConstants

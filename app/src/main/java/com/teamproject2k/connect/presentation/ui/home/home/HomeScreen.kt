@@ -65,8 +65,8 @@ import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.PostBean
 import com.teamproject2k.connect.domain.models.StoriesWithUserBean
 import com.teamproject2k.connect.domain.models.StoryBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
@@ -213,7 +213,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
 @Composable
 private fun HandleStoryDetailsWithUserDetails(
     viewModel: HomeViewModel,
-    currentUsersBean: UsersBean,
+    currentUserBean: UserBean,
     navigator: DestinationsNavigator
 ) {
     val storyDetailsWithUserDetailsState = viewModel.storyDetailsStateFlow.collectAsState().value
@@ -229,7 +229,7 @@ private fun HandleStoryDetailsWithUserDetails(
         RequestStatusEnum.Success -> {
             StoryUiSection(
                 allStoriesWithUserBeanList = storyDetailsWithUserDetailsState.data,
-                loggedInUserFirebaseId = currentUsersBean.firebaseUserId,
+                loggedInUserFirebaseId = currentUserBean.firebaseUserId,
                 navigator = navigator
             )
         }
@@ -321,7 +321,7 @@ private fun StoryItem(
     navigator: DestinationsNavigator
 ) {
     val storiesWithUser = allStoriesList[currentStoryIndex]
-    val isLoggedInUser = loggedInUserFirebaseId == storiesWithUser.usersBean.firebaseUserId
+    val isLoggedInUser = loggedInUserFirebaseId == storiesWithUser.userBean.firebaseUserId
     Column(modifier = Modifier.clickable {
         navigator.navigate(
             ShowStoryScreenDestination(
@@ -332,37 +332,16 @@ private fun StoryItem(
         )
     }, horizontalAlignment = Alignment.CenterHorizontally) {
         BreakCircularBorder(
-            storiesWithUser.usersBean.profilePhoto,
+            storiesWithUser.userBean.profilePhoto,
             parts = storiesWithUser.storiesList.size,
             getColorListFromStories(storiesWithUser.storiesList, loggedInUserFirebaseId)
         )
         SpacerHeight6()
         Text(
-            text = if (isLoggedInUser) stringResource(R.string.your_story) else storiesWithUser.usersBean.name,
+            text = if (isLoggedInUser) stringResource(R.string.your_story) else storiesWithUser.userBean.name,
             fontSize = 12.sp
         )
     }
-}
-
-private fun getColorListFromStories(
-    currentUserStories: ArrayList<StoryBean>,
-    loggedInUserFirebaseId: String
-): List<List<Color>> {
-    val colorList = mutableListOf<List<Color>>()
-    val numberOfStoriesSeen =
-        currentUserStories.count {
-            it.seenBy.map { list -> list.seenUserId }.contains(loggedInUserFirebaseId)
-        }
-
-    repeat(numberOfStoriesSeen) {
-        colorList.add(listOf(Color.Gray, Color.LightGray))
-    }
-
-    repeat(currentUserStories.size - numberOfStoriesSeen) {
-        colorList.add(listOf(Color(0xFF00668B), Color(0xff0083b3)))
-    }
-
-    return colorList.toList()
 }
 
 @Composable
@@ -409,25 +388,10 @@ private fun BreakCircularBorder(
     }
 }
 
-private fun DrawScope.drawCircularBorder(
-    brush: Brush,
-    strokeWidth: Float,
-    startAngle: Float,
-    sweepAngle: Float
-) {
-    drawArc(
-        brush = brush,
-        startAngle = startAngle,
-        sweepAngle = sweepAngle,
-        useCenter = false,
-        style = Stroke(width = strokeWidth)
-    )
-}
-
 @Composable
 private fun HandlePostDetailsWithUserDetails(
     viewModel: HomeViewModel,
-    currentUsersBean: UsersBean,
+    currentUserBean: UserBean,
     navigator: DestinationsNavigator
 ) {
     val postDetailsWithUserDetailsState = viewModel.postDetailsStateFlow.collectAsState().value
@@ -449,7 +413,7 @@ private fun HandlePostDetailsWithUserDetails(
                 isResponseHandled = true
             }
             PostListUiSection(
-                loggedInUserBean = currentUsersBean,
+                loggedInUserBean = currentUserBean,
                 navigator = navigator,
                 viewModel = viewModel
             )
@@ -484,7 +448,7 @@ private fun HandlePostDetailsWithUserDetails(
 
 @Composable
 private fun PostListUiSection(
-    loggedInUserBean: UsersBean,
+    loggedInUserBean: UserBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -509,9 +473,9 @@ private fun PostListUiSection(
 
 @Composable
 private fun PostListItem(
-    usersDetails: UsersBean,
+    usersDetails: UserBean,
     postDetails: PostBean,
-    loggedInUserBean: UsersBean,
+    loggedInUserBean: UserBean,
     viewModel: HomeViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -558,8 +522,8 @@ private fun PostListItem(
 private fun PostBottomSection(
     postDetails: PostBean,
     viewModel: HomeViewModel,
-    userDetails: UsersBean,
-    loggedInUserBean: UsersBean,
+    userDetails: UserBean,
+    loggedInUserBean: UserBean,
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
@@ -675,7 +639,6 @@ private fun PostBottomSection(
     }
 }
 
-
 @Composable
 private fun HandleLikeUnlikePostState(viewModel: HomeViewModel) {
     val likeUnlikeState = viewModel.likeUnlikePostStateFlow.collectAsState().value
@@ -764,3 +727,52 @@ private fun HandleSaveUnSavePost(viewModel: HomeViewModel) {
     }
 }
 
+/**
+ * Generates a list of color combinations based on the user's interaction with stories.
+ * This function creates color combinations for stories seen and unseen by the logged-in user.
+ * @param currentUserStories The list of stories belonging to the current user.
+ * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+ * @return A list of color combinations, where each combination represents a story's visual state.
+ */
+private fun getColorListFromStories(
+    currentUserStories: ArrayList<StoryBean>,
+    loggedInUserFirebaseId: String
+): List<List<Color>> {
+    val colorList = mutableListOf<List<Color>>()
+    val numberOfStoriesSeen =
+        currentUserStories.count {
+            it.seenBy.map { list -> list.seenUserId }.contains(loggedInUserFirebaseId)
+        }
+
+    repeat(numberOfStoriesSeen) {
+        colorList.add(listOf(Color.Gray, Color.LightGray))
+    }
+
+    repeat(currentUserStories.size - numberOfStoriesSeen) {
+        colorList.add(listOf(Color(0xFF00668B), Color(0xff0083b3)))
+    }
+
+    return colorList.toList()
+}
+
+/**
+ * Draws a circular border with the specified brush, stroke width, start angle, and sweep angle.
+ * @param brush The brush used to fill the circular border.
+ * @param strokeWidth The width of the stroke for the circular border.
+ * @param startAngle The starting angle (in degrees) of the circular border.
+ * @param sweepAngle The sweep angle (in degrees) of the circular border.
+ */
+private fun DrawScope.drawCircularBorder(
+    brush: Brush,
+    strokeWidth: Float,
+    startAngle: Float,
+    sweepAngle: Float
+) {
+    drawArc(
+        brush = brush,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        style = Stroke(width = strokeWidth)
+    )
+}

@@ -6,7 +6,7 @@ import com.teamproject2k.connect.data.remote.IRemoteRepository
 import com.teamproject2k.connect.data.utils.FCMConstantHelper
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IFCMRepository
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.utils.ConstantsHelper

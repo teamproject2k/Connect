@@ -5,8 +5,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddPostToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.posts.UploadPostToRemoteUseCase
@@ -31,13 +31,16 @@ class AddPostViewModel @Inject constructor(
     private val uploadFileToRemoteUseCase: UploadFileToRemoteUseCase,
     private val addPostToLocalUseCase: AddPostToLocalUseCase
 ) : BaseViewModel() {
-    val captionTextState = mutableStateOf("")
-    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
-    lateinit var postVisibilityScopeList: List<VisibilityScope>
 
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
+
     var isFirstTimeSetup = true
+
+    val captionTextState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
+    val selectedMediaState: MutableState<MediaData?> = mutableStateOf(null)
+
     private val _uploadPostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val uploadPostStateFlow: StateFlow<ResponseState<Nothing>> get() = _uploadPostStateFlow

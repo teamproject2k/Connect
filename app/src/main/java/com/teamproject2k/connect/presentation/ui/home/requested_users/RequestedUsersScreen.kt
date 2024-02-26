@@ -33,8 +33,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
 import com.teamproject2k.connect.presentation.ui.common.UserListLoading
@@ -162,7 +162,7 @@ fun HandleGetRequestedUsersState(
 @Composable
 private fun DisplayUsersList(
     navigator: DestinationsNavigator,
-    requestedUsersList: List<UsersBean>
+    requestedUsersList: List<UserBean>
 ) {
     if (requestedUsersList.isEmpty()) {
         Box(

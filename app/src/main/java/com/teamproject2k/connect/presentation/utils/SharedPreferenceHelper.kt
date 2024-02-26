@@ -11,11 +11,10 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
         private const val IS_CHAT_DETAIL_SCREEN_OPEN = "is_chat_detail_screen_open"
     }
 
-
     /**
      * A boolean value that indicates whether the user has entered their details.
      *
-     * @property get Returns the value of the user detail entered.
+     * @property get Returns the value of whether the user details are entered.
      * @property set Sets the value of the user detail entered.
      */
     var isUserDetailsEntered
@@ -25,7 +24,6 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
             editor.putBoolean(IS_USER_DETAILS_ENTERED, isEntered)
             editor.apply()
         }
-
 
     /**
      * A string value that represent the device id on which app is running
@@ -41,7 +39,6 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
             editor.apply()
         }
 
-
     /**
      * A string value that represent the mobile number of user
      *
@@ -56,7 +53,12 @@ class SharedPreferenceHelper @Inject constructor(private val sharedPreferences: 
             editor.apply()
         }
 
-
+    /**
+     * A boolean value that indicates whether the ChatDetailsScreen is open.
+     *
+     * @property get Returns the value of whether ChatDetailsScreen is opened.
+     * @property set Sets the value of the user detail entered.
+     */
     var isChatDetailScreenOpen: Boolean
         get() = sharedPreferences.getBoolean(IS_CHAT_DETAIL_SCREEN_OPEN, false)
         set(updatedValue) {

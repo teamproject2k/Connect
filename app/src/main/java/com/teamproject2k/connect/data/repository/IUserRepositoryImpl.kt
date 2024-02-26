@@ -12,8 +12,8 @@ import com.teamproject2k.connect.data.models.post.PostRemoteEntity
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
 import com.teamproject2k.connect.data.models.user.UsersLocalEntity
 import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.repository.IUserRepository
 import com.teamproject2k.connect.domain.utils.FirebaseConstants
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
@@ -26,7 +26,7 @@ class IUserRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase
 ) :
     IUserRepository {
-    override suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UsersBean?> {
+    override suspend fun getUserDetailsFromRemote(userId: String): ResponseState<UserBean?> {
         // Try to get the user details from the FireStore database.
         return try {
             val result =
@@ -70,7 +70,7 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToRemote(userDetails: UsersBean): ResponseState<Nothing> {
+    override suspend fun addUserToRemote(userDetails: UserBean): ResponseState<Nothing> {
         // Add the user to the remote database.
         return try {
             // Get the user's FireStore document reference.
@@ -89,22 +89,22 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addUserToLocal(userDetails: UsersBean): Long {
+    override suspend fun addUserToLocal(userDetails: UserBean): Long {
         // Add the user to the local database.
         return appDatabase.getUsersDao().insertUser(userDetails.toUserLocalEntity())
     }
 
-    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UsersBean? {
+    override suspend fun getUserDetailsFromLocal(fireBaseId: String): UserBean? {
         // Get the user details from the local database.
         return appDatabase.getUsersDao().getUserDetails(fireBaseId)?.toUserBean()
     }
 
-    override suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UsersBean>> {
+    override suspend fun getUserDetailsFromIdsFromRemote(idList: List<String>): ResponseState<List<UserBean>> {
         // Get the user details from the server for the given list of IDs.
         return try {
             val response = fireStore.collection(FirebaseConstants.USER_KEY)
                 .whereIn(UserRemoteEntity::firebaseUserId.name, idList).get().await()
-            val usersList = arrayListOf<UsersBean>()
+            val usersList = arrayListOf<UserBean>()
             response.documents.forEach { document ->
                 document.toObject(UserRemoteEntity::class.java)
                     ?.let { usersList.add(it.toUserBean()) }
@@ -164,10 +164,10 @@ class IUserRepositoryImpl @Inject constructor(
     override suspend fun getAllUsersNotInListFromRemote(
         excludeUserIdList: List<String>,
         loggedInUserFirebaseId: String
-    ): ResponseState<ArrayList<UsersBean>> {
+    ): ResponseState<ArrayList<UserBean>> {
         // Try to get the users from the FireStore database whose id is not in excludeUserIdList.
         return try {
-            val usersList = arrayListOf<UsersBean>()
+            val usersList = arrayListOf<UserBean>()
             val result = fireStore.collection(FirebaseConstants.USER_KEY)
                 .whereNotIn(UserRemoteEntity::firebaseUserId.name, excludeUserIdList)
                 .get()
@@ -703,7 +703,7 @@ class IUserRepositoryImpl @Inject constructor(
 
     override suspend fun liveObserveUserFromRemote(
         firebaseUserId: String,
-        userObserverStateFlow: MutableStateFlow<ResponseState<UsersBean>>
+        userObserverStateFlow: MutableStateFlow<ResponseState<UserBean>>
     ): ListenerRegistration {
         // Get a reference to the user document in the FireStore database.
         val userDocumentReference = fireStore.collection(FirebaseConstants.USER_KEY)
@@ -714,7 +714,7 @@ class IUserRepositoryImpl @Inject constructor(
             // If there is no error and the document exists, get the user data from the document.
             if (error == null && document != null && document.exists()) {
                 val requiredUser = document.toObject(UserRemoteEntity::class.java)
-                // If the user data is not null, convert it to a UsersBean object and emit it to the user observer state flow.
+                // If the user data is not null, convert it to a UserBean object and emit it to the user observer state flow.
                 if (requiredUser != null) {
                     userObserverStateFlow.value =
                         ResponseState.success(requiredUser.toUserBean())
@@ -838,15 +838,15 @@ class IUserRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun updateUserOnLocal(userDetails: UsersBean): Int {
+    override suspend fun updateUserOnLocal(userDetails: UserBean): Int {
         return appDatabase.getUsersDao().updateUsersDetails(userDetails.toUserLocalEntity())
     }
 
-    override suspend fun addUserListToLocal(userList: List<UsersBean>): LongArray {
+    override suspend fun addUserListToLocal(userList: List<UserBean>): LongArray {
         return appDatabase.getUsersDao().insertUserList(userList.map { it.toUserLocalEntity() })
     }
 
-    override suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UsersBean> {
+    override suspend fun getAllUsersFromIdsFromLocal(userIdList: List<String>): List<UserBean> {
         return appDatabase.getUsersDao().getAllUserFromIds(userIdList).map { it.toUserBean() }
     }
 
@@ -858,13 +858,13 @@ class IUserRepositoryImpl @Inject constructor(
     private suspend fun getUserFRBRList(
         userFirebaseId: String,
         listToGet: Int
-    ): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+    ): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return try {
             val userDocument =
                 fireStore.collection(FirebaseConstants.USER_KEY).document(userFirebaseId).get()
                     .await()
             val userBean = userDocument.toObject(UserRemoteEntity::class.java)?.toUserBean()
-            val usersList = arrayListOf<UsersBean>()
+            val usersList = arrayListOf<UserBean>()
             if (userBean != null) {
                 val listToFetch = when (listToGet) {
                     0 -> userBean.friendList
@@ -895,20 +895,20 @@ class IUserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getLoggedInUserFriendListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+    override suspend fun getLoggedInUserFriendListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(loggedInUserFirebaseId, 0)
     }
 
-    override suspend fun getLoggedInUserReceivedFriendRequestListFromRemote(userFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+    override suspend fun getLoggedInUserReceivedFriendRequestListFromRemote(userFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(userFirebaseId, 1)
     }
 
 
-    override suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+    override suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(loggedInUserFirebaseId, 2)
     }
 
-    override suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UsersBean, ArrayList<UsersBean>>> {
+    override suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(loggedInUserFirebaseId, 3)
     }
 

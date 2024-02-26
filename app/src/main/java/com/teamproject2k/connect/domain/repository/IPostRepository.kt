@@ -4,7 +4,7 @@ import com.teamproject2k.connect.domain.models.CommentBean
 import com.teamproject2k.connect.domain.models.CommentWithUserBean
 import com.teamproject2k.connect.domain.models.PostBean
 import com.teamproject2k.connect.domain.models.PostWithUserDetailsBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 
 interface IPostRepository {
     /**
@@ -14,7 +14,6 @@ interface IPostRepository {
      * @return The post details, or null if the post is not found.
      */
     suspend fun getPostDetailsFromLocal(fireBaseId: String): List<PostBean>
-
 
     suspend fun getPostDetailsWithUsersFromLocal(
         loggedInUserFirebaseId: String,
@@ -93,12 +92,10 @@ interface IPostRepository {
         loggedInUserFirebaseId: String
     ): ResponseState<MutableMap<CommentWithUserBean, ArrayList<CommentWithUserBean>>>
 
-
     suspend fun addLikeForCommentOnRemote(
         commentId: String,
         loggedInUserFirebaseId: String
     ): ResponseState<Nothing>
-
 
     suspend fun removeLikeForCommentFromRemote(
         commentId: String,
@@ -121,9 +118,7 @@ interface IPostRepository {
 
     suspend fun deleteAllPostFomLocal(): Int
 
-
     suspend fun deleteAllPostOfUserFromLocal(userFirebaseId: String): Int
-
 
     suspend fun deleteAllPostOfUserWithFriendsOnlyVisibilityFromLocal(userFirebaseId: String): Int
 }

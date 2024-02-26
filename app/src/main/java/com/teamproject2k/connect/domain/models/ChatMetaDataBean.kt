@@ -2,7 +2,6 @@ package com.teamproject2k.connect.domain.models
 
 import com.teamproject2k.connect.data.models.chats.ChatMetaDataLocalEntity
 
-
 data class ChatMetaDataBean(
     val chatId: String,
     val lastSeenChatAt: Long,

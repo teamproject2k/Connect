@@ -4,5 +4,5 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class StoriesWithUserBean(val usersBean: UsersBean, val storiesList: ArrayList<StoryBean>) :
+data class StoriesWithUserBean(val userBean: UserBean, val storiesList: ArrayList<StoryBean>) :
     Parcelable

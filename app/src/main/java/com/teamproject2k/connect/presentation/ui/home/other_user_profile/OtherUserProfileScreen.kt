@@ -67,8 +67,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
@@ -100,7 +100,7 @@ import kotlinx.coroutines.launch
 @HomeNavGraph
 @Destination
 @Composable
-fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: UsersBean) {
+fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: UserBean) {
     val viewModel: OtherUserProfileViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -203,7 +203,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {
-    val liveObserverState = viewModel.liveObserveCurrentUserDetailsStateFlow.collectAsState().value
+    val liveObserverState = viewModel.liveObserveLoggedInUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
         RequestStatusEnum.Success -> {
             val updatedDetails = liveObserverState.data
@@ -240,7 +240,7 @@ fun HandleLiveObserveOtherUsersStateFlow(viewModel: OtherUserProfileViewModel) {
 private fun ProfileScreen(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
-    userDetails: UsersBean,
+    userDetails: UserBean,
     onOptionsMenuClick: () -> Unit
 ) {
     if (viewModel.statusWithCurrentUserState.value == StatusWithCurrentUserUiEnum.BlockedByOtherUser.name) {
@@ -268,7 +268,6 @@ private fun ProfileScreen(
         }
     }
 }
-
 
 @Composable
 private fun ImageSection(
@@ -317,7 +316,6 @@ private fun ImageSection(
             contentScale = ContentScale.Crop,
             error = painterResource(id = R.drawable.ic_default_user),
             placeholder = painterResource(id = R.drawable.ic_default_user)
-
         )
         if (showOptionsMenu) {
             IconButton(onClick = {
@@ -541,7 +539,7 @@ private fun HandleFriendListSection(
 private fun HandlePostDetailsState(
     viewModel: OtherUserProfileViewModel,
     navigator: DestinationsNavigator,
-    usersBean: UsersBean,
+    userBean: UserBean,
 ) {
     val postDetailState = viewModel.postDetailsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
@@ -558,7 +556,7 @@ private fun HandlePostDetailsState(
                 navigator,
                 postDetailsList = postDetailState.data,
                 false,
-                usersBean
+                userBean
             )
         }
 
@@ -587,7 +585,6 @@ private fun HandlePostDetailsState(
         }
     }
 }
-
 
 @Composable
 private fun BottomSheetSection(

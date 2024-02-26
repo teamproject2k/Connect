@@ -2,8 +2,8 @@ package com.teamproject2k.connect.presentation.ui.home.liked_by
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.user.GetUserDetailsFromIdsFromRemoteUseCase
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,12 +20,11 @@ class LikedByViewModel @Inject constructor(
     private val getUserDetailsFromIdsFromRemoteUseCase: GetUserDetailsFromIdsFromRemoteUseCase,
 ) : BaseViewModel() {
 
-    private val _getLikedByUsersStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
-        MutableStateFlow(ResponseState.none())
-
-    val getLikedByUsersStateFlow = _getLikedByUsersStateFlow.asStateFlow()
-
     val snackBarMessageState = mutableStateOf("")
+
+    private val _getLikedByUsersStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
+        MutableStateFlow(ResponseState.none())
+    val getLikedByUsersStateFlow = _getLikedByUsersStateFlow.asStateFlow()
 
     /**
      * Gets the liked by users.

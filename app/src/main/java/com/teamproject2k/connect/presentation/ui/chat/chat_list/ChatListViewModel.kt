@@ -4,9 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.ChatMetaDataBean
 import com.teamproject2k.connect.domain.models.ChatWithUserAndCountBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.chat.AddChatMessagesListToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.chat.AddChatMetaDataListToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.chat.DeleteAllChatsFromLocalUseCase
@@ -34,20 +34,18 @@ class ChatListViewModel @Inject constructor(
 
 ) : BaseViewModel() {
 
+    lateinit var loggedInUserDetails: UserBean
+
+    private var isChatListFetched: Boolean = false
+    var isDetailsInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
 
     private val _getChatListStateFlow: MutableStateFlow<ResponseState<MutableList<ChatWithUserAndCountBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val getChatListStateFlow = _getChatListStateFlow.asStateFlow()
 
-    var isDetailsInitialized = false
-    lateinit var loggedInUserDetails: UsersBean
-
-
-    private var isChatListFetched: Boolean = false
-
-    fun initData(loggedInUserDetails: UsersBean) {
+    fun initializeData(loggedInUserDetails: UserBean) {
         this.loggedInUserDetails = loggedInUserDetails
         isDetailsInitialized = true
     }
@@ -98,5 +96,4 @@ class ChatListViewModel @Inject constructor(
             }
         }
     }
-
 }

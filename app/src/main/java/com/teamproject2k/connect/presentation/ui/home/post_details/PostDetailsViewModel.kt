@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.CommentBean
 import com.teamproject2k.connect.domain.models.CommentWithUserBean
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.posts.AddCommentOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddLikeForCommentOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddLikeOnRemoteUseCase
@@ -55,26 +55,39 @@ class PostDetailsViewModel @Inject constructor(
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase
 ) : BaseViewModel() {
 
+    lateinit var post: PostBean
+    lateinit var postVisibilityScopeList: List<VisibilityScope>
+    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
+    lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
+    lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
+
+    var isDataInitialized = false
+    var isCommentDataFetched: Boolean = false
+
+    val forceRecomposeState = mutableIntStateOf(0)
+    val getCommentListState = mutableIntStateOf(-1)
+    val commentTextState = mutableStateOf("")
+    val repliedCommentPosterConnectIdState = mutableStateOf("")
+    val isSendingCommentState = mutableStateOf(false)
+    var showDeletePostAlertDialogState = mutableStateOf(false)
+    val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
+
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
 
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
-
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
     var commentDataMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
-
-
     val snackBarMessageState = mutableStateOf("")
 
     private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val deletePostStateFlow = _deletePostStateFlow.asStateFlow()
 
-    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
+    private val _getAllCommentsStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
         MutableStateFlow(ResponseState.none())
     val getAllCommentsStateFlow = _getAllCommentsStateFlow.asStateFlow()
 
@@ -90,34 +103,7 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
-    val commentTextState = mutableStateOf("")
-
-    val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
-
-    val forceRecomposeState = mutableIntStateOf(0)
-
-    val repliedCommentPosterConnectIdState = mutableStateOf("")
-    var isInitialized = false
-
-    lateinit var post: PostBean
-
-    val isSendingCommentState = mutableStateOf(false)
-
-    lateinit var postVisibilityScopeList: List<VisibilityScope>
-
-    lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
-
-    lateinit var isPostLikedByLoggedInUserState: MutableState<Boolean>
-
-    lateinit var isPostSavedByLoggedInUserState: MutableState<Boolean>
-
-    val getCommentListState = mutableIntStateOf(-1)
-
-    var isCommentDataFetched: Boolean = false
-
-    var showDeletePostAlertDialogState = mutableStateOf(false)
-
-    fun initialize(context: Context, post: PostBean, loggedInUsersBean: UsersBean) {
+    fun initialize(context: Context, post: PostBean, loggedInUserBean: UserBean) {
         this.post = post
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
         val postVisibility =
@@ -126,10 +112,10 @@ class PostDetailsViewModel @Inject constructor(
             currentPostVisibilityState = mutableStateOf(postVisibility)
         }
         isPostLikedByLoggedInUserState =
-            mutableStateOf(post.likedBy.contains(loggedInUsersBean.firebaseUserId))
+            mutableStateOf(post.likedBy.contains(loggedInUserBean.firebaseUserId))
         isPostSavedByLoggedInUserState =
-            mutableStateOf(loggedInUsersBean.savedPosts.contains(post.postFirebaseId))
-        isInitialized = true
+            mutableStateOf(loggedInUserBean.savedPosts.contains(post.postFirebaseId))
+        isDataInitialized = true
     }
 
     fun addLikeOnPost(loggedInUserFirebaseId: String) {
@@ -185,18 +171,18 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun savePost(loggedInUsersBean: UsersBean) {
+    fun savePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
                     savePostOnRemoteUseCase(
-                        loggedInUsersBean.firebaseUserId,
+                        loggedInUserBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.add(post.postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.add(post.postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = true
                     }
@@ -212,18 +198,18 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun unSavePost(loggedInUsersBean: UsersBean) {
+    fun unSavePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
                     unSavePostFromRemoteUseCase(
-                        loggedInUsersBean.firebaseUserId,
+                        loggedInUserBean.firebaseUserId,
                         post.postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.remove(post.postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.remove(post.postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     withContext(Dispatchers.Main) {
                         isPostSavedByLoggedInUserState.value = false
                     }
@@ -257,7 +243,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    fun addComment(loggedInUser: UsersBean) {
+    fun addComment(loggedInUser: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _addCommentStateFlow.value = ResponseState.loading()

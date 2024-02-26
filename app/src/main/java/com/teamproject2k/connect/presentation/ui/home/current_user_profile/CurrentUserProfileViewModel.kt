@@ -4,9 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.PostBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.posts.AddPostListToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.posts.GetPostDetailsFromLocalUseCase
 import com.teamproject2k.connect.domain.use_case.posts.GetPostDetailsFromRemoteUseCase
@@ -37,28 +37,25 @@ class CurrentUserProfileViewModel @Inject constructor(
     private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase
 ) : BaseViewModel() {
 
-    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UsersBean>>> =
-        MutableStateFlow(ResponseState.none())
+    lateinit var loggedInUserDetailsState: MutableState<UserBean>
 
+    var isDataInitialized = false
+
+    val snackBarMessageState = mutableStateOf("")
+
+    private val _friendsDetailsStateFlow: MutableStateFlow<ResponseState<List<UserBean>>> =
+        MutableStateFlow(ResponseState.none())
     val friendsDetailsStateFlow = _friendsDetailsStateFlow.asStateFlow()
 
-    private val _loggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UsersBean>> =
+    private val _loggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<UserBean>> =
         MutableStateFlow(ResponseState.none())
-
     val loggedInUserDetailsStateFlow = _loggedInUserDetailsStateFlow.asStateFlow()
 
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
-    val snackBarMessageState = mutableStateOf("")
-
-    lateinit var loggedInUserDetailsState: MutableState<UsersBean>
-
-    var isDataInitialized = false
-
-    fun init(loggedInUserDetails: UsersBean) {
+    fun initializeData(loggedInUserDetails: UserBean) {
         this.loggedInUserDetailsState = mutableStateOf(loggedInUserDetails)
         isDataInitialized = true
     }
@@ -127,7 +124,6 @@ class CurrentUserProfileViewModel @Inject constructor(
                         _loggedInUserDetailsStateFlow.value =
                             ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                     }
-
                 } else if (getUserDetailsResponse.data == null) {
                     _loggedInUserDetailsStateFlow.value =
                         ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)

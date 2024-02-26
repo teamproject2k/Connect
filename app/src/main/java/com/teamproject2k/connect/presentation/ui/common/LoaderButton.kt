@@ -92,7 +92,6 @@ fun LoaderButton(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoaderButton() {

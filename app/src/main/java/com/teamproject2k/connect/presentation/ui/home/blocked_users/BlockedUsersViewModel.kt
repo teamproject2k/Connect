@@ -2,9 +2,9 @@ package com.teamproject2k.connect.presentation.ui.home.blocked_users
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.user.GetLoggedInUserBlockedUserListFromRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserOnLocalUseCase
 import com.teamproject2k.connect.presentation.base.BaseViewModel
@@ -22,12 +22,11 @@ class BlockedUsersViewModel @Inject constructor(
     private val updateUserOnLocalUseCase: UpdateUserOnLocalUseCase
 ) : BaseViewModel() {
 
-    private val _getBlockedUsersStateFlow: MutableStateFlow<ResponseState<Pair<UsersBean, List<UsersBean>>>> =
-        MutableStateFlow(ResponseState.none())
-
-    val getBlockedUsersStateFlow = _getBlockedUsersStateFlow.asStateFlow()
-
     val snackBarMessageState = mutableStateOf("")
+
+    private val _getBlockedUsersStateFlow: MutableStateFlow<ResponseState<Pair<UserBean, List<UserBean>>>> =
+        MutableStateFlow(ResponseState.none())
+    val getBlockedUsersStateFlow = _getBlockedUsersStateFlow.asStateFlow()
 
     fun getBlockedUsers(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.

@@ -9,9 +9,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
 import com.teamproject2k.connect.data.models.user.UsersLocalEntity
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.file.UploadFileToRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnRemoteUseCase
@@ -36,9 +36,8 @@ class EditProfileViewModel @Inject constructor(
     private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase,
 ) :
     BaseViewModel() {
-    private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
-        MutableStateFlow(ResponseState.none())
-    val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
+
+    lateinit var userDetails: UserBean
     lateinit var userNameState: MutableState<String>
     lateinit var connectUserIdState: MutableState<String>
     lateinit var userBioState: MutableState<String>
@@ -46,18 +45,23 @@ class EditProfileViewModel @Inject constructor(
     lateinit var selectedGenderState: MutableState<String>
     lateinit var profilePhotoState: MutableState<MediaData?>
     lateinit var coverPhotoState: MutableState<MediaData?>
-    lateinit var userDetails: UsersBean
+
     var isProfileUri = true
+    var isDataInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
-    var isDataInitialized = false
+
+    private val _updateUserStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val updateUserStateFlow = _updateUserStateFlow.asStateFlow()
 
     /**
      * Initializes the states of the user profile.
      *
      * @param userDetails The user details to initialize the states with.
      */
-    fun init(userDetails: UsersBean) {
+    fun initializeData(userDetails: UserBean) {
         // Initialize the user details.
         this.userDetails = userDetails
 

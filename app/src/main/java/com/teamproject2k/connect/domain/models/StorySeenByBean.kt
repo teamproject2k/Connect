@@ -5,7 +5,6 @@ import com.teamproject2k.connect.data.models.story.StorySeenByLocalEntity
 import com.teamproject2k.connect.data.models.story.StorySeenByRemoteEntity
 import kotlinx.parcelize.Parcelize
 
-
 @Parcelize
 data class StorySeenByBean(
     val seenUserId: String,

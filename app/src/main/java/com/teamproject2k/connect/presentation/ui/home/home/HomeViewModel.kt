@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.domain.models.PostBean
 import com.teamproject2k.connect.domain.models.PostWithUserDetailsBean
 import com.teamproject2k.connect.domain.models.StoriesWithUserBean
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.posts.AddLikeOnRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.posts.AddPostListToLocalUseCase
 import com.teamproject2k.connect.domain.use_case.posts.DeleteAllPostFromLocalUseCase
@@ -57,34 +57,27 @@ class HomeViewModel @Inject constructor(
     private val deleteAllStoriesFromLocalUseCase: DeleteAllStoriesFromLocalUseCase
 ) : BaseViewModel() {
 
+    private var isPostListFromRemoteFetched: Boolean = false
+    private var isStoryListFetchedFromRemote: Boolean = false
+
+    val snackBarMessageState = mutableStateOf("")
+    val postListWithUsersState = mutableStateListOf<PostWithUserDetailsBean>()
+
     private val _postDetailsStateFlow: MutableStateFlow<ResponseState<List<PostWithUserDetailsBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
     private val _storyDetailsStateFlow: MutableStateFlow<ResponseState<ArrayList<StoriesWithUserBean>>> =
         MutableStateFlow(ResponseState.none())
-
     val storyDetailsStateFlow = _storyDetailsStateFlow.asStateFlow()
-
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val likeUnlikePostStateFlow = _likeUnlikePostStateFlow.asStateFlow()
 
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<String>> =
         MutableStateFlow(ResponseState.none())
-
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
-
-    val snackBarMessageState = mutableStateOf("")
-
-    private var isPostListFromRemoteFetched: Boolean = false
-
-    private var isStoryListFetchedFromRemote: Boolean = false
-
-    val postListWithUsersState = mutableStateListOf<PostWithUserDetailsBean>()
 
     fun getStoryDetailsWithUserDetails(
         loggedInUserFirebaseId: String,
@@ -97,7 +90,7 @@ class HomeViewModel @Inject constructor(
                     val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
                     if (response.status == RequestStatusEnum.Success) {
                         val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
-                        val usersList = response.data?.map { it.usersBean } ?: emptyList()
+                        val usersList = response.data?.map { it.userBean } ?: emptyList()
                         deleteAllStoriesFromLocalUseCase()
                         if (addAllStoriesToLocalUseCase(storyList).size == storyList.size) {
                             addUserListToLocalUseCase(usersList)
@@ -233,15 +226,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun savePost(loggedInUsersBean: UsersBean, postFirebaseId: String, onUpdate: () -> Unit) {
+    fun savePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
-                    savePostOnRemoteUseCase(loggedInUsersBean.firebaseUserId, postFirebaseId)
+                    savePostOnRemoteUseCase(loggedInUserBean.firebaseUserId, postFirebaseId)
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.add(postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.add(postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {
@@ -255,18 +248,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun unSavePost(loggedInUsersBean: UsersBean, postFirebaseId: String, onUpdate: () -> Unit) {
+    fun unSavePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 _saveUnSavePostStateFlow.value = ResponseState.loading()
                 val responseState =
                     unSavePostFromRemoteUseCase(
-                        loggedInUsersBean.firebaseUserId,
+                        loggedInUserBean.firebaseUserId,
                         postFirebaseId
                     )
                 if (responseState.status == RequestStatusEnum.Success) {
-                    loggedInUsersBean.savedPosts.remove(postFirebaseId)
-                    updateUserOnLocalUseCase(loggedInUsersBean)
+                    loggedInUserBean.savedPosts.remove(postFirebaseId)
+                    updateUserOnLocalUseCase(loggedInUserBean)
                     onUpdate()
                     _saveUnSavePostStateFlow.value = ResponseState.success(null)
                 } else {

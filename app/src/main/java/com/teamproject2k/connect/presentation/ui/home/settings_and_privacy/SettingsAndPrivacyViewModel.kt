@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
 import com.teamproject2k.connect.data.models.user.UsersLocalEntity
-import com.teamproject2k.connect.domain.models.UsersBean
-import com.teamproject2k.connect.domain.network_request_response.RequestStatusEnum
-import com.teamproject2k.connect.domain.network_request_response.ResponseState
+import com.teamproject2k.connect.domain.models.UserBean
+import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
+import com.teamproject2k.connect.domain.network_utils.ResponseState
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.UpdateUserDetailsOnRemoteUseCase
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
@@ -28,12 +28,17 @@ class SettingsAndPrivacyViewModel @Inject constructor(
     private val updateUserDetailsOnRemoteUseCase: UpdateUserDetailsOnRemoteUseCase,
     private val updateUserDetailsOnLocalUseCase: UpdateUserDetailsOnLocalUseCase
 ) : BaseViewModel() {
+
     lateinit var genderVisibilityScopeList: List<VisibilityScope>
     lateinit var dobVisibilityScopeList: List<VisibilityScope>
     lateinit var friendListVisibilityScopeList: List<VisibilityScope>
     lateinit var genderVisibilityState: MutableState<VisibilityScope>
     lateinit var dobVisibilityState: MutableState<VisibilityScope>
     lateinit var friendListVisibilityState: MutableState<VisibilityScope>
+
+    var isFirstTimeSetup = true
+
+    val snackBarMessageState = mutableStateOf("")
 
     private val _updateGenderVisibilityStateFlow: MutableStateFlow<ResponseState<VisibilityScope>> =
         MutableStateFlow(ResponseState.none())
@@ -47,16 +52,13 @@ class SettingsAndPrivacyViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val updateFriendListVisibilityStateFlow = _updateFriendListVisibilityStateFlow.asStateFlow()
 
-    val snackBarMessageState = mutableStateOf("")
-    var isFirstTimeSetup = true
-
     /**
      * Sets up the data for the user details screen.
      *
      * @param userDetails The user details bean.
      * @param context The context.
      */
-    fun setUpData(userDetails: UsersBean, context: Context) {
+    fun setUpData(userDetails: UserBean, context: Context) {
 
         // Get the default selected visibility for the gender field.
         val defaultSelectedGenderVisibility =
