@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="friends_tab_list">
+        <item>Friends</item>
+        <item>Pending</item>
+    </string-array>
+</resources>

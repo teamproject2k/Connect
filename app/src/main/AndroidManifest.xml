@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="LockedOrientationActivity">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:allowBackup="true"
+        android:name=".presentation.base.BaseApp"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -13,16 +19,35 @@
         android:theme="@style/Theme.Connect"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.ui.auth.AuthenticationActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Connect">
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashScreenTheme"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".presentation.ui.home.base_screen.HomeActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="DiscouragedApi" />
+        <activity
+            android:name=".presentation.ui.chat.base_screen.ChatActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="DiscouragedApi" />
+
+        <service
+            android:name=".presentation.services.fcm.MessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

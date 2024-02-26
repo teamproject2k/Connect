@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "386072661121",
+    "firebase_url": "https://connect-prod-3417f-default-rtdb.firebaseio.com",
+    "project_id": "connect-prod-3417f",
+    "storage_bucket": "connect-prod-3417f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386072661121:android:6ac1b86ffd8b6316f29180",
+        "android_client_info": {
+          "package_name": "com.teamproject2k.connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD78PgufB-E-imzU9sChvYkxzSWEoi1qhs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

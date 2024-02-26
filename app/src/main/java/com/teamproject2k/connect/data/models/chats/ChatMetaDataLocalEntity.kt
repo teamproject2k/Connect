@@ -1,0 +1,13 @@
+package com.teamproject2k.connect.data.models.chats
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+
+@Entity("chat_meta_data")
+data class ChatMetaDataLocalEntity(
+    @PrimaryKey
+    val chatId: String,
+    val lastSeenChatAt: Long,
+    val isChatDeleted: Boolean = false
+)
