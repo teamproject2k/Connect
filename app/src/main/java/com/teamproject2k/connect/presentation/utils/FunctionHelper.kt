@@ -28,6 +28,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.google.auth.oauth2.GoogleCredentials
+import com.teamproject2k.connect.BuildConfig
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
@@ -596,7 +597,9 @@ object FunctionHelper {
     fun getAccessToken(context: Context): String {
         var token = ""
         try {
-            val fileInputStream = context.assets.open("serviceAccountKey.json")
+            val fileName =
+                if (BuildConfig.DEBUG) "service_account_key_debug.json" else "service_account_key_release.json"
+            val fileInputStream = context.assets.open(fileName)
             val googleCredential = GoogleCredentials
                 .fromStream(fileInputStream)
                 .createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))

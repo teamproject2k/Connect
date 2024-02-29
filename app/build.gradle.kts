@@ -10,6 +10,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("/home/cd-user/keystores/Connect.jks")
+            storePassword = "Team@2000"
+            keyPassword = "Team@2000"
+            keyAlias = "Connect"
+        }
+    }
     namespace = "com.teamproject2k.connect"
     compileSdk = ConfigData.compileSdk
     buildFeatures {
@@ -34,10 +42,15 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            applicationIdSuffix = ".release"
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            resValue("string", "app_name", "Connect-Debug")
         }
     }
     compileOptions {
