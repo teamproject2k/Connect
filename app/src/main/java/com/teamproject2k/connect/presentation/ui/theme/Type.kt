@@ -3,7 +3,7 @@ package com.teamproject2k.connect.presentation.ui.theme
 import androidx.compose.material3.Typography
 
 private val DefaultTypography = Typography()
-val PoppinsTypography = Typography(
+val RobotoTypography = Typography(
     displayLarge = DefaultTypography.displayLarge.copy(fontFamily = Roboto),
     displayMedium = DefaultTypography.displayMedium.copy(fontFamily = Roboto),
     displaySmall = DefaultTypography.displaySmall.copy(fontFamily = Roboto),

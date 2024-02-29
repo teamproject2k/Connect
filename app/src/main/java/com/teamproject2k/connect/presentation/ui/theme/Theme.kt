@@ -32,7 +32,7 @@ fun ConnectTheme(
     }
     MaterialTheme(
         colorScheme = LightColorScheme,
-        typography = PoppinsTypography,
+        typography = RobotoTypography,
         content = content
     )
 }

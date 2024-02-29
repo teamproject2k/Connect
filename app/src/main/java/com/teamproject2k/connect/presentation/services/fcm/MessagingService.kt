@@ -17,6 +17,7 @@ import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
 import com.teamproject2k.connect.presentation.utils.SharedPreferenceHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.random.Random
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 @AndroidEntryPoint
@@ -93,6 +94,7 @@ open class MessagingService : FirebaseMessagingService() {
         message: String,
         notificationType: String?
     ) {
+        val notificationId = Random(3000).nextInt()
         val activity =
             if (notificationType != NotificationTypesEnum.ChatMessages.name) HomeActivity::class.java else ChatActivity::class.java
         val intent = Intent(
@@ -119,6 +121,6 @@ open class MessagingService : FirebaseMessagingService() {
                 .setContentIntent(pendingIntent)
         val notificationManager: NotificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(0, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 }
