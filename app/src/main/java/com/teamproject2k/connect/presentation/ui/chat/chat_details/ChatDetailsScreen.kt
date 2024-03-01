@@ -273,7 +273,7 @@ private fun ChatDetailsTopSection(
         Column {
             TextBold16(text = viewModel.otherUser.name, color = MaterialTheme.colorScheme.onPrimary)
             Text(
-                text = viewModel.loggedInUser.connectUserId,
+                text = viewModel.otherUser.connectUserId,
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 12.sp
             )
