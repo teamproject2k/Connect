@@ -26,6 +26,12 @@ class SearchUserViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val searchUserStateFlow = _searchUserStateFlow.asStateFlow()
 
+    /**
+     * Retrieves details of all users except the current user and the users blocked by the current user.
+     * This function retrieves details of all users except the current user and the users blocked by the current user.
+     *
+     * @param currentUser The details of the current user.
+     */
     fun getAllUsers(currentUser: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

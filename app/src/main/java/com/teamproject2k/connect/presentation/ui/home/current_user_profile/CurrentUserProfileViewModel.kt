@@ -55,6 +55,11 @@ class CurrentUserProfileViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val postDetailsStateFlow = _postDetailsStateFlow.asStateFlow()
 
+    /**
+     * Initializes the data for the view model with the provided logged-in user details.
+     *
+     * @param loggedInUserDetails The details of the logged-in user.
+     */
     fun initializeData(loggedInUserDetails: UserBean) {
         this.loggedInUserDetailsState = mutableStateOf(loggedInUserDetails)
         isDataInitialized = true
@@ -90,7 +95,6 @@ class CurrentUserProfileViewModel @Inject constructor(
 
     /**
      * Gets the friend list from the given list of friend IDs.
-     *
      */
     fun getFriendListFromIds() {
         viewModelScope.launch {
@@ -107,7 +111,10 @@ class CurrentUserProfileViewModel @Inject constructor(
         }
     }
 
-
+    /**
+     * Retrieves the details of the logged-in user.
+     * This function fetches the user details both remotely and locally and updates the state flow accordingly.
+     */
     fun getUserDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

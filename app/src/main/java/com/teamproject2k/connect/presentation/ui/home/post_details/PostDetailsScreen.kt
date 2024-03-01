@@ -344,7 +344,7 @@ private fun PostDetails(
 }
 
 @Composable
-fun PostDetailsDropDownSection(
+private fun PostDetailsDropDownSection(
     viewModel: PostDetailsViewModel,
     onDropDownMenuDismiss: () -> Unit
 ) {
@@ -498,7 +498,7 @@ private fun PostVisibilityScopeBottomSheet(
 }
 
 @Composable
-fun HandleUpdatePostVisibilityState(
+private fun HandleUpdatePostVisibilityState(
     viewModel: PostDetailsViewModel
 ) {
     val updatePostVisibilityState = viewModel.updatePostVisibilityStateFlow.collectAsState().value
@@ -545,7 +545,7 @@ fun HandleUpdatePostVisibilityState(
 }
 
 @Composable
-fun HandleDeletePostState(
+private fun HandleDeletePostState(
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -597,7 +597,7 @@ fun HandleDeletePostState(
 }
 
 @Composable
-fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
+private fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
     val getAllCommentsState = viewModel.getAllCommentsStateFlow.collectAsState().value
     var isExceptionHandled by remember {
         mutableStateOf(false)
@@ -635,7 +635,7 @@ fun HandleGetAllCommentsSection(viewModel: PostDetailsViewModel) {
 }
 
 @Composable
-fun ParentChildCommentItem(
+private fun ParentChildCommentItem(
     viewModel: PostDetailsViewModel,
     parentCommentWithUserBean: CommentWithUserBean,
     childCommentList: List<CommentWithUserBean>,
@@ -684,7 +684,7 @@ fun ParentChildCommentItem(
 }
 
 @Composable
-fun CommentItemLoading() {
+private fun CommentItemLoading() {
     Row(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -728,7 +728,7 @@ fun CommentItemLoading() {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CommentItem(
+private fun CommentItem(
     commentWithCommentPoster: CommentWithUserBean,
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator,
@@ -915,7 +915,7 @@ fun CommentItem(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AddCommentSection(
+private fun AddCommentSection(
     viewModel: PostDetailsViewModel,
     loggedInUser: UserBean
 ) {
@@ -1002,7 +1002,7 @@ fun AddCommentSection(
 }
 
 @Composable
-fun HandleAddCommentSectionState(
+private fun HandleAddCommentSectionState(
     viewModel: PostDetailsViewModel,
     navigator: DestinationsNavigator
 ) {
@@ -1057,7 +1057,7 @@ fun HandleAddCommentSectionState(
 }
 
 @Composable
-fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
+private fun HandleDeleteCommentSectionState(viewModel: PostDetailsViewModel) {
     val deleteCommentState = viewModel.deleteCommentStateFlow.collectAsState().value
     var isResponseHandled by remember {
         mutableStateOf(false)

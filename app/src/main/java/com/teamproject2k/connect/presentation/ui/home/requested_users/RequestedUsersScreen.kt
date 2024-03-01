@@ -115,7 +115,7 @@ fun RequestedListScreen(navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun HandleGetRequestedUsersState(
+private fun HandleGetRequestedUsersState(
     viewModel: RequestedUsersViewModel,
     homeSharedViewModel: HomeSharedViewModel,
     navigator: DestinationsNavigator

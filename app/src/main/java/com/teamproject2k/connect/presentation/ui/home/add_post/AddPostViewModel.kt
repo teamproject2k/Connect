@@ -61,6 +61,12 @@ class AddPostViewModel @Inject constructor(
         isFirstTimeSetup = false
     }
 
+    /**
+     * Uploads a post created by the logged-in user to the remote server.
+     * This function handles uploading media files, determining post type, and adding the post to the local database.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun uploadUserPost(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {

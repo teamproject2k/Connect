@@ -199,7 +199,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
 }
 
 @Composable
-fun HandleLiveObserveCurrentUsersStateFlow(
+private fun HandleLiveObserveCurrentUsersStateFlow(
     viewModel: OtherUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {
@@ -220,7 +220,7 @@ fun HandleLiveObserveCurrentUsersStateFlow(
 }
 
 @Composable
-fun HandleLiveObserveOtherUsersStateFlow(viewModel: OtherUserProfileViewModel) {
+private fun HandleLiveObserveOtherUsersStateFlow(viewModel: OtherUserProfileViewModel) {
     val liveObserverState = viewModel.liveObserveRequiredUserDetailsStateFlow.collectAsState().value
     when (liveObserverState.status) {
         RequestStatusEnum.Success -> {

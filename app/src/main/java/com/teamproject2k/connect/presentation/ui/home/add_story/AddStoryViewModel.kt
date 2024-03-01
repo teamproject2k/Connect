@@ -52,11 +52,22 @@ class AddStoryViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val uploadStoryStateFlow = _uploadStoryStateFlow.asStateFlow()
 
-    fun initData(textColor: Color) {
+    /**
+     * Initializes the data for the view model with the provided text color.
+     *
+     * @param textColor The color used for text on media.
+     */
+    fun initializeData(textColor: Color) {
         this.colorOnMediaState = mutableStateOf(textColor)
         isDataInitialized = true
     }
 
+    /**
+     * Uploads a story created by the logged-in user to the remote server.
+     * This function handles uploading media files, determining story type, and adding the story to the local database.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun uploadUserStory(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {

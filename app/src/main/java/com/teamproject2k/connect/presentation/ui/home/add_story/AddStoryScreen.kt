@@ -110,7 +110,7 @@ fun AddStoryScreen(navigator: DestinationsNavigator) {
     }
     val textColor = MaterialTheme.colorScheme.onPrimary
     if (!viewModel.isDataInitialized) {
-        viewModel.initData(textColor)
+        viewModel.initializeData(textColor)
     }
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) }) {
         Column(

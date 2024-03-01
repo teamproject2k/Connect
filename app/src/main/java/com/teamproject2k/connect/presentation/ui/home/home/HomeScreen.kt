@@ -288,7 +288,7 @@ private fun StoryUiSection(
 }
 
 @Composable
-fun StoryLoaderItem() {
+private fun StoryLoaderItem() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row {
             repeat(5) {
