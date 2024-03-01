@@ -48,9 +48,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField(
+                "String",
+                "FCM_BASE_URL",
+                "\"https://fcm.googleapis.com/v1/projects/connect-release-3e00b/\""
+            )
         }
         debug {
             resValue("string", "app_name", "Connect-Debug")
+            buildConfigField(
+                "String",
+                "FCM_BASE_URL",
+                "\"https://fcm.googleapis.com/v1/projects/connect-prod-3417f/\""
+            )
         }
     }
     compileOptions {
