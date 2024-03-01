@@ -20,6 +20,7 @@ import com.teamproject2k.connect.domain.use_case.chat.UpdateLastSeenAtOnLocalUse
 import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.presentation.base.BaseViewModel
+import com.teamproject2k.connect.presentation.services.fcm.NotificationTypesEnum
 import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
@@ -109,6 +110,10 @@ class ChatDetailsViewModel @Inject constructor(
                         Pair(
                             NotificationsConstantHelper.MESSAGE,
                             message.message
+                        ),
+                        Pair(
+                            NotificationTypesEnum::name.name,
+                            NotificationTypesEnum.ChatMessages.name
                         )
                     )
                     sendFCMUseCase(
