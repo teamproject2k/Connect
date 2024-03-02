@@ -105,7 +105,7 @@ class ChatDetailsViewModel @Inject constructor(
                     val data = hashMapOf(
                         Pair(
                             NotificationsConstantHelper.TITLE,
-                            otherUser.name
+                            loggedInUser.name
                         ),
                         Pair(
                             NotificationsConstantHelper.MESSAGE,

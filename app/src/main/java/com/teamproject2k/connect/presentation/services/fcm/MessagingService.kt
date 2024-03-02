@@ -36,7 +36,7 @@ open class MessagingService : FirebaseMessagingService() {
                 NotificationTypesEnum.FriendRequestReceived.name -> {
                     val message =
                         getString(
-                            R.string.send_you_friend_request,
+                            R.string.sent_you_friend_request,
                             dataMessage[NotificationsConstantHelper.MESSAGE]
                         )
                     showNotification(
