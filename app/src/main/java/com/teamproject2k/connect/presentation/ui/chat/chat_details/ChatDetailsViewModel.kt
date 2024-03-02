@@ -68,7 +68,6 @@ class ChatDetailsViewModel @Inject constructor(
     fun initializeData(loggedInUserDetails: UserBean, otherUserDetails: UserBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
-        sharedPreference.isChatDetailScreenOpen = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 updateLastSeenAtOnLocalUseCase(
@@ -184,8 +183,5 @@ class ChatDetailsViewModel @Inject constructor(
     override fun onCleared() {
         // Removing the live observation listener from the remote server, if it exists.
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
-
-        // Updating the status indicating whether the chat detail screen is open in shared preferences.
-        sharedPreference.isChatDetailScreenOpen = false
     }
 }

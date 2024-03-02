@@ -17,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class ChatActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences.isChatDetailScreenOpen = true
         setContent {
             CompositionLocalProvider(LocalActivity provides this) {
                 Surface {
@@ -30,5 +31,10 @@ class ChatActivity : BaseActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sharedPreferences.isChatDetailScreenOpen = false
     }
 }
