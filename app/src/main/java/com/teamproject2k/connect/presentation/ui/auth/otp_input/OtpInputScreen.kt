@@ -215,7 +215,8 @@ private fun OTPField(viewModel: OtpInputViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp), horizontalArrangement = Arrangement.Center
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
         repeat(ConstantsHelper.OTP_CHAR_COUNT) { index ->
             val enteredValue = viewModel.otpState.value[index].toString()
