@@ -63,6 +63,7 @@ import com.teamproject2k.connect.presentation.ui.common.IconTextSection
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
 import com.teamproject2k.connect.presentation.ui.common.ShowSelectedImage
+import com.teamproject2k.connect.presentation.ui.common.SpacerWidth8
 import com.teamproject2k.connect.presentation.ui.common.TransparentTextField
 import com.teamproject2k.connect.presentation.ui.common.UserDetailsSection
 import com.teamproject2k.connect.presentation.ui.common.VisibilityItem
@@ -310,6 +311,7 @@ private fun TopDetailsSection(
             user = sharedViewModel.usersDetails,
             modifier = Modifier.weight(1f)
         )
+        SpacerWidth8()
         VisibilityItem(
             drawableId = viewModel.currentPostVisibilityState.value.drawableId,
             scopeName = viewModel.currentPostVisibilityState.value.scopeName
