@@ -17,6 +17,7 @@ import android.os.Vibrator
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.speech.RecognizerIntent
+import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.ui.graphics.Color
@@ -103,7 +104,6 @@ object FunctionHelper {
         userIdFirstPart = "$userIdFirstPart@${currentCount + 1}"
         return userIdFirstPart
     }
-
 
     /**
      * Gets the first part of the connect ID.
@@ -663,7 +663,6 @@ object FunctionHelper {
         return (mutableListOf(Color.Black, Color(0xFF262626)))
     }
 
-
     /**
      * Parses a string of colors into a list of [Color] objects.
      *
@@ -733,6 +732,10 @@ object FunctionHelper {
                 context.getString(R.string.speak_to_enter_message)
             )
         }
+    }
+
+    fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
     fun checkAudioPermissionGranted(context: Context): Boolean {

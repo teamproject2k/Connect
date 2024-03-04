@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
 import androidx.palette.graphics.Palette
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -67,10 +68,10 @@ import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
+import com.teamproject2k.connect.presentation.ui.common.GetPlayerView
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
 import com.teamproject2k.connect.presentation.ui.common.ShowSelectedImage
-import com.teamproject2k.connect.presentation.ui.common.ShowSelectedVideo
 import com.teamproject2k.connect.presentation.ui.common.SpacerWidth16
 import com.teamproject2k.connect.presentation.ui.common.SpacerWidth8
 import com.teamproject2k.connect.presentation.ui.common.TransparentTextField
@@ -317,6 +318,13 @@ private fun MediaSection(viewModel: AddStoryViewModel, context: Context) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
+    GetPlayerView(context = context, uri = selectedMediaData.uri.toString()) { exoPlayer, _ ->
+        exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
     }
 }
 
