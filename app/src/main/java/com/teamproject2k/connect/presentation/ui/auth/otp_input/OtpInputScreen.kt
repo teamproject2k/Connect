@@ -97,9 +97,11 @@ fun OTPScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
-    viewModel.mobileNumber = mobileNumber
-    viewModel.verificationId = verificationId
-    viewModel.countryCode = countryCode
+
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(mobileNumber, verificationId, countryCode)
+    }
+
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -163,7 +165,7 @@ fun OTPScreen(
         }
     }
     HandleVerifyOTPState(viewModel, navigator, context)
-    HandleUserDetailsState(viewModel, navigator, context)
+    HandleGetUserDetailsState(viewModel, navigator, context)
     HandleResendOTPState(viewModel, context)
     HandleBackPressed(navigator)
 }
@@ -265,7 +267,7 @@ private fun OTPField(viewModel: OtpInputViewModel) {
                         } else {
                             false
                         }
-                    },
+                    }
             )
             if (index + 1 != ConstantsHelper.OTP_CHAR_COUNT) {
                 SpacerWidth8()
@@ -280,7 +282,7 @@ private fun OTPField(viewModel: OtpInputViewModel) {
 }
 
 @Composable
-private fun HandleUserDetailsState(
+private fun HandleGetUserDetailsState(
     viewModel: OtpInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
@@ -312,7 +314,6 @@ private fun HandleUserDetailsState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
                 isResponseHandled = true
             }
-
         }
 
         RequestStatusEnum.Exception -> {

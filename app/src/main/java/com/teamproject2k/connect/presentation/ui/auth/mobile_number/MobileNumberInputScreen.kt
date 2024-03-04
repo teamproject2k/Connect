@@ -134,8 +134,8 @@ private fun HandleGetUserDetailsState(
         RequestStatusEnum.Success -> {
             if (!isResponseHandled) {
                 if (userDetailsState.data == null) {
-                    navigator.navigate(UserDetailsScreenDestination)
                     navigator.popBackStack()
+                    navigator.navigate(UserDetailsScreenDestination)
                 } else {
                     viewModel.sharedPreference.isUserDetailsEntered = true
                     val intent = Intent(context, HomeActivity::class.java)

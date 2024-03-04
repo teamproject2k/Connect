@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -98,9 +97,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 NameInputTextField(viewModel)
                 SpacerHeight18()
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    GenderPickerSection(viewModel)
-                }
+                GenderPickerSection(viewModel)
                 SpacerHeight18()
                 DOBPickerSection(viewModel = viewModel)
                 SpacerHeight48()
