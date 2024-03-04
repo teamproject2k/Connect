@@ -189,7 +189,7 @@ private fun OTPTimer(viewModel: OtpInputViewModel) {
                 }
             ),
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     } else {
         Text(
