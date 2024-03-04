@@ -65,6 +65,14 @@ class SavedPostsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
+    /**
+     * Retrieves the details of saved posts along with user details for the logged-in user.
+     * This function retrieves the details of saved posts along with user details for the logged-in user.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param loggedInUserBlockedList The list of Firebase IDs of users blocked by the logged-in user.
+     * @param savedPosts The list of Firebase IDs of saved posts.
+     */
     fun getSavedPosts(
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
@@ -114,6 +122,14 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a like to the specified post by the logged-in user.
+     * This function adds a like to the specified post by the logged-in user.
+     *
+     * @param postDetails The details of the post to which the like should be added.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param onUpdate Callback function to be called after the like is added.
+     */
     fun addLikeOnPost(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -141,6 +157,14 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Removes the like from a post by the logged-in user.
+     * This function removes the like of the logged-in user from the specified post.
+     *
+     * @param postDetails The details of the post from which the like should be removed.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param onUpdate Callback function to be called after the like is removed.
+     */
     fun removeLikeForPost(
         postDetails: PostBean,
         loggedInUserFirebaseId: String,
@@ -171,6 +195,14 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Saves a post by the logged-in user.
+     * This function adds the specified post to the saved posts list of the logged-in user.
+     *
+     * @param loggedInUserBean The details of the logged-in user.
+     * @param postFirebaseId The Firebase ID of the post to be saved.
+     * @param onUpdate Callback function to be called after the post is saved.
+     */
     fun savePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -193,6 +225,14 @@ class SavedPostsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Un-saves a post by the logged-in user.
+     * This function removes the specified post from the saved posts list of the logged-in user.
+     *
+     * @param loggedInUserBean The details of the logged-in user.
+     * @param postFirebaseId The Firebase ID of the post to be un-saved.
+     * @param onUpdate Callback function to be called after the post is un-saved.
+     */
     fun unSavePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

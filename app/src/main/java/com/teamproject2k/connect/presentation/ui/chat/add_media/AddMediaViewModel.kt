@@ -70,6 +70,11 @@ class AddMediaViewModel @Inject constructor(
         isDataInitialized = true // Marking that data has been initialized.
     }
 
+    /**
+     * Sends a message in the chat, including text, images, or videos.
+     * @param mediaData Information about the media being sent.
+     * @param context Android context for accessing resources.
+     */
     fun sendMessage(mediaData: MediaData, context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -123,7 +128,7 @@ class AddMediaViewModel @Inject constructor(
                         val data = hashMapOf(
                             Pair(
                                 NotificationsConstantHelper.TITLE,
-                                otherUser.name
+                                loggedInUser.name
                             ),
                             Pair(
                                 NotificationsConstantHelper.MESSAGE,

@@ -128,6 +128,10 @@ class MobileNumberInputViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Called when the ViewModel is no longer used and will be destroyed.
+     * It clears the instance of the AuthenticationActivity.
+     */
     override fun onCleared() {
         super.onCleared()
         AuthenticationActivity.Instance = null

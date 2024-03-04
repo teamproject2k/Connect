@@ -12,8 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-abstract class BaseActivity :
-    ComponentActivity() {
+abstract class BaseActivity : ComponentActivity() {
 
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
@@ -38,6 +37,5 @@ abstract class BaseActivity :
                 finish()
             }
         }
-
     }
 }

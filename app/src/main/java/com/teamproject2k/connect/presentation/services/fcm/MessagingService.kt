@@ -11,12 +11,15 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.teamproject2k.connect.R
+import com.teamproject2k.connect.presentation.base.BaseApp
 import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
 import com.teamproject2k.connect.presentation.ui.home.base_screen.HomeActivity
 import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
 import com.teamproject2k.connect.presentation.utils.SharedPreferenceHelper
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlin.random.Random
+
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 @AndroidEntryPoint
@@ -35,7 +38,7 @@ open class MessagingService : FirebaseMessagingService() {
                 NotificationTypesEnum.FriendRequestReceived.name -> {
                     val message =
                         getString(
-                            R.string.send_you_friend_request,
+                            R.string.sent_you_friend_request,
                             dataMessage[NotificationsConstantHelper.MESSAGE]
                         )
                     showNotification(
@@ -61,7 +64,7 @@ open class MessagingService : FirebaseMessagingService() {
                 }
 
                 NotificationTypesEnum.ChatMessages.name -> {
-                    if (!sharedPreferenceHelper.isChatDetailScreenOpen) {
+                    if (BaseApp.INSTANCE?.isChatScreenOpen == false) {
                         val title = dataMessage[NotificationsConstantHelper.TITLE]
                         val message = dataMessage[NotificationsConstantHelper.MESSAGE]
                         showNotification(
@@ -87,12 +90,14 @@ open class MessagingService : FirebaseMessagingService() {
         }
     }
 
+
     private fun showNotification(
         channelId: String,
         title: String?,
         message: String,
         notificationType: String?
     ) {
+        val notificationId = Random(3000).nextInt()
         val activity =
             if (notificationType != NotificationTypesEnum.ChatMessages.name) HomeActivity::class.java else ChatActivity::class.java
         val intent = Intent(
@@ -119,6 +124,6 @@ open class MessagingService : FirebaseMessagingService() {
                 .setContentIntent(pendingIntent)
         val notificationManager: NotificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(0, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 }

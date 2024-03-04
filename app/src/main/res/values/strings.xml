@@ -186,7 +186,7 @@
     <string name="story">STORY</string>
     <string name="add_media">Add Media</string>
     <string name="friend_request_channel">Friend Requests</string>
-    <string name="send_you_friend_request">%1$s send you friend request</string>
+    <string name="sent_you_friend_request">%1$s sent you friend request</string>
     <string name="accepted_your_friend_request">%1$s accepted your friend request</string>
     <string name="your_story">Your Story</string>
     <string name="seen_by">Seen By</string>

@@ -20,7 +20,6 @@ class IFCMRepositoryImpl @Inject constructor(
     private val remoteRepository: IRemoteRepository
 ) : IFCMRepository {
 
-
     override suspend fun getFCMToken(): ResponseState<String> {
         return try {
             val token = firebaseMessaging.token.await()

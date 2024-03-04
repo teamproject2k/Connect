@@ -42,12 +42,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.teamproject2k.connect.R
@@ -56,11 +58,12 @@ import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
+import com.teamproject2k.connect.presentation.ui.common.GetPlayerView
 import com.teamproject2k.connect.presentation.ui.common.IconTextSection
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
 import com.teamproject2k.connect.presentation.ui.common.ShowSelectedImage
-import com.teamproject2k.connect.presentation.ui.common.ShowSelectedVideo
+import com.teamproject2k.connect.presentation.ui.common.SpacerWidth8
 import com.teamproject2k.connect.presentation.ui.common.TransparentTextField
 import com.teamproject2k.connect.presentation.ui.common.UserDetailsSection
 import com.teamproject2k.connect.presentation.ui.common.VisibilityItem
@@ -279,6 +282,20 @@ private fun MediaSection(viewModel: AddPostViewModel, context: Context) {
 }
 
 @Composable
+private fun ShowSelectedVideo(selectedMediaData: MediaData, context: Context) {
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val playerHeightPixels =
+        FunctionHelper.convertDpToPixel(screenWidthDp.toFloat(), context)
+    GetPlayerView(
+        context = context,
+        uri = selectedMediaData.uri.toString(),
+        height = playerHeightPixels.toInt()
+    ) { exoPlayer, _ ->
+        exoPlayer.setMediaItem(MediaItem.fromUri(selectedMediaData.uri))
+    }
+}
+
+@Composable
 private fun TopDetailsSection(
     viewModel: AddPostViewModel,
     sharedViewModel: HomeSharedViewModel,
@@ -294,6 +311,7 @@ private fun TopDetailsSection(
             user = sharedViewModel.usersDetails,
             modifier = Modifier.weight(1f)
         )
+        SpacerWidth8()
         VisibilityItem(
             drawableId = viewModel.currentPostVisibilityState.value.drawableId,
             scopeName = viewModel.currentPostVisibilityState.value.scopeName

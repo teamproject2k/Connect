@@ -79,6 +79,13 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
 
+    /**
+     * Retrieves story details along with user details, considering the given parameters.
+     * This function fetches data both remotely and locally and updates the state flow accordingly.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param isForceRefresh Boolean indicating whether to force refresh the data from the remote source.
+     */
     fun getStoryDetailsWithUserDetails(
         loggedInUserFirebaseId: String,
         isForceRefresh: Boolean
@@ -120,6 +127,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves post details along with user details, considering the given parameters.
+     * This function fetches data both remotely and locally and updates the state flow accordingly.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param loggedInUserBlockedList List of Firebase IDs representing users blocked by the logged-in user.
+     * @param isForceRefresh Boolean indicating whether to force refresh the data from the remote source.
+     */
     fun getPostDetailsWithUserDetails(
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>,
@@ -169,6 +184,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a like from the logged-in user for a specific post.
+     * This function adds the like both remotely and locally.
+     *
+     * @param postDetails The details of the post to which the like is to be added.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param onUpdate Callback function to be executed after the like addition is completed.
+     */
     fun addLikeOnPost(postDetails: PostBean, loggedInUserFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -196,6 +219,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Removes the like of the logged-in user for a specific post.
+     * This function removes the like both remotely and locally.
+     *
+     * @param postDetails The details of the post from which the like is to be removed.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param onUpdate Callback function to be executed after the like removal is completed.
+     */
     fun removeLikeForPost(
         postDetails: PostBean,
         loggedInUserFirebaseId: String,
@@ -226,6 +257,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Saves a post to the saved posts list of the logged-in user.
+     * This function performs the saving both remotely and locally.
+     *
+     * @param loggedInUserBean The user currently logged in.
+     * @param postFirebaseId The Firebase ID of the post to be saved.
+     * @param onUpdate Callback function to be executed after the saving is completed.
+     */
     fun savePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -248,6 +287,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+    * Removes a post from the saved posts list of the logged-in user.
+    * This function performs the removal both remotely and locally.
+    *
+    * @param loggedInUserBean The user currently logged in.
+    * @param postFirebaseId The Firebase ID of the post to be removed.
+    * @param onUpdate Callback function to be executed after the removal is completed.
+    */
     fun unSavePost(loggedInUserBean: UserBean, postFirebaseId: String, onUpdate: () -> Unit) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

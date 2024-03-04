@@ -340,7 +340,7 @@ private fun HandlePostListSectionState(
 }
 
 @Composable
-fun HandleUserDetailsState(
+private fun HandleUserDetailsState(
     viewModel: CurrentUserProfileViewModel,
     homeSharedViewModel: HomeSharedViewModel
 ) {

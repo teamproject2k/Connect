@@ -98,6 +98,7 @@ fun UserDetailsScreen(navigator: DestinationsNavigator) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 NameInputTextField(viewModel)
                 SpacerHeight18()
+                // Added row to maintain teh offset of the gender dialog
                 Row(modifier = Modifier.fillMaxWidth()) {
                     GenderPickerSection(viewModel)
                 }

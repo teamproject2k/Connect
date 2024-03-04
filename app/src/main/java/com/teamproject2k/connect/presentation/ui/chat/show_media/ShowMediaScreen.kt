@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -93,20 +92,19 @@ private fun HandleImageSection(mediaUrl: String) {
         mutableStateOf(MediaStateChangeEnum.Loading.name)
     }
     var scale by remember { mutableStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
     Box(modifier = Modifier
         .fillMaxSize()
         .pointerInput(Unit) {
-            detectTransformGestures { _, pan, zoom, _ ->
-                scale *= zoom
-                offset += pan
+            detectTransformGestures { _, _, zoom, _ ->
+                val tempScale = scale * zoom
+                if (tempScale >= .75f) {
+                    scale *= zoom
+                }
             }
         }
         .graphicsLayer(
             scaleX = scale,
-            scaleY = scale,
-            translationX = offset.x,
-            translationY = offset.y
+            scaleY = scale
         ), contentAlignment = Alignment.Center) {
         if (currentImageState == MediaStateChangeEnum.Error.name) {
             Text(

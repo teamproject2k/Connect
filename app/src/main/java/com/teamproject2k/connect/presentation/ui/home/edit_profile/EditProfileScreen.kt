@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -127,7 +128,9 @@ fun EditProfileScreen(
                 SpacerHeight24()
                 BioInputTextField(viewModel)
                 SpacerHeight24()
-                EditProfileGenderPicker(viewModel)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    EditProfileGenderPicker(viewModel)
+                }
                 SpacerHeight24()
                 EditProfileDOBPicker(viewModel)
                 SpacerHeight24()

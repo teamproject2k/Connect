@@ -148,7 +148,6 @@ class OtherUserProfileViewModel @Inject constructor(
 
     /**
      * Gets the details of a post.
-     *
      */
     fun getPostDetails() {
         // Launch a coroutine in the viewModelScope
@@ -168,7 +167,6 @@ class OtherUserProfileViewModel @Inject constructor(
 
     /**
      * Gets the friend list from the given friend IDs.
-     *
      */
     fun getFriendListFromIds() {
         // Launch a coroutine in the viewModelScope.
