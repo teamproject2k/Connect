@@ -103,6 +103,15 @@ class PostDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val updatePostVisibilityStateFlow = _updatePostVisibilityStateFlow.asStateFlow()
 
+    /**
+     * Initializes the ViewModel with the provided post details and logged-in user information.
+     * This function sets up the ViewModel with the given post details, including its visibility scope,
+     * whether it is liked and saved by the logged-in user.
+     *
+     * @param context The application context.
+     * @param post The post details to be initialized with.
+     * @param loggedInUserBean The details of the logged-in user.
+     */
     fun initialize(context: Context, post: PostBean, loggedInUserBean: UserBean) {
         this.post = post
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
@@ -118,6 +127,12 @@ class PostDetailsViewModel @Inject constructor(
         isDataInitialized = true
     }
 
+    /**
+     * Adds a like to the post.
+     * This function adds a like to the specified post by the logged-in user.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun addLikeOnPost(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -144,6 +159,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Removes the like for the post.
+     * This function removes the like for the specified post made by the logged-in user.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun removeLikeForPost(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -171,6 +192,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Saves the post.
+     * This function saves the specified post to the saved posts list of the logged-in user.
+     *
+     * @param loggedInUserBean The user object representing the logged-in user.
+     */
     fun savePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -198,6 +225,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Un-saves the post.
+     * This function removes the specified post from the saved posts list of the logged-in user.
+     *
+     * @param loggedInUserBean The user object representing the logged-in user.
+     */
     fun unSavePost(loggedInUserBean: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -225,6 +258,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Deletes the post.
+     * This function deletes the specified post both remotely and locally if the logged-in user has the authority to do so.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun deletePost(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -243,6 +282,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a comment to the post.
+     * This function allows the logged-in user to add a comment to the specified post.
+     *
+     * @param loggedInUser The user object representing the logged-in user.
+     */
     fun addComment(loggedInUser: UserBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -323,6 +368,13 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a comment from the post.
+     * This function deletes the specified comment both remotely and locally, and updates the associated post details.
+     *
+     * @param comment The comment to be deleted.
+     * @param deleteCount The number of comments to be deleted (including the specified comment).
+     */
     fun deleteComment(comment: CommentBean, deleteCount: Int) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -356,6 +408,12 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves all comments along with associated user details for a particular post from the remote server.
+     * This function fetches comments and user details asynchronously and updates the local state accordingly.
+     *
+     * @param loggedInUserFireId The Firebase ID of the logged-in user.
+     */
     fun getAllCommentsWithUsers(loggedInUserFireId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -377,6 +435,15 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a like for a comment given by the logged-in user.
+     * This function adds the like for the specified comment both remotely and locally.
+     *
+     * @param comment The comment for which the like is to be added.
+     * @param loggedInUserFireId The Firebase ID of the logged-in user.
+     * @param onSuccess Callback function to be called upon successful addition of the like.
+     * @param onError Callback function to be called upon encountering an error during the addition process. Receives an optional error message.
+     */
     fun addLikeForComment(
         comment: CommentBean,
         loggedInUserFireId: String,
@@ -402,6 +469,15 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Removes a like for a comment given by the logged-in user.
+     * This function removes the like for the specified comment both remotely and locally.
+     *
+     * @param comment The comment for which the like is to be removed.
+     * @param loggedInUserFireId The Firebase ID of the logged-in user.
+     * @param onSuccess Callback function to be called upon successful removal of the like.
+     * @param onError Callback function to be called upon encountering an error during the removal process. Receives an optional error message.
+     */
     fun removeLikeForComment(
         comment: CommentBean,
         loggedInUserFireId: String,
@@ -425,6 +501,13 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the visibility scope of a post.
+     * This function updates the visibility scope of the specified post both remotely and locally.
+     *
+     * @param postScope The new visibility scope for the post.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun updatePostVisibility(postScope: VisibilityScope, loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

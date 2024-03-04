@@ -65,6 +65,11 @@ class ChatDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
+    /**
+     * Initializes data for the chat screen.
+     * @param loggedInUserDetails Details of the logged-in user.
+     * @param otherUserDetails Details of the other user in the chat.
+     */
     fun initializeData(loggedInUserDetails: UserBean, otherUserDetails: UserBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
@@ -82,6 +87,10 @@ class ChatDetailsViewModel @Inject constructor(
         isDataInitialized = true
     }
 
+    /**
+     * Sends a message to another user.
+     * @param context The application context.
+     */
     fun sendMessage(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

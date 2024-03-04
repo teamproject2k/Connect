@@ -45,11 +45,20 @@ class ChatListViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getChatListStateFlow = _getChatListStateFlow.asStateFlow()
 
+    /**
+     * Initializes the details of the logged-in user.
+     * @param loggedInUserDetails The details of the logged-in user.
+     */
     fun initializeData(loggedInUserDetails: UserBean) {
         this.loggedInUserDetails = loggedInUserDetails
         isDetailsInitialized = true
     }
 
+    /**
+     * Retrieves the list of chats for the logged-in user.
+     * @param isForceUpdate Flag indicating whether to force update the chat list.
+     * @param isNetworkAvailable Flag indicating whether the network is available.
+     */
     fun getChatList(isForceUpdate: Boolean, isNetworkAvailable: Boolean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

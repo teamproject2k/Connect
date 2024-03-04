@@ -60,6 +60,13 @@ class ShowStoryViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteStoryStateFlow = _deleteStoryStateFlow.asStateFlow()
 
+    /**
+     * Initializes the data for managing stories.
+     * This function sets the provided list of stories with user details and the current story index.
+     *
+     * @param allBeanStoriesWithUsersList The list of stories with user details.
+     * @param currentStoryIndex The index of the currently displayed story.
+     */
     fun initializeData(
         allBeanStoriesWithUsersList: ArrayList<StoriesWithUserBean>,
         currentStoryIndex: Int
@@ -70,6 +77,13 @@ class ShowStoryViewModel @Inject constructor(
         isDataInitialized = true
     }
 
+    /**
+     * Retrieves the seen list of a story.
+     * This function fetches the seen list of a story from the remote server.
+     *
+     * @param storyId The Firebase ID of the story for which the seen list is being retrieved.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun getSeenList(storyId: String, loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -80,6 +94,14 @@ class ShowStoryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a user to the seen list of a story.
+     * This function adds a user to the seen list of a story, updating both the remote server and local storage.
+     *
+     * @param story The story for which the user is being added to the seen list.
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @param seenAt The timestamp indicating when the user viewed the story.
+     */
     fun addUserToSeenList(story: StoryBean, loggedInUserFirebaseId: String, seenAt: Long) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -106,6 +128,12 @@ class ShowStoryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a story from the remote server and local storage.
+     * This function deletes a story from the remote server and local storage.
+     *
+     * @param story The story to be deleted.
+     */
     fun deleteStory(story: StoryBean) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

@@ -28,6 +28,12 @@ class BlockedUsersViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getBlockedUsersStateFlow = _getBlockedUsersStateFlow.asStateFlow()
 
+    /**
+     * Retrieves the list of blocked users for the logged-in user.
+     * This function fetches the blocked user list both remotely and locally and updates the state flow accordingly.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun getBlockedUsers(loggedInUserFirebaseId: String) {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {

@@ -40,11 +40,22 @@ class FriendsAndPendingViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getPendingFriendRequestListStateFlow = _getPendingFriendRequestListStateFlow.asStateFlow()
 
+    /**
+     * Initializes the data for the view model.
+     *
+     * @param defaultSelectedTab The default index of the selected tab.
+     */
     fun initializeData(defaultSelectedTab: Int) {
         selectedTabIndexState = mutableIntStateOf(defaultSelectedTab)
         isDataInitialized = true
     }
 
+    /**
+     * Retrieves the list of friends of the logged-in user.
+     * This function fetches the list both remotely and locally and updates the state flow accordingly.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun getFriendsList(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -61,6 +72,12 @@ class FriendsAndPendingViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves the list of pending friend requests received by the logged-in user.
+     * This function fetches the list both remotely and locally and updates the state flow accordingly.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     */
     fun getPendingFriendRequestList(loggedInUserFirebaseId: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
