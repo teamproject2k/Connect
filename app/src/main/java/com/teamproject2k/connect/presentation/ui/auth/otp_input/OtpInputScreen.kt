@@ -116,7 +116,7 @@ fun OTPScreen(
                     append(
                         stringResource(
                             id = R.string.an_otp_has_been_sent_to,
-                            countryCode,
+                            viewModel.countryCode,
                             mobileNumber
                         )
                     )
@@ -126,7 +126,7 @@ fun OTPScreen(
                             fontWeight = FontWeight.Bold
                         )
                     ) {
-                        append("$countryCode $mobileNumber.")
+                        append("${viewModel.countryCode} $mobileNumber.")
                     }
                 }
             )
