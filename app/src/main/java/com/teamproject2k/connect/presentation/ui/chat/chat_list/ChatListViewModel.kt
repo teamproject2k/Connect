@@ -13,7 +13,9 @@ import com.teamproject2k.connect.domain.use_case.chat.DeleteAllChatsFromLocalUse
 import com.teamproject2k.connect.domain.use_case.chat.GetChatListFromRemoteUseCase
 import com.teamproject2k.connect.domain.use_case.chat.GetUserWithLastMessageWithUnreadCountFromLocalUseCase
 import com.teamproject2k.connect.domain.use_case.user.AddUserListToLocalUseCase
+import com.teamproject2k.connect.domain.use_case.user.GetUserDetailsFromLocalUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
+import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
 import com.teamproject2k.connect.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -30,14 +32,13 @@ class ChatListViewModel @Inject constructor(
     private val addChatMessagesListToLocalUseCase: AddChatMessagesListToLocalUseCase,
     private val addUserListToLocalUseCase: AddUserListToLocalUseCase,
     private val getUserWithLastMessageWithUnreadCountFromLocalUseCase: GetUserWithLastMessageWithUnreadCountFromLocalUseCase,
-    private val deleteAllChatsFromLocalUseCase: DeleteAllChatsFromLocalUseCase
+    private val deleteAllChatsFromLocalUseCase: DeleteAllChatsFromLocalUseCase,
+    private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase
 
 ) : BaseViewModel() {
 
     lateinit var loggedInUserDetails: UserBean
-
     private var isChatListFetched: Boolean = false
-    var isDetailsInitialized = false
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -45,14 +46,9 @@ class ChatListViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val getChatListStateFlow = _getChatListStateFlow.asStateFlow()
 
-    /**
-     * Initializes the details of the logged-in user.
-     * @param loggedInUserDetails The details of the logged-in user.
-     */
-    fun initializeData(loggedInUserDetails: UserBean) {
-        this.loggedInUserDetails = loggedInUserDetails
-        isDetailsInitialized = true
-    }
+    private val _getLoggedInUserDetailsStateFlow: MutableStateFlow<ResponseState<Nothing>> =
+        MutableStateFlow(ResponseState.none())
+    val getLoggedInUserDetailsStateFlow = _getLoggedInUserDetailsStateFlow.asStateFlow()
 
     /**
      * Retrieves the list of chats for the logged-in user.
@@ -101,6 +97,27 @@ class ChatListViewModel @Inject constructor(
                                 loggedInUserDetails.firebaseUserId
                             ).toMutableList()
                         )
+                }
+            }
+        }
+    }
+
+    fun getLoggedInUser() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _getLoggedInUserDetailsStateFlow.value = ResponseState.loading()
+                val loggedInUserFirebaseId = fireBaseAuth.currentUser?.uid
+                if (loggedInUserFirebaseId != null) {
+                    val response = getUserDetailsFromLocalUseCase(loggedInUserFirebaseId)
+                    if (response != null) {
+                        loggedInUserDetails = response
+                        _getLoggedInUserDetailsStateFlow.value = ResponseState.success(null)
+                    } else {
+                        _getLoggedInUserDetailsStateFlow.value = ResponseState.error("")
+                    }
+                } else {
+                    _getLoggedInUserDetailsStateFlow.value =
+                        ResponseState.error(FirebaseErrorCodes.NO_USER_FOUND)
                 }
             }
         }
