@@ -146,10 +146,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 }
                 IconButton(onClick = {
                     val intent = Intent(context, ChatActivity::class.java)
-                    intent.putExtra(
-                        ConstantsHelper.USER_DETAILS_KEY,
-                        homeSharedViewModel.usersDetails
-                    )
                     activity.startActivity(intent)
                 }) {
                     Icon(
@@ -288,7 +284,7 @@ private fun StoryUiSection(
 }
 
 @Composable
-fun StoryLoaderItem() {
+private fun StoryLoaderItem() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row {
             repeat(5) {

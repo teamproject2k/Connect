@@ -20,6 +20,7 @@ import com.teamproject2k.connect.domain.use_case.chat.UpdateLastSeenAtOnLocalUse
 import com.teamproject2k.connect.domain.use_case.fcm.SendFCMUseCase
 import com.teamproject2k.connect.domain.utils.DomainFunctionHelper
 import com.teamproject2k.connect.presentation.base.BaseViewModel
+import com.teamproject2k.connect.presentation.services.fcm.NotificationTypesEnum
 import com.teamproject2k.connect.presentation.ui.enums.MediaTypeEnum
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 import com.teamproject2k.connect.presentation.utils.NotificationsConstantHelper
@@ -64,10 +65,14 @@ class ChatDetailsViewModel @Inject constructor(
         MutableStateFlow(ResponseState.none())
     val deleteMessageStateFlow = _deleteMessageStateFlow.asStateFlow()
 
+    /**
+     * Initializes data for the chat screen.
+     * @param loggedInUserDetails Details of the logged-in user.
+     * @param otherUserDetails Details of the other user in the chat.
+     */
     fun initializeData(loggedInUserDetails: UserBean, otherUserDetails: UserBean) {
         this.loggedInUser = loggedInUserDetails
         this.otherUser = otherUserDetails
-        sharedPreference.isChatDetailScreenOpen = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 updateLastSeenAtOnLocalUseCase(
@@ -82,6 +87,10 @@ class ChatDetailsViewModel @Inject constructor(
         isDataInitialized = true
     }
 
+    /**
+     * Sends a message to another user.
+     * @param context The application context.
+     */
     fun sendMessage(context: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -104,11 +113,15 @@ class ChatDetailsViewModel @Inject constructor(
                     val data = hashMapOf(
                         Pair(
                             NotificationsConstantHelper.TITLE,
-                            otherUser.name
+                            loggedInUser.name
                         ),
                         Pair(
                             NotificationsConstantHelper.MESSAGE,
                             message.message
+                        ),
+                        Pair(
+                            NotificationTypesEnum::name.name,
+                            NotificationTypesEnum.ChatMessages.name
                         )
                     )
                     sendFCMUseCase(
@@ -179,8 +192,5 @@ class ChatDetailsViewModel @Inject constructor(
     override fun onCleared() {
         // Removing the live observation listener from the remote server, if it exists.
         listener?.let { removeLiveObserveListenerFromRemoteUseCase(it) }
-
-        // Updating the status indicating whether the chat detail screen is open in shared preferences.
-        sharedPreference.isChatDetailScreenOpen = false
     }
 }

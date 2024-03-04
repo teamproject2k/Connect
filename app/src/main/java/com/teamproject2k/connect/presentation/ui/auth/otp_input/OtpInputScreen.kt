@@ -97,9 +97,11 @@ fun OTPScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel: OtpInputViewModel = hiltViewModel()
     val snackBarHostState = remember { SnackbarHostState() }
-    viewModel.mobileNumber = mobileNumber
-    viewModel.verificationId = verificationId
-    viewModel.countryCode = countryCode
+
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(mobileNumber, verificationId, countryCode)
+    }
+
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }) {
         Column(
             modifier = Modifier
@@ -114,7 +116,7 @@ fun OTPScreen(
                     append(
                         stringResource(
                             id = R.string.an_otp_has_been_sent_to,
-                            countryCode,
+                            viewModel.countryCode,
                             mobileNumber
                         )
                     )
@@ -124,7 +126,7 @@ fun OTPScreen(
                             fontWeight = FontWeight.Bold
                         )
                     ) {
-                        append("$countryCode $mobileNumber.")
+                        append("${viewModel.countryCode} $mobileNumber.")
                     }
                 }
             )
@@ -163,7 +165,7 @@ fun OTPScreen(
         }
     }
     HandleVerifyOTPState(viewModel, navigator, context)
-    HandleUserDetailsState(viewModel, navigator, context)
+    HandleGetUserDetailsState(viewModel, navigator, context)
     HandleResendOTPState(viewModel, context)
     HandleBackPressed(navigator)
 }
@@ -187,7 +189,7 @@ private fun OTPTimer(viewModel: OtpInputViewModel) {
                 }
             ),
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
     } else {
         Text(
@@ -213,7 +215,8 @@ private fun OTPField(viewModel: OtpInputViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp), horizontalArrangement = Arrangement.Center
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
         repeat(ConstantsHelper.OTP_CHAR_COUNT) { index ->
             val enteredValue = viewModel.otpState.value[index].toString()
@@ -265,7 +268,7 @@ private fun OTPField(viewModel: OtpInputViewModel) {
                         } else {
                             false
                         }
-                    },
+                    }
             )
             if (index + 1 != ConstantsHelper.OTP_CHAR_COUNT) {
                 SpacerWidth8()
@@ -280,7 +283,7 @@ private fun OTPField(viewModel: OtpInputViewModel) {
 }
 
 @Composable
-private fun HandleUserDetailsState(
+private fun HandleGetUserDetailsState(
     viewModel: OtpInputViewModel,
     navigator: DestinationsNavigator,
     context: Context
@@ -312,7 +315,6 @@ private fun HandleUserDetailsState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
                 isResponseHandled = true
             }
-
         }
 
         RequestStatusEnum.Exception -> {

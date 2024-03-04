@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "290318220313",
+    "firebase_url": "https://connect-release-3e00b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "connect-release-3e00b",
+    "storage_bucket": "connect-release-3e00b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290318220313:android:d2dd78581f8fa12d10be88",
+        "android_client_info": {
+          "package_name": "com.teamproject2k.connect.release"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWzMg6yBe6M2YqUYH4N6sQau9A-_vSjtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

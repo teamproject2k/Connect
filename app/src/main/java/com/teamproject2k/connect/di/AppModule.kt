@@ -168,11 +168,12 @@ class AppModule {
         }
     }
 
+
     @Provides
     @Singleton
     fun getRetrofitInstance(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://fcm.googleapis.com/v1/projects/connect-d6237/")
+            .baseUrl(BuildConfig.FCM_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

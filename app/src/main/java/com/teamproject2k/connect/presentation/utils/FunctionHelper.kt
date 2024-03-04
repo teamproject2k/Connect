@@ -17,6 +17,7 @@ import android.os.Vibrator
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.speech.RecognizerIntent
+import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.google.auth.oauth2.GoogleCredentials
+import com.teamproject2k.connect.BuildConfig
 import com.teamproject2k.connect.R
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
@@ -102,7 +104,6 @@ object FunctionHelper {
         userIdFirstPart = "$userIdFirstPart@${currentCount + 1}"
         return userIdFirstPart
     }
-
 
     /**
      * Gets the first part of the connect ID.
@@ -596,7 +597,9 @@ object FunctionHelper {
     fun getAccessToken(context: Context): String {
         var token = ""
         try {
-            val fileInputStream = context.assets.open("serviceAccountKey.json")
+            val fileName =
+                if (BuildConfig.DEBUG) "service_account_key_debug.json" else "service_account_key_release.json"
+            val fileInputStream = context.assets.open(fileName)
             val googleCredential = GoogleCredentials
                 .fromStream(fileInputStream)
                 .createScoped(listOf("https://www.googleapis.com/auth/firebase.messaging"))
@@ -659,7 +662,6 @@ object FunctionHelper {
     fun getDefaultBackgroundGradient(): MutableList<Color> {
         return (mutableListOf(Color.Black, Color(0xFF262626)))
     }
-
 
     /**
      * Parses a string of colors into a list of [Color] objects.
@@ -730,6 +732,10 @@ object FunctionHelper {
                 context.getString(R.string.speak_to_enter_message)
             )
         }
+    }
+
+    fun convertDpToPixel(dp: Float, context: Context): Float {
+        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
     }
 
     fun checkAudioPermissionGranted(context: Context): Boolean {

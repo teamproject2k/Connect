@@ -54,12 +54,13 @@ import com.teamproject2k.connect.domain.enums.MediaStateChangeEnum
 import com.teamproject2k.connect.domain.logger.LoggingHelper
 import com.teamproject2k.connect.domain.logger.LoggingLevelEnum
 import com.teamproject2k.connect.domain.models.ChatWithUserAndCountBean
-import com.teamproject2k.connect.domain.models.UserBean
 import com.teamproject2k.connect.domain.network_utils.RequestStatusEnum
-import com.teamproject2k.connect.presentation.ui.chat.base_screen.ChatActivity
+import com.teamproject2k.connect.domain.utils.FirebaseErrorCodes
+import com.teamproject2k.connect.presentation.base.BaseActivity
 import com.teamproject2k.connect.presentation.ui.common.AppTopAppBar
 import com.teamproject2k.connect.presentation.ui.common.ColorsHelper
 import com.teamproject2k.connect.presentation.ui.common.DividerLightGrayAlpha50
+import com.teamproject2k.connect.presentation.ui.common.LoaderFullScreen
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight4
 import com.teamproject2k.connect.presentation.ui.common.SpacerWidth12
@@ -76,7 +77,7 @@ import com.teamproject2k.connect.presentation.utils.ChatNavGraph
 import com.teamproject2k.connect.presentation.utils.ConstantsHelper
 import com.teamproject2k.connect.presentation.utils.FunctionHelper
 import com.teamproject2k.connect.presentation.utils.FunctionHelper.isNetworkAvailable
-import com.teamproject2k.connect.presentation.utils.FunctionHelper.parcelable
+import com.teamproject2k.connect.presentation.utils.FunctionHelper.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ChatNavGraph(start = true)
@@ -84,18 +85,9 @@ import com.teamproject2k.connect.presentation.utils.FunctionHelper.parcelable
 @Composable
 fun ChatListScreen(navigator: DestinationsNavigator) {
     val viewModel: ChatListViewModel = hiltViewModel()
-    val activity = (LocalActivity.current as ChatActivity)
     val context = LocalContext.current
     val snackBarHostState = remember { SnackbarHostState() }
-    if (!viewModel.isDetailsInitialized) {
-        val userDetails =
-            activity.intent.parcelable<UserBean>(ConstantsHelper.USER_DETAILS_KEY)
-        if (userDetails != null) {
-            viewModel.initializeData(userDetails)
-        } else {
-            activity.finish()
-        }
-    }
+
     var refreshing by rememberSaveable { mutableStateOf(false) }
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = {
@@ -142,8 +134,9 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.getChatList(false, context.isNetworkAvailable())
+        viewModel.getLoggedInUser()
     }
+    HandleLoggedInUserDetails(viewModel = viewModel)
 }
 
 @Composable
@@ -406,3 +399,49 @@ private fun ChatListItem(
     }
 }
 
+@Composable
+fun HandleLoggedInUserDetails(viewModel: ChatListViewModel) {
+    val context = LocalContext.current
+    val getLoggedInUserDetailsState =
+        viewModel.getLoggedInUserDetailsStateFlow.collectAsState().value
+    var isResponseHandled by remember {
+        mutableStateOf(false)
+    }
+    when (getLoggedInUserDetailsState.status) {
+        RequestStatusEnum.Loading -> {
+            isResponseHandled = false
+            LoaderFullScreen()
+        }
+
+        RequestStatusEnum.Exception -> {
+            if (!isResponseHandled) {
+                if (getLoggedInUserDetailsState.message == FirebaseErrorCodes.NO_USER_FOUND) {
+                    context.showToast(stringResource(id = R.string.some_error_occurred_please_login_again))
+                    (LocalActivity.current as BaseActivity).logout()
+                } else {
+                    viewModel.snackBarMessageState.value =
+                        getLoggedInUserDetailsState.message
+                            ?: stringResource(id = R.string.something_went_wrong)
+                }
+                LoggingHelper.logData(
+                    LoggingLevelEnum.Error,
+                    ConstantsHelper.ERROR_TAG,
+                    ScreenNameEnum.ChatListScreen.name,
+                    getLoggedInUserDetailsState.message.toString()
+                )
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.Success -> {
+            if (!isResponseHandled) {
+                viewModel.getChatList(false, context.isNetworkAvailable())
+                isResponseHandled = true
+            }
+        }
+
+        RequestStatusEnum.None -> {
+            // do not handle this
+        }
+    }
+}

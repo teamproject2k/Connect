@@ -34,7 +34,11 @@ class IUserRepositoryImpl @Inject constructor(
             // If the document exists, get the user details object and return a success response.
             if (result.exists()) {
                 val userModel = result.toObject(UserRemoteEntity::class.java)
-                ResponseState.success(userModel?.toUserBean())
+                if (userModel != null) {
+                    ResponseState.success(userModel.toUserBean())
+                } else {
+                    ResponseState.error("")
+                }
             } else {
                 // If the document does not exist, return a success response with null.
                 ResponseState.success(null)

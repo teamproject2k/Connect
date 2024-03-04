@@ -47,6 +47,8 @@ class OtpInputViewModel @Inject constructor(
     lateinit var mobileNumber: String
     lateinit var countryCode: String
 
+    var isDataInitialized = false
+
     val snackBarMessageState = mutableStateOf("")
     val otpState = mutableStateOf(" ".repeat(ConstantsHelper.OTP_CHAR_COUNT))
     val currentButtonLoadingState = mutableStateOf(ButtonStateEnum.NotLoading)
@@ -80,6 +82,20 @@ class OtpInputViewModel @Inject constructor(
 
         // When the countdown time reaches 0, set the showTimerState to false.
         showTimerState.value = false
+    }
+
+    /**
+     * Initializes the data required.
+     *
+     * @param mobileNumber The mobile number to be verified.
+     * @param verificationId The verification ID obtained from the verification process.
+     * @param countryCode The country code associated with the mobile number.
+     */
+    fun initializeData(mobileNumber: String, verificationId: String, countryCode: String) {
+        this.mobileNumber = mobileNumber
+        this.verificationId = verificationId
+        this.countryCode = countryCode
+        isDataInitialized = true
     }
 
     /**
