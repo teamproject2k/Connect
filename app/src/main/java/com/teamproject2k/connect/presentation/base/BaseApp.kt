@@ -14,8 +14,15 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class BaseApp : Application() {
 
+    var isChatScreenOpen = false
+
+    companion object {
+        var INSTANCE: BaseApp? = null
+    }
+
     override fun onCreate() {
         super.onCreate()
+        INSTANCE = this
         Firebase.crashlytics.setUserId(Firebase.auth.uid ?: "")
         createNotificationChannels()
     }
