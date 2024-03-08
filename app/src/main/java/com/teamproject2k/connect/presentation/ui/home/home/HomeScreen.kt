@@ -77,7 +77,7 @@ import com.teamproject2k.connect.presentation.ui.common.Dot
 import com.teamproject2k.connect.presentation.ui.common.ExpandingText
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
-import com.teamproject2k.connect.presentation.ui.common.PostCaptionMediaSection
+import com.teamproject2k.connect.presentation.ui.common.PostMediaSection
 import com.teamproject2k.connect.presentation.ui.common.PostListLoadingSection
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight16
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight6
@@ -180,7 +180,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
             )
         }
     }
-
     LaunchedEffect(viewModel.snackBarMessageState.value) {
         if (viewModel.snackBarMessageState.value.isNotBlank()) {
             snackBarHostState.showSnackbar(viewModel.snackBarMessageState.value)
@@ -346,7 +345,7 @@ private fun BreakCircularBorder(
     parts: Int,
     colorList: List<List<Color>>,
     gapAngle: Float = 10f,
-    strokeWidth: Dp = 4.dp,
+    strokeWidth: Dp = 4.dp
 ) {
     if (colorList.size != parts || parts == 0) throw IllegalArgumentException("either parts is 0 or color list size not equal to parts")
 
@@ -506,7 +505,7 @@ private fun PostListItem(
             || postDetails.postContentType == MediaTypeEnum.Video.name
             || postDetails.postContentType == MediaTypeEnum.TextVideo.name
         ) {
-            PostCaptionMediaSection(postDetails = postDetails)
+            PostMediaSection(postDetails = postDetails)
         }
         PostBottomSection(postDetails, viewModel, usersDetails, loggedInUserBean, navigator)
         SpacerHeight16()
@@ -566,7 +565,7 @@ private fun PostBottomSection(
                     navigator.navigate(
                         PostDetailsScreenDestination(
                             postDetails,
-                            userDetails,
+                            userDetails
                         )
                     )
                 }) {

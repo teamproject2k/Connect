@@ -97,12 +97,11 @@ fun HomeActivityScreen(screenToNavigate: String) {
 @Composable
 private fun CheckAndRequestNotificationPermission(onPermissionRequest: @Composable () -> Unit) {
     if (Build.VERSION.SDK_INT >= 33) {
-
         val context = LocalContext.current
         val permissionCheckResult =
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
         if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-            // do not do anything if not granted
+            // do not do anything if granted
         } else {
             // Request a permission
             onPermissionRequest()
@@ -222,7 +221,6 @@ private fun HandleUserDetailsFlow(
     }
 }
 
-
 @Composable
 private fun CreateUi(context: Context, viewModel: HomeSharedViewModel, screenToNavigate: String) {
     val selectedRouteState = rememberSaveable {
@@ -331,7 +329,6 @@ private fun CreateUi(context: Context, viewModel: HomeSharedViewModel, screenToN
         }
     }
 }
-
 
 /**
  * Gets the list of items to be displayed in the bottom navigation bar of home activity.

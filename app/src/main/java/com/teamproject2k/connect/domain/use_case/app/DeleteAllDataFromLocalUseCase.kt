@@ -4,6 +4,9 @@ import com.teamproject2k.connect.domain.repository.IAppLocalRepository
 import javax.inject.Inject
 
 class DeleteAllDataFromLocalUseCase @Inject constructor(private val repository: IAppLocalRepository) {
+    /**
+     * Invokes the function to delete all tables from the repository.
+     */
     suspend operator fun invoke() {
         repository.deleteAllTables()
     }

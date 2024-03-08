@@ -82,7 +82,7 @@ import com.teamproject2k.connect.presentation.ui.common.Dot
 import com.teamproject2k.connect.presentation.ui.common.ExpandingText
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
-import com.teamproject2k.connect.presentation.ui.common.PostCaptionMediaSection
+import com.teamproject2k.connect.presentation.ui.common.PostMediaSection
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight12
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight16
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight4
@@ -123,13 +123,14 @@ fun PostDetailsScreen(
     val viewModel: PostDetailsViewModel = hiltViewModel()
     val homeSharedViewModel: HomeSharedViewModel = hiltViewModel(LocalActivity.current)
     val context = LocalContext.current
+    val snackBarHostState = remember { SnackbarHostState() }
 
     var showPostVisibilityScopeBottomSheet by remember {
         mutableStateOf(false)
     }
 
     if (!viewModel.isDataInitialized) {
-        viewModel.initialize(context, postDetails, homeSharedViewModel.usersDetails)
+        viewModel.initializeData(context, postDetails, homeSharedViewModel.usersDetails)
     }
 
     if (homeSharedViewModel.usersDetails.blockedUsersList.contains(viewModel.post.createdByUserFirebaseId)) {
@@ -141,7 +142,6 @@ fun PostDetailsScreen(
         )
         navigator.popBackStack()
     }
-    val snackBarHostState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         modifier = Modifier.fillMaxSize()
@@ -199,7 +199,6 @@ fun PostDetailsScreen(
                             }
                         }
                     }
-
                 }
                 DividerLightGrayAlpha50()
                 AddCommentSection(
@@ -335,7 +334,7 @@ private fun PostDetails(
             || viewModel.post.postContentType == MediaTypeEnum.Video.name
             || viewModel.post.postContentType == MediaTypeEnum.TextVideo.name
         ) {
-            PostCaptionMediaSection(postDetails = viewModel.post)
+            PostMediaSection(postDetails = viewModel.post)
         }
         PostBottomSection(viewModel, loggedInUser, context, navigator, onBottomSheetItemClick)
         SpacerHeight16()

@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.teamproject2k.connect.data.local_db.AppDatabase
 import com.teamproject2k.connect.data.models.comment.CommentRemoteEntity
 import com.teamproject2k.connect.data.models.post.PostRemoteEntity
-import com.teamproject2k.connect.data.models.post.PostWithUserDetailsFromLocalEntity
+import com.teamproject2k.connect.data.models.post.PostWithUserDetailsLocalEntity
 import com.teamproject2k.connect.data.models.user.UserRemoteEntity
 import com.teamproject2k.connect.domain.enums.StatusWithCurrentUserRemoteEnum
 import com.teamproject2k.connect.domain.models.CommentBean
@@ -506,7 +506,7 @@ class IPostRepositoryImpl @Inject constructor(
     override suspend fun getPostDetailsWithUserFromLocal(
         savedPostFirebaseIds: List<String>,
         loggedInUserFirebaseId: String,
-        loggedInUserBlockedList: List<String>,
+        loggedInUserBlockedList: List<String>
     ): ResponseState<List<PostWithUserDetailsBean>> {
         return try {
             ResponseState.success(
@@ -522,7 +522,7 @@ class IPostRepositoryImpl @Inject constructor(
     }
 
     private fun getPostDetailsWithUsers(
-        postWithUsersList: List<PostWithUserDetailsFromLocalEntity>,
+        postWithUsersList: List<PostWithUserDetailsLocalEntity>,
         loggedInUserFirebaseId: String,
         loggedInUserBlockedList: List<String>
     ): ArrayList<PostWithUserDetailsBean> {

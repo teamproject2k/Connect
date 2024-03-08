@@ -38,8 +38,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val postDetailsWithUserDetailsUseCase: GetPostDetailsWithUserDetailsFromRemoteUseCase,
-    private val storyDetailsWithUserDetailsUseCase: GetAllStoriesWithUserFormRemoteUseCase,
+    private val postDetailsWithUserDetailsFromRemoteUseCase: GetPostDetailsWithUserDetailsFromRemoteUseCase,
+    private val storyDetailsWithUserDetailsFromRemoteUseCase: GetAllStoriesWithUserFormRemoteUseCase,
     private val addLikeOnRemoteUseCase: AddLikeOnRemoteUseCase,
     private val removeLikeOfPostFromRemoteUseCase: RemoveLikeOfPostFromRemoteUseCase,
     private val savePostOnRemoteUseCase: SavePostOnRemoteUseCase,
@@ -94,7 +94,7 @@ class HomeViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 _storyDetailsStateFlow.value = ResponseState.loading()
                 if (isForceRefresh || !isStoryListFetchedFromRemote) {
-                    val response = storyDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
+                    val response = storyDetailsWithUserDetailsFromRemoteUseCase(loggedInUserFirebaseId)
                     if (response.status == RequestStatusEnum.Success) {
                         val storyList = response.data?.flatMap { it.storiesList } ?: emptyList()
                         val usersList = response.data?.map { it.userBean } ?: emptyList()
@@ -145,7 +145,7 @@ class HomeViewModel @Inject constructor(
                 _postDetailsStateFlow.value = ResponseState.loading()
                 if (!isPostListFromRemoteFetched || isForceRefresh) {
                     val postListWithUserDetailsResponse =
-                        postDetailsWithUserDetailsUseCase(loggedInUserFirebaseId)
+                        postDetailsWithUserDetailsFromRemoteUseCase(loggedInUserFirebaseId)
                     if (postListWithUserDetailsResponse.status == RequestStatusEnum.Success) {
                         val postList = postListWithUserDetailsResponse.data?.map { it.postDetail }
                         val userList = postListWithUserDetailsResponse.data?.map { it.userDetail }
