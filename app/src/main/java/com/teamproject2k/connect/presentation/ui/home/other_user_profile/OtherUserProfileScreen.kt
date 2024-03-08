@@ -177,7 +177,7 @@ fun OtherUserProfileScreen(navigator: DestinationsNavigator, requestedUser: User
             viewModel.getFriendListFromIds()
             viewModel.getPostDetails()
             viewModel.liveObserveOtherUsers()
-            viewModel.liveObserveLoggedInUsers()
+            viewModel.liveObserveLoggedInUser()
         } else {
             viewModel.snackBarMessageState.value =
                 context.getString(R.string.no_internet_connection)

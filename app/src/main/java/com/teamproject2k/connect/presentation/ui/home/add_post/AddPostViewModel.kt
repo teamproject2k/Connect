@@ -35,7 +35,7 @@ class AddPostViewModel @Inject constructor(
     lateinit var postVisibilityScopeList: List<VisibilityScope>
     lateinit var currentPostVisibilityState: MutableState<VisibilityScope>
 
-    var isFirstTimeSetup = true
+    var isDataInitialized = false
 
     val captionTextState = mutableStateOf("")
     val snackBarMessageState = mutableStateOf("")
@@ -50,15 +50,15 @@ class AddPostViewModel @Inject constructor(
      *
      * @param context The context of the app.
      */
-    fun init(context: Context) {
+    fun initializeData(context: Context) {
         // Get the list of post visibility scopes from the context.
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
 
         // Set the current post visibility state to the first item in the list.
         currentPostVisibilityState = mutableStateOf(postVisibilityScopeList[0])
 
-        // Set the isFirstTimeSetup flag to false.
-        isFirstTimeSetup = false
+        // Set the isDataInitialized flag to true.
+        isDataInitialized = true
     }
 
     /**

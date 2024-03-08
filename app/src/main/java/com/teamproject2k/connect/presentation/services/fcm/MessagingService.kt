@@ -90,7 +90,6 @@ open class MessagingService : FirebaseMessagingService() {
         }
     }
 
-
     private fun showNotification(
         channelId: String,
         title: String?,

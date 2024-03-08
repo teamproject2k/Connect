@@ -89,8 +89,8 @@ fun AddPostScreen(navigator: DestinationsNavigator) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    if (viewModel.isFirstTimeSetup) {
-        viewModel.init(context)
+    if (!viewModel.isDataInitialized) {
+        viewModel.initializeData(context)
     }
 
     var showPostVisibilityScopeBottomSheet by remember {

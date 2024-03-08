@@ -234,7 +234,6 @@ private fun MainContentSection(
                 contentDescription = stringResource(id = R.string.clear)
             )
         }
-
     }
 }
 
@@ -382,7 +381,6 @@ private fun BottomSection(
                     contentDescription = stringResource(R.string.text_color)
                 )
             }
-
             SpacerWidth16()
             if (viewModel.selectedMediaState.value == null) {
                 Box(
