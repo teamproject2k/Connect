@@ -61,5 +61,4 @@ class AuthenticationActivity : BaseActivity() {
         super.onDestroy()
         Instance = null
     }
-
 }
