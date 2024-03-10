@@ -18,7 +18,6 @@ import com.teamproject2k.connect.presentation.ui.theme.ConnectTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 
-
 @AndroidEntryPoint
 class AuthenticationActivity : BaseActivity() {
     companion object {
