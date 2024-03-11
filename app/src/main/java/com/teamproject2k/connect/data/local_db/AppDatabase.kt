@@ -23,9 +23,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getUsersDao(): IUsersDao
     abstract fun getPostDao(): IPostDao
     abstract fun getStoryDao(): IStoryDao
-
     abstract fun getChatMetaDataDao(): IChatMetaDataDao
-
-
     abstract fun getChatDao(): IChatDao
 }
