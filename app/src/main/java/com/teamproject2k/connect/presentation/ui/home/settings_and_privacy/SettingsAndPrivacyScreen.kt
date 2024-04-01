@@ -86,8 +86,8 @@ fun SettingsAndPrivacyScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val currentActivity = LocalActivity.current as BaseActivity
 
-    if (viewModel.isFirstTimeSetup) {
-        viewModel.setUpData(homeSharedViewModel.usersDetails, context)
+    if (viewModel.isDataInitialized) {
+        viewModel.initializeData(homeSharedViewModel.usersDetails, context)
     }
 
     val coroutineScope = rememberCoroutineScope()

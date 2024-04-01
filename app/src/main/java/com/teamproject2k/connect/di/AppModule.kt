@@ -168,7 +168,6 @@ class AppModule {
         }
     }
 
-
     @Provides
     @Singleton
     fun getRetrofitInstance(okHttpClient: OkHttpClient): Retrofit {

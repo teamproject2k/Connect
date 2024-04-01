@@ -46,7 +46,7 @@ class SavedPostsViewModel @Inject constructor(
     private val updatePostDetailsOnLocalUseCase: UpdatePostDetailsOnLocalUseCase,
     private val deletePostFromLocalUseCase: DeletePostFromLocalUseCase,
     private val deleteAllUsersExceptInListFromLocalUseCase: DeleteAllUsersExceptInListFromLocalUseCase,
-    private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase,
+    private val deleteAllPostsFromLocal: DeleteAllPostFromLocalUseCase
 
     ) : BaseViewModel() {
 

@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.teamproject2k.connect.data.models.post.PostLocalEntity
-import com.teamproject2k.connect.data.models.post.PostWithUserDetailsFromLocalEntity
+import com.teamproject2k.connect.data.models.post.PostWithUserDetailsLocalEntity
 import com.teamproject2k.connect.domain.utils.VisibilityScopeEnum
 
 @Dao
@@ -21,26 +21,22 @@ interface IPostDao {
     @Query("SELECT * FROM posts WHERE createdByUserFirebaseId = :createdByUserFirebaseId AND whetherDeleted=0 ORDER BY createdAt DESC")
     fun getPostList(createdByUserFirebaseId: String): List<PostLocalEntity>
 
-
     @Transaction
     @Query("SELECT * FROM posts WHERE postFirebaseId IN (:savedPostFirebaseIds) ORDER BY createdAt DESC")
-    fun getSavedPostsAndUsers(savedPostFirebaseIds: List<String>): List<PostWithUserDetailsFromLocalEntity>
+    fun getSavedPostsAndUsers(savedPostFirebaseIds: List<String>): List<PostWithUserDetailsLocalEntity>
 
     @Transaction
     @Query("SELECT * FROM posts WHERE whetherDeleted=0 ORDER BY createdAt DESC")
-    fun getPostDetailsWithUsers(): List<PostWithUserDetailsFromLocalEntity>
+    fun getPostDetailsWithUsers(): List<PostWithUserDetailsLocalEntity>
 
     @Update
     fun updatePostDetails(postDetails: PostLocalEntity): Int
 
-
     @Query("DELETE FROM posts WHERE postFirebaseId = :postFirebaseId")
     fun deletePost(postFirebaseId: String): Int
 
-
     @Query("DELETE FROM posts")
     fun deleteAllPosts(): Int
-
 
     @Query("DELETE FROM posts WHERE createdByUserFirebaseId= :userFirebaseId")
     fun deleteAllPostOfUser(userFirebaseId: String): Int

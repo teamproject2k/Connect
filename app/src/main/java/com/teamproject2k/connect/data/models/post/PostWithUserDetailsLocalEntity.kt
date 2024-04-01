@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import com.teamproject2k.connect.data.models.user.UsersLocalEntity
 
-data class PostWithUserDetailsFromLocalEntity(
+data class PostWithUserDetailsLocalEntity(
     @Embedded
     val postDetail: PostLocalEntity,
 

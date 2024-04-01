@@ -36,7 +36,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
     lateinit var dobVisibilityState: MutableState<VisibilityScope>
     lateinit var friendListVisibilityState: MutableState<VisibilityScope>
 
-    var isFirstTimeSetup = true
+    var isDataInitialized = true
 
     val snackBarMessageState = mutableStateOf("")
 
@@ -58,7 +58,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
      * @param userDetails The user details bean.
      * @param context The context.
      */
-    fun setUpData(userDetails: UserBean, context: Context) {
+    fun initializeData(userDetails: UserBean, context: Context) {
 
         // Get the default selected visibility for the gender field.
         val defaultSelectedGenderVisibility =
@@ -93,7 +93,7 @@ class SettingsAndPrivacyViewModel @Inject constructor(
             mutableStateOf(friendListVisibilityScopeList[defaultSelectedFriendListVisibility])
 
         // Set the flag to indicate that this is not the first time the data is being set up.
-        isFirstTimeSetup = false
+        isDataInitialized = false
     }
 
     /**

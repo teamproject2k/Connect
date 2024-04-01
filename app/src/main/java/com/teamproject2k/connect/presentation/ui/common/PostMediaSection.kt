@@ -26,7 +26,7 @@ import com.teamproject2k.connect.presentation.utils.ConstantsHelper
 
 @SuppressLint("OpaqueUnitKey")
 @Composable
-fun PostCaptionMediaSection(postDetails: PostBean) {
+fun PostMediaSection(postDetails: PostBean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
