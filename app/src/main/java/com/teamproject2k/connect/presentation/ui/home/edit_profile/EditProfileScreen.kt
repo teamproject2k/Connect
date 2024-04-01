@@ -444,7 +444,6 @@ private fun HandleUpdateUserState(
                 viewModel.currentButtonLoadingState.value = ButtonStateEnum.Success
                 isResponseHandled = true
             }
-
         }
 
         RequestStatusEnum.Exception -> {
@@ -599,7 +598,6 @@ private fun handleButtonClick(
         FunctionHelper.vibrateDevice(context)
     }
 }
-
 
 /**
  * Checks if the edit profile button should be enabled.

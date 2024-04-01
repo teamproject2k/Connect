@@ -692,11 +692,9 @@ private fun LinearIndicator(
     onPauseTimer: Boolean = false,
     onAnimationEnd: () -> Unit
 ) {
-
     val delayInMillis = rememberSaveable {
         progressMaxTime / 100
     }
-
     var progress by remember {
         mutableFloatStateOf(0.00f)
     }

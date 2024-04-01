@@ -10,6 +10,12 @@ class GetAllStoriesWithUserFromLocalUseCase @Inject constructor(
     private val storyRepository: IStoryRepository,
     private val userRepository: IUserRepository
 ) {
+    /**
+     * Suspended function to retrieve a list of stories along with user details for the logged-in user from the local repository.
+     *
+     * @param loggedInUserFirebaseId The Firebase ID of the logged-in user.
+     * @return An [ArrayList] of [StoriesWithUserBean] containing stories along with user details.
+     */
     suspend operator fun invoke(loggedInUserFirebaseId: String): ArrayList<StoriesWithUserBean> {
         val storiesList =
             storyRepository.getAllStoriesFromLocal().sortedByDescending { it.createdAt }

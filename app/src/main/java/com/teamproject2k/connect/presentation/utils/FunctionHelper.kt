@@ -387,7 +387,6 @@ object FunctionHelper {
         return exoPlayer
     }
 
-
     /**
      * Gets the current time in milliseconds.
      *
@@ -615,7 +614,6 @@ object FunctionHelper {
         }
         return if (token.isNotBlank()) "Bearer $token" else ""
     }
-
 
     fun getMediaType(contentResolver: ContentResolver, uri: Uri): String? {
         return contentResolver.getType(uri)?.substringBefore("/")

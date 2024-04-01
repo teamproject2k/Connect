@@ -4,7 +4,6 @@ import com.teamproject2k.connect.domain.repository.IUserRepository
 import javax.inject.Inject
 
 class UpdateFcmTokenOnLocalUseCase @Inject constructor(private val repository: IUserRepository) {
-
     /**
      * Updates the FCM token on the local database.
      *

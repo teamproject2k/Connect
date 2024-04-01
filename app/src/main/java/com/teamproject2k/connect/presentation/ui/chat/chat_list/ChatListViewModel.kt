@@ -102,6 +102,12 @@ class ChatListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * This function retrieves details of the currently logged-in user asynchronously.
+     * It updates the state flow [_getLoggedInUserDetailsStateFlow] to reflect the operation's progress and outcome.
+     * If successful, it updates [loggedInUserDetails] and sets the state to [ResponseState.success].
+     * If no user is found, it sets an error state with the corresponding Firebase error code [FirebaseErrorCodes.NO_USER_FOUND].
+     */
     fun getLoggedInUser() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

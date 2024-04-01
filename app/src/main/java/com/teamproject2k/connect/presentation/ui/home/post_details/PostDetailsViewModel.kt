@@ -66,11 +66,13 @@ class PostDetailsViewModel @Inject constructor(
 
     val forceRecomposeState = mutableIntStateOf(0)
     val getCommentListState = mutableIntStateOf(-1)
+    val snackBarMessageState = mutableStateOf("")
     val commentTextState = mutableStateOf("")
     val repliedCommentPosterConnectIdState = mutableStateOf("")
     val isSendingCommentState = mutableStateOf(false)
     var showDeletePostAlertDialogState = mutableStateOf(false)
     val commentedOnState: MutableState<CommentBean?> = mutableStateOf(null)
+    var commentDataMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
 
     private val _likeUnlikePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
@@ -79,9 +81,6 @@ class PostDetailsViewModel @Inject constructor(
     private val _saveUnSavePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
     val saveUnSavePostStateFlow = _saveUnSavePostStateFlow.asStateFlow()
-
-    var commentDataMap = mutableMapOf<CommentWithUserBean, ArrayList<CommentWithUserBean>>()
-    val snackBarMessageState = mutableStateOf("")
 
     private val _deletePostStateFlow: MutableStateFlow<ResponseState<Nothing>> =
         MutableStateFlow(ResponseState.none())
@@ -112,7 +111,7 @@ class PostDetailsViewModel @Inject constructor(
      * @param post The post details to be initialized with.
      * @param loggedInUserBean The details of the logged-in user.
      */
-    fun initialize(context: Context, post: PostBean, loggedInUserBean: UserBean) {
+    fun initializeData(context: Context, post: PostBean, loggedInUserBean: UserBean) {
         this.post = post
         postVisibilityScopeList = FunctionHelper.getPostVisibilityList(context)
         val postVisibility =
@@ -187,7 +186,6 @@ class PostDetailsViewModel @Inject constructor(
                     _likeUnlikePostStateFlow.value =
                         ResponseState.error(removeLikeResponse.message ?: "")
                 }
-
             }
         }
     }
