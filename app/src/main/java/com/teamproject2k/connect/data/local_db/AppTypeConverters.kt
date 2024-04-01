@@ -33,12 +33,10 @@ class AppTypeConverters {
         )
     }
 
-
     @TypeConverter
     fun fromListOfStorySeenByLocalEntityToString(listOfStorySeenBy: List<StorySeenByLocalEntity>): String {
         return Gson().toJson(listOfStorySeenBy)
     }
-
 
     @TypeConverter
     fun toListOfStorySeenByLocalEntityFromString(stringOfList: String): List<StorySeenByLocalEntity> {

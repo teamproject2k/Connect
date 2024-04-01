@@ -132,7 +132,6 @@ fun FriendsAndPendingScreen(navigator: DestinationsNavigator, defaultSelectedTab
                 context.getString(R.string.no_internet_connection)
             FunctionHelper.vibrateDevice(context)
         }
-
     }
 }
 

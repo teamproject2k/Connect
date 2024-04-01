@@ -26,7 +26,7 @@ class HomeSharedViewModel @Inject constructor(
     private val getUserDetailsFromLocalUseCase: GetUserDetailsFromLocalUseCase,
     private val getUserDetailsFromRemoteUseCase: GetUserDetailsFromRemoteUseCase,
     private val addUserToLocalUseCase: AddUserToLocalUseCase,
-    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase,
+    private val getDeviceIdFromRemoteUseCase: GetDeviceIdFromRemoteUseCase
 ) :
     BaseViewModel() {
 
@@ -80,7 +80,6 @@ class HomeSharedViewModel @Inject constructor(
         }
     }
 
-
     /**
      * Gets the user details from the database or the server.
      */
@@ -104,9 +103,9 @@ class HomeSharedViewModel @Inject constructor(
                             getUserDetailsFromRemoteUseCase(fireBaseId)
 
                         // Check if the response state is successful
-                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success) {
+                        if (userDetailsFromServerResponseState.status == RequestStatusEnum.Success && userDetailsFromServerResponseState.data != null) {
                             // Add the user to the database
-                            addUserToLocalUseCase(userDetailsFromServerResponseState.data!!)
+                            addUserToLocalUseCase(userDetailsFromServerResponseState.data)
 
                             // Update the usersDetails variable
                             usersDetails = userDetailsFromServerResponseState.data

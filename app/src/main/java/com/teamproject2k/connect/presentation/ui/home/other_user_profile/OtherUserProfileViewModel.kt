@@ -649,7 +649,7 @@ class OtherUserProfileViewModel @Inject constructor(
     /**
      * Launches a coroutine in the viewModelScope to observe the current user.
      */
-    fun liveObserveLoggedInUsers() {
+    fun liveObserveLoggedInUser() {
         // Launch a coroutine in the viewModelScope.
         viewModelScope.launch {
             // Get the live user observer from the remote use case.

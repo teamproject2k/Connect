@@ -858,7 +858,6 @@ class IUserRepositoryImpl @Inject constructor(
         return appDatabase.getUsersDao().deleteAllUsersExcept(exceptList)
     }
 
-
     private suspend fun getUserFRBRList(
         userFirebaseId: String,
         listToGet: Int
@@ -907,7 +906,6 @@ class IUserRepositoryImpl @Inject constructor(
         return getUserFRBRList(userFirebaseId, 1)
     }
 
-
     override suspend fun getLoggedInUserBlockedListFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(loggedInUserFirebaseId, 2)
     }
@@ -915,5 +913,4 @@ class IUserRepositoryImpl @Inject constructor(
     override suspend fun getRequestedByLoggedInUserListFromRemoteFromRemote(loggedInUserFirebaseId: String): ResponseState<Pair<UserBean, ArrayList<UserBean>>> {
         return getUserFRBRList(loggedInUserFirebaseId, 3)
     }
-
 }

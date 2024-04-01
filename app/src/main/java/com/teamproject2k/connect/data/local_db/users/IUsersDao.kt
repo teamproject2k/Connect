@@ -21,7 +21,6 @@ interface IUsersDao {
     @Query("SELECT * FROM users WHERE firebaseUserId = :fireBaseId")
     fun getUserDetails(fireBaseId: String): UsersLocalEntity?
 
-
     @Query("UPDATE users SET otherUsersStatus = :otherUsersStatus WHERE firebaseUserId = :loggedInUserFirebaseId")
     fun updateOtherUsersStatus(
         loggedInUserFirebaseId: String,
@@ -40,22 +39,17 @@ interface IUsersDao {
         loggedInUserFirebaseId: String
     ): Int
 
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUserList(userList: List<UsersLocalEntity>): LongArray
-
 
     @Update
     fun updateUsersDetails(userDetails: UsersLocalEntity): Int
 
-
     @Query("SELECT * FROM users WHERE firebaseUserId IN (:userIdList) ORDER BY createdAt DESC")
     fun getAllUserFromIds(userIdList: List<String>): List<UsersLocalEntity>
 
-
     @Query("DELETE FROM users WHERE firebaseUserId NOT IN (:exceptList)")
     fun deleteAllUsersExcept(exceptList: List<String>): Int
-
 
     @Query("DELETE FROM users")
     fun deleteAllUsers()

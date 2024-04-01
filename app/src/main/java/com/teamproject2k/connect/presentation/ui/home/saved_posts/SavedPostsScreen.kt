@@ -58,7 +58,7 @@ import com.teamproject2k.connect.presentation.ui.common.Dot
 import com.teamproject2k.connect.presentation.ui.common.ExpandingText
 import com.teamproject2k.connect.presentation.ui.common.LoaderDialog
 import com.teamproject2k.connect.presentation.ui.common.LocalActivity
-import com.teamproject2k.connect.presentation.ui.common.PostCaptionMediaSection
+import com.teamproject2k.connect.presentation.ui.common.PostMediaSection
 import com.teamproject2k.connect.presentation.ui.common.PostListLoadingSection
 import com.teamproject2k.connect.presentation.ui.common.SpacerHeight16
 import com.teamproject2k.connect.presentation.ui.common.SpacerWidth12
@@ -283,7 +283,7 @@ private fun PostListItem(
             || postDetails.postContentType == MediaTypeEnum.Video.name
             || postDetails.postContentType == MediaTypeEnum.TextVideo.name
         ) {
-            PostCaptionMediaSection(postDetails = postDetails)
+            PostMediaSection(postDetails = postDetails)
         }
         PostBottomSection(postDetails, viewModel, usersDetails, loggedInUserBean, navigator)
         SpacerHeight16()

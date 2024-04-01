@@ -30,7 +30,7 @@ class RequestedUsersViewModel @Inject constructor(
     val getRequestedUsersStateFlow = _getRequestedUsersStateFlow.asStateFlow()
 
     /**
-     * Gets the details of the requested users.
+     * Gets the details of the friend-requested users.
      *
      * @param loggedInUserFirebaseId The list of requested users.
      */
