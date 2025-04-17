@@ -32,8 +32,8 @@ android {
         applicationId = "com.teamproject2k.connect"
         minSdk = ConfigData.minSdk
         targetSdk = ConfigData.compileSdk
-        versionCode = 4
-        versionName = "1.4"
+        versionCode = 15
+        versionName = "1.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
