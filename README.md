@@ -17,19 +17,25 @@ Here’s a quick peek into the Connect app experience:
 
 | Login |   Enter OTP   |  Create Account  | 
 |--------|  -------     |-------|
-| <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/login_screen.jpg?raw=true" width="200" height="400"/>   | <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/otp_input_screen.jpg?raw=true" width="200" height="400"/> |    <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/create_account_screen.webp?raw=true" width="200" height="400"/> |
+| <img src="https://github.com/teamproject2k/Connect/blob/release/media/login_screen.jpg?raw=true" width="200" height="400"/>   | <img src="https://github.com/teamproject2k/Connect/blob/release/media/otp_input_screen.jpg?raw=true" width="200" height="400"/> |    <img src="https://github.com/teamproject2k/Connect/blob/release/media/create_account_screen.webp?raw=true" width="200" height="400"/> |
 
 | Home |   Add Comment   |  Search User  | 
 |--------|  -------     |-------|
-| <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/home_screen.webp?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/add_comment_screen.webp?raw=true" width="200" height="400"/> |  <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/search_user_screen.webp?raw=true" width="200" height="400"/>|
+| <img src="https://github.com/teamproject2k/Connect/blob/release/media/home_screen.webp?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/media/add_comment_screen.webp?raw=true" width="200" height="400"/> |  <img src="https://github.com/teamproject2k/Connect/blob/release/media/search_user_screen.webp?raw=true" width="200" height="400"/>|
 
 | Add Friend |   Add Post  |  View Story  | 
 |--------|  -------     |-------|
-| <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/add_friend_screen.jpg?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/create_post_screen.webp?raw=true" width="200" height="400"/> |  <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/story_screen.jpg?raw=true" width="200" height="400"/>|
+| <img src="https://github.com/teamproject2k/Connect/blob/release/media/add_friend_screen.jpg?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/media/create_post_screen.webp?raw=true" width="200" height="400"/> |  <img src="https://github.com/teamproject2k/Connect/blob/release/media/story_screen.jpg?raw=true" width="200" height="400"/>|
 
 | Profile |   Settings & Privacy  |  Chat  | 
 |--------|  -------     |-------|
-| <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/profile_screen.webp?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/settings_privacy_screen.webp?raw=true" width="200" height="400"/> |   <img src="https://github.com/teamproject2k/Connect/blob/release/screenshots_and_demo/chat_screen.webp?raw=true" width="200" height="400"/>|
+| <img src="https://github.com/teamproject2k/Connect/blob/release/media/profile_screen.webp?raw=true" width="200" height="400"/> | <img src="https://github.com/teamproject2k/Connect/blob/release/media/settings_privacy_screen.webp?raw=true" width="200" height="400"/> |   <img src="https://github.com/teamproject2k/Connect/blob/release/media/chat_screen.webp?raw=true" width="200" height="400"/>|
+
+## 📦 Download APK
+
+You can try out the latest version of **Connect** directly by downloading the APK:
+
+👉 [**Download Latest APK**](https://github.com/teamproject2k/Connect/blob/release/media/app-release.apk)  
 
 ## 🚀 Features
 
@@ -70,3 +76,22 @@ Here’s a quick peek into the Connect app experience:
 - **Google Speech-to-Text API** – Convert voice to text
 - **CameraX** – Jetpack library for camera access
 
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Whether it's bug fixes, new features, UI improvements, or documentation — all help is appreciated.
+
+### To contribute:
+
+1. 🍴 Fork the repository
+2. 🛠️ Create a new branch: `git checkout -b feature/your-feature-name`
+3. 🔨 Make your changes
+4. ✅ Commit your updates: `git commit -m 'Add some feature'`
+5. 📤 Push to your branch: `git push origin feature/your-feature-name`
+6. 🔁 Open a Pull Request
+
+---
+
+## 📃 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
