@@ -5,6 +5,9 @@
 ![Platform](https://img.shields.io/badge/Platform-Android-lightseagreen) &nbsp;
 ![API Level](https://img.shields.io/badge/API-21%2B-steelblue) &nbsp;
 ![Language](https://img.shields.io/badge/Language-Kotlin-orange)
+![Firebase](https://img.shields.io/badge/Backend-Firebase-yellow) &nbsp;
+![Contributions](https://img.shields.io/badge/Contributions-Welcome-purple)
+
 
 ## 🚀 Features
 
