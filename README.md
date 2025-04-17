@@ -3,7 +3,7 @@
 **Connect** is a next-gen social media platform designed to bring people together. Share thoughts, moments, and media — all in a sleek and intuitive interface. Built with ❤️ for Android, it integrates deeply with Firebase to deliver real-time and seamless social experiences.
 
 ![Platform](https://img.shields.io/badge/Platform-Android-lightseagreen) &nbsp;
-![API Level](https://img.shields.io/badge/API-21%2B-steelblue) &nbsp;
+![API Level](https://img.shields.io/badge/API-26%2B-steelblue) &nbsp;
 ![Language](https://img.shields.io/badge/Language-Kotlin-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue) &nbsp;
 ![Firebase](https://img.shields.io/badge/Backend-Firebase-yellow) &nbsp;
